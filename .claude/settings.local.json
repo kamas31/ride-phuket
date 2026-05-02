@@ -1,7 +1,21 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir=false --import-alias=\"@/*\" --yes)"
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir=false --import-alias=\"@/*\" --yes)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(grep -v \"//\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://xuzmkhwfjissagnygrfb.supabase.co/rest/v1/\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1em1raHdmamlzc2FnbnlncmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NDU1MjUsImV4cCI6MjA5MzIyMTUyNX0.cUKhm5BpwgsY46_mGb3KmJKqIL1ZdtlBkOx4qaiWDxw\")",
+      "Bash(node scripts/probe-supabase.js)",
+      "Bash(node scripts/test-connection.js)",
+      "Bash(node scripts/test-full.js)",
+      "Bash(node scripts/seed-missing.js)",
+      "Bash(node -e ' *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Kamas\\Desktop\\ride-phuket\\app\\scooter",
+      "C:\\Users\\Kamas\\.claude\\projects\\c--Users-Kamas-Desktop-ride-phuket",
+      "c:\\Users\\Kamas\\Desktop\\ride-phuket\\app\\phuket"
     ]
   }
 }

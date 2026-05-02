@@ -1,0 +1,349 @@
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import Image from 'next/image'
+import {
+  ArrowLeft, Star, MapPin, Shield, Zap, Check, ChevronRight,
+  Phone, MessageCircle, Users, Clock, RotateCcw, TrendingUp,
+} from 'lucide-react'
+import { Badge } from '@/components/ui/Badge'
+import { SCOOTERS, REVIEWS } from '@/data/scooters'
+import { getScooters, getScooterById } from '@/lib/supabase/queries'
+import { formatPrice, formatPricePerDay, pluralize } from '@/lib/utils'
+import { ImageGallery } from '@/components/ride/ImageGallery'
+
+interface ScooterPageProps {
+  params: Promise<{ id: string }>
+}
+
+export const revalidate = 60
+
+export async function generateStaticParams() {
+  // Use live DB IDs if available, fall back to mock
+  try {
+    const scooters = await getScooters({ available: true })
+    if (scooters.length > 0) return scooters.map(s => ({ id: s.id }))
+  } catch {}
+  return SCOOTERS.map(s => ({ id: s.id }))
+}
+
+export async function generateMetadata({ params }: ScooterPageProps) {
+  const { id } = await params
+  const scooter = await getScooterById(id)
+  if (!scooter) return {}
+  return {
+    title: `${scooter.name} — ${formatPricePerDay(scooter.pricePerDay)}`,
+    description: scooter.description,
+  }
+}
+
+export default async function ScooterPage({ params }: ScooterPageProps) {
+  const { id } = await params
+  const scooter = await getScooterById(id)
+  if (!scooter) notFound()
+
+  const shop = scooter.shop!
+  const relatedReviews = REVIEWS.filter(r => r.scooterId === scooter.id).slice(0, 3)
+
+  const allReviews = REVIEWS.slice(0, 3)
+
+  const SPEC_ROWS = [
+    { label: 'Engine', value: scooter.specs.engine },
+    { label: 'Power', value: scooter.specs.power },
+    { label: 'Fuel Tank', value: scooter.specs.fuelCapacity },
+    { label: 'Consumption', value: scooter.specs.consumption },
+    { label: 'Weight', value: scooter.specs.weight },
+    { label: 'Storage', value: scooter.specs.storage },
+  ]
+
+  const weekSavings = scooter.pricePerWeek
+    ? scooter.pricePerDay * 7 - scooter.pricePerWeek
+    : 0
+
+  return (
+    <div className="bg-white min-h-screen">
+      {/* Breadcrumb nav */}
+      <div className="sticky top-16 z-20 bg-white/90 backdrop-blur-md border-b border-[#e8e8e4]">
+        <div className="max-w-5xl mx-auto px-4 h-11 flex items-center justify-between">
+          <Link
+            href="/explore"
+            className="flex items-center gap-1.5 text-sm font-medium text-[#5c5c58] hover:text-[#0f0f0e] transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Explore
+          </Link>
+          <div className="flex items-center gap-3 text-xs text-[#9c9c98]">
+            <span className="flex items-center gap-1">
+              <Users className="w-3 h-3" />
+              12 viewed today
+            </span>
+            <span className="flex items-center gap-1 text-[#FF6B35] font-medium">
+              <TrendingUp className="w-3 h-3" />
+              Popular pick
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 py-6 md:py-8">
+        <div className="lg:grid lg:grid-cols-5 lg:gap-10">
+          {/* ── LEFT COLUMN ── */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Image gallery */}
+            <ImageGallery images={scooter.images} name={scooter.name} />
+
+            {/* Title & meta */}
+            <div>
+              <div className="flex items-start justify-between gap-4 mb-1">
+                <h1 className="text-[26px] md:text-[32px] font-bold text-[#0f0f0e] tracking-tight leading-tight">
+                  {scooter.name}
+                </h1>
+                <Badge variant={scooter.category === 'automatic' ? 'brand' : 'default'} className="mt-1 flex-shrink-0">
+                  {scooter.category.charAt(0).toUpperCase() + scooter.category.slice(1)}
+                </Badge>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2">
+                <button className="flex items-center gap-1 hover:underline">
+                  <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
+                  <span className="font-bold text-sm text-[#0f0f0e]">{scooter.rating}</span>
+                  <span className="text-sm text-[#9c9c98] underline">({scooter.reviewCount} reviews)</span>
+                </button>
+                <span className="text-[#e8e8e4]">·</span>
+                <div className="flex items-center gap-1 text-sm text-[#9c9c98]">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {scooter.location}
+                </div>
+                {scooter.deliveryAvailable && (
+                  <>
+                    <span className="text-[#e8e8e4]">·</span>
+                    <span className="text-sm text-[#FF6B35] font-medium flex items-center gap-1">
+                      <Zap className="w-3.5 h-3.5" />
+                      Delivery available
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            <p className="text-[#5c5c58] text-[15px] leading-relaxed border-t border-[#f0f0ec] pt-5">
+              {scooter.description}
+            </p>
+
+            {/* What's included */}
+            <div>
+              <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-3">What&rsquo;s included</h2>
+              <div className="grid grid-cols-2 gap-y-2.5 gap-x-4">
+                {scooter.features.map(feature => (
+                  <div key={feature} className="flex items-center gap-2 text-sm text-[#5c5c58]">
+                    <div className="w-5 h-5 rounded-full bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-[#22c55e]" />
+                    </div>
+                    {feature}
+                  </div>
+                ))}
+                {/* Always-on guarantees */}
+                <div className="flex items-center gap-2 text-sm text-[#5c5c58]">
+                  <div className="w-5 h-5 rounded-full bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-[#22c55e]" />
+                  </div>
+                  Free cancellation
+                </div>
+                <div className="flex items-center gap-2 text-sm text-[#5c5c58]">
+                  <div className="w-5 h-5 rounded-full bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-[#22c55e]" />
+                  </div>
+                  24/7 roadside support
+                </div>
+              </div>
+            </div>
+
+            {/* Specs */}
+            <div>
+              <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-3">Technical specs</h2>
+              <div className="bg-[#f8f8f6] rounded-[16px] overflow-hidden">
+                {SPEC_ROWS.map((row, i) => (
+                  <div
+                    key={row.label}
+                    className={`flex items-center justify-between px-4 py-3 text-sm ${i < SPEC_ROWS.length - 1 ? 'border-b border-[#efefed]' : ''}`}
+                  >
+                    <span className="text-[#9c9c98]">{row.label}</span>
+                    <span className="font-semibold text-[#0f0f0e]">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Rental partner */}
+            <div className="bg-[#f8f8f6] rounded-[20px] p-5 border border-[#e8e8e4]">
+              <h2 className="text-[15px] font-bold text-[#0f0f0e] mb-4">Rental partner</h2>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-[#FF6B35]/10 rounded-full flex items-center justify-center text-[#FF6B35] font-bold text-lg flex-shrink-0">
+                  {shop.name[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-bold text-[#0f0f0e]">{shop.name}</p>
+                    {shop.verified && <Badge variant="success">✓ Verified</Badge>}
+                  </div>
+                  <div className="flex items-center gap-3 mt-1">
+                    <div className="flex items-center gap-1 text-xs text-[#9c9c98]">
+                      <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
+                      {shop.rating} · {shop.reviewCount} reviews
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-[#9c9c98]">
+                      <Clock className="w-3 h-3" />
+                      Responds {shop.responseTime}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <a
+                  href={`tel:${shop.phone}`}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
+                >
+                  <Phone className="w-4 h-4" />
+                  Call shop
+                </a>
+                {shop.whatsapp && (
+                  <a
+                    href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[#f0fdf4] border border-[#22c55e]/20 text-sm font-semibold text-[#16a34a] hover:bg-[#dcfce7] transition-colors"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    WhatsApp
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Reviews */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[16px] font-bold text-[#0f0f0e]">
+                  <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35] inline mr-1 mb-0.5" />
+                  {scooter.rating} · {scooter.reviewCount} reviews
+                </h2>
+              </div>
+              <div className="space-y-5">
+                {(relatedReviews.length > 0 ? relatedReviews : allReviews).map(review => (
+                  <div key={review.id} className="pb-5 border-b border-[#f0f0ec] last:border-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-9 h-9 bg-[#fff4f0] rounded-full flex items-center justify-center text-sm font-bold text-[#FF6B35] flex-shrink-0">
+                        {review.userName[0]}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#0f0f0e]">{review.userName}</p>
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'text-[#FF6B35] fill-[#FF6B35]' : 'text-[#e8e8e4] fill-[#e8e8e4]'}`} />
+                          ))}
+                        </div>
+                      </div>
+                      {review.verified && (
+                        <span className="ml-auto text-xs text-[#22c55e] font-medium">✓ Verified</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-[#5c5c58] leading-relaxed pl-12">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── RIGHT COLUMN: Booking card ── */}
+          <div className="lg:col-span-2 mt-8 lg:mt-0">
+            <div className="sticky top-32">
+              <div className="bg-white rounded-[24px] border border-[#e8e8e4] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.10),0_1px_4px_-1px_rgba(0,0,0,0.05)] overflow-hidden">
+
+                {/* Price header */}
+                <div className="px-6 pt-6 pb-4 border-b border-[#f0f0ec]">
+                  <div className="flex items-baseline gap-1.5 mb-1">
+                    <span className="text-[34px] font-bold text-[#0f0f0e] leading-none">
+                      {formatPrice(scooter.pricePerDay)}
+                    </span>
+                    <span className="text-[#9c9c98] text-base">/day</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    {scooter.pricePerWeek && (
+                      <span className="text-[#9c9c98]">{formatPrice(scooter.pricePerWeek)}/week</span>
+                    )}
+                    {weekSavings > 0 && (
+                      <span className="text-[#22c55e] font-semibold text-xs bg-[#f0fdf4] px-2 py-0.5 rounded-full">
+                        Save {formatPrice(weekSavings)} weekly
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="px-6 py-5 space-y-4">
+                  {/* Availability */}
+                  <div className="flex items-center gap-2 p-3 bg-[#f0fdf4] rounded-[12px]">
+                    <div className="w-2 h-2 bg-[#22c55e] rounded-full flex-shrink-0" />
+                    <span className="text-sm font-semibold text-[#16a34a]">Available — ready to book</span>
+                  </div>
+
+                  {/* Line items */}
+                  <div className="space-y-2 text-sm">
+                    {scooter.deliveryAvailable && (
+                      <div className="flex justify-between text-[#5c5c58]">
+                        <span>Delivery to your hotel</span>
+                        <span className="font-medium text-[#0f0f0e]">{formatPrice(scooter.deliveryFee)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-[#5c5c58]">
+                      <span>Minimum rental</span>
+                      <span className="font-medium text-[#0f0f0e]">{pluralize(scooter.minRentalDays, 'day')}</span>
+                    </div>
+                    <div className="flex justify-between text-[#5c5c58]">
+                      <span>Insurance</span>
+                      <span className="font-semibold text-[#22c55e]">Included</span>
+                    </div>
+                  </div>
+
+                  {/* CTA */}
+                  <Link
+                    href={`/checkout?scooterId=${scooter.id}`}
+                    className="flex items-center justify-center gap-2 w-full py-4 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-all text-base shadow-sm hover:shadow-[0_8px_24px_rgba(255,107,53,0.35)] hover:scale-[1.01] active:scale-[0.99]"
+                  >
+                    Reserve — Pay on Delivery
+                    <ChevronRight className="w-5 h-5" />
+                  </Link>
+
+                  {/* Reassurance row */}
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-[#9c9c98]">
+                    <RotateCcw className="w-3 h-3" />
+                    Free cancellation up to 24h before
+                  </div>
+
+                  {/* Trust checklist */}
+                  <div className="pt-3 border-t border-[#f0f0ec] space-y-2">
+                    {[
+                      { icon: Shield, text: 'Insurance included in price' },
+                      { icon: Zap, text: 'Instant booking confirmation' },
+                      { icon: MapPin, text: 'Delivered anywhere in Phuket' },
+                      { icon: MessageCircle, text: 'WhatsApp support 24/7' },
+                    ].map(({ icon: Icon, text }) => (
+                      <div key={text} className="flex items-center gap-2.5 text-xs text-[#5c5c58]">
+                        <Icon className="w-3.5 h-3.5 text-[#FF6B35] flex-shrink-0" />
+                        {text}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Social proof under the card */}
+              <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-[#9c9c98]">
+                <Users className="w-3.5 h-3.5" />
+                <span>Booked <strong className="text-[#5c5c58]">24 times</strong> in the last 30 days</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
