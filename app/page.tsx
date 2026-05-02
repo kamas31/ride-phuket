@@ -66,79 +66,154 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       {/* ── HERO ── */}
-      <section className="relative min-h-[100svh] flex flex-col">
-        {/* Base dark layer */}
-        <div className="absolute inset-0 bg-[#0d1a0f]" />
-        {/* Hero background — tropical coastal road */}
+      <section className="relative min-h-[100svh] flex flex-col overflow-hidden">
+
+        {/* ── Layer 1: Absolute black base (prevents any flash) */}
+        <div className="absolute inset-0 bg-[#07090d]" />
+
+        {/* ── Layer 2: Cinematic background — Phuket tropical beach, golden hour */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 hero-ken-burns"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=85')`,
+            backgroundImage: `url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=85&auto=format&fit=crop')`,
             backgroundSize: 'cover',
-            backgroundPosition: 'center 40%',
-            opacity: 0.55,
+            backgroundPosition: 'center 45%',
+            opacity: 0.62,
           }}
         />
-        {/* Gradient: darken top (nav) + strong bottom vignette */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-black/75" />
-        {/* Subtle warm tint */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6B35]/10 via-transparent to-transparent" />
 
-        <div className="relative flex-1 flex flex-col justify-center items-center text-center px-4 pt-28 pb-20">
-          {/* Live pill */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white/90 text-sm font-medium mb-8">
-            <div className="w-2 h-2 bg-[#22c55e] rounded-full animate-pulse" />
-            Live across Phuket — book in minutes
+        {/* ── Layer 3: Radial vignette — darkens edges, keeps center luminous */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse 80% 70% at 50% 40%, transparent 20%, rgba(0,0,0,0.55) 100%)',
+          }}
+        />
+
+        {/* ── Layer 4: Top shadow — nav readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-transparent pointer-events-none" />
+
+        {/* ── Layer 5: Bottom shadow — CTA + stats readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
+
+        {/* ── Layer 6: Warm golden tint at bottom — ties into brand orange */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(to top, rgba(180,70,10,0.22) 0%, rgba(255,107,53,0.08) 25%, transparent 55%)',
+          }}
+        />
+
+        {/* ── Layer 7: Cool blue-teal atmosphere at top — depth + sky feel */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(5,18,38,0.35) 0%, transparent 40%)',
+          }}
+        />
+
+        {/* ── CONTENT ── */}
+        <div className="relative flex-1 flex flex-col justify-center items-center text-center px-5 pt-28 pb-16">
+
+          {/* Live pill — entrance 0.15s */}
+          <div
+            style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.15s' }}
+          >
+            <div className="inline-flex items-center gap-2.5 px-4 py-2 mb-8 bg-white/[0.1] backdrop-blur-md border border-white/[0.18] rounded-full text-white/90 text-sm font-medium">
+              <div className="w-2 h-2 bg-[#22c55e] rounded-full animate-pulse flex-shrink-0" />
+              Live across Phuket — book in minutes
+            </div>
           </div>
 
-          {/* Headline */}
-          <h1 className="text-white font-bold text-[44px] md:text-[68px] lg:text-[76px] leading-[1.06] tracking-[-0.035em] max-w-4xl mb-6">
-            Explore Phuket{' '}
-            <span className="text-gradient">your way.</span>
-          </h1>
-
-          {/* Subheadline */}
-          <p className="text-white/70 text-[18px] md:text-[21px] max-w-md leading-relaxed mb-10 font-light">
-            Premium scooters delivered to your hotel.
-            <br />
-            Verified shops. Instant booking.
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center gap-3 mb-14">
-            <Link
-              href="/explore"
-              className="flex items-center gap-2.5 px-9 py-4 bg-[#FF6B35] text-white text-[16px] font-bold rounded-full hover:bg-[#e85d29] transition-all shadow-[0_4px_24px_rgba(255,107,53,0.45)] hover:shadow-[0_8px_32px_rgba(255,107,53,0.5)] hover:scale-[1.02] active:scale-[0.98]"
+          {/* Headline — entrance 0.3s */}
+          <div
+            style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.3s' }}
+          >
+            <h1
+              className="text-white font-bold text-[46px] md:text-[70px] lg:text-[80px] leading-[1.04] tracking-[-0.04em] max-w-[16ch] mb-6 hero-text-shadow"
             >
-              Explore Scooters
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/explore"
-              className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white text-[15px] font-semibold rounded-full border border-white/25 hover:bg-white/18 transition-all"
-            >
-              View All Locations
-            </Link>
+              Explore Phuket{' '}
+              <span className="text-gradient">your way.</span>
+            </h1>
           </div>
 
-          {/* Trust stats */}
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-5">
-            {TRUST_STATS.map((stat, i) => (
-              <div key={stat.label} className="text-center">
-                {i > 0 && <div className="hidden sm:block absolute -left-5 top-1/2 -translate-y-1/2 w-px h-6 bg-white/20" />}
-                <div className="text-white font-bold text-[26px] leading-none tracking-tight">{stat.value}</div>
-                <div className="text-white/50 text-xs mt-1.5 font-medium tracking-wide">{stat.label}</div>
+          {/* Subheadline — entrance 0.48s */}
+          <div
+            style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.48s' }}
+          >
+            <p className="text-white/72 text-[17px] md:text-[20px] max-w-[30ch] leading-[1.65] mb-10 font-light hero-sub-shadow">
+              Premium scooters delivered to your hotel.
+              <br className="hidden sm:block" />
+              Verified shops. Instant booking.
+            </p>
+          </div>
+
+          {/* CTAs — entrance 0.62s */}
+          <div
+            style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.62s' }}
+          >
+            <div className="flex flex-col sm:flex-row items-center gap-3 mb-12">
+              <Link
+                href="/explore"
+                className="flex items-center gap-2.5 px-9 py-[15px] bg-[#FF6B35] text-white text-[15px] font-bold rounded-full
+                           shadow-[0_4px_28px_rgba(255,107,53,0.5),0_2px_8px_rgba(0,0,0,0.3)]
+                           hover:bg-[#e85d29] hover:shadow-[0_8px_40px_rgba(255,107,53,0.6)]
+                           hover:scale-[1.03] active:scale-[0.97]
+                           transition-all duration-200"
+              >
+                Explore Scooters
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                href="/explore"
+                className="flex items-center gap-2 px-7 py-[15px] rounded-full text-[15px] font-semibold text-white/90
+                           bg-white/[0.1] backdrop-blur-md border border-white/[0.22]
+                           hover:bg-white/[0.18] hover:border-white/30
+                           transition-all duration-200"
+              >
+                View All Locations
+              </Link>
+            </div>
+          </div>
+
+          {/* Stats glass card — entrance 0.8s */}
+          <div
+            className="w-full max-w-xl"
+            style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.8s' }}
+          >
+            <div className="px-5 py-4 bg-white/[0.07] backdrop-blur-md border border-white/[0.1] rounded-2xl">
+              <div className="flex flex-wrap items-center justify-center gap-y-3">
+                {TRUST_STATS.map((stat, i) => (
+                  <div key={stat.label} className="flex items-center">
+                    {i > 0 && (
+                      <div className="w-px h-7 bg-white/[0.15] mx-5 flex-shrink-0" />
+                    )}
+                    <div className="text-center">
+                      <div className="text-white font-bold text-[22px] md:text-[24px] leading-none tracking-tight">
+                        {stat.value}
+                      </div>
+                      <div className="text-white/48 text-[11px] mt-1.5 font-medium tracking-wide uppercase">
+                        {stat.label}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="relative flex justify-center pb-8">
-          <div className="w-6 h-10 rounded-full border-2 border-white/25 flex justify-center pt-2 animate-bounce">
-            <div className="w-1 h-2 bg-white/50 rounded-full" />
+        {/* Scroll indicator — entrance 1.1s */}
+        <div
+          className="relative flex flex-col items-center pb-8 gap-2"
+          style={{ opacity: 0, animation: 'fade-in 0.8s ease forwards 1.1s' }}
+        >
+          <span className="text-[10px] uppercase tracking-[0.22em] font-medium text-white/35">Scroll</span>
+          <div className="w-[22px] h-9 rounded-full border border-white/20 flex justify-center pt-1.5">
+            <div className="w-0.5 h-2.5 bg-white/40 rounded-full animate-bounce" />
           </div>
         </div>
+
       </section>
 
       {/* ── TRUST STRIP ── */}

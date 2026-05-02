@@ -101,6 +101,23 @@ h1, h2, h3, h4, h5, h6 {
 .animate-fade-in { animation: fade-in 0.4s ease forwards; }
 .animate-scale-in { animation: scale-in 0.3s ease forwards; }
 
+/* Hero Ken Burns — very slow cinematic zoom-out */
+@keyframes hero-ken-burns {
+  from { transform: scale(1.08); }
+  to   { transform: scale(1.0); }
+}
+.hero-ken-burns {
+  animation: hero-ken-burns 12s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Hero text shadow utility */
+.hero-text-shadow {
+  text-shadow: 0 2px 20px rgba(0,0,0,0.45), 0 0 60px rgba(0,0,0,0.25);
+}
+.hero-sub-shadow {
+  text-shadow: 0 1px 12px rgba(0,0,0,0.55);
+}
+
 /* Utility: text gradient */
 .text-gradient {
   background: linear-gradient(135deg, #FF6B35 0%, #ff9a5c 100%);
