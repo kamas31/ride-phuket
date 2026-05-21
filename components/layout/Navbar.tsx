@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { MapPin, Menu, X, User, BookOpen, LayoutDashboard, LogOut, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { MapPin, Menu, X, BookOpen, LayoutDashboard, LogOut, ChevronDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { SITE_NAME } from '@/constants'
 import { useAuth } from '@/hooks/useAuth'
@@ -38,6 +38,26 @@ export default function Navbar() {
 
   const isHome = pathname === '/'
   const isShopOwner = profile?.role === 'shop_owner'
+
+  // ── Body scroll lock for iOS Safari ────────────────────────────────
+  // Prevents background scroll when drawer is open.
+  // Saves/restores scroll position to avoid layout jump.
+  useEffect(() => {
+    if (!menuOpen) return
+    const scrollY = window.scrollY
+    const body = document.body
+    body.style.overflow  = 'hidden'
+    body.style.position  = 'fixed'
+    body.style.top       = `-${scrollY}px`
+    body.style.width     = '100%'
+    return () => {
+      body.style.overflow  = ''
+      body.style.position  = ''
+      body.style.top       = ''
+      body.style.width     = ''
+      window.scrollTo(0, scrollY)
+    }
+  }, [menuOpen])
 
   const NAV_LINKS = isShopOwner
     ? [
@@ -216,7 +236,12 @@ export default function Navbar() {
               </div>
             )}
 
-            <nav className="flex-1 p-5 flex flex-col gap-1">
+            {/* overflow-y-auto + overscroll-contain prevents scroll leaking to body
+                WebkitOverflowScrolling enables momentum scrolling on iOS */}
+            <nav
+              className="flex-1 overflow-y-auto overscroll-contain p-5 flex flex-col gap-1"
+              style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+            >
               {NAV_LINKS.map(link => (
                 <Link
                   key={link.href}

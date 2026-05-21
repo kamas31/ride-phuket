@@ -96,17 +96,26 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         </div>
 
         {/* Price */}
-        <div className="flex items-end justify-between">
-          <div>
+        <div className="flex items-end justify-between gap-2">
+          <div className="flex-shrink-0">
             <span className="text-[22px] font-bold text-[#0f0f0e] leading-none">
               {formatPrice(scooter.pricePerDay)}
             </span>
             <span className="text-[#9c9c98] text-sm ml-1">/day</span>
           </div>
-          {scooter.pricePerWeek && (
-            <span className="text-[11px] text-[#9c9c98]">
-              {formatPrice(scooter.pricePerWeek)}/wk
-            </span>
+          {(scooter.pricePerWeek || scooter.pricePerMonth) && (
+            <div className="text-right flex-shrink-0 space-y-0.5 pb-0.5">
+              {scooter.pricePerWeek && (
+                <div className="text-[11px] text-[#9c9c98] leading-tight">
+                  {formatPrice(scooter.pricePerWeek)}/wk
+                </div>
+              )}
+              {scooter.pricePerMonth && (
+                <div className="text-[11px] text-[#9c9c98] leading-tight">
+                  {formatPrice(scooter.pricePerMonth)}/mo
+                </div>
+              )}
+            </div>
           )}
         </div>
 

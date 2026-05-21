@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils'
 // ─────────────────────────────────────────────────────────────
 // Cinematic warm-sand blur placeholder — 16×9 SVG gradient
 // Shown by Next.js while the real image loads (placeholder="blur")
-// Palette: #ece9e4 → #dedad2 — cohérent avec bg tropicale
 // ─────────────────────────────────────────────────────────────
 const BLUR_DATA_URL =
   'data:image/svg+xml;base64,' +
@@ -18,17 +17,6 @@ const BLUR_DATA_URL =
   'IjEiIHN0b3AtY29sb3I9IiNkZWRhZDIiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCBm' +
   'aWxsPSJ1cmwoI2cpIiB3aWR0aD0iMTYiIGhlaWdodD0iOSIvPjwvc3ZnPg=='
 
-// ─────────────────────────────────────────────────────────────
-// ScooterImage — universal scooter photo component
-//
-// • Next.js Image Optimization enabled (no unoptimized)
-//   → right size per viewport, WebP/AVIF auto, Vercel CDN cache
-// • placeholder="blur" → smooth gradient→image transition
-// • .shimmer-sweep overlay → premium skeleton while loading
-// • hover scale via group-hover (parent must carry `group`)
-// • CustomEvent 'scooter-img-load' → picked up by ImageMetricsOverlay
-// ─────────────────────────────────────────────────────────────
-
 interface ScooterImageProps {
   src?: string | null
   alt: string
@@ -36,6 +24,7 @@ interface ScooterImageProps {
   overlay?: boolean          // bottom gradient for badge legibility
   priority?: boolean         // above-the-fold: skip lazy loading
   hover?: boolean            // scale on group-hover — parent needs `group`
+  objectFit?: 'cover' | 'contain'  // cover = fills frame, contain = full scooter visible
   sizes?: string             // Next.js responsive sizes hint
   children?: React.ReactNode // badges, arrows, counters on top of image
 }
@@ -44,10 +33,11 @@ export function ScooterImage({
   src,
   alt,
   className,
-  overlay  = false,
-  priority = false,
-  hover    = false,
-  sizes    = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
+  overlay   = false,
+  priority  = false,
+  hover     = false,
+  objectFit = 'cover',
+  sizes     = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
   children,
 }: ScooterImageProps) {
   const [loaded, setLoaded] = useState(priority) // priority images skip shimmer
@@ -72,19 +62,12 @@ export function ScooterImage({
             />
           )}
 
-          {/*
-           * No `unoptimized` prop → Next.js /_next/image proxy:
-           *   - Serves the exact size needed (from `sizes`)
-           *   - Auto-converts to WebP or AVIF
-           *   - Caches on Vercel CDN — fast on repeated loads
-           *   - Mobile 400px screen gets ~80 KB instead of full 1.2 MB
-           */}
           <Image
             src={src}
             alt={alt}
             fill
             className={cn(
-              'object-cover',
+              objectFit === 'contain' ? 'object-contain' : 'object-cover',
               hover && 'group-hover:scale-[1.04] transition-transform duration-500',
             )}
             sizes={sizes}

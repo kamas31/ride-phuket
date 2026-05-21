@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 interface ImageGalleryProps {
   images: string[]
   name: string
-  coverImage?: string | null  // start on the designated cover
+  coverImage?: string | null
 }
 
 export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
@@ -22,11 +22,12 @@ export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
 
   return (
     <div className="space-y-3">
-      {/* Main image */}
+      {/* Main image — object-contain so the full scooter is always visible */}
       <ScooterImage
         src={images[active]}
         alt={`${name} — photo ${active + 1}`}
         className="h-[270px] md:h-[400px] rounded-[22px] group"
+        objectFit="contain"
         priority
         sizes="(max-width: 1024px) 100vw, 60vw"
       >
@@ -35,14 +36,14 @@ export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
           <>
             <button
               onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10"
               aria-label="Previous image"
             >
               <ChevronLeft className="w-5 h-5 text-[#0f0f0e]" />
             </button>
             <button
               onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10"
               aria-label="Next image"
             >
               <ChevronRight className="w-5 h-5 text-[#0f0f0e]" />
@@ -52,14 +53,14 @@ export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
 
         {/* Dot indicators */}
         {hasMultiple && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
             {images.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setActive(i)}
                 className={cn(
                   'h-1.5 rounded-full transition-all duration-200',
-                  i === active ? 'w-5 bg-white' : 'w-1.5 bg-white/50'
+                  i === active ? 'w-5 bg-white shadow-sm' : 'w-1.5 bg-white/50'
                 )}
                 aria-label={`Photo ${i + 1}`}
               />
@@ -69,13 +70,13 @@ export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
 
         {/* Counter badge */}
         {hasMultiple && (
-          <div className="absolute top-4 right-4 px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full text-white text-xs font-medium">
+          <div className="absolute top-4 right-4 px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full text-white text-xs font-medium z-10">
             {active + 1} / {images.length}
           </div>
         )}
       </ScooterImage>
 
-      {/* Thumbnail strip */}
+      {/* Thumbnail strip — object-cover (small, composition matters) */}
       {hasMultiple && (
         <div className="flex gap-2">
           {images.map((src, i) => (

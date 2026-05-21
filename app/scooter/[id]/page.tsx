@@ -53,6 +53,10 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
 
   const shop = scooter.shop!
 
+  // Filter out empty / N/A values — no fake placeholders
+  const isValidSpec = (v: string | undefined) =>
+    v && v.trim().length > 0 && !/^n\/?a$/i.test(v.trim())
+
   const SPEC_ROWS = [
     { label: 'Engine',      value: scooter.specs.engine },
     { label: 'Power',       value: scooter.specs.power },
@@ -60,7 +64,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
     { label: 'Consumption', value: scooter.specs.consumption },
     { label: 'Weight',      value: scooter.specs.weight },
     { label: 'Storage',     value: scooter.specs.storage },
-  ]
+  ].filter(r => isValidSpec(r.value))
 
   const weekSavings = scooter.pricePerWeek
     ? scooter.pricePerDay * 7 - scooter.pricePerWeek
@@ -76,7 +80,8 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
         <div className="max-w-5xl mx-auto px-4 h-11 flex items-center gap-3">
           <Link
             href="/explore"
-            className="flex items-center gap-1.5 text-sm font-medium text-[#5c5c58] hover:text-[#0f0f0e] transition-colors"
+            prefetch={true}
+            className="flex items-center gap-1.5 text-sm font-medium text-[#5c5c58] hover:text-[#0f0f0e] transition-colors active:opacity-50"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Explore
@@ -175,7 +180,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
             <div>
               <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-3">Technical specs</h2>
               <div className="bg-[#f8f8f6] rounded-[16px] overflow-hidden">
-                {SPEC_ROWS.filter(r => r.value).map((row, i) => (
+                {SPEC_ROWS.map((row, i) => (
                   <div
                     key={row.label}
                     className={`flex items-center justify-between px-4 py-3 text-sm ${i < SPEC_ROWS.length - 1 ? 'border-b border-[#efefed]' : ''}`}
