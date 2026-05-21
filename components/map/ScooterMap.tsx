@@ -6,10 +6,10 @@ import mapboxgl from 'mapbox-gl'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Star, MapPin, X, ArrowRight, Zap, Shield } from 'lucide-react'
 import { getScooterCover } from '@/lib/utils'
 import { cn, formatPrice } from '@/lib/utils'
+import { ScooterImage } from '@/components/ride/ScooterImage'
 import type { Scooter } from '@/types'
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
@@ -71,14 +71,13 @@ function ScooterPopupCard({ scooter, onClose }: { scooter: Scooter; onClose: () 
       <button onClick={onClose} className="absolute top-2.5 right-2.5 z-10 w-7 h-7 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center transition-colors">
         <X className="w-3.5 h-3.5 text-white/80" />
       </button>
-      {getScooterCover(scooter) ? (
-        <div className="relative h-28 bg-[#1a1c20]">
-          <Image src={getScooterCover(scooter)} alt={scooter.name} fill className="object-cover opacity-90" unoptimized />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0c0e12]/60 to-transparent" />
-        </div>
-      ) : (
-        <div className="h-16 bg-[#1a1c20] flex items-center justify-center text-2xl">🛵</div>
-      )}
+      <ScooterImage
+        src={getScooterCover(scooter)}
+        alt={scooter.name}
+        className="h-28"
+        overlay
+        sizes="240px"
+      />
       <div className="px-3.5 pb-3.5 pt-2.5">
         <p className="font-bold text-[13px] text-white leading-tight truncate pr-6">{scooter.name}</p>
         <div className="flex items-center gap-2 mt-1.5 mb-3">

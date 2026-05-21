@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { MapPin, Star, ArrowRight, CheckCircle2, AlertCircle, XCircle, Clock } from 'lucide-react'
+import { ScooterImage } from '@/components/ride/ScooterImage'
 import { Badge } from '@/components/ui/Badge'
 import { useAuth } from '@/hooks/useAuth'
 import { useBookings } from '@/hooks/useBookings'
@@ -92,11 +92,12 @@ export default function BookingsPage() {
                     <div className={`h-1 ${config.barColor}`} />
                     <div className="p-5">
                       <div className="flex gap-4 mb-4">
-                        {scooter?.images?.[0] && (
-                          <div className="relative w-20 h-16 rounded-[12px] overflow-hidden flex-shrink-0 bg-[#f0f0ec]">
-                            <Image src={scooter.images[0]} alt={scooter.name} fill className="object-cover" unoptimized />
-                          </div>
-                        )}
+                        <ScooterImage
+                          src={scooter?.images?.[0]}
+                          alt={scooter?.name ?? 'Scooter'}
+                          className="w-20 h-16 rounded-[12px] flex-shrink-0"
+                          sizes="80px"
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <div>
@@ -166,11 +167,12 @@ export default function BookingsPage() {
                 const scooter = booking.scooter
                 return (
                   <div key={booking.id} className="bg-white rounded-[20px] p-4 border border-[#e8e8e4] flex gap-4 items-center">
-                    {scooter?.images?.[0] && (
-                      <div className="relative w-16 h-14 rounded-[10px] overflow-hidden flex-shrink-0 bg-[#f0f0ec]">
-                        <Image src={scooter.images[0]} alt={scooter.name} fill className="object-cover opacity-80" unoptimized />
-                      </div>
-                    )}
+                    <ScooterImage
+                      src={scooter?.images?.[0]}
+                      alt={scooter?.name ?? 'Scooter'}
+                      className="w-16 h-14 rounded-[10px] flex-shrink-0 opacity-70"
+                      sizes="64px"
+                    />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <p className="font-semibold text-[#0f0f0e] text-sm truncate">{scooter?.name ?? 'Scooter'}</p>

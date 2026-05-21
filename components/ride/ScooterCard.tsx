@@ -1,8 +1,8 @@
+import { memo } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Star, MapPin, Zap, Shield, Check } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
-import { ScooterFallback } from '@/components/ride/ImageUploader'
+import { ScooterImage } from '@/components/ride/ScooterImage'
 import { cn, formatPrice, getScooterCover } from '@/lib/utils'
 import type { Scooter } from '@/types'
 
@@ -12,7 +12,7 @@ interface ScooterCardProps {
   compact?: boolean
 }
 
-export function ScooterCard({ scooter, className, compact = false }: ScooterCardProps) {
+export const ScooterCard = memo(function ScooterCard({ scooter, className, compact = false }: ScooterCardProps) {
   return (
     <Link
       href={`/scooter/${scooter.id}`}
@@ -24,20 +24,14 @@ export function ScooterCard({ scooter, className, compact = false }: ScooterCard
       )}
     >
       {/* Image */}
-      <div className={cn('relative overflow-hidden bg-[#f0f0ec]', compact ? 'h-44' : 'h-52')}>
-        {getScooterCover(scooter) ? (
-          <Image
-            src={getScooterCover(scooter)}
-            alt={scooter.name}
-            fill
-            className="object-cover group-hover:scale-[1.04] transition-transform duration-500"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-            unoptimized
-          />
-        ) : (
-          <ScooterFallback className="w-full h-full" />
-        )}
-
+      <ScooterImage
+        src={getScooterCover(scooter)}
+        alt={scooter.name}
+        className={compact ? 'h-44' : 'h-52'}
+        overlay
+        hover
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+      >
         {/* Top-left badges */}
         <div className="absolute top-3 left-3 flex gap-1.5">
           {!scooter.available && (
@@ -62,10 +56,7 @@ export function ScooterCard({ scooter, className, compact = false }: ScooterCard
             </span>
           </div>
         )}
-
-        {/* Bottom gradient fade for text legibility */}
-        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/20 to-transparent" />
-      </div>
+      </ScooterImage>
 
       {/* Content */}
       <div className="p-4">
@@ -135,4 +126,4 @@ export function ScooterCard({ scooter, className, compact = false }: ScooterCard
       </div>
     </Link>
   )
-}
+})

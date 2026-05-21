@@ -2,12 +2,12 @@
 
 import { useState, Suspense, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Shield, Check, MapPin, Calendar, Truck, Store, ChevronRight, Lock } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
+import { ScooterImage } from '@/components/ride/ScooterImage'
 import { SCOOTERS } from '@/data/scooters'
-import { formatPrice, calculateDays, calculateTotal, addDays } from '@/lib/utils'
+import { formatPrice, calculateDays, calculateTotal, addDays, getScooterCover } from '@/lib/utils'
 import { createBookingAction } from '@/app/actions/booking'
 import { getScooterAction } from '@/app/actions/scooter'
 import { useAuth } from '@/hooks/useAuth'
@@ -188,9 +188,12 @@ function CheckoutContent() {
               {/* Scooter summary */}
               <div className="bg-white rounded-[20px] p-5 border border-[#e8e8e4]">
                 <div className="flex gap-4">
-                  <div className="relative w-24 h-20 rounded-[12px] overflow-hidden flex-shrink-0 bg-[#f0f0ec]">
-                    <Image src={scooter.images[0]} alt={scooter.name} fill className="object-cover" unoptimized />
-                  </div>
+                  <ScooterImage
+                    src={getScooterCover(scooter)}
+                    alt={scooter.name}
+                    className="w-24 h-20 rounded-[12px] flex-shrink-0"
+                    sizes="96px"
+                  />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-[#0f0f0e] truncate">{scooter.name}</h3>
                     <div className="flex items-center gap-1 text-xs text-[#9c9c98] mt-0.5">

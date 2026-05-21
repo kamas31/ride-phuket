@@ -126,6 +126,22 @@ h1, h2, h3, h4, h5, h6 {
   background-clip: text;
 }
 
+/* Image shimmer skeleton — GPU-accelerated sweep over blur placeholder */
+@keyframes shimmer {
+  from { transform: translateX(-150%); }
+  to   { transform: translateX(150%); }
+}
+.shimmer-sweep {
+  will-change: transform;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
 /* Map placeholder gradient */
 .map-gradient {
   background: linear-gradient(135deg, #e8f4f0 0%, #d4e8e0 50%, #c8e0d8 100%);

@@ -10,6 +10,14 @@ import { cn } from '@/lib/utils'
 
 // ── Types ──────────────────────────────────────────────────────
 
+export interface ImageQualityScore {
+  overall: 'excellent' | 'good' | 'poor'
+  score: number        // 0–100 composite
+  brightness: number   // 0–100
+  sharpness: number    // 0–100
+  composition: number  // 0–100
+}
+
 export interface ProcessedImage {
   id: string
   previewUrl: string  // Object URL for <img>
@@ -17,6 +25,7 @@ export interface ProcessedImage {
   sizeKb: number
   originalName: string
   isCover: boolean    // explicit cover/hero image (one per scooter)
+  quality: ImageQualityScore
 }
 
 interface ImageUploaderProps {
@@ -32,16 +41,132 @@ interface ImageUploaderProps {
 const TARGET_ASPECT = 16 / 9
 const MAX_WIDTH_PX  = 1600
 const MAX_SIZE_KB   = 800
-const MIN_SRC_WIDTH = 400 // reject images too small
+const MIN_SRC_WIDTH = 400
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+
+// Hard rejection thresholds
+const BRIGHTNESS_MIN = 35   // 0–255 average luminance
+const SHARPNESS_MIN  = 5    // Laplacian variance
+
+// Common phone screenshot dimensions [w, h] — tolerance ±5px
+const SCREENSHOT_DIMS: [number, number][] = [
+  [390, 844], [428, 926], [414, 896], [412, 915], [360, 800],
+  [393, 873], [430, 932], [375, 812], [390, 896], [320, 568],
+  [360, 780], [414, 736], [375, 667], [320, 480], [768, 1024],
+]
+
+// ── Quality analysis functions ─────────────────────────────────
+
+function detectScreenshot(w: number, h: number): { rejected: boolean; reason?: string } {
+  if (h > w * 1.5) {
+    return { rejected: true, reason: 'Please upload a horizontal scooter photo — portrait images are not accepted.' }
+  }
+  for (const [sw, sh] of SCREENSHOT_DIMS) {
+    if (Math.abs(w - sw) <= 5 && Math.abs(h - sh) <= 5) {
+      return { rejected: true, reason: 'Screenshots are not allowed. Please upload a real scooter photo.' }
+    }
+  }
+  return { rejected: false }
+}
+
+function computeBrightness(ctx: CanvasRenderingContext2D, w: number, h: number): number {
+  // Sample every 8th pixel for performance (~4k samples on 1600×900)
+  const step = 8
+  const data = ctx.getImageData(0, 0, w, h).data
+  let total = 0, count = 0
+  for (let y = 0; y < h; y += step) {
+    for (let x = 0; x < w; x += step) {
+      const i = (y * w + x) * 4
+      total += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
+      count++
+    }
+  }
+  return count > 0 ? total / count : 0
+}
+
+function computeSharpness(ctx: CanvasRenderingContext2D, w: number, h: number): number {
+  // Laplacian variance on a 200×200 center crop
+  const cs = Math.min(200, w, h)
+  const cx = Math.floor((w - cs) / 2)
+  const cy = Math.floor((h - cs) / 2)
+  const data = ctx.getImageData(cx, cy, cs, cs).data
+
+  // Grayscale conversion
+  const gray: number[] = new Array(cs * cs)
+  for (let i = 0; i < cs * cs; i++) {
+    gray[i] = 0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2]
+  }
+
+  // Laplacian kernel [0,1,0 / 1,-4,1 / 0,1,0] — variance of responses
+  let sum = 0, sumSq = 0, n = 0
+  for (let y = 1; y < cs - 1; y++) {
+    for (let x = 1; x < cs - 1; x++) {
+      const idx = y * cs + x
+      const lap =
+        gray[idx - cs] + gray[idx + cs] +
+        gray[idx - 1]  + gray[idx + 1]  - 4 * gray[idx]
+      sum   += lap
+      sumSq += lap * lap
+      n++
+    }
+  }
+  if (n === 0) return 0
+  const mean = sum / n
+  return sumSq / n - mean * mean
+}
+
+function computeQualityScore(
+  brightness: number,
+  sharpness: number,
+  origW: number,
+  origH: number,
+): ImageQualityScore {
+  // Brightness score: optimal 80–200 (0-255 raw)
+  let bScore: number
+  if      (brightness < 35)  bScore = 0
+  else if (brightness < 80)  bScore = 20 + ((brightness - 35) / 45) * 40
+  else if (brightness <= 200) bScore = 60 + ((brightness - 80) / 120) * 40
+  else if (brightness <= 240) bScore = 100 - ((brightness - 200) / 40) * 20
+  else                        bScore = 80 - ((brightness - 240) / 15) * 15
+
+  // Sharpness score: log-ish mapping of Laplacian variance
+  let sScore: number
+  if      (sharpness < 5)   sScore = 0
+  else if (sharpness < 20)  sScore = 15 + ((sharpness - 5) / 15) * 30
+  else if (sharpness < 100) sScore = 45 + ((sharpness - 20) / 80) * 40
+  else                      sScore = Math.min(100, 85 + ((sharpness - 100) / 200) * 15)
+
+  // Composition: favor 16:9 landscape
+  const ratio  = origW / origH
+  const diff   = Math.abs(ratio - TARGET_ASPECT) / TARGET_ASPECT
+  const cScore =
+    diff < 0.10 ? 100 :
+    diff < 0.30 ? 100 - ((diff - 0.10) / 0.20) * 30 :
+    diff < 0.80 ?  70 - ((diff - 0.30) / 0.50) * 40 : 30
+
+  const score = Math.round(bScore * 0.40 + sScore * 0.40 + cScore * 0.20)
+  const overall: ImageQualityScore['overall'] =
+    score >= 75 ? 'excellent' : score >= 50 ? 'good' : 'poor'
+
+  return {
+    overall,
+    score,
+    brightness:  Math.round(Math.max(0, Math.min(100, bScore))),
+    sharpness:   Math.round(Math.max(0, Math.min(100, sScore))),
+    composition: Math.round(Math.max(0, Math.min(100, cScore))),
+  }
+}
+
+// ── ProcessResult type ─────────────────────────────────────────
 
 type ProcessResult =
   | { ok: true; img: ProcessedImage }
   | { ok: false; fileName: string; reason: string }
 
+// ── Core processing pipeline ───────────────────────────────────
+
 async function processImageFile(file: File): Promise<ProcessResult> {
-  // Format check
   if (!ACCEPTED_TYPES.includes(file.type) && !file.name.match(/\.(jpe?g|png|webp|heic|heif)$/i)) {
     return { ok: false, fileName: file.name, reason: 'Unsupported format. Use JPEG, PNG or WebP.' }
   }
@@ -58,26 +183,30 @@ async function processImageFile(file: File): Promise<ProcessResult> {
     img.onload = () => {
       URL.revokeObjectURL(srcUrl)
 
-      // Minimum size check (before crop)
+      // ── Minimum size ───────────────────────────────────────
       if (img.width < MIN_SRC_WIDTH || img.height < MIN_SRC_WIDTH / TARGET_ASPECT) {
         resolve({ ok: false, fileName: file.name, reason: `Image too small (min ${MIN_SRC_WIDTH}px wide). Use a higher quality photo.` })
         return
       }
 
+      // ── Screenshot / portrait detection ───────────────────
+      const screenshotCheck = detectScreenshot(img.width, img.height)
+      if (screenshotCheck.rejected) {
+        resolve({ ok: false, fileName: file.name, reason: screenshotCheck.reason! })
+        return
+      }
+
       // ── Centered 16:9 crop ─────────────────────────────────
       let srcX = 0, srcY = 0, srcW = img.width, srcH = img.height
-
       if (img.width / img.height > TARGET_ASPECT) {
-        // Wider than 16:9 → crop horizontally (keep center)
         srcW = img.height * TARGET_ASPECT
         srcX = (img.width - srcW) / 2
       } else {
-        // Taller than 16:9 → crop vertically (keep top 40% focus)
         srcH = img.width / TARGET_ASPECT
-        srcY = (img.height - srcH) * 0.35 // slight top bias
+        srcY = (img.height - srcH) * 0.35
       }
 
-      // ── Output dimensions (max 1600px) ─────────────────────
+      // ── Output dimensions ──────────────────────────────────
       const outW = Math.round(Math.min(srcW, MAX_WIDTH_PX))
       const outH = Math.round(outW / TARGET_ASPECT)
 
@@ -86,9 +215,24 @@ async function processImageFile(file: File): Promise<ProcessResult> {
       canvas.width  = outW
       canvas.height = outH
       const ctx = canvas.getContext('2d')!
-      ctx.imageSmoothingEnabled  = true
-      ctx.imageSmoothingQuality  = 'high'
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
       ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, outW, outH)
+
+      // ── Quality analysis (on processed canvas) ─────────────
+      const brightness = computeBrightness(ctx, outW, outH)
+      const sharpness  = computeSharpness(ctx, outW, outH)
+
+      if (brightness < BRIGHTNESS_MIN) {
+        resolve({ ok: false, fileName: file.name, reason: 'Photo too dark — shoot in natural daylight for best results.' })
+        return
+      }
+      if (sharpness < SHARPNESS_MIN) {
+        resolve({ ok: false, fileName: file.name, reason: 'Photo too blurry — use a stable surface or better lighting.' })
+        return
+      }
+
+      const quality = computeQualityScore(brightness, sharpness, img.width, img.height)
 
       // ── WebP compression (target ≤ 800 KB) ─────────────────
       const tryExport = (quality: number): Promise<Blob | null> =>
@@ -98,7 +242,7 @@ async function processImageFile(file: File): Promise<ProcessResult> {
         for (const q of [0.88, 0.75, 0.62, 0.50]) {
           const blob = await tryExport(q)
           if (blob && blob.size <= MAX_SIZE_KB * 1024) return blob
-          if (blob && q === 0.50) return blob // last resort — return anyway
+          if (blob && q === 0.50) return blob
         }
         return null
       }
@@ -116,7 +260,8 @@ async function processImageFile(file: File): Promise<ProcessResult> {
             blob,
             sizeKb:       Math.round(blob.size / 1024),
             originalName: file.name,
-            isCover:      false, // set by ImageUploader after adding to list
+            isCover:      false,
+            quality,
           },
         })
       })
@@ -124,6 +269,25 @@ async function processImageFile(file: File): Promise<ProcessResult> {
 
     img.src = srcUrl
   })
+}
+
+// ── Quality badge ──────────────────────────────────────────────
+
+function QualityBadge({ quality }: { quality: ImageQualityScore }) {
+  const cfg = {
+    excellent: { label: 'Excellent', cls: 'bg-[#dcfce7] text-[#15803d] border-[#bbf7d0]' },
+    good:      { label: 'Good',      cls: 'bg-[#fef9c3] text-[#a16207] border-[#fde68a]' },
+    poor:      { label: 'Poor',      cls: 'bg-[#fff7ed] text-[#c2410c] border-[#fed7aa]' },
+  }[quality.overall]
+
+  return (
+    <span
+      className={cn('inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold rounded-full border flex-shrink-0', cfg.cls)}
+      title={`Quality ${quality.score}/100 · Brightness ${quality.brightness} · Sharpness ${quality.sharpness}`}
+    >
+      {cfg.label}
+    </span>
+  )
 }
 
 // ── Fallback placeholder ───────────────────────────────────────
@@ -145,7 +309,6 @@ export function ImageUploader({
   const [errors, setErrors]         = useState<string[]>([])
   const [dragOver, setDragOver]     = useState(false)
 
-  // Drag-to-reorder state
   const [dragIdx, setDragIdx] = useState<number | null>(null)
   const [overIdx, setOverIdx] = useState<number | null>(null)
 
@@ -169,7 +332,6 @@ export function ImageUploader({
 
     if (good.length) {
       const combined = [...images, ...good]
-      // Auto-set first image as cover if none is designated yet
       const hasCover = combined.some(img => img.isCover)
       const next = hasCover
         ? combined
@@ -203,7 +365,7 @@ export function ImageUploader({
     const next = [...images]
     const [item] = next.splice(fromIdx, 1)
     next.splice(toIdx, 0, item)
-    onChange(next) // isCover travels with the item
+    onChange(next)
   }
 
   const moveImage = (idx: number, direction: -1 | 1) => {
@@ -215,7 +377,6 @@ export function ImageUploader({
   const removeImage = (idx: number) => {
     URL.revokeObjectURL(images[idx].previewUrl)
     const next = images.filter((_, i) => i !== idx)
-    // If cover was removed, auto-assign to new first image
     const coverRemoved = images[idx].isCover
     const withCover = coverRemoved && next.length > 0
       ? next.map((img, i) => ({ ...img, isCover: i === 0 }))
@@ -257,7 +418,7 @@ export function ImageUploader({
             <>
               <Loader2 className="w-8 h-8 text-[#FF6B35] animate-spin" />
               <p className="text-sm font-medium text-[#FF6B35]">Processing photos…</p>
-              <p className="text-xs text-[#9c9c98]">Resizing, cropping and compressing</p>
+              <p className="text-xs text-[#9c9c98]">Resizing, cropping and analysing quality</p>
             </>
           ) : (
             <>
@@ -327,7 +488,7 @@ export function ImageUploader({
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <p className="text-xs font-medium text-[#0f0f0e] truncate">{img.originalName}</p>
                   {img.isCover && (
                     <span className="flex-shrink-0 flex items-center gap-0.5 text-[10px] font-bold text-[#FF6B35]">
@@ -335,15 +496,15 @@ export function ImageUploader({
                       Cover
                     </span>
                   )}
+                  <QualityBadge quality={img.quality} />
                 </div>
                 <p className="text-[10px] text-[#9c9c98] mt-0.5">
-                  {img.sizeKb} KB · WebP · 16:9
+                  {img.sizeKb} KB · WebP · 16:9 · {img.quality.score}/100
                 </p>
               </div>
 
               {/* Actions */}
               <div className="flex items-center gap-1 flex-shrink-0">
-                {/* Set as cover — only on non-cover images */}
                 {!img.isCover ? (
                   <button
                     type="button"
@@ -421,7 +582,7 @@ export function ImageUploader({
         </div>
         {images.length > 0 && (
           <p className="text-[10px] text-[#9c9c98]">
-            Drag ⠿ to reorder · First = cover
+            Drag ⠿ to reorder · Star = cover
           </p>
         )}
       </div>

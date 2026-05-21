@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import { ScooterImage } from '@/components/ride/ScooterImage'
 import {
   LayoutDashboard, Bike, BookOpen, TrendingUp, Plus,
   ToggleLeft, ToggleRight, Settings, MapPin, Star,
@@ -193,13 +193,12 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
                     style={{ opacity: 0, animation: `fade-up 0.35s ease forwards ${i * 0.05}s` }}
                   >
                     {/* Image */}
-                    <div className="relative w-20 h-16 rounded-[12px] overflow-hidden flex-shrink-0 bg-[#f0f0ec]">
-                      {scooter.images?.[0] ? (
-                        <Image src={scooter.images[0]} alt={scooter.name} fill className="object-cover" unoptimized />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-2xl">🛵</div>
-                      )}
-                    </div>
+                    <ScooterImage
+                      src={scooter.images?.[0]}
+                      alt={scooter.name}
+                      className="w-20 h-16 rounded-[12px] flex-shrink-0"
+                      sizes="80px"
+                    />
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">

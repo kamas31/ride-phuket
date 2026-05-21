@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ScooterImage } from '@/components/ride/ScooterImage'
 import { cn } from '@/lib/utils'
 
 interface ImageGalleryProps {
@@ -12,7 +13,6 @@ interface ImageGalleryProps {
 }
 
 export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
-  // Start on the cover image if it's in the images array
   const coverIdx = coverImage ? Math.max(0, images.indexOf(coverImage)) : 0
   const [active, setActive] = useState(coverIdx)
   const hasMultiple = images.length > 1
@@ -23,17 +23,13 @@ export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
   return (
     <div className="space-y-3">
       {/* Main image */}
-      <div className="relative h-[270px] md:h-[400px] rounded-[22px] overflow-hidden bg-[#f0f0ec] group">
-        <Image
-          src={images[active]}
-          alt={`${name} — photo ${active + 1}`}
-          fill
-          className="object-cover transition-opacity duration-300"
-          sizes="(max-width: 1024px) 100vw, 60vw"
-          priority
-          unoptimized
-        />
-
+      <ScooterImage
+        src={images[active]}
+        alt={`${name} — photo ${active + 1}`}
+        className="h-[270px] md:h-[400px] rounded-[22px] group"
+        priority
+        sizes="(max-width: 1024px) 100vw, 60vw"
+      >
         {/* Prev / next arrows — desktop only */}
         {hasMultiple && (
           <>
@@ -77,7 +73,7 @@ export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
             {active + 1} / {images.length}
           </div>
         )}
-      </div>
+      </ScooterImage>
 
       {/* Thumbnail strip */}
       {hasMultiple && (
@@ -98,6 +94,7 @@ export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
                 alt={`${name} thumbnail ${i + 1}`}
                 fill
                 className="object-cover"
+                sizes="160px"
                 unoptimized
               />
             </button>

@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { Search, Map, List } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ExploreFilters } from '@/components/ride/ExploreFilters'
+import { ImageMetricsOverlay } from '@/components/debug/ImageMetricsOverlay'
 import { cn } from '@/lib/utils'
 import type { Scooter, FilterState } from '@/types'
 
@@ -45,12 +46,12 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
     cardRefs.current[id] = el
   }, [])
 
-  const handleSelectFromMap = (id: string | null) => {
+  const handleSelectFromMap = useCallback((id: string | null) => {
     setSelectedId(id)
     if (id && cardRefs.current[id]) {
       cardRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
-  }
+  }, [])
 
   const filtered = useMemo(() => {
     let list = initialScooters.filter(s => {
@@ -220,6 +221,7 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
           )}
         </div>
       </div>
+      {process.env.NODE_ENV === 'development' && <ImageMetricsOverlay />}
     </div>
   )
 }
