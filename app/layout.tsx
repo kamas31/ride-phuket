@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
-import 'mapbox-gl/dist/mapbox-gl.css'
+// mapbox-gl CSS served from /public/mapbox-gl.css (see <link> in <head> below)
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import MobileBottomNav from '@/components/layout/MobileBottomNav'
@@ -50,7 +50,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <head>
-        {/* Preconnect to Supabase and image CDN for faster cold starts */}
+        {/* Mapbox GL CSS — served from /public, zero bundler dependency */}
+        <link rel="stylesheet" href="/mapbox-gl.css" />
+        {/* Preconnect hints */}
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
       </head>
