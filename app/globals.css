@@ -130,3 +130,34 @@ h1, h2, h3, h4, h5, h6 {
 .map-gradient {
   background: linear-gradient(135deg, #e8f4f0 0%, #d4e8e0 50%, #c8e0d8 100%);
 }
+
+/* ── Mapbox GL overrides — premium dark style ────────────── */
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+.mapboxgl-popup-tip { display: none !important; }
+.mapboxgl-ctrl-logo { display: none !important; }
+.mapboxgl-ctrl-attrib { display: none !important; }
+.mapboxgl-ctrl-group {
+  background: rgba(15, 15, 14, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+}
+.mapboxgl-ctrl-group button {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+}
+.mapboxgl-ctrl-group button:last-child { border-bottom: none !important; }
+.mapboxgl-ctrl-zoom-in .mapboxgl-ctrl-icon,
+.mapboxgl-ctrl-zoom-out .mapboxgl-ctrl-icon,
+.mapboxgl-ctrl-compass .mapboxgl-ctrl-icon {
+  filter: invert(1) !important;
+  opacity: 0.7 !important;
+}
+.mapboxgl-marker { cursor: pointer; }
