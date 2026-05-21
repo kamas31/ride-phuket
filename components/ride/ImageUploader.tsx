@@ -16,6 +16,7 @@ export interface ProcessedImage {
   blob: Blob          // WebP blob ready to upload
   sizeKb: number
   originalName: string
+  isCover: boolean    // explicit cover/hero image (one per scooter)
 }
 
 interface ImageUploaderProps {
@@ -115,6 +116,7 @@ async function processImageFile(file: File): Promise<ProcessResult> {
             blob,
             sizeKb:       Math.round(blob.size / 1024),
             originalName: file.name,
+            isCover:      false, // set by ImageUploader after adding to list
           },
         })
       })
@@ -165,7 +167,15 @@ export function ImageUploader({
       else errs.push(`${r.fileName}: ${r.reason}`)
     }
 
-    if (good.length) onChange([...images, ...good])
+    if (good.length) {
+      const combined = [...images, ...good]
+      // Auto-set first image as cover if none is designated yet
+      const hasCover = combined.some(img => img.isCover)
+      const next = hasCover
+        ? combined
+        : combined.map((img, i) => ({ ...img, isCover: i === 0 }))
+      onChange(next)
+    }
     if (errs.length) setErrors(errs)
     setProcessing(false)
   }, [images, maxImages, onChange])
@@ -182,13 +192,18 @@ export function ImageUploader({
     setDragOver(true)
   }
 
+  // ── Cover management ──────────────────────────────────────
+  const setCover = (idx: number) => {
+    onChange(images.map((img, i) => ({ ...img, isCover: i === idx })))
+  }
+
   // ── Reorder helpers ────────────────────────────────────────
   const reorderDrop = (fromIdx: number, toIdx: number) => {
     if (fromIdx === toIdx) return
     const next = [...images]
     const [item] = next.splice(fromIdx, 1)
     next.splice(toIdx, 0, item)
-    onChange(next)
+    onChange(next) // isCover travels with the item
   }
 
   const moveImage = (idx: number, direction: -1 | 1) => {
@@ -198,9 +213,14 @@ export function ImageUploader({
   }
 
   const removeImage = (idx: number) => {
-    const next = images.filter((_, i) => i !== idx)
     URL.revokeObjectURL(images[idx].previewUrl)
-    onChange(next)
+    const next = images.filter((_, i) => i !== idx)
+    // If cover was removed, auto-assign to new first image
+    const coverRemoved = images[idx].isCover
+    const withCover = coverRemoved && next.length > 0
+      ? next.map((img, i) => ({ ...img, isCover: i === 0 }))
+      : next
+    onChange(withCover)
   }
 
   const hasMin  = images.length >= minImages
@@ -289,27 +309,58 @@ export function ImageUploader({
               </div>
 
               {/* Thumbnail — always 16:9 */}
-              <div className="relative flex-shrink-0 w-24 rounded-[8px] overflow-hidden bg-[#f0f0ec]" style={{ aspectRatio: '16/9' }}>
+              <div
+                className="relative flex-shrink-0 w-24 rounded-[8px] overflow-hidden bg-[#f0f0ec]"
+                style={{ aspectRatio: '16/9' }}
+              >
                 <Image src={img.previewUrl} alt={`Photo ${idx + 1}`} fill className="object-cover" unoptimized />
-                {idx === 0 && (
-                  <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-[#FF6B35] text-white text-[9px] font-bold rounded-full flex items-center gap-0.5">
-                    <Star className="w-2.5 h-2.5 fill-white" />
-                    Main
+                {img.isCover && (
+                  <div className="absolute inset-0 ring-2 ring-[#FF6B35] ring-inset rounded-[8px] pointer-events-none" />
+                )}
+                {img.isCover && (
+                  <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-[#FF6B35] text-white text-[9px] font-bold rounded-full flex items-center gap-0.5 shadow-sm">
+                    <Star className="w-2 h-2 fill-white" />
+                    Cover
                   </div>
                 )}
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-[#0f0f0e] truncate">{img.originalName}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-medium text-[#0f0f0e] truncate">{img.originalName}</p>
+                  {img.isCover && (
+                    <span className="flex-shrink-0 flex items-center gap-0.5 text-[10px] font-bold text-[#FF6B35]">
+                      <Star className="w-2.5 h-2.5 fill-[#FF6B35]" />
+                      Cover
+                    </span>
+                  )}
+                </div>
                 <p className="text-[10px] text-[#9c9c98] mt-0.5">
                   {img.sizeKb} KB · WebP · 16:9
-                  {idx === 0 && <span className="ml-1.5 text-[#FF6B35] font-semibold">Cover image</span>}
                 </p>
               </div>
 
               {/* Actions */}
               <div className="flex items-center gap-1 flex-shrink-0">
+                {/* Set as cover — only on non-cover images */}
+                {!img.isCover ? (
+                  <button
+                    type="button"
+                    onClick={() => setCover(idx)}
+                    className="w-7 h-7 rounded-[8px] bg-[#f8f8f6] border border-[#e8e8e4] flex items-center justify-center text-[#9c9c98] hover:text-[#FF6B35] hover:border-[#FF6B35]/30 hover:bg-[#fff4f0] transition-colors"
+                    title="Set as cover image"
+                  >
+                    <Star className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <div
+                    className="w-7 h-7 rounded-[8px] bg-[#fff4f0] border border-[#FF6B35]/30 flex items-center justify-center"
+                    title="Current cover image"
+                  >
+                    <Star className="w-3.5 h-3.5 text-[#FF6B35] fill-[#FF6B35]" />
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => moveImage(idx, -1)}

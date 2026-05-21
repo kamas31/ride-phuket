@@ -30,6 +30,7 @@ export interface Scooter {
   year: number
   category: ScooterCategory
   images: string[]
+  coverImage?: string | null  // explicit cover; falls back to images[0]
   pricePerDay: number
   pricePerWeek?: number
   pricePerMonth?: number

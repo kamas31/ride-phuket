@@ -94,6 +94,7 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
 
       if (upErr) {
         console.error('[upload]', upErr.message)
+        urls.push('') // keep index alignment for cover detection
         continue
       }
 
@@ -125,6 +126,11 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
 
     try {
       const urls = await uploadImages()
+      // Determine cover: use the designated cover image URL; fallback to first
+      const coverIdx  = images.findIndex(img => img.isCover)
+      const coverImage = (coverIdx >= 0 && urls[coverIdx]) ? urls[coverIdx] : (urls[0] ?? null)
+      const validUrls = urls.filter(Boolean)
+
       const result = await createScooter({
         shopId,
         name:              form.name,
@@ -132,7 +138,8 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
         model:             form.model || form.name,
         year:              Number(form.year),
         category:          form.category,
-        images:            urls,
+        images:            validUrls,
+        coverImage,
         pricePerDay:       Number(form.pricePerDay),
         pricePerWeek:      form.pricePerWeek ? Number(form.pricePerWeek) : undefined,
         pricePerMonth:     form.pricePerMonth ? Number(form.pricePerMonth) : undefined,

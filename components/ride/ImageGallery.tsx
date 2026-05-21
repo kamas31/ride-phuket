@@ -8,10 +8,13 @@ import { cn } from '@/lib/utils'
 interface ImageGalleryProps {
   images: string[]
   name: string
+  coverImage?: string | null  // start on the designated cover
 }
 
-export function ImageGallery({ images, name }: ImageGalleryProps) {
-  const [active, setActive] = useState(0)
+export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
+  // Start on the cover image if it's in the images array
+  const coverIdx = coverImage ? Math.max(0, images.indexOf(coverImage)) : 0
+  const [active, setActive] = useState(coverIdx)
   const hasMultiple = images.length > 1
 
   const prev = () => setActive(i => (i - 1 + images.length) % images.length)

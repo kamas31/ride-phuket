@@ -89,6 +89,7 @@ export interface Database {
           year: number | null
           category: ScooterCategory
           images: string[]
+          cover_image: string | null
           price_per_day: number
           price_per_week: number | null
           price_per_month: number | null
@@ -116,6 +117,7 @@ export interface Database {
           price_per_day: number
           year?: number | null
           images?: string[]
+          cover_image?: string | null
           price_per_week?: number | null
           price_per_month?: number | null
           location?: string | null

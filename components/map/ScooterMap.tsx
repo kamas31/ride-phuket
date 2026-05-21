@@ -8,6 +8,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Star, MapPin, X, ArrowRight, Zap, Shield } from 'lucide-react'
+import { getScooterCover } from '@/lib/utils'
 import { cn, formatPrice } from '@/lib/utils'
 import type { Scooter } from '@/types'
 
@@ -70,9 +71,9 @@ function ScooterPopupCard({ scooter, onClose }: { scooter: Scooter; onClose: () 
       <button onClick={onClose} className="absolute top-2.5 right-2.5 z-10 w-7 h-7 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center transition-colors">
         <X className="w-3.5 h-3.5 text-white/80" />
       </button>
-      {scooter.images?.[0] ? (
+      {getScooterCover(scooter) ? (
         <div className="relative h-28 bg-[#1a1c20]">
-          <Image src={scooter.images[0]} alt={scooter.name} fill className="object-cover opacity-90" unoptimized />
+          <Image src={getScooterCover(scooter)} alt={scooter.name} fill className="object-cover opacity-90" unoptimized />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0c0e12]/60 to-transparent" />
         </div>
       ) : (

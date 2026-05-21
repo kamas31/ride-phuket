@@ -8,7 +8,7 @@ import {
 import { Badge } from '@/components/ui/Badge'
 import { SCOOTERS, REVIEWS } from '@/data/scooters'
 import { getScooters, getScooterById } from '@/lib/supabase/queries'
-import { formatPrice, formatPricePerDay, pluralize } from '@/lib/utils'
+import { formatPrice, formatPricePerDay, pluralize, getScooterCover } from '@/lib/utils'
 import { ImageGallery } from '@/components/ride/ImageGallery'
 
 interface ScooterPageProps {
@@ -30,9 +30,19 @@ export async function generateMetadata({ params }: ScooterPageProps) {
   const { id } = await params
   const scooter = await getScooterById(id)
   if (!scooter) return {}
+  const coverUrl = getScooterCover(scooter)
   return {
     title: `${scooter.name} — ${formatPricePerDay(scooter.pricePerDay)}`,
     description: scooter.description,
+    openGraph: {
+      title: `${scooter.name} — ${formatPricePerDay(scooter.pricePerDay)}`,
+      description: scooter.description,
+      ...(coverUrl ? { images: [{ url: coverUrl, width: 1600, height: 900, alt: scooter.name }] } : {}),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      ...(coverUrl ? { images: [coverUrl] } : {}),
+    },
   }
 }
 
@@ -89,7 +99,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
           {/* ── LEFT COLUMN ── */}
           <div className="lg:col-span-3 space-y-6">
             {/* Image gallery */}
-            <ImageGallery images={scooter.images} name={scooter.name} />
+            <ImageGallery images={scooter.images} name={scooter.name} coverImage={scooter.coverImage} />
 
             {/* Title & meta */}
             <div>

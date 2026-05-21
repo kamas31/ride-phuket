@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { Star, MapPin, Zap, Shield, Check } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { ScooterFallback } from '@/components/ride/ImageUploader'
-import { cn, formatPrice } from '@/lib/utils'
+import { cn, formatPrice, getScooterCover } from '@/lib/utils'
 import type { Scooter } from '@/types'
 
 interface ScooterCardProps {
@@ -25,9 +25,9 @@ export function ScooterCard({ scooter, className, compact = false }: ScooterCard
     >
       {/* Image */}
       <div className={cn('relative overflow-hidden bg-[#f0f0ec]', compact ? 'h-44' : 'h-52')}>
-        {scooter.images?.[0] ? (
+        {getScooterCover(scooter) ? (
           <Image
-            src={scooter.images[0]}
+            src={getScooterCover(scooter)}
             alt={scooter.name}
             fill
             className="object-cover group-hover:scale-[1.04] transition-transform duration-500"

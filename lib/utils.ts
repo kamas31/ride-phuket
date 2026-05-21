@@ -61,3 +61,15 @@ export function addDays(date: Date, days: number): Date {
 export function formatShortDate(date: Date): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
+
+/**
+ * Returns the cover image URL for a scooter.
+ * Priority: explicit cover_image → images[0] → empty string
+ * Use this everywhere an image is displayed so the cover is always respected.
+ */
+export function getScooterCover(scooter: {
+  coverImage?: string | null
+  images: string[]
+}): string {
+  return scooter.coverImage || scooter.images?.[0] || ''
+}

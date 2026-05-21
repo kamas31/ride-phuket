@@ -12,6 +12,7 @@ export interface CreateScooterPayload {
   year: number
   category: 'automatic' | 'manual' | 'electric'
   images: string[]
+  coverImage?: string | null  // explicit cover; app falls back to images[0]
   pricePerDay: number
   pricePerWeek?: number
   pricePerMonth?: number
@@ -128,6 +129,7 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
       year:               Number(payload.year) || new Date().getFullYear(),
       category:           payload.category,
       images:             Array.isArray(payload.images) ? payload.images : [],
+      cover_image:        payload.coverImage ?? null,
       price_per_day:      Number(payload.pricePerDay),
       price_per_week:     payload.pricePerWeek ? Number(payload.pricePerWeek) : null,
       price_per_month:    payload.pricePerMonth ? Number(payload.pricePerMonth) : null,

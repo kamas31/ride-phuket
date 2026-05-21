@@ -156,6 +156,7 @@ function mapDbScooter(row: any): Scooter {
     year: row.year ?? new Date().getFullYear(),
     category: row.category,
     images: row.images ?? [],
+    coverImage: row.cover_image ?? null,
     pricePerDay: row.price_per_day,
     pricePerWeek: row.price_per_week ?? undefined,
     pricePerMonth: row.price_per_month ?? undefined,
