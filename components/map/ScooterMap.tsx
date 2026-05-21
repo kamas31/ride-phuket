@@ -3,7 +3,7 @@
 import { useRef, useCallback, useEffect, useState } from 'react'
 import Map, { Marker, Popup, NavigationControl } from 'react-map-gl/mapbox'
 import type { MapRef, MapMouseEvent } from 'react-map-gl/mapbox'
-import 'mapbox-gl/dist/mapbox-gl.css'
+// CSS loaded globally in app/globals.css to avoid Turbopack CSS-in-component issues
 import Image from 'next/image'
 import Link from 'next/link'
 import { Star, MapPin, X, ArrowRight, Zap, Shield } from 'lucide-react'
