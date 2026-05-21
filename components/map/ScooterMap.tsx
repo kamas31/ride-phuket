@@ -1,7 +1,6 @@
 'use client'
 
 // CSS loaded via <link href="/mapbox-gl.css"> in app/layout.tsx
-// mapbox-gl v3 has exports: { '.': { default: '...' } } — Turbopack resolves it correctly
 import mapboxgl from 'mapbox-gl'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
@@ -39,7 +38,7 @@ function resolveCoords(scooter: Scooter, index: number) {
   return { lat: 7.9519 + (index % 8) * 0.008, lng: 98.3381 + (index % 8) * 0.006 }
 }
 
-// ── Price Pin React component (rendered into Mapbox marker element) ──
+// ── Price Pin React component ───────────────────────────────────
 function PricePin({
   price, active, onClick, onEnter, onLeave
 }: {
@@ -154,14 +153,23 @@ interface ScooterMapProps {
 }
 
 export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, onHover, className }: ScooterMapProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<mapboxgl.Map | null>(null)
+  const containerRef  = useRef<HTMLDivElement>(null)
+  const mapRef        = useRef<mapboxgl.Map | null>(null)
   const [ready, setReady] = useState(false)
 
   // Marker roots: id → { marker, root, container }
   const markersRef = useRef<Map<string, { marker: mapboxgl.Marker; root: Root; container: HTMLDivElement }>>(new Map())
+  // Scooter data indexed by id — used in hover effect without needing scooters in dep array
+  const scootersById = useRef<Map<string, Scooter>>(new Map())
+  // Track which markers were active last render to avoid full O(n) re-renders on hover
+  const prevActiveIds = useRef(new Set<string>())
   // Popup root
   const popupRef = useRef<{ popup: mapboxgl.Popup; root: Root; container: HTMLDivElement } | null>(null)
+  // Stable callbacks — avoid stale closures in marker event handlers
+  const onSelectRef = useRef(onSelect)
+  const onHoverRef  = useRef(onHover)
+  useEffect(() => { onSelectRef.current = onSelect }, [onSelect])
+  useEffect(() => { onHoverRef.current  = onHover  }, [onHover])
 
   // ── Init map (once) ──────────────────────────────────────────
   useEffect(() => {
@@ -185,9 +193,7 @@ export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, 
     })
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
-
-    // Click on map canvas → deselect
-    map.on('click', () => onSelect(null))
+    map.on('click', () => onSelectRef.current(null))
 
     mapRef.current = map
     return () => {
@@ -202,10 +208,16 @@ export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, 
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Sync markers whenever scooters / selected / hovered change ──
+  // ── Effect 1: Create/remove markers + fitBounds ───────────────
+  // Runs ONLY when scooters list changes. Does NOT re-run on hover/select.
+  // This prevents fitBounds from firing on every mouse movement.
   useEffect(() => {
     if (!ready || !mapRef.current) return
     const map = mapRef.current
+
+    // Index scooters by id for O(1) lookup in hover effect
+    scootersById.current.clear()
+    scooters.forEach(s => scootersById.current.set(s.id, s))
 
     // Remove markers no longer in scooters list
     const currentIds = new Set(scooters.map(s => s.id))
@@ -214,44 +226,40 @@ export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, 
         entry.root.unmount()
         entry.marker.remove()
         markersRef.current.delete(id)
+        prevActiveIds.current.delete(id)
       }
     })
 
-    // Add / update markers
+    // Create new markers (initial render — not active)
     scooters.forEach((scooter, i) => {
       const coords = resolveCoords(scooter, i)
-      const active = scooter.id === selectedId || scooter.id === hoveredId
 
       if (!markersRef.current.has(scooter.id)) {
-        // Create new marker
         const container = document.createElement('div')
         const marker = new mapboxgl.Marker({ element: container, anchor: 'bottom' })
           .setLngLat([coords.lng, coords.lat])
           .addTo(map)
         const root = createRoot(container)
         markersRef.current.set(scooter.id, { marker, root, container })
-        // Prevent map click from firing when clicking a marker
         container.addEventListener('click', e => e.stopPropagation())
       }
 
-      // Re-render pin with latest state
+      // Initial render (active state comes from Effect 2 right after)
+      const active = scooter.id === selectedId || scooter.id === hoveredId
       const { root } = markersRef.current.get(scooter.id)!
       root.render(
         <PricePin
           price={scooter.pricePerDay}
           active={active}
-          onClick={() => onSelect(scooter.id === selectedId ? null : scooter.id)}
-          onEnter={() => onHover?.(scooter.id)}
-          onLeave={() => onHover?.(null)}
+          onClick={() => onSelectRef.current(scooter.id === selectedId ? null : scooter.id)}
+          onEnter={() => onHoverRef.current?.(scooter.id)}
+          onLeave={() => onHoverRef.current?.(null)}
         />
       )
-
-      // Update z-index via marker element
-      const el = markersRef.current.get(scooter.id)!.marker.getElement()
-      el.style.zIndex = active ? '20' : '10'
+      markersRef.current.get(scooter.id)!.marker.getElement().style.zIndex = active ? '20' : '10'
     })
 
-    // ── fitBounds when scooters change ──────────────────────────
+    // fitBounds — only runs when scooters change, NOT on every hover
     if (scooters.length === 1) {
       const c = resolveCoords(scooters[0], 0)
       map.flyTo({ center: [c.lng, c.lat], zoom: 14, duration: 900 })
@@ -263,14 +271,52 @@ export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, 
       const ne: [number, number] = [Math.max(...lngs) + 0.01, Math.max(...lats) + 0.01]
       map.fitBounds([sw, ne], { padding: { top: 80, bottom: 80, left: 60, right: 60 }, maxZoom: 14, duration: 900 })
     }
-  }, [scooters, selectedId, hoveredId, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [scooters, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Effect 2: Update marker appearance on hover/select ────────
+  // O(1) — only touches the 2 markers that changed state (prev → new).
+  // fitBounds never runs here. No layout recalculation.
+  useEffect(() => {
+    if (!ready) return
+
+    const newActiveIds = new Set<string>(
+      [selectedId, hoveredId].filter((id): id is string => Boolean(id))
+    )
+
+    const updateMarker = (id: string, active: boolean) => {
+      const entry   = markersRef.current.get(id)
+      const scooter = scootersById.current.get(id)
+      if (!entry || !scooter) return
+
+      entry.root.render(
+        <PricePin
+          price={scooter.pricePerDay}
+          active={active}
+          onClick={() => onSelectRef.current(id === selectedId ? null : id)}
+          onEnter={() => onHoverRef.current?.(id)}
+          onLeave={() => onHoverRef.current?.(null)}
+        />
+      )
+      entry.marker.getElement().style.zIndex = active ? '20' : '10'
+    }
+
+    // Newly activated markers (max 2)
+    newActiveIds.forEach(id => {
+      if (!prevActiveIds.current.has(id)) updateMarker(id, true)
+    })
+    // Newly deactivated markers (max 2)
+    prevActiveIds.current.forEach(id => {
+      if (!newActiveIds.has(id)) updateMarker(id, false)
+    })
+
+    prevActiveIds.current = newActiveIds
+  }, [selectedId, hoveredId, ready]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Popup for selected scooter ─────────────────────────────
   useEffect(() => {
     if (!ready || !mapRef.current) return
     const map = mapRef.current
 
-    // Remove existing popup
     if (popupRef.current) {
       popupRef.current.root.unmount()
       popupRef.current.popup.remove()
@@ -298,7 +344,7 @@ export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, 
     root.render(
       <ScooterPopupCard
         scooter={scooter}
-        onClose={() => onSelect(null)}
+        onClose={() => onSelectRef.current(null)}
       />
     )
 
