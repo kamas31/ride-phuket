@@ -1,17 +1,8 @@
 import Link from 'next/link'
-import { ArrowRight, Shield, Zap, Truck, Headphones, Star, ChevronRight, MapPin, RotateCcw } from 'lucide-react'
+import { ArrowRight, Shield, Zap, Truck, Star, ChevronRight, MapPin, RotateCcw, Check } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
-import { ReviewCard } from '@/components/ride/ReviewCard'
-import { REVIEWS } from '@/data/scooters'
 import { LOCATIONS } from '@/constants'
-import { getScooters } from '@/lib/supabase/queries'
-
-const TRUST_STATS = [
-  { value: '48', label: 'Verified shops' },
-  { value: '4.9★', label: 'Average rating' },
-  { value: '3,200+', label: 'Rides completed' },
-  { value: '< 5min', label: 'To confirm' },
-]
+import { getScooters, getStats } from '@/lib/supabase/queries'
 
 const HOW_IT_WORKS = [
   {
@@ -59,9 +50,24 @@ const BENEFITS = [
 ]
 
 export default async function HomePage() {
-  const allScooters = await getScooters({ available: true })
+  const [allScooters, { shopCount, scooterCount }] = await Promise.all([
+    getScooters({ available: true }),
+    getStats(),
+  ])
   const featuredScooters = allScooters.slice(0, 4)
   const popularLocations = LOCATIONS.slice(1, 7)
+
+  // Real trust stats — numbers only shown when > 0, otherwise qualitative
+  const trustItems = [
+    scooterCount > 0
+      ? { value: String(scooterCount), label: 'Scooters listed' }
+      : { value: '✓', label: 'Curated fleet' },
+    shopCount > 0
+      ? { value: String(shopCount), label: 'Verified shops' }
+      : { value: '✓', label: 'Verified shops' },
+    { value: '24/7', label: 'WhatsApp support' },
+    { value: 'Free', label: 'Cancellation' },
+  ]
 
   return (
     <div className="flex flex-col">
@@ -183,17 +189,17 @@ export default async function HomePage() {
           >
             <div className="px-5 py-4 bg-white/[0.07] backdrop-blur-md border border-white/[0.1] rounded-2xl">
               <div className="flex flex-wrap items-center justify-center gap-y-3">
-                {TRUST_STATS.map((stat, i) => (
-                  <div key={stat.label} className="flex items-center">
+                {trustItems.map((item, i) => (
+                  <div key={item.label} className="flex items-center">
                     {i > 0 && (
                       <div className="w-px h-7 bg-white/[0.15] mx-5 flex-shrink-0" />
                     )}
                     <div className="text-center">
                       <div className="text-white font-bold text-[22px] md:text-[24px] leading-none tracking-tight">
-                        {stat.value}
+                        {item.value}
                       </div>
                       <div className="text-white/48 text-[11px] mt-1.5 font-medium tracking-wide uppercase">
-                        {stat.label}
+                        {item.label}
                       </div>
                     </div>
                   </div>
@@ -342,31 +348,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── REVIEWS ── */}
-      <section className="bg-[#f8f8f6] py-12 md:py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <div className="flex items-center justify-center gap-0.5 mb-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="w-5 h-5 text-[#FF6B35] fill-[#FF6B35]" />
-              ))}
-            </div>
-            <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-2">Real Reviews</p>
-            <h2 className="text-[26px] md:text-[34px] font-bold text-[#0f0f0e] leading-tight tracking-tight">
-              Loved by riders worldwide
-            </h2>
-            <p className="text-[#9c9c98] text-sm mt-2">
-              3,200+ completed rentals &nbsp;·&nbsp; 4.9 / 5 average rating &nbsp;·&nbsp; 97% would re-book
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {REVIEWS.map(review => (
-              <ReviewCard key={review.id} review={review} />
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── FINAL CTA ── */}
       <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
         <div className="relative overflow-hidden bg-[#0f0f0e] rounded-[28px] px-8 md:px-16 py-12 text-center">
@@ -379,7 +360,7 @@ export default async function HomePage() {
               Your perfect scooter<br />is waiting.
             </h2>
             <p className="text-white/50 text-base mb-8 max-w-sm mx-auto leading-relaxed">
-              Join 3,200+ riders who explored Phuket their way — on their own terms, at their own pace.
+              Verified shops, real insurance, and delivery to your hotel — the reliable way to explore Phuket.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link

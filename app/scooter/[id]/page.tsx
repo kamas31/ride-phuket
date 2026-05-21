@@ -1,15 +1,16 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   ArrowLeft, Star, MapPin, Shield, Zap, Check, ChevronRight,
-  Phone, MessageCircle, Users, Clock, RotateCcw, TrendingUp,
+  Phone, MessageCircle, Clock, RotateCcw,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
-import { SCOOTERS, REVIEWS } from '@/data/scooters'
+import { SCOOTERS } from '@/data/scooters'
 import { getScooters, getScooterById } from '@/lib/supabase/queries'
 import { formatPrice, formatPricePerDay, pluralize, getScooterCover } from '@/lib/utils'
 import { ImageGallery } from '@/components/ride/ImageGallery'
+import { TrustBadge, isNewListing, isFastResponder } from '@/components/ride/TrustBadge'
+import { EmptyReviews } from '@/components/ride/EmptyReviews'
 
 interface ScooterPageProps {
   params: Promise<{ id: string }>
@@ -18,7 +19,6 @@ interface ScooterPageProps {
 export const revalidate = 60
 
 export async function generateStaticParams() {
-  // Use live DB IDs if available, fall back to mock
   try {
     const scooters = await getScooters({ available: true })
     if (scooters.length > 0) return scooters.map(s => ({ id: s.id }))
@@ -52,28 +52,28 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
   if (!scooter) notFound()
 
   const shop = scooter.shop!
-  const relatedReviews = REVIEWS.filter(r => r.scooterId === scooter.id).slice(0, 3)
-
-  const allReviews = REVIEWS.slice(0, 3)
 
   const SPEC_ROWS = [
-    { label: 'Engine', value: scooter.specs.engine },
-    { label: 'Power', value: scooter.specs.power },
-    { label: 'Fuel Tank', value: scooter.specs.fuelCapacity },
+    { label: 'Engine',      value: scooter.specs.engine },
+    { label: 'Power',       value: scooter.specs.power },
+    { label: 'Fuel Tank',   value: scooter.specs.fuelCapacity },
     { label: 'Consumption', value: scooter.specs.consumption },
-    { label: 'Weight', value: scooter.specs.weight },
-    { label: 'Storage', value: scooter.specs.storage },
+    { label: 'Weight',      value: scooter.specs.weight },
+    { label: 'Storage',     value: scooter.specs.storage },
   ]
 
   const weekSavings = scooter.pricePerWeek
     ? scooter.pricePerDay * 7 - scooter.pricePerWeek
     : 0
 
+  const newListing  = isNewListing(scooter.createdAt)
+  const fastShop    = isFastResponder(shop.responseTime)
+
   return (
     <div className="bg-white min-h-screen">
-      {/* Breadcrumb nav */}
+      {/* Breadcrumb nav — no fake "12 viewed today" */}
       <div className="sticky top-16 z-20 bg-white/90 backdrop-blur-md border-b border-[#e8e8e4]">
-        <div className="max-w-5xl mx-auto px-4 h-11 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 h-11 flex items-center gap-3">
           <Link
             href="/explore"
             className="flex items-center gap-1.5 text-sm font-medium text-[#5c5c58] hover:text-[#0f0f0e] transition-colors"
@@ -81,15 +81,10 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
             <ArrowLeft className="w-4 h-4" />
             Back to Explore
           </Link>
-          <div className="flex items-center gap-3 text-xs text-[#9c9c98]">
-            <span className="flex items-center gap-1">
-              <Users className="w-3 h-3" />
-              12 viewed today
-            </span>
-            <span className="flex items-center gap-1 text-[#FF6B35] font-medium">
-              <TrendingUp className="w-3 h-3" />
-              Popular pick
-            </span>
+          {/* Real trust signals only */}
+          <div className="ml-auto flex items-center gap-2">
+            {newListing && <TrustBadge variant="new_listing" />}
+            {shop.verified && <TrustBadge variant="verified" />}
           </div>
         </div>
       </div>
@@ -111,12 +106,22 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   {scooter.category.charAt(0).toUpperCase() + scooter.category.slice(1)}
                 </Badge>
               </div>
+
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2">
-                <button className="flex items-center gap-1 hover:underline">
-                  <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
-                  <span className="font-bold text-sm text-[#0f0f0e]">{scooter.rating}</span>
-                  <span className="text-sm text-[#9c9c98] underline">({scooter.reviewCount} reviews)</span>
-                </button>
+                {/* Rating — only shown when real reviews exist */}
+                {scooter.reviewCount > 0 ? (
+                  <button className="flex items-center gap-1 hover:underline">
+                    <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
+                    <span className="font-bold text-sm text-[#0f0f0e]">{scooter.rating.toFixed(1)}</span>
+                    <span className="text-sm text-[#9c9c98] underline">({scooter.reviewCount} reviews)</span>
+                  </button>
+                ) : (
+                  <span className="flex items-center gap-1 text-sm text-[#9c9c98]">
+                    <Star className="w-3.5 h-3.5 text-[#e0e0dc]" />
+                    No reviews yet
+                  </span>
+                )}
+
                 <span className="text-[#e8e8e4]">·</span>
                 <div className="flex items-center gap-1 text-sm text-[#9c9c98]">
                   <MapPin className="w-3.5 h-3.5" />
@@ -151,7 +156,6 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     {feature}
                   </div>
                 ))}
-                {/* Always-on guarantees */}
                 <div className="flex items-center gap-2 text-sm text-[#5c5c58]">
                   <div className="w-5 h-5 rounded-full bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
                     <Check className="w-3 h-3 text-[#22c55e]" />
@@ -171,7 +175,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
             <div>
               <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-3">Technical specs</h2>
               <div className="bg-[#f8f8f6] rounded-[16px] overflow-hidden">
-                {SPEC_ROWS.map((row, i) => (
+                {SPEC_ROWS.filter(r => r.value).map((row, i) => (
                   <div
                     key={row.label}
                     className={`flex items-center justify-between px-4 py-3 text-sm ${i < SPEC_ROWS.length - 1 ? 'border-b border-[#efefed]' : ''}`}
@@ -193,13 +197,19 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-bold text-[#0f0f0e]">{shop.name}</p>
-                    {shop.verified && <Badge variant="success">✓ Verified</Badge>}
+                    {shop.verified && <TrustBadge variant="verified" size="xs" />}
+                    {fastShop && <TrustBadge variant="fast_response" size="xs" />}
                   </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <div className="flex items-center gap-1 text-xs text-[#9c9c98]">
-                      <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
-                      {shop.rating} · {shop.reviewCount} reviews
-                    </div>
+                  <div className="flex items-center gap-3 mt-1.5">
+                    {/* Shop rating — only if real reviews exist */}
+                    {shop.reviewCount > 0 ? (
+                      <div className="flex items-center gap-1 text-xs text-[#9c9c98]">
+                        <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
+                        {shop.rating.toFixed(1)} · {shop.reviewCount} reviews
+                      </div>
+                    ) : (
+                      <TrustBadge variant="new_partner" size="xs" />
+                    )}
                     <div className="flex items-center gap-1 text-xs text-[#9c9c98]">
                       <Clock className="w-3 h-3" />
                       Responds {shop.responseTime}
@@ -208,13 +218,15 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                 </div>
               </div>
               <div className="flex gap-2">
-                <a
-                  href={`tel:${shop.phone}`}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
-                >
-                  <Phone className="w-4 h-4" />
-                  Call shop
-                </a>
+                {shop.phone && (
+                  <a
+                    href={`tel:${shop.phone}`}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
+                  >
+                    <Phone className="w-4 h-4" />
+                    Call shop
+                  </a>
+                )}
                 {shop.whatsapp && (
                   <a
                     href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}`}
@@ -229,37 +241,20 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               </div>
             </div>
 
-            {/* Reviews */}
+            {/* Reviews — real or empty state, never fake */}
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-[16px] font-bold text-[#0f0f0e]">
-                  <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35] inline mr-1 mb-0.5" />
-                  {scooter.rating} · {scooter.reviewCount} reviews
-                </h2>
-              </div>
-              <div className="space-y-5">
-                {(relatedReviews.length > 0 ? relatedReviews : allReviews).map(review => (
-                  <div key={review.id} className="pb-5 border-b border-[#f0f0ec] last:border-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-9 h-9 bg-[#fff4f0] rounded-full flex items-center justify-center text-sm font-bold text-[#FF6B35] flex-shrink-0">
-                        {review.userName[0]}
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-[#0f0f0e]">{review.userName}</p>
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'text-[#FF6B35] fill-[#FF6B35]' : 'text-[#e8e8e4] fill-[#e8e8e4]'}`} />
-                          ))}
-                        </div>
-                      </div>
-                      {review.verified && (
-                        <span className="ml-auto text-xs text-[#22c55e] font-medium">✓ Verified</span>
-                      )}
-                    </div>
-                    <p className="text-sm text-[#5c5c58] leading-relaxed pl-12">{review.comment}</p>
-                  </div>
-                ))}
-              </div>
+              <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-4 flex items-center gap-2">
+                {scooter.reviewCount > 0 ? (
+                  <>
+                    <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
+                    {scooter.rating.toFixed(1)} · {scooter.reviewCount} {scooter.reviewCount === 1 ? 'review' : 'reviews'}
+                  </>
+                ) : (
+                  'Reviews'
+                )}
+              </h2>
+              {/* EmptyReviews until real reviews are fetched from DB */}
+              <EmptyReviews scooterName={scooter.reviewCount === 0 ? scooter.name : undefined} />
             </div>
           </div>
 
@@ -328,13 +323,13 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     Free cancellation up to 24h before
                   </div>
 
-                  {/* Trust checklist */}
+                  {/* Trust checklist — all factual */}
                   <div className="pt-3 border-t border-[#f0f0ec] space-y-2">
                     {[
-                      { icon: Shield, text: 'Insurance included in price' },
-                      { icon: Zap, text: 'Instant booking confirmation' },
-                      { icon: MapPin, text: 'Delivered anywhere in Phuket' },
-                      { icon: MessageCircle, text: 'WhatsApp support 24/7' },
+                      { icon: Shield,         text: 'Insurance included in price' },
+                      { icon: Zap,            text: 'Instant booking confirmation' },
+                      { icon: MapPin,         text: 'Delivered anywhere in Phuket' },
+                      { icon: MessageCircle,  text: 'WhatsApp support 24/7' },
                     ].map(({ icon: Icon, text }) => (
                       <div key={text} className="flex items-center gap-2.5 text-xs text-[#5c5c58]">
                         <Icon className="w-3.5 h-3.5 text-[#FF6B35] flex-shrink-0" />
@@ -343,12 +338,6 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     ))}
                   </div>
                 </div>
-              </div>
-
-              {/* Social proof under the card */}
-              <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-[#9c9c98]">
-                <Users className="w-3.5 h-3.5" />
-                <span>Booked <strong className="text-[#5c5c58]">24 times</strong> in the last 30 days</span>
               </div>
             </div>
           </div>

@@ -165,8 +165,8 @@ function mapDbScooter(row: any): Scooter {
     lat: row.lat ?? 7.95,
     lng: row.lng ?? 98.34,
     available: row.available,
-    rating: 4.8,
-    reviewCount: 0,
+    rating: row.rating ?? 0,
+    reviewCount: row.review_count ?? 0,
     features: row.features ?? [],
     specs: row.specs ?? {},
     deliveryAvailable: row.delivery_available,
@@ -175,6 +175,7 @@ function mapDbScooter(row: any): Scooter {
     insuranceIncluded: row.insurance_included,
     minRentalDays: row.min_rental_days,
     description: row.description ?? '',
+    createdAt: row.created_at ?? undefined,
   }
 }
 
@@ -190,11 +191,36 @@ function mapDbShop(row: any): Shop {
     address: row.address ?? '',
     lat: row.lat ?? 7.95,
     lng: row.lng ?? 98.34,
-    rating: 4.8,
-    reviewCount: 0,
+    rating: row.rating ?? 0,
+    reviewCount: row.review_count ?? 0,
     verified: row.verified,
     responseTime: row.response_time ?? '< 15 min',
     phone: row.phone ?? '',
     whatsapp: row.whatsapp ?? undefined,
+  }
+}
+
+// ── PLATFORM STATS (real counts from DB for homepage) ─────────
+export async function getStats(): Promise<{ shopCount: number; scooterCount: number }> {
+  if (!isConfigured()) return { shopCount: 0, scooterCount: 0 }
+
+  const { createClient } = await import('./server')
+  const supabase = await createClient()
+
+  const [shopRes, scooterRes] = await Promise.all([
+    supabase
+      .from('shops')
+      .select('id', { count: 'exact', head: true })
+      .eq('verified', true)
+      .eq('active', true),
+    supabase
+      .from('scooters')
+      .select('id', { count: 'exact', head: true })
+      .eq('available', true),
+  ])
+
+  return {
+    shopCount:    shopRes.count    ?? 0,
+    scooterCount: scooterRes.count ?? 0,
   }
 }

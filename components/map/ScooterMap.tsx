@@ -81,11 +81,20 @@ function ScooterPopupCard({ scooter, onClose }: { scooter: Scooter; onClose: () 
       <div className="px-3.5 pb-3.5 pt-2.5">
         <p className="font-bold text-[13px] text-white leading-tight truncate pr-6">{scooter.name}</p>
         <div className="flex items-center gap-2 mt-1.5 mb-3">
-          <div className="flex items-center gap-1">
-            <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
-            <span className="text-[11px] font-semibold text-white/80">{scooter.rating}</span>
-          </div>
-          <span className="text-white/20">·</span>
+          {scooter.reviewCount > 0 ? (
+            <>
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
+                <span className="text-[11px] font-semibold text-white/80">{scooter.rating.toFixed(1)}</span>
+              </div>
+              <span className="text-white/20">·</span>
+            </>
+          ) : (
+            <>
+              <span className="text-[10px] font-semibold text-[#FF6B35]/80">New</span>
+              <span className="text-white/20">·</span>
+            </>
+          )}
           <div className="flex items-center gap-1 text-[11px] text-white/50">
             <MapPin className="w-2.5 h-2.5" />{scooter.location}
           </div>

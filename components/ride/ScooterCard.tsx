@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Star, MapPin, Zap, Shield, Check } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { ScooterImage } from '@/components/ride/ScooterImage'
+import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
 import { cn, formatPrice, getScooterCover } from '@/lib/utils'
 import type { Scooter } from '@/types'
 
@@ -69,11 +70,16 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
               <span className="ml-1 text-[#22c55e] font-medium">· Verified</span>
             )}
           </div>
-          <div className="flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 text-[#FF6B35] fill-[#FF6B35]" />
-            <span className="text-xs font-bold text-[#0f0f0e]">{scooter.rating}</span>
-            <span className="text-xs text-[#9c9c98]">({scooter.reviewCount})</span>
-          </div>
+          {/* Only show rating when there are real reviews — never show hardcoded 4.8 */}
+          {scooter.reviewCount > 0 ? (
+            <div className="flex items-center gap-1">
+              <Star className="w-3.5 h-3.5 text-[#FF6B35] fill-[#FF6B35]" />
+              <span className="text-xs font-bold text-[#0f0f0e]">{scooter.rating.toFixed(1)}</span>
+              <span className="text-xs text-[#9c9c98]">({scooter.reviewCount})</span>
+            </div>
+          ) : isNewListing(scooter.createdAt) ? (
+            <TrustBadge variant="new_listing" />
+          ) : null}
         </div>
 
         {/* Name */}

@@ -49,6 +49,7 @@ export interface Scooter {
   insuranceIncluded: boolean
   minRentalDays: number
   description: string
+  createdAt?: string  // ISO date — used for "New listing" badge (< 30 days)
 }
 
 export interface ScooterSpecs {
