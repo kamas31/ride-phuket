@@ -141,47 +141,64 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
   // ── Submit ──────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.name || !form.pricePerDay) { setError('Name and price are required.'); return }
+    if (!form.name.trim()) { setError('Scooter name is required.'); return }
+    if (Number(form.pricePerDay) < 100) { setError('Price per day must be at least ฿100.'); return }
     setError(null)
     setSubmitting(true)
 
-    // Upload images first
-    const urls = await uploadImages()
+    // Client-side timeout: 20s covers upload + insert
+    const timeoutId = setTimeout(() => {
+      setSubmitting(false)
+      setError('Request timed out. Please check your connection and try again.')
+    }, 20_000)
 
-    const result = await createScooter({
-      shopId,
-      name:            form.name,
-      brand:           form.brand,
-      model:           form.model || form.name,
-      year:            Number(form.year),
-      category:        form.category,
-      images:          urls,
-      pricePerDay:     Number(form.pricePerDay),
-      pricePerWeek:    form.pricePerWeek ? Number(form.pricePerWeek) : undefined,
-      pricePerMonth:   form.pricePerMonth ? Number(form.pricePerMonth) : undefined,
-      location:        form.location,
-      deliveryAvailable: form.deliveryAvailable,
-      deliveryFee:     Number(form.deliveryFee) || 0,
-      helmetIncluded:  form.helmetIncluded,
-      insuranceIncluded: form.insuranceIncluded,
-      minRentalDays:   form.minRentalDays,
-      features:        form.features,
-      specs: {
-        engine:       form.engine || 'N/A',
-        power:        form.power || 'N/A',
-        fuelCapacity: form.fuelCapacity || 'N/A',
-        consumption:  form.consumption || 'N/A',
-        weight:       form.weight || 'N/A',
-        storage:      form.storage || 'N/A',
-      },
-      description: form.description,
-    })
+    try {
+      // Upload images first (client-side)
+      const urls = await uploadImages()
 
-    if (result.success) {
-      router.push('/partner/dashboard')
-      router.refresh()
-    } else {
-      setError(result.error ?? 'Failed to create scooter.')
+      const result = await createScooter({
+        shopId,
+        name:              form.name,
+        brand:             form.brand,
+        model:             form.model || form.name,
+        year:              Number(form.year),
+        category:          form.category,
+        images:            urls,
+        pricePerDay:       Number(form.pricePerDay),
+        pricePerWeek:      form.pricePerWeek ? Number(form.pricePerWeek) : undefined,
+        pricePerMonth:     form.pricePerMonth ? Number(form.pricePerMonth) : undefined,
+        location:          form.location,
+        deliveryAvailable: form.deliveryAvailable,
+        deliveryFee:       Number(form.deliveryFee) || 0,
+        helmetIncluded:    form.helmetIncluded,
+        insuranceIncluded: form.insuranceIncluded,
+        minRentalDays:     form.minRentalDays,
+        features:          form.features,
+        specs: {
+          engine:       form.engine || 'N/A',
+          power:        form.power || 'N/A',
+          fuelCapacity: form.fuelCapacity || 'N/A',
+          consumption:  form.consumption || 'N/A',
+          weight:       form.weight || 'N/A',
+          storage:      form.storage || 'N/A',
+        },
+        description: form.description,
+      })
+
+      clearTimeout(timeoutId)
+
+      if (result.success) {
+        // Hard navigate — forces fresh server render with updated fleet
+        window.location.href = '/partner/dashboard'
+      } else {
+        setError(result.error ?? 'Failed to add scooter. Please try again.')
+        setSubmitting(false)
+      }
+    } catch (thrown) {
+      clearTimeout(timeoutId)
+      const msg = thrown instanceof Error ? thrown.message : 'Unexpected error.'
+      console.error('[NewScooterForm] caught thrown error:', msg)
+      setError(`Error: ${msg}`)
       setSubmitting(false)
     }
   }
