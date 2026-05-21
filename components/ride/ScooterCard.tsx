@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Star, MapPin, Zap, Shield, Check } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
+import { ScooterFallback } from '@/components/ride/ImageUploader'
 import { cn, formatPrice } from '@/lib/utils'
 import type { Scooter } from '@/types'
 
@@ -24,14 +25,18 @@ export function ScooterCard({ scooter, className, compact = false }: ScooterCard
     >
       {/* Image */}
       <div className={cn('relative overflow-hidden bg-[#f0f0ec]', compact ? 'h-44' : 'h-52')}>
-        <Image
-          src={scooter.images[0]}
-          alt={scooter.name}
-          fill
-          className="object-cover group-hover:scale-[1.04] transition-transform duration-500"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-          unoptimized
-        />
+        {scooter.images?.[0] ? (
+          <Image
+            src={scooter.images[0]}
+            alt={scooter.name}
+            fill
+            className="object-cover group-hover:scale-[1.04] transition-transform duration-500"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            unoptimized
+          />
+        ) : (
+          <ScooterFallback className="w-full h-full" />
+        )}
 
         {/* Top-left badges */}
         <div className="absolute top-3 left-3 flex gap-1.5">
