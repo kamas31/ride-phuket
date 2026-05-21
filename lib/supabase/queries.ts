@@ -2,8 +2,8 @@
 // Route Handlers, or Server Actions ('use server' files).
 // Client components must call Server Actions instead.
 
-import type { Scooter, Shop, Booking } from '@/types'
-import { SCOOTERS, MOCK_BOOKINGS } from '@/data/scooters'
+import type { Scooter, Shop, Booking, MileageRange } from '@/types'
+import { SCOOTERS, SHOPS, MOCK_BOOKINGS } from '@/data/scooters'
 
 function isConfigured() {
   return Boolean(
@@ -176,6 +176,7 @@ function mapDbScooter(row: any): Scooter {
     minRentalDays: row.min_rental_days,
     description: row.description ?? '',
     createdAt: row.created_at ?? undefined,
+    mileageRange: (row.mileage_range as MileageRange) ?? undefined,
   }
 }
 
@@ -197,7 +198,49 @@ function mapDbShop(row: any): Shop {
     responseTime: row.response_time ?? '< 15 min',
     phone: row.phone ?? '',
     whatsapp: row.whatsapp ?? undefined,
+    coverImage: row.cover_image ?? null,
+    deliveryZones: row.delivery_zones ?? [],
+    openingHours: row.opening_hours ?? undefined,
+    instagram: row.instagram ?? undefined,
+    website: row.website ?? undefined,
   }
+}
+
+// ── SHOP BY SLUG ────────────────────────────────────────────
+export type ShopWithFleet = Shop & { scooters: Scooter[] }
+
+export async function getShopBySlug(slug: string): Promise<ShopWithFleet | null> {
+  if (!isConfigured()) {
+    const shop = SHOPS.find(s => s.slug === slug)
+    if (!shop) return null
+    const scooters = SCOOTERS.filter(s => s.shopId === shop.id && s.available)
+    return { ...shop, scooters }
+  }
+
+  const { createClient } = await import('./server')
+  const supabase = await createClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: shopRow, error } = await (supabase as any)
+    .from('shops')
+    .select('*')
+    .eq('slug', slug)
+    .eq('active', true)
+    .single()
+
+  if (error || !shopRow) return null
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: scooterRows } = await (supabase as any)
+    .from('scooters')
+    .select('*, shops(*)')
+    .eq('shop_id', (shopRow as any).id)
+    .eq('available', true)
+    .order('created_at', { ascending: false })
+
+  const shop = mapDbShop(shopRow)
+  const scooters = (scooterRows ?? []).map(mapDbScooter)
+  return { ...shop, scooters }
 }
 
 // ── PLATFORM STATS (real counts from DB for homepage) ─────────

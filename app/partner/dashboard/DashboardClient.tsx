@@ -238,6 +238,13 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
                         )} />
                       </button>
 
+                      {/* Edit */}
+                      <Link
+                        href={`/partner/scooters/${scooter.id}/edit`}
+                        className="px-3 py-1.5 rounded-full bg-[#f8f8f6] border border-[#e8e8e4] text-[11px] font-semibold text-[#5c5c58] hover:border-[#FF6B35]/30 hover:text-[#FF6B35] transition-colors"
+                      >
+                        Edit
+                      </Link>
                       {/* View listing */}
                       <Link
                         href={`/scooter/${scooter.id}`}
@@ -258,8 +265,8 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
         {shop && (
           <div className="grid grid-cols-2 gap-4">
             {[
-              { href: '/bookings', label: 'View All Bookings', icon: BookOpen, desc: 'Manage incoming reservations' },
-              { href: '/explore', label: 'Preview Your Listings', icon: Star, desc: 'See how riders see your scooters' },
+              { href: '/bookings',           label: 'View All Bookings',   icon: BookOpen, desc: 'Manage incoming reservations' },
+              { href: `/shop/${shop.slug}`,  label: 'My Shop Page',        icon: Star,     desc: 'See your public shop profile' },
             ].map(item => (
               <Link
                 key={item.href}

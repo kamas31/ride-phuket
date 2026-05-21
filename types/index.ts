@@ -1,6 +1,7 @@
 export type ScooterCategory = 'automatic' | 'manual' | 'electric'
 export type BookingStatus = 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled'
 export type DeliveryMethod = 'delivery' | 'pickup'
+export type MileageRange = '0-10000' | '10000-20000' | '20000-30000' | '30000-50000' | '50000+'
 
 export interface Shop {
   id: string
@@ -18,6 +19,12 @@ export interface Shop {
   responseTime: string
   phone: string
   whatsapp?: string
+  // Premium shop fields (migration 005)
+  coverImage?: string | null
+  deliveryZones?: string[]
+  openingHours?: string
+  instagram?: string
+  website?: string
 }
 
 export interface Scooter {
@@ -49,7 +56,8 @@ export interface Scooter {
   insuranceIncluded: boolean
   minRentalDays: number
   description: string
-  createdAt?: string  // ISO date — used for "New listing" badge (< 30 days)
+  createdAt?: string       // ISO date — used for "New listing" badge (< 30 days)
+  mileageRange?: MileageRange
 }
 
 export interface ScooterSpecs {

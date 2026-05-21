@@ -9,7 +9,6 @@ import { ImageMetricsOverlay } from '@/components/debug/ImageMetricsOverlay'
 import { cn } from '@/lib/utils'
 import type { Scooter, FilterState } from '@/types'
 
-// Dynamic import — keeps mapbox-gl out of the SSR bundle entirely
 const ScooterMap = dynamic(() => import('@/components/map/ScooterMap'), {
   ssr: false,
   loading: () => (
@@ -32,14 +31,13 @@ const DEFAULT_FILTERS: FilterState = {
 type MobileView = 'list' | 'map'
 
 export default function ExploreClient({ initialScooters }: { initialScooters: Scooter[] }) {
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
+  const [filters, setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
   const [search, setSearch]           = useState('')
   const [selectedId, setSelectedId]   = useState<string | null>(null)
   const [hoveredId, setHoveredId]     = useState<string | null>(null)
   const [showMap, setShowMap]         = useState(true)
   const [mobileView, setMobileView]   = useState<MobileView>('list')
 
-  // Scroll the matching card into view when map pin is clicked
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const setCardRef = useCallback((id: string) => (el: HTMLDivElement | null) => {
@@ -75,30 +73,61 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
 
   return (
     <div className="min-h-screen bg-[#f8f8f6]">
-      {/* Sticky top bar */}
+      {/* ── Sticky top bar ── */}
       <div className="sticky top-16 z-30 bg-white border-b border-[#e8e8e4] shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-3">
-          <div className="relative mb-3">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9c9c98]" />
-            <input
-              type="text"
-              placeholder="Search scooters, brands, locations…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-full text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors"
-            />
+          {/* Search row — includes mobile List/Map toggle on the right */}
+          <div className="flex items-center gap-2 mb-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9c9c98] pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search scooters, brands, locations…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full pl-11 pr-4 py-2.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-full text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors"
+              />
+            </div>
+
+            {/* Mobile toggle — always visible, inside sticky bar, z-issue fixed */}
+            <div className="flex lg:hidden items-center gap-0.5 bg-[#f0f0ec] rounded-full p-1 flex-shrink-0">
+              <button
+                onClick={() => setMobileView('list')}
+                className={cn(
+                  'flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all',
+                  mobileView === 'list'
+                    ? 'bg-white text-[#0f0f0e] shadow-sm'
+                    : 'text-[#9c9c98] hover:text-[#5c5c58]'
+                )}
+              >
+                <List className="w-3 h-3" />
+                List
+              </button>
+              <button
+                onClick={() => setMobileView('map')}
+                className={cn(
+                  'flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all',
+                  mobileView === 'map'
+                    ? 'bg-[#0f0f0e] text-white shadow-sm'
+                    : 'text-[#9c9c98] hover:text-[#5c5c58]'
+                )}
+              >
+                <Map className="w-3 h-3" />
+                Map
+              </button>
+            </div>
           </div>
+
           <ExploreFilters filters={filters} onChange={setFilters} />
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Count + Desktop toggle */}
-        <div className="flex items-center justify-between mb-5">
+      <div className="max-w-6xl mx-auto px-4 py-5">
+        {/* Count + Desktop map toggle */}
+        <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-[#5c5c58]">
             <span className="font-bold text-[#0f0f0e]">{filtered.length}</span> scooters available
           </p>
-          {/* Desktop: toggle map sidebar */}
           <button
             onClick={() => setShowMap(!showMap)}
             className="hidden lg:flex items-center gap-1.5 text-sm font-semibold text-[#FF6B35] hover:text-[#e85d29] transition-colors"
@@ -106,47 +135,16 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
             <Map className="w-4 h-4" />
             {showMap ? 'Hide Map' : 'Show Map'}
           </button>
-          {/* Mobile: List / Map toggle pills */}
-          <div className="flex lg:hidden items-center gap-1 bg-[#f0f0ec] rounded-full p-1">
-            <button
-              onClick={() => setMobileView('list')}
-              className={cn(
-                'flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold transition-all',
-                mobileView === 'list'
-                  ? 'bg-white text-[#0f0f0e] shadow-sm'
-                  : 'text-[#9c9c98] hover:text-[#5c5c58]'
-              )}
-            >
-              <List className="w-3.5 h-3.5" />
-              List
-            </button>
-            <button
-              onClick={() => setMobileView('map')}
-              className={cn(
-                'flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold transition-all',
-                mobileView === 'map'
-                  ? 'bg-[#0f0f0e] text-white shadow-sm'
-                  : 'text-[#9c9c98] hover:text-[#5c5c58]'
-              )}
-            >
-              <Map className="w-3.5 h-3.5" />
-              Map
-            </button>
-          </div>
         </div>
 
         {/* ── DESKTOP LAYOUT ── */}
-        <div className="hidden lg:flex gap-6">
+        <div className="hidden lg:flex gap-5">
           {/* List */}
           <div className={showMap ? 'w-full lg:w-[48%]' : 'w-full'}>
             {filtered.length === 0 ? (
-              <div className="text-center py-20">
-                <div className="text-5xl mb-4">🛵</div>
-                <h3 className="text-lg font-bold text-[#0f0f0e] mb-2">No scooters found</h3>
-                <p className="text-[#5c5c58] text-sm">Try adjusting your filters or search terms.</p>
-              </div>
+              <EmptyState />
             ) : (
-              <div className={`grid gap-4 ${showMap ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
+              <div className={`grid gap-3 ${showMap ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
                 {filtered.map(scooter => (
                   <div
                     key={scooter.id}
@@ -160,7 +158,7 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
                       hoveredId === scooter.id && selectedId !== scooter.id ? 'ring-1 ring-[#FF6B35]/40 rounded-[20px]' : ''
                     )}
                   >
-                    <ScooterCard scooter={scooter} />
+                    <ScooterCard scooter={scooter} compact />
                   </div>
                 ))}
               </div>
@@ -187,21 +185,15 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
         {/* ── MOBILE LAYOUT ── */}
         <div className="lg:hidden">
           {mobileView === 'list' ? (
-            filtered.length === 0 ? (
-              <div className="text-center py-20">
-                <div className="text-5xl mb-4">🛵</div>
-                <h3 className="text-lg font-bold text-[#0f0f0e] mb-2">No scooters found</h3>
-                <p className="text-[#5c5c58] text-sm">Try adjusting your filters or search terms.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            filtered.length === 0 ? <EmptyState /> : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {filtered.map(scooter => (
                   <div
                     key={scooter.id}
                     onClick={() => setSelectedId(prev => prev === scooter.id ? null : scooter.id)}
                     className={selectedId === scooter.id ? 'ring-2 ring-[#FF6B35] rounded-[20px]' : ''}
                   >
-                    <ScooterCard scooter={scooter} />
+                    <ScooterCard scooter={scooter} compact />
                   </div>
                 ))}
               </div>
@@ -221,7 +213,18 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
           )}
         </div>
       </div>
+
       {process.env.NODE_ENV === 'development' && <ImageMetricsOverlay />}
+    </div>
+  )
+}
+
+function EmptyState() {
+  return (
+    <div className="text-center py-20">
+      <div className="text-5xl mb-4">🛵</div>
+      <h3 className="text-lg font-bold text-[#0f0f0e] mb-2">No scooters found</h3>
+      <p className="text-[#5c5c58] text-sm">Try adjusting your filters or search terms.</p>
     </div>
   )
 }

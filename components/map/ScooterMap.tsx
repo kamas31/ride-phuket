@@ -110,9 +110,16 @@ function ScooterPopupCard({ scooter, onClose }: { scooter: Scooter; onClose: () 
             <span className="text-[20px] font-bold text-white leading-none">{formatPrice(scooter.pricePerDay)}</span>
             <span className="text-white/40 text-[11px] ml-1">/day</span>
           </div>
-          <Link href={`/scooter/${scooter.id}`} className="flex items-center gap-1 px-3.5 py-2 bg-[#FF6B35] text-white text-[11px] font-bold rounded-full hover:bg-[#e85d29] transition-colors shadow-[0_2px_12px_rgba(255,107,53,0.4)]">
-            Book <ArrowRight className="w-3 h-3" />
-          </Link>
+          <div className="flex flex-col gap-1.5">
+            <Link href={`/scooter/${scooter.id}`} className="flex items-center gap-1 px-3.5 py-2 bg-[#FF6B35] text-white text-[11px] font-bold rounded-full hover:bg-[#e85d29] transition-colors shadow-[0_2px_12px_rgba(255,107,53,0.4)]">
+              Book <ArrowRight className="w-3 h-3" />
+            </Link>
+            {scooter.shop?.slug && (
+              <Link href={`/shop/${scooter.shop.slug}`} className="text-[10px] text-white/40 hover:text-white/70 text-center transition-colors">
+                {scooter.shop.name} →
+              </Link>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-1.5 mt-2.5">
           {scooter.insuranceIncluded && <span className="text-[10px] text-white/50 flex items-center gap-1"><Shield className="w-2.5 h-2.5 text-[#22c55e]" />Insured</span>}

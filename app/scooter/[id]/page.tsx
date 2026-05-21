@@ -196,7 +196,12 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-bold text-[#0f0f0e]">{shop.name}</p>
+                    <Link
+                      href={`/shop/${shop.slug}`}
+                      className="font-bold text-[#0f0f0e] hover:text-[#FF6B35] transition-colors"
+                    >
+                      {shop.name}
+                    </Link>
                     {shop.verified && <TrustBadge variant="verified" size="xs" />}
                     {fastShop && <TrustBadge variant="fast_response" size="xs" />}
                   </div>
