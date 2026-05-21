@@ -1,16 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Building2, MapPin, Phone, FileText, ArrowRight, Check } from 'lucide-react'
+import { Building2, MapPin, Phone, FileText, ArrowRight, Check, AlertCircle } from 'lucide-react'
 import { createShop } from '@/app/actions/partner'
 
 const LOCATIONS = ['Patong', 'Kata', 'Karon', 'Rawai', 'Bang Tao', 'Phuket Town', 'Kamala', 'Surin']
 
+// Client-side timeout: if the Server Action takes > 15s → abort
+const CLIENT_TIMEOUT_MS = 15_000
+
 export default function CreateShopForm({ userName }: { userName?: string }) {
-  const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError]           = useState<string | null>(null)
   const [form, setForm] = useState({
     shopName: '',
     location: '',
@@ -20,28 +21,51 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
   })
 
   const update = (k: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm(f => ({ ...f, [k]: e.target.value }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Client-side validation (duplicate of server, but fast)
+    if (!form.shopName.trim()) { setError('Shop name is required.'); return }
+    if (!form.location)        { setError('Please select your area.'); return }
+    if (!form.phone.trim())    { setError('Phone number is required.'); return }
+
     setError(null)
     setSubmitting(true)
 
-    const result = await createShop({
-      shopName:    form.shopName,
-      location:    form.location,
-      phone:       form.phone,
-      address:     form.address || undefined,
-      description: form.description || undefined,
-    })
+    // Client-side timeout guard — if action never returns, unblock the UI
+    const timeoutId = setTimeout(() => {
+      setSubmitting(false)
+      setError('The request timed out. Please check your connection and try again.')
+    }, CLIENT_TIMEOUT_MS)
 
-    if (result.success) {
-      // Hard navigate so server state (profile.shop_id) is refreshed
-      router.push('/partner/dashboard')
-      router.refresh()
-    } else {
-      setError(result.error ?? 'Something went wrong.')
+    try {
+      const result = await createShop({
+        shopName:    form.shopName,
+        location:    form.location,
+        phone:       form.phone,
+        address:     form.address || undefined,
+        description: form.description || undefined,
+      })
+
+      clearTimeout(timeoutId)
+
+      if (result.success) {
+        // Hard navigation — forces fresh server render with updated profile.shop_id
+        window.location.href = '/partner/dashboard'
+      } else {
+        setError(result.error ?? 'Something went wrong. Please try again.')
+        setSubmitting(false)
+      }
+    } catch (thrown) {
+      // Server Action threw an unhandled exception — should never happen
+      // after the top-level guard, but defensive just in case
+      clearTimeout(timeoutId)
+      const msg = thrown instanceof Error ? thrown.message : 'Unexpected error.'
+      console.error('[CreateShopForm] caught thrown error:', msg)
+      setError(`Connection error: ${msg}`)
       setSubmitting(false)
     }
   }
@@ -66,10 +90,10 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
 
       <div className="flex-1 max-w-xl mx-auto w-full px-4 py-8">
         <div className="bg-white rounded-[24px] border border-[#e8e8e4] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)] overflow-hidden">
-          {/* Progress bar */}
-          <div className="h-1 bg-[#FF6B35]" style={{ width: '100%' }} />
+          <div className="h-1 bg-[#FF6B35]" />
 
           <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-5">
+
             {/* Shop Name */}
             <div>
               <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">
@@ -84,7 +108,8 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
                   placeholder="e.g. Patong Riders"
                   required
                   autoFocus
-                  className="w-full pl-10 pr-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors"
+                  disabled={submitting}
+                  className="w-full pl-10 pr-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors disabled:opacity-60"
                 />
               </div>
             </div>
@@ -99,8 +124,9 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
                   <button
                     key={loc}
                     type="button"
+                    disabled={submitting}
                     onClick={() => setForm(f => ({ ...f, location: loc }))}
-                    className={`py-2.5 px-3 rounded-[10px] text-sm font-medium border transition-all text-center ${
+                    className={`py-2.5 px-3 rounded-[10px] text-sm font-medium border transition-all text-center disabled:opacity-60 ${
                       form.location === loc
                         ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]'
                         : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58] hover:border-[#d0d0cc]'
@@ -111,7 +137,6 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
                   </button>
                 ))}
               </div>
-              {!form.location && <input type="text" value="" onChange={() => {}} required tabIndex={-1} className="sr-only" aria-hidden />}
             </div>
 
             {/* Phone */}
@@ -127,7 +152,8 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
                   onChange={update('phone')}
                   placeholder="+66 8X XXX XXXX"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors"
+                  disabled={submitting}
+                  className="w-full pl-10 pr-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors disabled:opacity-60"
                 />
               </div>
             </div>
@@ -135,7 +161,7 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
             {/* Address */}
             <div>
               <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">
-                Address <span className="text-[#9c9c98] font-normal normal-case">(optional)</span>
+                Address <span className="font-normal normal-case text-[#9c9c98]">(optional)</span>
               </label>
               <div className="relative">
                 <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9c9c98]" />
@@ -144,7 +170,8 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
                   value={form.address}
                   onChange={update('address')}
                   placeholder="Street, number, area"
-                  className="w-full pl-10 pr-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors"
+                  disabled={submitting}
+                  className="w-full pl-10 pr-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors disabled:opacity-60"
                 />
               </div>
             </div>
@@ -152,7 +179,7 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
             {/* Description */}
             <div>
               <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">
-                Short Description <span className="text-[#9c9c98] font-normal normal-case">(optional)</span>
+                Short Description <span className="font-normal normal-case text-[#9c9c98]">(optional)</span>
               </label>
               <div className="relative">
                 <FileText className="absolute left-3.5 top-3.5 w-4 h-4 text-[#9c9c98]" />
@@ -161,26 +188,37 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
                   onChange={update('description')}
                   placeholder="Tell riders what makes your shop special…"
                   rows={2}
-                  className="w-full pl-10 pr-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors resize-none"
+                  disabled={submitting}
+                  className="w-full pl-10 pr-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors resize-none disabled:opacity-60"
                 />
               </div>
             </div>
 
+            {/* Error */}
             {error && (
-              <div className="px-4 py-3 bg-[#fef2f2] border border-[#fecaca] rounded-[12px] text-sm text-[#dc2626]">
-                {error}
+              <div className="flex items-start gap-3 px-4 py-3 bg-[#fef2f2] border border-[#fecaca] rounded-[12px]">
+                <AlertCircle className="w-4 h-4 text-[#dc2626] flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-[#dc2626] leading-relaxed">{error}</p>
               </div>
             )}
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={submitting || !form.shopName || !form.location || !form.phone}
               className="w-full flex items-center justify-center gap-2 py-4 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-all text-base disabled:opacity-40 shadow-[0_4px_20px_rgba(255,107,53,0.35)]"
             >
-              {submitting
-                ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : <>Create My Shop &amp; Go to Dashboard <ArrowRight className="w-5 h-5" /></>
-              }
+              {submitting ? (
+                <>
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin flex-shrink-0" />
+                  Creating your shop…
+                </>
+              ) : (
+                <>
+                  Create My Shop &amp; Go to Dashboard
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
             </button>
 
             <p className="text-center text-[11px] text-[#9c9c98]">
