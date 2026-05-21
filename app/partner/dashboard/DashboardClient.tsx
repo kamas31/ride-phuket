@@ -1,0 +1,275 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import {
+  LayoutDashboard, Bike, BookOpen, TrendingUp, Plus,
+  ToggleLeft, ToggleRight, Settings, MapPin, Star,
+  CheckCircle2, Clock, AlertCircle, ChevronRight, ArrowRight
+} from 'lucide-react'
+import { cn, formatPrice } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import type { Profile } from '@/hooks/useProfile'
+
+interface DashboardClientProps {
+  profile: Profile | null
+  shop: { id: string; name: string; slug: string; location: string; verified: boolean; active: boolean } | null
+  scooters: {
+    id: string; name: string; brand: string; model: string;
+    price_per_day: number; location: string; available: boolean;
+    images: string[]; category: string;
+  }[]
+  bookingStats: { pending: number; active: number; total: number }
+}
+
+export default function DashboardClient({ profile, shop, scooters: initial, bookingStats }: DashboardClientProps) {
+  const [scooters, setScooters] = useState(initial)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
+
+  const availableCount = scooters.filter(s => s.available).length
+
+  async function toggleAvailability(scooterId: string, current: boolean) {
+    setTogglingId(scooterId)
+    const supabase = createClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from('scooters')
+      .update({ available: !current })
+      .eq('id', scooterId)
+
+    if (!error) {
+      setScooters(prev => prev.map(s =>
+        s.id === scooterId ? { ...s, available: !current } : s
+      ))
+    }
+    setTogglingId(null)
+  }
+
+  const STATS = [
+    {
+      icon: Bike,
+      label: 'My Fleet',
+      value: scooters.length,
+      sub: `${availableCount} available`,
+      color: 'bg-[#fff4f0] text-[#FF6B35]',
+    },
+    {
+      icon: CheckCircle2,
+      label: 'Active Bookings',
+      value: bookingStats.active,
+      sub: 'right now',
+      color: 'bg-[#f0fdf4] text-[#22c55e]',
+    },
+    {
+      icon: Clock,
+      label: 'Pending',
+      value: bookingStats.pending,
+      sub: 'awaiting confirmation',
+      color: 'bg-[#fffbeb] text-[#f59e0b]',
+    },
+    {
+      icon: TrendingUp,
+      label: 'Total Bookings',
+      value: bookingStats.total,
+      sub: 'all time',
+      color: 'bg-[#eff6ff] text-[#2563eb]',
+    },
+  ]
+
+  return (
+    <div className="min-h-screen bg-[#f8f8f6]">
+      {/* Header */}
+      <div className="bg-white border-b border-[#e8e8e4]">
+        <div className="max-w-5xl mx-auto px-4 pt-20 pb-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm text-[#9c9c98] mb-1">
+                Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'},
+              </p>
+              <h1 className="text-[26px] font-bold text-[#0f0f0e] tracking-tight leading-tight">
+                {profile?.name?.split(' ')[0] ?? 'Partner'} 👋
+              </h1>
+              {shop && (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-sm font-semibold text-[#0f0f0e]">{shop.name}</span>
+                  {shop.verified
+                    ? <span className="px-2 py-0.5 bg-[#f0fdf4] text-[#22c55e] text-[10px] font-bold rounded-full uppercase tracking-wider">✓ Verified</span>
+                    : <span className="px-2 py-0.5 bg-[#fffbeb] text-[#d97706] text-[10px] font-bold rounded-full uppercase tracking-wider">Pending Review</span>
+                  }
+                  <span className="text-[#9c9c98] text-xs flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />{shop.location}
+                  </span>
+                </div>
+              )}
+            </div>
+            <Link
+              href="/partner"
+              className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 bg-[#f8f8f6] border border-[#e8e8e4] rounded-full text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              Shop Settings
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+
+        {/* No shop yet — onboarding prompt */}
+        {!shop && (
+          <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-8 text-center">
+            <div className="text-5xl mb-4">🏪</div>
+            <h2 className="text-[20px] font-bold text-[#0f0f0e] mb-2">Set up your shop</h2>
+            <p className="text-[#5c5c58] text-sm leading-relaxed mb-6 max-w-sm mx-auto">
+              Complete your shop profile to start receiving bookings. Our team will verify your shop within 24 hours.
+            </p>
+            <Link
+              href="/partner"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-sm"
+            >
+              Complete Shop Setup
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
+
+        {/* Stats row */}
+        {shop && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {STATS.map(stat => (
+              <div key={stat.label} className="bg-white rounded-[20px] p-5 border border-[#e8e8e4]">
+                <div className={`w-10 h-10 rounded-[12px] flex items-center justify-center mb-3 ${stat.color}`}>
+                  <stat.icon className="w-5 h-5" />
+                </div>
+                <p className="text-[28px] font-bold text-[#0f0f0e] leading-none">{stat.value}</p>
+                <p className="text-xs font-semibold text-[#0f0f0e] mt-1">{stat.label}</p>
+                <p className="text-[11px] text-[#9c9c98] mt-0.5">{stat.sub}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Fleet management */}
+        {shop && (
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-[18px] font-bold text-[#0f0f0e]">My Fleet</h2>
+                <p className="text-sm text-[#9c9c98] mt-0.5">Toggle availability in real-time</p>
+              </div>
+              <button
+                disabled
+                className="flex items-center gap-2 px-4 py-2.5 bg-[#FF6B35] text-white text-sm font-semibold rounded-full opacity-60 cursor-not-allowed"
+                title="Coming soon"
+              >
+                <Plus className="w-4 h-4" />
+                Add Scooter
+              </button>
+            </div>
+
+            {scooters.length === 0 ? (
+              <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-10 text-center">
+                <div className="text-4xl mb-3">🛵</div>
+                <p className="font-semibold text-[#0f0f0e] mb-1">No scooters yet</p>
+                <p className="text-sm text-[#9c9c98]">Your fleet will appear here once added.</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-[20px] border border-[#e8e8e4] overflow-hidden divide-y divide-[#f0f0ec]">
+                {scooters.map((scooter, i) => (
+                  <div
+                    key={scooter.id}
+                    className={cn(
+                      'flex items-center gap-4 p-4 transition-colors',
+                      scooter.available ? 'hover:bg-[#f8f8f6]' : 'bg-[#fafafa] opacity-75 hover:opacity-100'
+                    )}
+                    style={{ opacity: 0, animation: `fade-up 0.35s ease forwards ${i * 0.05}s` }}
+                  >
+                    {/* Image */}
+                    <div className="relative w-20 h-16 rounded-[12px] overflow-hidden flex-shrink-0 bg-[#f0f0ec]">
+                      {scooter.images?.[0] ? (
+                        <Image src={scooter.images[0]} alt={scooter.name} fill className="object-cover" unoptimized />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-2xl">🛵</div>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-[#0f0f0e] text-sm truncate">{scooter.name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-[#9c9c98] capitalize">{scooter.category}</span>
+                        <span className="text-[#e8e8e4]">·</span>
+                        <span className="text-xs text-[#9c9c98]">{formatPrice(scooter.price_per_day)}/day</span>
+                        <span className="text-[#e8e8e4]">·</span>
+                        <span className="text-xs text-[#9c9c98]">{scooter.location}</span>
+                      </div>
+                    </div>
+
+                    {/* Availability status */}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className={cn(
+                        'text-[11px] font-semibold',
+                        scooter.available ? 'text-[#22c55e]' : 'text-[#9c9c98]'
+                      )}>
+                        {scooter.available ? 'Available' : 'Unavailable'}
+                      </span>
+
+                      {/* Toggle */}
+                      <button
+                        onClick={() => toggleAvailability(scooter.id, scooter.available)}
+                        disabled={togglingId === scooter.id}
+                        className={cn(
+                          'relative w-11 h-6 rounded-full transition-all duration-200 flex-shrink-0',
+                          scooter.available ? 'bg-[#22c55e]' : 'bg-[#e8e8e4]',
+                          togglingId === scooter.id && 'opacity-50'
+                        )}
+                        aria-label={scooter.available ? 'Mark unavailable' : 'Mark available'}
+                      >
+                        <div className={cn(
+                          'absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200',
+                          scooter.available ? 'translate-x-5' : 'translate-x-0.5'
+                        )} />
+                      </button>
+
+                      {/* View listing */}
+                      <Link
+                        href={`/scooter/${scooter.id}`}
+                        className="w-8 h-8 rounded-full bg-[#f8f8f6] flex items-center justify-center hover:bg-[#f0f0ec] transition-colors"
+                        title="View listing"
+                      >
+                        <ChevronRight className="w-4 h-4 text-[#9c9c98]" />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Quick links */}
+        {shop && (
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { href: '/bookings', label: 'View All Bookings', icon: BookOpen, desc: 'Manage incoming reservations' },
+              { href: '/explore', label: 'Preview Your Listings', icon: Star, desc: 'See how riders see your scooters' },
+            ].map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="bg-white rounded-[20px] p-5 border border-[#e8e8e4] hover:border-[#FF6B35]/30 hover:shadow-[0_4px_20px_-4px_rgba(255,107,53,0.1)] transition-all group"
+              >
+                <item.icon className="w-5 h-5 text-[#FF6B35] mb-3" />
+                <p className="font-semibold text-[#0f0f0e] text-sm group-hover:text-[#FF6B35] transition-colors">{item.label}</p>
+                <p className="text-xs text-[#9c9c98] mt-0.5">{item.desc}</p>
+              </Link>
+            ))}
+          </div>
+        )}
+
+      </div>
+    </div>
+  )
+}

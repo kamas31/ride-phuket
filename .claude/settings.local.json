@@ -10,7 +10,8 @@
       "Bash(node scripts/test-connection.js)",
       "Bash(node scripts/test-full.js)",
       "Bash(node scripts/seed-missing.js)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(node scripts/check-new-db.js)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Kamas\\Desktop\\ride-phuket\\app\\scooter",

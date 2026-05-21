@@ -226,3 +226,72 @@ Mobile-first responsive design. No dark mode in v1.
 - Context API sufficient for auth
 - Adding Zustand/Redux is premature optimization
 - Re-evaluate when shop dashboard is built
+
+---
+
+## ADR-013: Multi-role auth — `rider` / `shop_owner` stored in `profiles.role`
+
+**Status:** Accepted  
+**Date:** 2025-05-02
+
+**Context:**  
+Two distinct user types exist on the platform with different UX and data access needs. Needed a clean, RLS-compatible way to enforce role separation.
+
+**Decision:**  
+Store `role` as a TEXT column on `public.profiles` with a CHECK constraint (`rider` | `shop_owner`). Role is also written to `auth.users.user_metadata.role` at signup time.
+
+**Reasoning:**
+- `profiles.role` is the source of truth for all DB-level queries and RLS policies
+- `user_metadata.role` is used by the Next.js proxy (middleware) to check roles from the JWT without making a DB call on every request
+- Two-source approach: fast for edge routing, accurate for DB
+- CHECK constraint prevents invalid values at DB level
+- `COALESCE(raw_user_meta_data->>'role', 'rider')` in trigger ensures all users get a default
+
+**Consequences:**
+- If role needs to change later, update both `profiles.role` AND `user_metadata` (or strip from metadata and always query DB)
+
+---
+
+## ADR-014: Auth trigger reads role from `user_metadata`
+
+**Status:** Accepted  
+**Date:** 2025-05-02
+
+**Decision:**  
+The `handle_new_user()` DB trigger (fires on `auth.users` INSERT) reads `raw_user_meta_data->>'role'` to set `profiles.role` automatically. For Google OAuth, the callback route explicitly sets the role via `supabase.auth.updateUser()` before the profile upsert.
+
+**Reasoning:**
+- Zero extra API call at signup — role flows through the auth payload
+- Works for both email/password and OAuth providers
+- `ON CONFLICT DO UPDATE` ensures idempotent operation
+
+---
+
+## ADR-015: Partner dashboard — Server Component + Client island
+
+**Status:** Accepted  
+**Date:** 2025-05-02
+
+**Decision:**  
+`/partner/dashboard/page.tsx` is a Server Component that fetches shop + scooter data server-side, then passes it as props to `DashboardClient.tsx` (Client Component). Availability toggles use the Supabase browser client directly from the Client Component.
+
+**Reasoning:**
+- Server Component = no loading flash for initial data (SSR)
+- Client Component needed for toggle interactivity (optimistic UI)
+- Same pattern used for `/explore` (proven)
+- Avoids prop drilling deep — data boundary is clean at the page level
+
+---
+
+## ADR-016: Role-aware Navbar uses `useProfile` hook
+
+**Status:** Accepted  
+**Date:** 2025-05-02
+
+**Decision:**  
+The Navbar is a Client Component that reads the current profile via `useProfile` hook. Nav links, CTA button, and user dropdown all adapt based on `profile.role`.
+
+**Consequences:**
+- Tiny waterfall: auth → profile query → render (< 200ms on warm session)
+- Alternative (Server Component Navbar) would require passing session as prop from every layout — more complex
+- Acceptable for v1 given the scale
