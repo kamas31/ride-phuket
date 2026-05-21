@@ -159,21 +159,27 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
                 <h2 className="text-[18px] font-bold text-[#0f0f0e]">My Fleet</h2>
                 <p className="text-sm text-[#9c9c98] mt-0.5">Toggle availability in real-time</p>
               </div>
-              <button
-                disabled
-                className="flex items-center gap-2 px-4 py-2.5 bg-[#FF6B35] text-white text-sm font-semibold rounded-full opacity-60 cursor-not-allowed"
-                title="Coming soon"
+              <Link
+                href="/partner/scooters/new"
+                className="flex items-center gap-2 px-4 py-2.5 bg-[#FF6B35] text-white text-sm font-semibold rounded-full hover:bg-[#e85d29] transition-all shadow-sm"
               >
                 <Plus className="w-4 h-4" />
                 Add Scooter
-              </button>
+              </Link>
             </div>
 
             {scooters.length === 0 ? (
               <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-10 text-center">
-                <div className="text-4xl mb-3">🛵</div>
-                <p className="font-semibold text-[#0f0f0e] mb-1">No scooters yet</p>
-                <p className="text-sm text-[#9c9c98]">Your fleet will appear here once added.</p>
+                <div className="text-4xl mb-4">🛵</div>
+                <p className="font-bold text-[#0f0f0e] mb-1">No scooters in your fleet yet</p>
+                <p className="text-sm text-[#9c9c98] mb-6">Add your first scooter and start receiving bookings today.</p>
+                <Link
+                  href="/partner/scooters/new"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Your First Scooter
+                </Link>
               </div>
             ) : (
               <div className="bg-white rounded-[20px] border border-[#e8e8e4] overflow-hidden divide-y divide-[#f0f0ec]">

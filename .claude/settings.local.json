@@ -11,7 +11,9 @@
       "Bash(node scripts/test-full.js)",
       "Bash(node scripts/seed-missing.js)",
       "Bash(node -e ' *)",
-      "Bash(node scripts/check-new-db.js)"
+      "Bash(node scripts/check-new-db.js)",
+      "Bash(node scripts/audit-backend.js)",
+      "Bash(node scripts/verify-partner-fix.js)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Kamas\\Desktop\\ride-phuket\\app\\scooter",

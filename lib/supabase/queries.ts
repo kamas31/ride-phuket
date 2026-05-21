@@ -95,11 +95,13 @@ export async function createBooking(payload: {
     return { id: `dev-${Date.now()}` }
   }
 
-  const { createClient } = await import('./server')
-  const supabase = await createClient()
+  // Use admin client — bookings are server-side and bypass RLS safely
+  // The Server Action caller already validates the user is authenticated
+  const { createAdminClient } = await import('./admin')
+  const admin = createAdminClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await (admin as any)
     .from('bookings')
     .insert({
       user_id: payload.userId,
@@ -119,41 +121,14 @@ export async function createBooking(payload: {
     .select('id')
     .single()
 
-  if (error || !data) return null
+  if (error) {
+    console.error('[createBooking] Supabase error:', error.message, '| code:', error.code)
+    return null
+  }
   return { id: (data as { id: string }).id }
 }
 
-// ── SHOPS ────────────────────────────────────────────────────
-
-export async function createShopApplication(payload: {
-  ownerName: string
-  email: string
-  phone: string
-  shopName: string
-  location: string
-  fleetSize: number
-  message?: string
-}): Promise<boolean> {
-  if (!isConfigured()) return true // dev: always succeed
-
-  const { createClient } = await import('./server')
-  const supabase = await createClient()
-
-  // Store in shops with verified=false as application queue
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
-    .from('shops')
-    .insert({
-      name: payload.shopName,
-      slug: payload.shopName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''),
-      location: payload.location,
-      phone: payload.phone,
-      verified: false,
-      active: false,
-    })
-
-  return !error
-}
+// createShopApplication removed — use app/actions/partner.ts:submitPartnerApplication
 
 // ── HELPERS ──────────────────────────────────────────────────
 
