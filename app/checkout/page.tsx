@@ -11,6 +11,7 @@ import { SCOOTERS } from '@/data/scooters'
 import { formatPrice, calculateDays, calculateTotal, addDays, getScooterCover, calcSmartPrice } from '@/lib/utils'
 import { createBookingAction } from '@/app/actions/booking'
 import { getScooterAction } from '@/app/actions/scooter'
+import { getBookedDates, type BlockedRange } from '@/app/actions/booking-actions'
 import { useAuth } from '@/hooks/useAuth'
 import type { Scooter } from '@/types'
 
@@ -26,9 +27,10 @@ function CheckoutContent() {
 
   const { user, loading: authLoading } = useAuth()
 
-  // Load real scooter data from DB
+  // Load real scooter data + blocked dates
   useEffect(() => {
     getScooterAction(scooterId).then(live => { if (live) setScooter(live) })
+    getBookedDates(scooterId).then(setBlockedRanges)
   }, [scooterId])
 
   const tomorrow = addDays(new Date(), 1)
@@ -45,6 +47,7 @@ function CheckoutContent() {
   const [bookingId, setBookingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [step, setStep] = useState<1 | 2>(1)
+  const [blockedRanges, setBlockedRanges] = useState<BlockedRange[]>([])
 
   // Pre-fill name from auth profile
   useEffect(() => {
@@ -77,7 +80,7 @@ function CheckoutContent() {
         notes: notes || undefined,
       })
 
-      if (!result) throw new Error('Booking failed — please try again.')
+      if (!result) throw new Error('These dates are no longer available. Please choose different dates.')
       setBookingId(result.id)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
@@ -259,6 +262,7 @@ function CheckoutContent() {
                   onStartChange={setStartDate}
                   onEndChange={setEndDate}
                   minDate={tomorrow.toISOString().split('T')[0]}
+                  blockedRanges={blockedRanges}
                 />
 
                 {/* Live pricing feedback */}

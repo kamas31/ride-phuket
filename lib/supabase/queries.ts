@@ -77,6 +77,67 @@ export async function getUserBookings(userId: string): Promise<Booking[]> {
   return data as unknown as Booking[]
 }
 
+// ── SHOP BOOKINGS (for partner dashboard) ───────────────────────
+export interface ShopBookingRow {
+  id: string
+  scooter_id: string
+  user_id: string
+  shop_id: string
+  status: string
+  start_date: string
+  end_date: string
+  total_days: number
+  daily_rate: number
+  delivery_fee: number
+  total_amount: number
+  delivery_method: string
+  delivery_address: string | null
+  notes: string | null
+  created_at: string
+  scooters: { id: string; name: string; images: string[]; cover_image: string | null } | null
+  rider: { id: string; name: string; phone: string | null; avatar_url: string | null } | null
+}
+
+export async function getShopBookings(shopId: string): Promise<ShopBookingRow[]> {
+  if (!isConfigured()) return []
+
+  const { createAdminClient } = await import('./admin')
+  const admin = createAdminClient()
+
+  // Look back 30 days + all future bookings
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: bookings, error } = await (admin as any)
+    .from('bookings')
+    .select('*, scooters(id, name, images, cover_image)')
+    .eq('shop_id', shopId)
+    .gte('end_date', cutoff)
+    .order('created_at', { ascending: false })
+    .limit(100)
+
+  if (error || !bookings) return []
+
+  // Fetch rider profiles separately (admin bypasses RLS)
+  const riderIds = [...new Set((bookings as { user_id: string }[]).map(b => b.user_id))]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: riders } = await (admin as any)
+    .from('profiles')
+    .select('id, name, phone, avatar_url')
+    .in('id', riderIds)
+
+  const riderMap = new Map<string, ShopBookingRow['rider']>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (riders ?? []).map((r: any) => [r.id, r])
+  )
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (bookings as any[]).map(b => ({
+    ...b,
+    rider: riderMap.get(b.user_id) ?? null,
+  }))
+}
+
 export async function createBooking(payload: {
   userId: string
   scooterId: string
@@ -99,6 +160,26 @@ export async function createBooking(payload: {
   // The Server Action caller already validates the user is authenticated
   const { createAdminClient } = await import('./admin')
   const admin = createAdminClient()
+
+  // ── Availability check (double protection: DB trigger also catches this) ──
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: available, error: availErr } = await (admin as any).rpc(
+    'is_scooter_available',
+    {
+      p_scooter_id: payload.scooterId,
+      p_start_date: payload.startDate,
+      p_end_date:   payload.endDate,
+      p_exclude_id: null,
+    }
+  )
+
+  if (availErr) {
+    console.error('[createBooking] availability check failed:', availErr.message)
+    // Don't block if the function doesn't exist yet — migration may not have run
+  } else if (available === false) {
+    console.warn('[createBooking] scooter not available for', payload.startDate, payload.endDate)
+    return null  // caller treats null as "unavailable"
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)

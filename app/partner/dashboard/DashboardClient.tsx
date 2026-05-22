@@ -322,7 +322,7 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
         {shop && (
           <div className="grid grid-cols-2 gap-4">
             {[
-              { href: '/bookings',           label: 'View All Bookings',   icon: BookOpen, desc: 'Manage incoming reservations' },
+              { href: '/partner/bookings',   label: 'Manage Bookings',     icon: BookOpen, desc: 'Confirm, cancel, contact riders' },
               { href: `/shop/${shop.slug}`,  label: 'My Shop Page',        icon: Star,     desc: 'See your public shop profile' },
             ].map(item => (
               <Link
