@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Heart, ArrowLeft } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
-import { getScootersByIds } from '@/lib/supabase/queries'
+import { getScootersByIdsAction } from '@/app/actions/scooter-actions'
 import { useSaved } from '@/hooks/useSaved'
 import type { Scooter } from '@/types'
 
@@ -18,7 +18,7 @@ export default function SavedPage() {
     if (savedIds.length === 0) { setLoading(false); return }
 
     setLoading(true)
-    getScootersByIds(savedIds).then(data => {
+    getScootersByIdsAction(savedIds).then(data => {
       setScooters(data)
       setLoading(false)
     })
