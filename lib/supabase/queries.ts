@@ -258,6 +258,12 @@ function mapDbScooter(row: any): Scooter {
     description: row.description ?? '',
     createdAt: row.created_at ?? undefined,
     mileageRange: (row.mileage_range as MileageRange) ?? undefined,
+    depositAmount: row.deposit_amount ?? undefined,
+    depositType: row.deposit_type ?? undefined,
+    passportRequired: row.passport_required ?? false,
+    passportCopyAllowed: row.passport_copy_allowed ?? true,
+    isPremiumBike: row.is_premium_bike ?? false,
+    depositNotes: row.deposit_notes ?? undefined,
   }
 }
 
@@ -284,6 +290,7 @@ function mapDbShop(row: any): Shop {
     openingHours: row.opening_hours ?? undefined,
     instagram: row.instagram ?? undefined,
     website: row.website ?? undefined,
+    depositProtectedMember: row.deposit_protected_member ?? false,
   }
 }
 

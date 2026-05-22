@@ -12,6 +12,7 @@ import { ImageGallery } from '@/components/ride/ImageGallery'
 import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
 import { EmptyReviews } from '@/components/ride/EmptyReviews'
 import { ShopContact } from '@/components/ride/ShopContact'
+import { DepositInfo } from '@/components/ride/DepositInfo'
 import { getPublicInquiries } from '@/app/actions/inquiry-actions'
 import { createClient } from '@/lib/supabase/server'
 import { sanitize } from '@/lib/moderation'
@@ -223,6 +224,17 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                 ))}
               </div>
             </div>
+
+            {/* Deposit & security */}
+            <DepositInfo
+              depositAmount={scooter.depositAmount}
+              depositType={scooter.depositType}
+              passportRequired={scooter.passportRequired}
+              passportCopyAllowed={scooter.passportCopyAllowed}
+              isPremiumBike={scooter.isPremiumBike}
+              depositNotes={scooter.depositNotes}
+              depositProtected={shop.depositProtectedMember}
+            />
 
             {/* Rental partner */}
             <div className="bg-[#f8f8f6] rounded-[20px] p-5 border border-[#e8e8e4]">

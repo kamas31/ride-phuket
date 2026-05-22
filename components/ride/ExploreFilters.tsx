@@ -22,6 +22,8 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
     filters.helmetIncluded,
     filters.location !== 'all',
     filters.priceMax < 2000,
+    filters.depositProtected,
+    filters.noPassport,
   ].filter(Boolean).length
 
   return (
@@ -87,6 +89,32 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
           )}
         >
           🪖 Helmet
+        </button>
+
+        {/* Quick: Deposit Protected */}
+        <button
+          onClick={() => update({ depositProtected: !filters.depositProtected })}
+          className={cn(
+            'flex-shrink-0 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
+            filters.depositProtected
+              ? 'bg-[#FF6B35] text-white border-[#FF6B35]'
+              : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
+          )}
+        >
+          🛡 Protected
+        </button>
+
+        {/* Quick: No Passport */}
+        <button
+          onClick={() => update({ noPassport: !filters.noPassport })}
+          className={cn(
+            'flex-shrink-0 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
+            filters.noPassport
+              ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
+              : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
+          )}
+        >
+          🪪 No Passport
         </button>
 
         {/* Sort */}
@@ -162,8 +190,10 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
             {/* Toggles */}
             <div className="space-y-3 mb-8">
               {[
-                { key: 'deliveryNow', label: 'Delivery available', emoji: '🚚' },
-                { key: 'helmetIncluded', label: 'Helmet included', emoji: '🪖' },
+                { key: 'deliveryNow',       label: 'Delivery available',          emoji: '🚚' },
+                { key: 'helmetIncluded',    label: 'Helmet included',             emoji: '🪖' },
+                { key: 'depositProtected',  label: 'Deposit Protected (safest)',  emoji: '🛡' },
+                { key: 'noPassport',        label: 'No passport required',        emoji: '🪪' },
               ].map(({ key, label, emoji }) => (
                 <button
                   key={key}
@@ -187,7 +217,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
             <div className="flex gap-3">
               <button
                 onClick={() => {
-                  onChange({ priceMin: 150, priceMax: 2000, category: 'all', deliveryNow: false, helmetIncluded: false, location: 'all', sortBy: 'rating' })
+                  onChange({ priceMin: 150, priceMax: 2000, category: 'all', deliveryNow: false, helmetIncluded: false, location: 'all', sortBy: 'rating', depositProtected: false, noPassport: false })
                 }}
                 className="flex-1 py-3 rounded-full border border-[#e8e8e4] text-sm font-semibold text-[#5c5c58] hover:bg-[#f8f8f6] transition-colors"
               >

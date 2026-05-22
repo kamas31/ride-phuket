@@ -27,6 +27,8 @@ const DEFAULT_FILTERS: FilterState = {
   helmetIncluded: false,
   location: 'all',
   sortBy: 'rating',
+  depositProtected: false,
+  noPassport: false,
 }
 
 type MobileView = 'list' | 'map'
@@ -86,6 +88,8 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
       if (filters.deliveryNow && !s.deliveryAvailable) return false
       if (filters.helmetIncluded && !s.helmetIncluded) return false
       if (filters.location !== 'all' && !s.location.toLowerCase().includes(filters.location)) return false
+      if (filters.depositProtected && !s.shop?.depositProtectedMember) return false
+      if (filters.noPassport && s.passportRequired) return false
       if (search) {
         const q = search.toLowerCase()
         if (!s.name.toLowerCase().includes(q) && !s.location.toLowerCase().includes(q) && !s.brand.toLowerCase().includes(q)) return false

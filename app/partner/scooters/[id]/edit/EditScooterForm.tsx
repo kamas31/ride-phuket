@@ -71,8 +71,14 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
     weight:            scooter.specs.weight !== 'N/A' ? scooter.specs.weight : '',
     storage:           scooter.specs.storage !== 'N/A' ? scooter.specs.storage : '',
     description:       scooter.description,
-    available:         scooter.available,
-    mileageRange:      scooter.mileageRange ?? ('' as MileageRange | ''),
+    available:          scooter.available,
+    mileageRange:       scooter.mileageRange ?? ('' as MileageRange | ''),
+    depositAmount:      scooter.depositAmount ? String(scooter.depositAmount) : '',
+    depositType:        (scooter.depositType ?? '') as string,
+    passportRequired:   scooter.passportRequired ?? false,
+    passportCopyAllowed: scooter.passportCopyAllowed ?? true,
+    isPremiumBike:      scooter.isPremiumBike ?? false,
+    depositNotes:       scooter.depositNotes ?? '',
   })
 
   const set = useCallback((k: keyof typeof form, v: unknown) => setForm(f => ({ ...f, [k]: v })), [])
@@ -167,8 +173,14 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
           storage:      form.storage || 'N/A',
         },
         description:   form.description,
-        available:     form.available,
-        mileageRange:  (form.mileageRange as MileageRange) || undefined,
+        available:            form.available,
+        mileageRange:         (form.mileageRange as MileageRange) || undefined,
+        depositAmount:        form.depositAmount ? Number(form.depositAmount) : undefined,
+        depositType:          form.depositType || undefined,
+        passportRequired:     form.passportRequired,
+        passportCopyAllowed:  form.passportCopyAllowed,
+        isPremiumBike:        form.isPremiumBike,
+        depositNotes:         form.depositNotes || undefined,
       })
 
       clearTimeout(timeoutId)
@@ -484,6 +496,73 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
                   className="w-full px-3 py-2.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[10px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35]" />
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* ── Deposit & Security ── */}
+        <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-5 space-y-4">
+          <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider flex items-center gap-1.5">
+            🛡 Deposit & Security
+          </p>
+
+          {/* Premium bike toggle */}
+          <button type="button" onClick={() => set('isPremiumBike', !form.isPremiumBike)}
+            className="w-full flex items-center justify-between p-4 rounded-[14px] border border-[#e8e8e4] hover:border-[#d0d0cc]">
+            <div>
+              <span className="text-sm font-medium text-[#0f0f0e]">Premium / high-value bike (500cc+)</span>
+              <p className="text-[10px] text-[#9c9c98] mt-0.5">Enables passport requirement for Tmax, X-ADV, Forza 750, etc.</p>
+            </div>
+            <div className={cn('w-11 h-6 rounded-full transition-colors relative flex-shrink-0', form.isPremiumBike ? 'bg-[#2563eb]' : 'bg-[#e8e8e4]')}>
+              <div className={cn('absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform', form.isPremiumBike ? 'translate-x-5' : 'translate-x-0.5')} />
+            </div>
+          </button>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Deposit Amount (฿)</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#9c9c98]">฿</span>
+                <input type="number" value={form.depositAmount} onChange={e => set('depositAmount', e.target.value)}
+                  placeholder="3000"
+                  className="w-full pl-7 pr-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Deposit Type</label>
+              <select value={form.depositType} onChange={e => set('depositType', e.target.value)}
+                className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]">
+                <option value="">Not specified</option>
+                <option value="cash">Cash</option>
+                <option value="card_hold">Card hold</option>
+                <option value="flexible">Cash or card</option>
+                <option value="none">No deposit</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Passport options */}
+          {[
+            { key: 'passportRequired',    label: form.isPremiumBike ? '🛂 Passport required (premium bike)' : '🛂 Passport required', disabled: !form.isPremiumBike, color: 'bg-[#2563eb]' },
+            { key: 'passportCopyAllowed', label: '📋 Passport copy accepted (not original required)', disabled: false, color: 'bg-[#22c55e]' },
+          ].map(item => (
+            <button key={item.key} type="button"
+              disabled={item.disabled && !form.isPremiumBike}
+              onClick={() => !item.disabled && set(item.key as keyof typeof form, !form[item.key as keyof typeof form])}
+              className={cn('w-full flex items-center justify-between p-4 rounded-[14px] border border-[#e8e8e4] hover:border-[#d0d0cc]', item.disabled && !form.isPremiumBike && 'opacity-40 cursor-not-allowed')}>
+              <span className="text-sm font-medium text-[#0f0f0e]">{item.label}</span>
+              <div className={cn('w-11 h-6 rounded-full transition-colors relative flex-shrink-0',
+                form[item.key as keyof typeof form] ? item.color : 'bg-[#e8e8e4]')}>
+                <div className={cn('absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform',
+                  form[item.key as keyof typeof form] ? 'translate-x-5' : 'translate-x-0.5')} />
+              </div>
+            </button>
+          ))}
+
+          <div>
+            <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Deposit Notes (optional)</label>
+            <input type="text" value={form.depositNotes} onChange={e => set('depositNotes', e.target.value)}
+              placeholder="e.g. Cash deposit returned on drop-off"
+              className="w-full px-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]" />
           </div>
         </div>
 

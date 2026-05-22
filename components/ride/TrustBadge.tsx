@@ -1,4 +1,4 @@
-import { Shield, Zap, Check } from 'lucide-react'
+import { Shield, Zap, Check, Star, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // ─────────────────────────────────────────────────────────────
@@ -22,6 +22,13 @@ export type TrustBadgeVariant =
   | 'new_listing'
   | 'new_partner'
   | 'fast_response'
+  // Deposit protection (v2)
+  | 'deposit_protected'    // shop enrolled in Ride Phuket Deposit Protection
+  | 'no_passport'          // no passport needed (standard scooters)
+  | 'premium_deposit'      // passport required — legit for 500cc+ / high-value bikes
+  | 'passport_copy'        // passport copy accepted (not original)
+  | 'instant_booking'      // scooter available now
+  | 'top_rated'            // reviewCount > 10 && rating >= 4.5
 
 interface TrustBadgeProps {
   variant: TrustBadgeVariant
@@ -68,6 +75,37 @@ const CONFIG: Record<TrustBadgeVariant, BadgeConfig> = {
     icon: Zap,
     cls: 'bg-[#f0fdf4] text-[#16a34a] border-[#bbf7d0]',
   },
+  // ── Deposit protection ──────────────────────────────────────────
+  deposit_protected: {
+    label: 'Deposit Protected',
+    icon: Shield,
+    cls: 'bg-[#fff4f0] text-[#FF6B35] border-[#fed7b0]',
+  },
+  no_passport: {
+    label: 'No Passport',
+    icon: Check,
+    cls: 'bg-[#f0fdf4] text-[#16a34a] border-[#bbf7d0]',
+  },
+  premium_deposit: {
+    label: 'Secured Deposit',
+    icon: Lock,
+    cls: 'bg-[#eff6ff] text-[#2563eb] border-[#bfdbfe]',
+  },
+  passport_copy: {
+    label: 'Passport Copy OK',
+    icon: Check,
+    cls: 'bg-[#f8f8f6] text-[#5c5c58] border-[#e8e8e4]',
+  },
+  instant_booking: {
+    label: 'Instant Booking',
+    icon: Zap,
+    cls: 'bg-[#fff4f0] text-[#FF6B35] border-[#fed7b0]',
+  },
+  top_rated: {
+    label: 'Top Rated',
+    icon: Star,
+    cls: 'bg-[#fffbeb] text-[#d97706] border-[#fde68a]',
+  },
 }
 
 export function TrustBadge({ variant, size = 'xs', className }: TrustBadgeProps) {
@@ -100,4 +138,9 @@ export function isNewListing(createdAt?: string): boolean {
 export function isFastResponder(responseTime?: string): boolean {
   if (!responseTime) return false
   return /< ?(5|10|15)\s*min/i.test(responseTime)
+}
+
+/** True if the scooter qualifies as "Top Rated" */
+export function isTopRated(rating: number, reviewCount: number): boolean {
+  return reviewCount >= 10 && rating >= 4.5
 }

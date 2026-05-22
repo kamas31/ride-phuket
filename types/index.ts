@@ -2,6 +2,7 @@ export type ScooterCategory = 'automatic' | 'manual' | 'electric'
 export type BookingStatus = 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled'
 export type DeliveryMethod = 'delivery' | 'pickup'
 export type MileageRange = '0-10000' | '10000-20000' | '20000-30000' | '30000-50000' | '50000+'
+export type DepositType = 'cash' | 'card_hold' | 'flexible' | 'none'
 
 export interface Shop {
   id: string
@@ -25,6 +26,8 @@ export interface Shop {
   openingHours?: string
   instagram?: string
   website?: string
+  // Deposit protection (migration 011)
+  depositProtectedMember?: boolean
 }
 
 export interface Scooter {
@@ -58,6 +61,13 @@ export interface Scooter {
   description: string
   createdAt?: string       // ISO date — used for "New listing" badge (< 30 days)
   mileageRange?: MileageRange
+  // Deposit & trust fields (migration 011)
+  depositAmount?: number        // THB, refundable deposit
+  depositType?: DepositType
+  passportRequired?: boolean    // true for premium/high-value bikes only
+  passportCopyAllowed?: boolean // true = copy OK, not original
+  isPremiumBike?: boolean       // 500cc+ or high-value — legitimate to require passport
+  depositNotes?: string
 }
 
 export interface ScooterSpecs {
@@ -125,6 +135,8 @@ export interface FilterState {
   helmetIncluded: boolean
   location: string | 'all'
   sortBy: 'price_asc' | 'price_desc' | 'rating' | 'distance'
+  depositProtected: boolean  // Ride Phuket Deposit Protection enrolled shops
+  noPassport: boolean        // no passport required (standard scooters only)
 }
 
 export interface MapMarker {

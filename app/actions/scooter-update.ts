@@ -30,6 +30,13 @@ export interface UpdateScooterPayload {
   description: string
   available: boolean
   mileageRange?: MileageRange
+  // Deposit & trust
+  depositAmount?: number
+  depositType?: string
+  passportRequired?: boolean
+  passportCopyAllowed?: boolean
+  isPremiumBike?: boolean
+  depositNotes?: string
 }
 
 export interface UpdateScooterResult {
@@ -90,8 +97,14 @@ export async function updateScooter(
         specs:              payload.specs,
         description:        payload.description.trim(),
         available:          payload.available,
-        mileage_range:      payload.mileageRange ?? null,
-        updated_at:         new Date().toISOString(),
+        mileage_range:        payload.mileageRange ?? null,
+        deposit_amount:       payload.depositAmount ?? null,
+        deposit_type:         payload.depositType ?? null,
+        passport_required:    payload.passportRequired ?? false,
+        passport_copy_allowed: payload.passportCopyAllowed ?? true,
+        is_premium_bike:      payload.isPremiumBike ?? false,
+        deposit_notes:        payload.depositNotes ?? null,
+        updated_at:           new Date().toISOString(),
       })
       .eq('id', scooterId)
 
