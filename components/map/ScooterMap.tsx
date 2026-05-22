@@ -9,33 +9,28 @@ import { Star, MapPin, X, ArrowRight, Zap, Shield } from 'lucide-react'
 import { getScooterCover } from '@/lib/utils'
 import { cn, formatPrice } from '@/lib/utils'
 import { ScooterImage } from '@/components/ride/ScooterImage'
+import { anonymiseCoords, PHUKET_ZONES, zoneCircleGeoJSON } from '@/lib/zones'
 import type { Scooter } from '@/types'
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
-// ── Area coordinate fallbacks ──────────────────────────────────
-const AREA_COORDS: Record<string, { lat: number; lng: number }> = {
-  patong:         { lat: 7.8956, lng: 98.2966 },
-  kata:           { lat: 7.8203, lng: 98.2986 },
-  karon:          { lat: 7.8347, lng: 98.2987 },
-  rawai:          { lat: 7.7781, lng: 98.3281 },
-  'bang tao':     { lat: 8.0000, lng: 98.2900 },
-  'phuket town':  { lat: 7.8804, lng: 98.3881 },
-  kamala:         { lat: 7.9476, lng: 98.2734 },
-  surin:          { lat: 7.9714, lng: 98.2800 },
+// ── Privacy: always use anonymised zone-based coordinates ──────
+// Real shop coordinates are NEVER exposed to the map client.
+// Deterministic jitter from scooter ID keeps positions stable.
+function resolveCoords(scooter: Scooter) {
+  return anonymiseCoords(scooter.id, scooter.location)
 }
 
-function resolveCoords(scooter: Scooter, index: number) {
-  const isDefault = Math.abs(scooter.lat - 7.95) < 0.01 && Math.abs(scooter.lng - 98.34) < 0.01
-  if (!isDefault) return { lat: scooter.lat, lng: scooter.lng }
-  const loc = scooter.location.toLowerCase()
-  for (const [key, coords] of Object.entries(AREA_COORDS)) {
-    if (loc.includes(key)) {
-      const jitter = (index % 5) * 0.003
-      return { lat: coords.lat + jitter, lng: coords.lng + jitter }
-    }
+// ── Zone circles GeoJSON (background layer) ────────────────────
+function buildZoneGeoJSON(): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: PHUKET_ZONES.map(zone => ({
+      type: 'Feature' as const,
+      properties: { name: zone.name },
+      geometry: zoneCircleGeoJSON(zone),
+    })),
   }
-  return { lat: 7.9519 + (index % 8) * 0.008, lng: 98.3381 + (index % 8) * 0.006 }
 }
 
 // ── Price Pin React component ───────────────────────────────────
@@ -189,6 +184,34 @@ export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, 
         map.setFog({ range: [0.5, 10], color: '#0a0c10', 'high-color': '#0d1520', 'space-color': '#030507', 'star-intensity': 0.1 } as Parameters<typeof map.setFog>[0])
         map.setPaintProperty('water', 'fill-color', '#0d1d2e')
       } catch { /* ignore if layer not available */ }
+
+      // ── Zone circles — subtle area boundaries (no exact locations) ──
+      try {
+        map.addSource('zones', {
+          type: 'geojson',
+          data: buildZoneGeoJSON() as GeoJSON.FeatureCollection,
+        })
+        // Translucent fill
+        map.addLayer({
+          id: 'zones-fill',
+          type: 'fill',
+          source: 'zones',
+          paint: { 'fill-color': '#FF6B35', 'fill-opacity': 0.05 },
+        })
+        // Dashed border
+        map.addLayer({
+          id: 'zones-line',
+          type: 'line',
+          source: 'zones',
+          paint: {
+            'line-color': '#FF6B35',
+            'line-opacity': 0.22,
+            'line-width': 1.5,
+            'line-dasharray': [4, 4],
+          },
+        })
+      } catch { /* ignore if layers fail */ }
+
       setReady(true)
     })
 
@@ -232,7 +255,7 @@ export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, 
 
     // Create new markers (initial render — not active)
     scooters.forEach((scooter, i) => {
-      const coords = resolveCoords(scooter, i)
+      const coords = resolveCoords(scooter)
 
       if (!markersRef.current.has(scooter.id)) {
         const container = document.createElement('div')
@@ -261,10 +284,10 @@ export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, 
 
     // fitBounds — only runs when scooters change, NOT on every hover
     if (scooters.length === 1) {
-      const c = resolveCoords(scooters[0], 0)
+      const c = resolveCoords(scooters[0])
       map.flyTo({ center: [c.lng, c.lat], zoom: 14, duration: 900 })
     } else if (scooters.length > 1) {
-      const coords = scooters.map((s, i) => resolveCoords(s, i))
+      const coords = scooters.map(s => resolveCoords(s))
       const lngs = coords.map(c => c.lng)
       const lats = coords.map(c => c.lat)
       const sw: [number, number] = [Math.min(...lngs) - 0.01, Math.min(...lats) - 0.01]
@@ -326,7 +349,7 @@ export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, 
     if (!selectedId) return
     const scooter = scooters.find(s => s.id === selectedId)
     if (!scooter) return
-    const coords = resolveCoords(scooter, scooters.indexOf(scooter))
+    const coords = resolveCoords(scooter)
 
     const container = document.createElement('div')
     const popup = new mapboxgl.Popup({
