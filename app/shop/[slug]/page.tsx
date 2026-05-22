@@ -9,6 +9,7 @@ import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import { TrustBadge, isNewListing, isFastResponder } from '@/components/ride/TrustBadge'
 import { EmptyReviews } from '@/components/ride/EmptyReviews'
+import { QuickContact } from '@/components/ride/QuickContact'
 
 interface ShopPageProps {
   params: Promise<{ slug: string }>
@@ -203,46 +204,34 @@ export default async function ShopPage({ params }: ShopPageProps) {
           {/* ── RIGHT (contact card) ── */}
           <div className="mt-8 lg:mt-0">
             <div className="sticky top-32 space-y-4">
-              {/* Contact card */}
+              {/* Premium contact card */}
               <div className="bg-white rounded-[20px] border border-[#e8e8e4] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)] p-5">
-                <div className="flex items-center gap-3 mb-4">
+                {/* Shop identity */}
+                <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#f0f0ec]">
                   <div className="w-11 h-11 bg-[#FF6B35]/10 rounded-full flex items-center justify-center text-[#FF6B35] font-bold text-lg flex-shrink-0">
                     {shop.name[0]}
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="font-bold text-[#0f0f0e] truncate">{shop.name}</p>
-                    <div className="flex items-center gap-1 text-xs text-[#9c9c98]">
-                      <Clock className="w-3 h-3" />
-                      Responds {shop.responseTime}
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {shop.verified && <TrustBadge variant="verified" size="xs" />}
+                      {fastResponder && <TrustBadge variant="fast_response" size="xs" />}
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-2.5 mb-5">
-                  {waLink && (
-                    <a
-                      href={waLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full py-3 bg-[#f0fdf4] border border-[#22c55e]/20 text-[#16a34a] font-bold text-sm rounded-full hover:bg-[#dcfce7] transition-colors"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      WhatsApp {shop.name}
-                    </a>
-                  )}
-                  {shop.phone && (
-                    <a
-                      href={`tel:${shop.phone}`}
-                      className="flex items-center justify-center gap-2 w-full py-3 border border-[#e8e8e4] text-[#5c5c58] font-semibold text-sm rounded-full hover:bg-[#f8f8f6] hover:border-[#d0d0cc] transition-colors"
-                    >
-                      <Phone className="w-4 h-4" />
-                      Call shop
-                    </a>
-                  )}
-                </div>
+                {/* Quick contact with smart templates */}
+                <QuickContact
+                  whatsapp={shop.whatsapp}
+                  phone={shop.phone}
+                  shopName={shop.name}
+                  responseTime={shop.responseTime}
+                  context={{ shopName: shop.name, location: shop.location }}
+                  questions={['ask_delivery', 'ask_deposit', 'ask_license', 'ask_availability', 'ask_monthly']}
+                />
 
                 {/* Info rows */}
-                <div className="space-y-2.5 text-sm">
+                <div className="space-y-2 mt-4 pt-4 border-t border-[#f0f0ec] text-sm">
                   <div className="flex items-start gap-2.5 text-[#5c5c58]">
                     <MapPin className="w-4 h-4 text-[#9c9c98] flex-shrink-0 mt-0.5" />
                     <span>{shop.address || shop.location + ', Phuket'}</span>
@@ -254,24 +243,16 @@ export default async function ShopPage({ params }: ShopPageProps) {
                     </div>
                   )}
                   {shop.website && (
-                    <a
-                      href={shop.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2.5 text-[#5c5c58] hover:text-[#FF6B35] transition-colors"
-                    >
+                    <a href={shop.website} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-2.5 text-[#5c5c58] hover:text-[#FF6B35] transition-colors">
                       <Globe className="w-4 h-4 text-[#9c9c98] flex-shrink-0" />
                       <span className="truncate">{shop.website.replace(/^https?:\/\//, '')}</span>
                       <ExternalLink className="w-3 h-3 flex-shrink-0 opacity-50" />
                     </a>
                   )}
                   {shop.instagram && (
-                    <a
-                      href={`https://instagram.com/${shop.instagram.replace('@', '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2.5 text-[#5c5c58] hover:text-[#FF6B35] transition-colors"
-                    >
+                    <a href={`https://instagram.com/${shop.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-2.5 text-[#5c5c58] hover:text-[#FF6B35] transition-colors">
                       <span className="w-4 h-4 text-[#9c9c98] flex-shrink-0 text-sm font-bold">IG</span>
                       <span>{shop.instagram.startsWith('@') ? shop.instagram : `@${shop.instagram}`}</span>
                     </a>
@@ -279,7 +260,26 @@ export default async function ShopPage({ params }: ShopPageProps) {
                 </div>
               </div>
 
-              {/* Explore all CTA */}
+              {/* Stats row — real data only */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white rounded-[16px] border border-[#e8e8e4] p-3.5 text-center">
+                  <p className="text-[22px] font-bold text-[#0f0f0e] leading-none">{scooters.length}</p>
+                  <p className="text-[10px] text-[#9c9c98] mt-1">Scooters available</p>
+                </div>
+                {shop.reviewCount > 0 ? (
+                  <div className="bg-white rounded-[16px] border border-[#e8e8e4] p-3.5 text-center">
+                    <p className="text-[22px] font-bold text-[#0f0f0e] leading-none">{shop.rating.toFixed(1)}</p>
+                    <p className="text-[10px] text-[#9c9c98] mt-1">{shop.reviewCount} reviews</p>
+                  </div>
+                ) : shop.responseTime ? (
+                  <div className="bg-white rounded-[16px] border border-[#e8e8e4] p-3.5 text-center">
+                    <p className="text-[13px] font-bold text-[#22c55e] leading-tight mt-1">{shop.responseTime}</p>
+                    <p className="text-[10px] text-[#9c9c98] mt-1">Response time</p>
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Explore CTA */}
               <Link
                 href={`/explore?location=${shop.location.toLowerCase()}`}
                 className="flex items-center justify-center gap-2 w-full py-3 bg-[#FF6B35] text-white font-bold text-sm rounded-full hover:bg-[#e85d29] transition-colors shadow-sm"

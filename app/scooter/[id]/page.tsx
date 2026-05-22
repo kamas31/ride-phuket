@@ -11,6 +11,7 @@ import { formatPrice, formatPricePerDay, pluralize, getScooterCover } from '@/li
 import { ImageGallery } from '@/components/ride/ImageGallery'
 import { TrustBadge, isNewListing, isFastResponder } from '@/components/ride/TrustBadge'
 import { EmptyReviews } from '@/components/ride/EmptyReviews'
+import { QuickContact } from '@/components/ride/QuickContact'
 
 interface ScooterPageProps {
   params: Promise<{ id: string }>
@@ -249,6 +250,19 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   </a>
                 )}
               </div>
+            </div>
+
+            {/* Quick contact — WhatsApp templates */}
+            <div className="bg-[#f8f8f6] rounded-[20px] p-5 border border-[#e8e8e4]">
+              <h2 className="text-[15px] font-bold text-[#0f0f0e] mb-4">Contact shop</h2>
+              <QuickContact
+                whatsapp={shop.whatsapp}
+                phone={shop.phone}
+                shopName={shop.name}
+                responseTime={shop.responseTime}
+                context={{ scooterName: scooter.name, location: scooter.location }}
+                questions={['ask_delivery', 'ask_deposit', 'ask_license', 'ask_availability', 'ask_monthly']}
+              />
             </div>
 
             {/* Reviews — real or empty state, never fake */}

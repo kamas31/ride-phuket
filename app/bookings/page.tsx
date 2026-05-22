@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { MapPin, Star, ArrowRight, CheckCircle2, AlertCircle, XCircle, Clock } from 'lucide-react'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import { Badge } from '@/components/ui/Badge'
+import { BookingTimeline } from '@/components/ride/BookingTimeline'
+import { QuickContact } from '@/components/ride/QuickContact'
 import { useAuth } from '@/hooks/useAuth'
 import { useBookings } from '@/hooks/useBookings'
 import { formatPrice, formatDateRange } from '@/lib/utils'
@@ -134,21 +136,34 @@ export default function BookingsPage() {
                         </div>
                       )}
 
-                      <div className="flex gap-2">
-                        {shop?.whatsapp && (
-                          <a
-                            href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 py-2.5 rounded-full bg-[#f0fdf4] text-[#16a34a] text-xs font-semibold border border-[#22c55e]/20 hover:bg-[#dcfce7] transition-colors text-center"
-                          >
-                            WhatsApp Shop
-                          </a>
-                        )}
-                        <button className="flex-1 py-2.5 rounded-full border border-[#e8e8e4] text-xs font-medium text-[#5c5c58] hover:bg-[#f8f8f6] transition-colors">
-                          View Details
-                        </button>
-                      </div>
+                      {/* Booking timeline */}
+                      <BookingTimeline
+                        status={booking.status as 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled'}
+                        startDate={booking.startDate}
+                        endDate={booking.endDate}
+                        className="mb-4"
+                      />
+
+                      {/* Smart WhatsApp contact */}
+                      {shop?.whatsapp && (
+                        <QuickContact
+                          whatsapp={shop.whatsapp}
+                          shopName={shop.name ?? 'Shop'}
+                          responseTime={shop.responseTime}
+                          context={{
+                            scooterName: scooter?.name,
+                            startDate:   booking.startDate,
+                            endDate:     booking.endDate,
+                            bookingRef:  booking.id.slice(-8).toUpperCase(),
+                          }}
+                          questions={
+                            booking.status === 'pending'
+                              ? ['ask_delivery', 'ask_deposit', 'ask_license']
+                              : ['ask_extension', 'ask_delivery']
+                          }
+                          variant="full"
+                        />
+                      )}
                     </div>
                   </div>
                 )

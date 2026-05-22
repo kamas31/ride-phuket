@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { notify } from '@/lib/notifications'
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -87,6 +88,14 @@ export async function confirmBooking(bookingId: string): Promise<BookingActionRe
       return { success: false, error: updateErr.message }
     }
 
+    // Notify the rider that their booking was confirmed
+    notify('booking_confirmed', {
+      userId: booking.user_id,
+      title:  'Booking confirmed! 🎉',
+      body:   `Your booking from ${booking.start_date} to ${booking.end_date} has been confirmed.`,
+      data:   { bookingId, scooterName: booking.scooters?.name, shopId: booking.shop_id },
+    })
+
     revalidatePath('/partner/bookings')
     revalidatePath('/bookings')
     return { success: true }
@@ -142,6 +151,17 @@ export async function cancelBooking(
       .eq('id', bookingId)
 
     if (updateErr) return { success: false, error: updateErr.message }
+
+    // Notify the other party
+    const notifyUserId = cancelledBy === 'partner' ? booking.user_id : null
+    if (notifyUserId) {
+      notify('booking_cancelled', {
+        userId: notifyUserId,
+        title:  'Booking cancelled',
+        body:   'Your booking has been cancelled by the shop. Please contact them for details.',
+        data:   { bookingId },
+      })
+    }
 
     revalidatePath('/partner/bookings')
     revalidatePath('/bookings')
