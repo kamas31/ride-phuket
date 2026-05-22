@@ -67,6 +67,62 @@ export function formatShortDate(date: Date): string {
  * Priority: explicit cover_image → images[0] → empty string
  * Use this everywhere an image is displayed so the cover is always respected.
  */
+/**
+ * Intelligent pricing: applies the best rate for the given duration.
+ * Weekly rate applied in full-week blocks; monthly in full-month blocks.
+ * Remaining days always charged at daily rate.
+ */
+export interface PricingBreakdown {
+  total: number
+  days: number
+  rateUsed: 'daily' | 'weekly' | 'monthly'
+  label: string   // human-readable explanation, e.g. "2 weeks + 1 day"
+  savings: number  // vs. pure daily rate (0 when no savings)
+}
+
+export function calcSmartPrice(
+  days: number,
+  perDay: number,
+  perWeek?: number,
+  perMonth?: number,
+): PricingBreakdown {
+  if (days <= 0) return { total: 0, days, rateUsed: 'daily', label: '0 days', savings: 0 }
+
+  const pureDaily = days * perDay
+
+  // Monthly blocks
+  if (perMonth && days >= 28) {
+    const months     = Math.floor(days / 30)
+    const remaining  = days % 30
+    if (months > 0) {
+      const total   = months * perMonth + remaining * perDay
+      const savings = pureDaily - total
+      const label   = [months > 0 ? `${months} month${months > 1 ? 's' : ''}` : '', remaining > 0 ? `${remaining} day${remaining > 1 ? 's' : ''}` : ''].filter(Boolean).join(' + ')
+      return { total, days, rateUsed: 'monthly', label, savings: Math.max(0, savings) }
+    }
+  }
+
+  // Weekly blocks
+  if (perWeek && days >= 7) {
+    const weeks     = Math.floor(days / 7)
+    const remaining = days % 7
+    if (weeks > 0) {
+      const total   = weeks * perWeek + remaining * perDay
+      const savings = pureDaily - total
+      const label   = [weeks > 0 ? `${weeks} week${weeks > 1 ? 's' : ''}` : '', remaining > 0 ? `${remaining} day${remaining > 1 ? 's' : ''}` : ''].filter(Boolean).join(' + ')
+      return { total, days, rateUsed: 'weekly', label, savings: Math.max(0, savings) }
+    }
+  }
+
+  return {
+    total:    pureDaily,
+    days,
+    rateUsed: 'daily',
+    label:    `${days} day${days > 1 ? 's' : ''}`,
+    savings:  0,
+  }
+}
+
 export function getScooterCover(scooter: {
   coverImage?: string | null
   images: string[]

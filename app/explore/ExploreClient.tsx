@@ -219,9 +219,16 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
         <div className="lg:hidden">
           {mobileView === 'list' ? (
             filtered.length === 0 ? <EmptyState /> : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              // xs 2-column: 4+ cards visible without scroll on iPhone
+              <div className="grid grid-cols-2 gap-2.5">
                 {filtered.map(scooter => (
-                  <CardWrapper key={scooter.id} scooter={scooter} />
+                  <div
+                    key={scooter.id}
+                    onTouchStart={() => prefetchScooter(scooter.id)}
+                    onClick={() => setSelectedId(prev => prev === scooter.id ? null : scooter.id)}
+                  >
+                    <ScooterCard scooter={scooter} xs />
+                  </div>
                 ))}
               </div>
             )

@@ -11,9 +11,53 @@ interface ScooterCardProps {
   scooter: Scooter
   className?: string
   compact?: boolean
+  xs?: boolean  // 2-column mobile grid: aspect-ratio image, minimal content
 }
 
-export const ScooterCard = memo(function ScooterCard({ scooter, className, compact = false }: ScooterCardProps) {
+export const ScooterCard = memo(function ScooterCard({ scooter, className, compact = false, xs = false }: ScooterCardProps) {
+  // xs variant: used in 2-column mobile grids. Shows essential info only.
+  if (xs) return (
+    <Link
+      href={`/scooter/${scooter.id}`}
+      className={cn(
+        'group block bg-white rounded-[16px] overflow-hidden border border-[#e8e8e4] transition-all duration-200',
+        'active:scale-[0.97] active:shadow-none',
+        className
+      )}
+    >
+      <ScooterImage
+        src={getScooterCover(scooter)}
+        alt={scooter.name}
+        className="aspect-[4/3]"
+        objectFit="contain"
+        hover
+        sizes="(max-width: 640px) 50vw, 33vw"
+      />
+      <div className="p-2.5">
+        <div className="flex items-center justify-between mb-0.5">
+          {scooter.reviewCount > 0 ? (
+            <div className="flex items-center gap-0.5">
+              <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
+              <span className="text-[10px] font-bold text-[#0f0f0e]">{scooter.rating.toFixed(1)}</span>
+            </div>
+          ) : (
+            <TrustBadge variant="new_listing" size="xs" />
+          )}
+          {!scooter.available && (
+            <span className="text-[9px] text-[#9c9c98]">Unavail.</span>
+          )}
+        </div>
+        <h3 className="font-bold text-[12px] text-[#0f0f0e] leading-tight truncate mb-0.5 group-hover:text-[#FF6B35] transition-colors">
+          {scooter.name}
+        </h3>
+        <div className="flex items-baseline gap-1">
+          <span className="text-[13px] font-bold text-[#0f0f0e] leading-none">{formatPrice(scooter.pricePerDay)}</span>
+          <span className="text-[10px] text-[#9c9c98]">/day</span>
+        </div>
+      </div>
+    </Link>
+  )
+
   return (
     <Link
       href={`/scooter/${scooter.id}`}
@@ -21,7 +65,6 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         'group block bg-white rounded-[20px] overflow-hidden border border-[#e8e8e4] transition-all duration-300',
         'hover:border-[#d0d0cc] hover:shadow-[0_8px_32px_-4px_rgba(0,0,0,0.12),0_2px_8px_-2px_rgba(0,0,0,0.06)]',
         'hover:-translate-y-0.5',
-        // Tactile feedback on tap — zero dead click feeling
         'active:scale-[0.98] active:shadow-none active:translate-y-0',
         className
       )}

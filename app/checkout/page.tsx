@@ -3,11 +3,12 @@
 import { useState, Suspense, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Shield, Check, MapPin, Calendar, Truck, Store, ChevronRight, Lock } from 'lucide-react'
+import { ArrowLeft, Shield, Check, MapPin, Calendar, Truck, Store, ChevronRight, Lock, MessageCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { ScooterImage } from '@/components/ride/ScooterImage'
+import { DateRangePicker } from '@/components/ui/DateRangePicker'
 import { SCOOTERS } from '@/data/scooters'
-import { formatPrice, calculateDays, calculateTotal, addDays, getScooterCover } from '@/lib/utils'
+import { formatPrice, calculateDays, calculateTotal, addDays, getScooterCover, calcSmartPrice } from '@/lib/utils'
 import { createBookingAction } from '@/app/actions/booking'
 import { getScooterAction } from '@/app/actions/scooter'
 import { useAuth } from '@/hooks/useAuth'
@@ -52,8 +53,9 @@ function CheckoutContent() {
 
   const days = calculateDays(startDate, endDate) || 3
   const deliveryFee = delivery === 'delivery' ? scooter.deliveryFee : 0
-  const subtotal = scooter.pricePerDay * days
-  const total = calculateTotal(scooter.pricePerDay, days, deliveryFee)
+  const pricing = calcSmartPrice(days, scooter.pricePerDay, scooter.pricePerWeek, scooter.pricePerMonth)
+  const subtotal = pricing.total
+  const total = subtotal + deliveryFee
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -129,19 +131,35 @@ function CheckoutContent() {
               <span className="font-medium text-[#0f0f0e]">{scooter.shop?.name}</span>
             </div>
           </div>
-          <div className="flex gap-3">
-            <Link
-              href="/bookings"
-              className="flex-1 flex items-center justify-center py-3.5 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-sm"
-            >
-              View Booking
-            </Link>
-            <Link
-              href="/explore"
-              className="flex-1 flex items-center justify-center py-3.5 border border-[#e8e8e4] text-[#5c5c58] font-semibold rounded-full hover:bg-[#f8f8f6] transition-colors text-sm"
-            >
-              Explore More
-            </Link>
+          <div className="space-y-2.5">
+            {/* WhatsApp CTA — pre-filled message */}
+            {scooter.shop?.whatsapp && (
+              <a
+                href={`https://wa.me/${scooter.shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(
+                  `Hi ${scooter.shop.name}! I just booked your ${scooter.name} on Ride Phuket (Ref: ${shortId}). Can you confirm the details?`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#f0fdf4] border border-[#22c55e]/20 text-[#16a34a] font-bold rounded-full hover:bg-[#dcfce7] transition-colors text-sm"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Message the shop on WhatsApp
+              </a>
+            )}
+            <div className="flex gap-2">
+              <Link
+                href="/bookings"
+                className="flex-1 flex items-center justify-center py-3.5 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-sm"
+              >
+                View Booking
+              </Link>
+              <Link
+                href="/explore"
+                className="flex-1 flex items-center justify-center py-3.5 border border-[#e8e8e4] text-[#5c5c58] font-semibold rounded-full hover:bg-[#f8f8f6] transition-colors text-sm"
+              >
+                Explore More
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -211,33 +229,59 @@ function CheckoutContent() {
                 </div>
               </div>
 
-              {/* Dates */}
+              {/* Dates — custom calendar, no native input[type=date] */}
               <div className="bg-white rounded-[20px] p-5 border border-[#e8e8e4]">
                 <div className="flex items-center gap-2 mb-4">
                   <Calendar className="w-4 h-4 text-[#FF6B35]" />
                   <h3 className="font-bold text-[#0f0f0e]">Rental Dates</h3>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+
+                {/* Selected dates summary */}
+                <div className="flex gap-2 mb-4">
                   {[
-                    { label: 'Start Date', value: startDate, min: tomorrow.toISOString().split('T')[0], onChange: setStartDate },
-                    { label: 'End Date', value: endDate, min: startDate, onChange: setEndDate },
-                  ].map(field => (
-                    <div key={field.label}>
-                      <label className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5 block">{field.label}</label>
-                      <input
-                        type="date"
-                        value={field.value}
-                        min={field.min}
-                        onChange={e => field.onChange(e.target.value)}
-                        required
-                        className="w-full px-3 py-2.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35] transition-colors"
-                      />
+                    { label: 'Check-in', value: startDate },
+                    { label: 'Check-out', value: endDate },
+                  ].map(f => (
+                    <div key={f.label} className={`flex-1 px-3 py-2.5 rounded-[12px] border-2 transition-colors ${
+                      f.value ? 'border-[#FF6B35] bg-[#fff4f0]' : 'border-[#e8e8e4] bg-[#f8f8f6]'
+                    }`}>
+                      <p className="text-[9px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-0.5">{f.label}</p>
+                      <p className={`text-sm font-bold ${f.value ? 'text-[#0f0f0e]' : 'text-[#9c9c98]'}`}>
+                        {f.value ? new Date(f.value + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                      </p>
                     </div>
                   ))}
                 </div>
-                <div className="mt-3 px-3 py-2 bg-[#fff4f0] rounded-[10px] text-sm text-[#FF6B35] font-semibold">
-                  {days} {days === 1 ? 'day' : 'days'} &nbsp;·&nbsp; {formatPrice(subtotal)} subtotal
-                </div>
+
+                <DateRangePicker
+                  startDate={startDate}
+                  endDate={endDate}
+                  onStartChange={setStartDate}
+                  onEndChange={setEndDate}
+                  minDate={tomorrow.toISOString().split('T')[0]}
+                />
+
+                {/* Live pricing feedback */}
+                {startDate && endDate && (
+                  <div className="mt-4 px-4 py-3 bg-[#fff4f0] rounded-[12px]">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-bold text-[#FF6B35]">{formatPrice(subtotal)}</span>
+                        <span className="text-xs text-[#9c9c98] ml-1">· {pricing.label}</span>
+                      </div>
+                      {pricing.savings > 0 && (
+                        <span className="text-[10px] font-bold text-[#22c55e] bg-[#f0fdf4] px-2 py-1 rounded-full">
+                          Save {formatPrice(pricing.savings)}
+                        </span>
+                      )}
+                    </div>
+                    {pricing.rateUsed !== 'daily' && (
+                      <p className="text-[10px] text-[#9c9c98] mt-1">
+                        {pricing.rateUsed === 'weekly' ? 'Weekly' : 'Monthly'} rate applied
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Delivery method */}

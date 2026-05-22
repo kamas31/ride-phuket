@@ -75,16 +75,16 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Breadcrumb nav — no fake "12 viewed today" */}
+      {/* Breadcrumb nav */}
       <div className="sticky top-16 z-20 bg-white/90 backdrop-blur-md border-b border-[#e8e8e4]">
-        <div className="max-w-5xl mx-auto px-4 h-11 flex items-center gap-3">
+        <div className="max-w-5xl mx-auto px-4 h-13 flex items-center gap-3">
           <Link
             href="/explore"
             prefetch={true}
-            className="flex items-center gap-1.5 text-sm font-medium text-[#5c5c58] hover:text-[#0f0f0e] transition-colors active:opacity-50"
+            className="flex items-center gap-2 py-2 pr-3 text-sm font-semibold text-[#5c5c58] hover:text-[#0f0f0e] transition-colors active:opacity-50 active:scale-95 rounded-[10px] hover:bg-[#f8f8f6]"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Explore
+            <span>Explore</span>
           </Link>
           {/* Real trust signals only */}
           <div className="ml-auto flex items-center gap-2">
