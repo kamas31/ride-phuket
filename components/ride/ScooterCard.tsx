@@ -1,8 +1,11 @@
+'use client'
+
 import { memo } from 'react'
 import Link from 'next/link'
 import { Star, MapPin, Zap, Shield, Check } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { ScooterImage } from '@/components/ride/ScooterImage'
+import { SaveButton } from '@/components/ride/SaveButton'
 import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
 import { cn, formatPrice, getScooterCover } from '@/lib/utils'
 import type { Scooter } from '@/types'
@@ -93,15 +96,16 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
           )}
         </div>
 
-        {/* Top-right: insurance */}
-        {scooter.insuranceIncluded && (
-          <div className="absolute top-3 right-3">
+        {/* Top-right: save heart + insurance */}
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+          <SaveButton scooterId={scooter.id} size="sm" />
+          {scooter.insuranceIncluded && (
             <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm text-white text-[11px] font-medium rounded-full flex items-center gap-1">
               <Shield className="w-2.5 h-2.5 text-[#22c55e]" />
               Insured
             </span>
-          </div>
-        )}
+          )}
+        </div>
       </ScooterImage>
 
       {/* Content */}

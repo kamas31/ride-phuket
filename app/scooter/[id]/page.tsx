@@ -13,6 +13,9 @@ import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
 import { EmptyReviews } from '@/components/ride/EmptyReviews'
 import { ShopContact } from '@/components/ride/ShopContact'
 import { DepositInfo } from '@/components/ride/DepositInfo'
+import { RidePhuketProtection } from '@/components/ride/RidePhuketProtection'
+import { StickyBookingBar } from '@/components/ride/StickyBookingBar'
+import { SaveButton } from '@/components/ride/SaveButton'
 import { getPublicInquiries } from '@/app/actions/inquiry-actions'
 import { createClient } from '@/lib/supabase/server'
 import { sanitize } from '@/lib/moderation'
@@ -117,10 +120,10 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
             <ArrowLeft className="w-4 h-4" />
             <span>Explore</span>
           </Link>
-          {/* Real trust signals only */}
           <div className="ml-auto flex items-center gap-2">
             {newListing && <TrustBadge variant="new_listing" />}
             {shop.verified && <TrustBadge variant="verified" />}
+            <SaveButton scooterId={scooter.id} size="md" />
           </div>
         </div>
       </div>
@@ -129,8 +132,13 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
         <div className="lg:grid lg:grid-cols-5 lg:gap-10">
           {/* ── LEFT COLUMN ── */}
           <div className="lg:col-span-3 space-y-6">
-            {/* Image gallery */}
-            <ImageGallery images={scooter.images} name={scooter.name} coverImage={scooter.coverImage} />
+            {/* Sentinel — triggers the sticky booking bar when scrolled past */}
+            <div id="sticky-booking-sentinel" className="-mt-1" aria-hidden />
+
+            {/* Image gallery — edge-to-edge on mobile, rounded on desktop */}
+            <div className="-mx-4 md:mx-0">
+              <ImageGallery images={scooter.images} name={scooter.name} coverImage={scooter.coverImage} />
+            </div>
 
             {/* Title & meta */}
             <div>
@@ -420,6 +428,12 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     Free cancellation up to 24h before
                   </div>
 
+                  {/* Ride Phuket Protection */}
+                  <RidePhuketProtection
+                    depositProtected={shop.depositProtectedMember}
+                    verified={shop.verified}
+                  />
+
                   {/* Trust checklist — all factual */}
                   <div className="pt-3 border-t border-[#f0f0ec] space-y-2">
                     {[
@@ -440,6 +454,14 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Mobile sticky booking bar — appears when sentinel scrolls off screen */}
+      <StickyBookingBar
+        scooterName={scooter.name}
+        pricePerDay={scooter.pricePerDay}
+        scooterId={scooter.id}
+        available={scooter.available}
+      />
     </div>
   )
 }

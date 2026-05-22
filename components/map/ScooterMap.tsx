@@ -144,13 +144,17 @@ interface ScooterMapProps {
   hoveredId?: string
   onSelect: (id: string | null) => void
   onHover?: (id: string | null) => void
+  onBoundsChange?: (bounds: { sw: [number, number]; ne: [number, number] }) => void
   className?: string
 }
 
-export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, onHover, className }: ScooterMapProps) {
+export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, onHover, onBoundsChange, className }: ScooterMapProps) {
   const containerRef  = useRef<HTMLDivElement>(null)
   const mapRef        = useRef<mapboxgl.Map | null>(null)
   const [ready, setReady] = useState(false)
+  const [showSearchHere, setShowSearchHere] = useState(false)
+  const onBoundsChangeRef = useRef(onBoundsChange)
+  useEffect(() => { onBoundsChangeRef.current = onBoundsChange }, [onBoundsChange])
 
   // Marker roots: id → { marker, root, container }
   const markersRef = useRef<Map<string, { marker: mapboxgl.Marker; root: Root; container: HTMLDivElement }>>(new Map())
@@ -217,6 +221,12 @@ export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, 
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
     map.on('click', () => onSelectRef.current(null))
+
+    // Show "Search this area" button when user pans or zooms the map
+    const onMoveEnd = () => {
+      if (onBoundsChangeRef.current) setShowSearchHere(true)
+    }
+    map.on('moveend', onMoveEnd)
 
     mapRef.current = map
     return () => {
@@ -385,10 +395,32 @@ export default function ScooterMap({ scooters, selectedId, hoveredId, onSelect, 
     )
   }
 
+  const handleSearchHere = () => {
+    if (!mapRef.current) return
+    const bounds = mapRef.current.getBounds()
+    if (!bounds) return
+    const sw = bounds.getSouthWest()
+    const ne = bounds.getNorthEast()
+    onBoundsChangeRef.current?.({ sw: [sw.lng, sw.lat], ne: [ne.lng, ne.lat] })
+    setShowSearchHere(false)
+  }
+
   return (
     <div className={cn('relative rounded-[20px] overflow-hidden', className)}>
       {!ready && <MapSkeleton className="absolute inset-0 z-10" />}
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+
+      {/* "Search this area" button — Airbnb pattern */}
+      {showSearchHere && onBoundsChange && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+          <button
+            onClick={handleSearchHere}
+            className="flex items-center gap-1.5 px-4 py-2 bg-white text-[#0f0f0e] text-xs font-bold rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:bg-[#f8f8f6] transition-colors active:scale-[0.96]"
+          >
+            🔍 Search this area
+          </button>
+        </div>
+      )}
     </div>
   )
 }

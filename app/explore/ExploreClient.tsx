@@ -42,6 +42,7 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
   const [hoveredId, setHoveredId]     = useState<string | null>(null)
   const [showMap, setShowMap]         = useState(true)
   const [mobileView, setMobileView]   = useState<MobileView>('list')
+  const [mapBounds, setMapBounds]     = useState<{ sw: [number, number]; ne: [number, number] } | null>(null)
 
   const cardRefs  = useRef<Record<string, HTMLDivElement | null>>({})
   // Debounce timer for hover — prevents cascade re-renders on fast mouse movement
@@ -90,6 +91,12 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
       if (filters.location !== 'all' && !s.location.toLowerCase().includes(filters.location)) return false
       if (filters.depositProtected && !s.shop?.depositProtectedMember) return false
       if (filters.noPassport && s.passportRequired) return false
+      // Map bounds filter (when "Search this area" is clicked)
+      if (mapBounds) {
+        const { lat, lng } = { lat: s.lat, lng: s.lng }
+        if (lng < mapBounds.sw[0] || lng > mapBounds.ne[0]) return false
+        if (lat < mapBounds.sw[1] || lat > mapBounds.ne[1]) return false
+      }
       if (search) {
         const q = search.toLowerCase()
         if (!s.name.toLowerCase().includes(q) && !s.location.toLowerCase().includes(q) && !s.brand.toLowerCase().includes(q)) return false
@@ -212,6 +219,7 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
                   hoveredId={hoveredId ?? undefined}
                   onSelect={handleSelectFromMap}
                   onHover={setHoveredId}
+                  onBoundsChange={setMapBounds}
                   className="h-[calc(100vh-10rem)] min-h-[480px]"
                 />
               </div>

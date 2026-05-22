@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { MapPin, Menu, X, BookOpen, LayoutDashboard, LogOut, ChevronDown } from 'lucide-react'
+import { MapPin, Menu, X, BookOpen, LayoutDashboard, LogOut, ChevronDown, Heart } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { SITE_NAME } from '@/constants'
@@ -63,10 +63,12 @@ export default function Navbar() {
     ? [
         { href: '/partner/dashboard', label: 'Dashboard' },
         { href: '/explore', label: 'Explore' },
+        { href: '/saved', label: 'Saved' },
         { href: '/profile', label: 'Profile' },
       ]
     : [
         { href: '/explore', label: 'Explore' },
+        { href: '/saved', label: 'Saved' },
         { href: '/bookings', label: 'My Bookings' },
         { href: '/profile', label: 'Profile' },
       ]

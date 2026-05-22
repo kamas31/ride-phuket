@@ -294,6 +294,23 @@ function mapDbShop(row: any): Shop {
   }
 }
 
+// ── SCOOTERS BY IDS (wishlist / saved page) ─────────────────
+export async function getScootersByIds(ids: string[]): Promise<Scooter[]> {
+  if (!ids.length) return []
+  if (!isConfigured()) return SCOOTERS.filter(s => ids.includes(s.id))
+
+  const { createClient } = await import('./server')
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('scooters')
+    .select('*, shops(*)')
+    .in('id', ids)
+
+  if (error || !data) return []
+  return data.map(mapDbScooter)
+}
+
 // ── SHOP BY SLUG ────────────────────────────────────────────
 export type ShopWithFleet = Shop & { scooters: Scooter[] }
 
