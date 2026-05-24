@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { getZoneForLocation } from '@/lib/zones'
 
 export interface CreateScooterPayload {
   shopId: string
@@ -134,6 +135,8 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
       price_per_week:     payload.pricePerWeek ? Number(payload.pricePerWeek) : null,
       price_per_month:    payload.pricePerMonth ? Number(payload.pricePerMonth) : null,
       location:           payload.location || 'Phuket',
+      lat:                getZoneForLocation(payload.location || '')?.lat ?? null,
+      lng:                getZoneForLocation(payload.location || '')?.lng ?? null,
       delivery_available: Boolean(payload.deliveryAvailable),
       delivery_fee:       Number(payload.deliveryFee) || 0,
       helmet_included:    Boolean(payload.helmetIncluded),

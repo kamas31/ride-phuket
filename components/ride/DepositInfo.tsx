@@ -127,16 +127,6 @@ export function DepositInfo({
         </div>
       </div>
 
-      {/* Deposit Protection program explanation */}
-      {depositProtected && (
-        <div className="mt-2 flex items-start gap-2 px-3 py-2.5 bg-[#fff4f0] rounded-[10px] border border-[#fed7b0]">
-          <Shield className="w-3.5 h-3.5 text-[#FF6B35] flex-shrink-0 mt-0.5" />
-          <p className="text-[11px] text-[#c2410c] leading-relaxed">
-            <strong>Deposit Protected</strong> — This shop has agreed to Ride Phuket&apos;s
-            deposit rules: clear pre/post-rental photos, refund within 24h, mediation if disputed.
-          </p>
-        </div>
-      )}
     </div>
   )
 }

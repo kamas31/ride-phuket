@@ -15,10 +15,10 @@ interface RidePhuketProtectionProps {
 
 const BASE_ITEMS = [
   'Verified rental partner',
-  'Protected booking record',
-  'Real availability tracking',
-  'Free cancellation guarantee',
-  'Direct 24/7 WhatsApp support',
+  'Listed on Ride Phuket marketplace',
+  'Real availability confirmed directly',
+  'Flexible cancellation — confirm with shop',
+  'Direct WhatsApp contact 24/7',
 ]
 
 const DEPOSIT_ITEMS = [
@@ -44,7 +44,7 @@ export function RidePhuketProtection({
         </div>
         <div>
           <p className="text-sm font-bold text-[#0f0f0e] leading-tight">Ride Phuket Protection</p>
-          <p className="text-[10px] text-[#9c9c98] mt-0.5">Every booking includes</p>
+          <p className="text-[10px] text-[#9c9c98] mt-0.5">Every rental partner provides</p>
         </div>
       </div>
 

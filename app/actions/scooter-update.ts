@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import type { MileageRange } from '@/types'
+import { getZoneForLocation } from '@/lib/zones'
 
 export interface UpdateScooterPayload {
   name: string
@@ -88,6 +89,8 @@ export async function updateScooter(
         price_per_week:     payload.pricePerWeek ?? null,
         price_per_month:    payload.pricePerMonth ?? null,
         location:           payload.location,
+        lat:                getZoneForLocation(payload.location || '')?.lat ?? null,
+        lng:                getZoneForLocation(payload.location || '')?.lng ?? null,
         delivery_available: payload.deliveryAvailable,
         delivery_fee:       payload.deliveryFee,
         helmet_included:    payload.helmetIncluded,

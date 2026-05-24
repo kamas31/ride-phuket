@@ -50,7 +50,7 @@ export function ScooterImage({
   }, [])
 
   return (
-    <div className={cn('relative overflow-hidden bg-[#ece9e4]', className)}>
+    <div className={cn('relative overflow-hidden bg-[#f3f3ef]', className)}>
 
       {src ? (
         <>

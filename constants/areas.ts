@@ -34,7 +34,7 @@ export const AREAS: AreaMeta[] = [
     slug: 'karon',
     name: 'Karon',
     label: 'Karon Beach',
-    description: 'Rent a scooter in Karon Beach, Phuket. Instant booking from ฿250/day.',
+    description: 'Rent a scooter in Karon Beach, Phuket. Contact local shops directly from ฿250/day.',
     longDescription: 'Karon Beach is the quieter, more family-friendly alternative to Patong. Wide beach, calm atmosphere, and excellent access to Phuket\'s interior. A scooter lets you explore at your own pace.',
     highlights: ['Family-friendly area', 'Less crowded than Patong', 'Great road access'],
     nearbyAttractions: ['Karon Viewpoint', 'Dino Park', 'Kata Beach', 'Patong (15 min)', 'Phuket Town (20 min)'],

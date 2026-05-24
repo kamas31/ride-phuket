@@ -27,26 +27,26 @@ const HOW_IT_WORKS = [
 const BENEFITS = [
   {
     icon: Shield,
-    title: 'Verified & Insured',
-    description: 'Every scooter and shop is personally vetted. Basic insurance included with every rental.',
+    title: 'Verified Shops Only',
+    description: 'Every rental partner is personally vetted by our team. Only trusted local shops make it onto Ride Phuket.',
     color: 'bg-[#f0fdf4] text-[#16a34a]',
   },
   {
-    icon: Zap,
-    title: 'Instant Booking',
-    description: 'Book and receive confirmation in under 5 minutes. 24/7, no phone calls needed.',
+    icon: MessageCircle,
+    title: 'Contact Directly',
+    description: 'Message any shop on WhatsApp in seconds. No booking forms, no platform fees — just direct contact.',
     color: 'bg-[#fff4f0] text-[#FF6B35]',
   },
   {
     icon: Truck,
-    title: 'Delivered to You',
-    description: 'Skip the taxi to the rental shop. We deliver directly to your hotel or villa.',
+    title: 'Hotel Delivery',
+    description: 'Skip the taxi to the rental shop. Many partner shops deliver directly to your hotel or villa.',
     color: 'bg-[#eff6ff] text-[#2563eb]',
   },
   {
-    icon: RotateCcw,
-    title: 'Free Cancellation',
-    description: 'Plans change. Cancel up to 24 hours before pickup at no charge, no questions asked.',
+    icon: Zap,
+    title: 'Fast Responses',
+    description: 'Most shops reply within minutes. Ask about availability, rates, and delivery — all on WhatsApp.',
     color: 'bg-[#fdf4ff] text-[#9333ea]',
   },
 ]
@@ -67,8 +67,8 @@ export default async function HomePage() {
     shopCount > 0
       ? { value: String(shopCount), label: 'Verified shops' }
       : { value: '✓', label: 'Verified shops' },
-    { value: '24/7', label: 'WhatsApp support' },
-    { value: 'Free', label: 'Cancellation' },
+    { value: '24/7', label: 'WhatsApp contact' },
+    { value: '0', label: 'Platform fees' },
   ]
 
   return (
@@ -129,7 +129,7 @@ export default async function HomePage() {
           >
             <div className="inline-flex items-center gap-2.5 px-4 py-2 mb-8 bg-white/[0.1] backdrop-blur-md border border-white/[0.18] rounded-full text-white/90 text-sm font-medium">
               <div className="w-2 h-2 bg-[#22c55e] rounded-full animate-pulse flex-shrink-0" />
-              Live across Phuket — book in minutes
+              Live across Phuket — find your ride
             </div>
           </div>
 
@@ -228,11 +228,11 @@ export default async function HomePage() {
       <div className="bg-white border-b border-[#e8e8e4]">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-6 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           {([
-            { icon: ShieldCheck,    text: 'All shops verified in-person', color: 'text-[#22c55e]' },
-            { icon: Shield,         text: 'Insurance on every rental',    color: 'text-[#2563eb]' },
-            { icon: Truck,          text: 'Hotel delivery available',     color: 'text-[#FF6B35]' },
-            { icon: Unlock,         text: 'Free cancellation 24h',        color: 'text-[#9c9c98]'  },
-            { icon: MessageCircle,  text: '24/7 WhatsApp support',        color: 'text-[#22c55e]' },
+            { icon: ShieldCheck,    text: 'All shops verified in-person',  color: 'text-[#22c55e]' },
+            { icon: Shield,         text: 'Insurance on every rental',     color: 'text-[#2563eb]' },
+            { icon: Truck,          text: 'Hotel delivery available',      color: 'text-[#FF6B35]' },
+            { icon: Unlock,         text: 'No platform fees ever',         color: 'text-[#9c9c98]' },
+            { icon: MessageCircle,  text: 'Direct WhatsApp contact',       color: 'text-[#22c55e]' },
           ] as const).map(item => (
             <div key={item.text} className="flex items-center gap-2 flex-shrink-0 text-sm text-[#5c5c58]">
               <item.icon className={`w-4 h-4 flex-shrink-0 ${item.color}`} strokeWidth={1.5} />
@@ -406,7 +406,7 @@ export default async function HomePage() {
                 href="/explore"
                 className="text-sm font-medium text-white/50 hover:text-white/80 transition-colors"
               >
-                Free cancellation · No card required
+                No fees · Contact shops directly
               </Link>
             </div>
           </div>

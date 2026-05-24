@@ -89,7 +89,7 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
     },
     {
       icon: CheckCircle2,
-      label: 'Active Bookings',
+      label: 'Active Rentals',
       value: bookingStats.active,
       sub: 'right now',
       color: 'bg-[#f0fdf4] text-[#22c55e]',
@@ -98,12 +98,12 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
       icon: Clock,
       label: 'Pending',
       value: bookingStats.pending,
-      sub: 'awaiting confirmation',
+      sub: 'new requests',
       color: 'bg-[#fffbeb] text-[#f59e0b]',
     },
     {
       icon: TrendingUp,
-      label: 'Total Bookings',
+      label: 'Total Rentals',
       value: bookingStats.total,
       sub: 'all time',
       color: 'bg-[#eff6ff] text-[#2563eb]',
@@ -163,7 +163,7 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
             </div>
             <h2 className="text-[20px] font-bold text-[#0f0f0e] mb-2">Set up your shop</h2>
             <p className="text-[#5c5c58] text-sm leading-relaxed mb-6 max-w-sm mx-auto">
-              Complete your shop profile to start receiving bookings. Our team will verify your shop within 24 hours.
+              Complete your shop profile to start receiving rental inquiries. Our team will verify your shop within 24 hours.
             </p>
             <Link
               href="/partner"
@@ -238,7 +238,7 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
                   <Bike className="w-7 h-7 text-[#9c9c98]" strokeWidth={1.5} />
                 </div>
                 <p className="font-bold text-[#0f0f0e] mb-1">No scooters in your fleet yet</p>
-                <p className="text-sm text-[#9c9c98] mb-6">Add your first scooter and start receiving bookings today.</p>
+                <p className="text-sm text-[#9c9c98] mb-6">Add your first scooter and start receiving rental inquiries today.</p>
                 <Link
                   href="/partner/scooters/new"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-sm"
@@ -503,7 +503,7 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
         {shop && (
           <div className="grid grid-cols-2 gap-4">
             {[
-              { href: '/partner/bookings',   label: 'Manage Bookings', icon: BookOpen, desc: 'Confirm, cancel, contact riders' },
+              { href: '/partner/bookings',   label: 'Rental Requests', icon: BookOpen, desc: 'View and manage rental contacts' },
               { href: `/shop/${shop.slug}`,  label: 'My Shop Page',    icon: Star,     desc: 'See your public shop profile' },
             ].map(item => (
               <Link

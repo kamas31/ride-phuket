@@ -5,7 +5,7 @@ import { SITE_NAME, SITE_DESCRIPTION } from '@/constants'
 const FOOTER_LINKS = {
   Product: [
     { href: '/explore', label: 'Explore Scooters' },
-    { href: '/bookings', label: 'My Bookings' },
+    { href: '/bookings', label: 'My Rentals' },
     { href: '/auth/login', label: 'Sign In' },
   ],
   Locations: [

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowRight, MapPin, Shield, Zap, Star, Check, ChevronRight } from 'lucide-react'
+import { ArrowRight, MapPin, Shield, Zap, Check, ChevronRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { SCOOTERS } from '@/data/scooters'
@@ -124,7 +124,7 @@ export default async function AreaPage({ params }: PageProps) {
                   <ArrowRight className="w-5 h-5" />
                 </Link>
                 <div className="flex items-center gap-2 px-5 py-4 text-white/60 text-sm">
-                  From <strong className="text-white">{formatPrice(area.priceFrom)}/day</strong> · Free cancellation
+                  From <strong className="text-white">{formatPrice(area.priceFrom)}/day</strong> · Contact directly
                 </div>
               </div>
             </div>
@@ -137,8 +137,8 @@ export default async function AreaPage({ params }: PageProps) {
             {[
               { icon: Shield, text: 'Insurance included' },
               { icon: Zap, text: 'Hotel delivery' },
-              { icon: Star, text: '4.9 average rating' },
-              { icon: Check, text: 'Free cancellation' },
+              { icon: MapPin, text: 'Local verified shops' },
+              { icon: Check, text: 'Flexible rental terms' },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-1.5 text-sm text-[#5c5c58]">
                 <Icon className="w-3.5 h-3.5 text-[#FF6B35]" />
@@ -238,13 +238,13 @@ export default async function AreaPage({ params }: PageProps) {
               Ready to explore {area.name}?
             </h2>
             <p className="text-white/50 text-sm mb-7 max-w-sm mx-auto">
-              Book online in minutes. Delivered to your hotel. Free cancellation.
+              Find your scooter, contact the shop directly, and explore on your terms.
             </p>
             <Link
               href={`/explore?location=${slug}`}
               className="inline-flex items-center gap-2 px-8 py-4 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-all text-base"
             >
-              Book Your Scooter
+              Find Your Scooter
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>

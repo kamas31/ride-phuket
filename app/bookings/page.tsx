@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { MapPin, Star, ArrowRight, CheckCircle2, AlertCircle, XCircle, Clock } from 'lucide-react'
+import { MapPin, Star, ArrowRight, CheckCircle2, AlertCircle, XCircle, Clock, Bike } from 'lucide-react'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import { Badge } from '@/components/ui/Badge'
 import { BookingTimeline } from '@/components/ride/BookingTimeline'
@@ -47,7 +47,7 @@ export default function BookingsPage() {
         <div className="max-w-2xl mx-auto px-4 py-6 pt-24">
           <div className="flex items-end justify-between">
             <div>
-              <h1 className="text-[26px] font-bold text-[#0f0f0e] tracking-tight">My Bookings</h1>
+              <h1 className="text-[26px] font-bold text-[#0f0f0e] tracking-tight">My Rentals</h1>
               <p className="text-[#9c9c98] text-sm mt-0.5">{bookings.length} total rental{bookings.length !== 1 ? 's' : ''}</p>
             </div>
             {user && (
@@ -64,10 +64,12 @@ export default function BookingsPage() {
         {/* Empty state */}
         {bookings.length === 0 && (
           <div className="text-center py-20">
-            <div className="text-5xl mb-4">🛵</div>
-            <h2 className="text-[22px] font-bold text-[#0f0f0e] mb-2">No bookings yet</h2>
+            <div className="w-14 h-14 bg-[#f8f8f6] rounded-[18px] flex items-center justify-center mx-auto mb-4">
+              <Bike className="w-7 h-7 text-[#9c9c98]" />
+            </div>
+            <h2 className="text-[22px] font-bold text-[#0f0f0e] mb-2">No rentals yet</h2>
             <p className="text-[#5c5c58] text-sm mb-7 max-w-xs mx-auto">
-              Your scooter rentals will appear here once you make your first booking.
+              Your rental contacts will appear here once you reach out to a shop.
             </p>
             <Link
               href="/explore"

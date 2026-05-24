@@ -20,14 +20,14 @@ const ROLE_OPTIONS: {
     icon: '🛵',
     title: 'I\'m a Rider',
     subtitle: 'I want to rent a scooter',
-    perks: ['Browse 500+ scooters', 'Instant booking', 'Hotel delivery', 'Free cancellation'],
+    perks: ['Browse verified shops', 'WhatsApp contact', 'Hotel delivery', 'Compare prices'],
   },
   {
     value: 'shop_owner',
     icon: '🏪',
     title: 'I\'m a Shop Owner',
     subtitle: 'I want to list my fleet',
-    perks: ['List your scooters', 'Manage bookings', 'Grow your business', 'Verified badge'],
+    perks: ['List your scooters', 'Get more leads', 'Grow your business', 'Verified badge'],
   },
 ]
 

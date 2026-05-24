@@ -211,7 +211,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   <div className="w-5 h-5 rounded-full bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
                     <Check className="w-3 h-3 text-[#22c55e]" />
                   </div>
-                  Free cancellation
+                  Flexible rental terms
                 </div>
                 <div className="flex items-center gap-2 text-sm text-[#5c5c58]">
                   <div className="w-5 h-5 rounded-full bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
@@ -250,7 +250,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
             />
 
             {/* Rental partner — always visible, direct contact */}
-            <div className="bg-[#f8f8f6] rounded-[20px] p-5 border border-[#e8e8e4]">
+            <div id="contact-rental-shop" className="bg-[#f8f8f6] rounded-[20px] p-5 border border-[#e8e8e4]">
               <h2 className="text-[15px] font-bold text-[#0f0f0e] mb-4">Rental partner</h2>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-11 h-11 bg-[#FF6B35]/10 rounded-full flex items-center justify-center text-[#FF6B35] font-bold text-lg flex-shrink-0">
@@ -388,7 +388,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   {/* Availability */}
                   <div className="flex items-center gap-2 p-3 bg-[#f0fdf4] rounded-[12px]">
                     <div className="w-2 h-2 bg-[#22c55e] rounded-full flex-shrink-0" />
-                    <span className="text-sm font-semibold text-[#16a34a]">Available — ready to book</span>
+                    <span className="text-sm font-semibold text-[#16a34a]">Available · Contact to rent</span>
                   </div>
 
                   {/* Line items */}
@@ -444,7 +444,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   <div className="flex items-center justify-center gap-4 pt-1 text-xs text-[#9c9c98]">
                     <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Insurance</span>
                     <span className="text-[#e8e8e4]">·</span>
-                    <span className="flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Free cancel</span>
+                    <span className="flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Flexible terms</span>
                     <span className="text-[#e8e8e4]">·</span>
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> Delivery</span>
                   </div>
@@ -455,12 +455,14 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
         </div>
       </div>
 
-      {/* Mobile sticky booking bar — appears when sentinel scrolls off screen */}
+      {/* Mobile sticky contact bar — appears when sentinel scrolls off screen */}
       <StickyBookingBar
         scooterName={scooter.name}
         pricePerDay={scooter.pricePerDay}
         scooterId={scooter.id}
         available={scooter.available}
+        shopWhatsapp={shop.whatsapp}
+        shopPhone={shop.phone}
       />
     </div>
   )

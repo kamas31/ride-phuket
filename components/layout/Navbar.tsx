@@ -69,7 +69,7 @@ export default function Navbar() {
     : [
         { href: '/explore', label: 'Explore' },
         { href: '/saved', label: 'Saved' },
-        { href: '/bookings', label: 'My Bookings' },
+        { href: '/bookings', label: 'My Rentals' },
         { href: '/profile', label: 'Profile' },
       ]
 

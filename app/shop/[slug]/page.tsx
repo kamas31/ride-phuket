@@ -49,7 +49,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
   const newPartner   = shop.reviewCount === 0 && shop.verified
   const fastResponder = isFastResponder(shop.responseTime)
   const waLink       = shop.whatsapp
-    ? `https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(shop.name)}%2C%20I%20found%20you%20on%20Ride%20Phuket%20and%20would%20like%20to%20book%20a%20scooter.`
+    ? `https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(shop.name)}%2C%20I%20found%20you%20on%20Ride%20Phuket%20and%20would%20like%20to%20rent%20a%20scooter.`
     : null
 
   return (
