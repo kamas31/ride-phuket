@@ -1,24 +1,48 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
-  ArrowLeft, Star, MapPin, Shield, Zap, Check, ChevronRight,
-  Phone, MessageCircle, Clock, RotateCcw, Lock,
+  ArrowLeft, Star, MapPin, Shield, Zap, Check,
+  Phone, MessageCircle, Clock, RotateCcw,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { SCOOTERS } from '@/data/scooters'
 import { getScooters, getScooterById } from '@/lib/supabase/queries'
 import { formatPrice, formatPricePerDay, pluralize, getScooterCover } from '@/lib/utils'
 import { ImageGallery } from '@/components/ride/ImageGallery'
-import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
+import { TrustBadge, isNewListing, isFastResponder } from '@/components/ride/TrustBadge'
 import { EmptyReviews } from '@/components/ride/EmptyReviews'
-import { ShopContact } from '@/components/ride/ShopContact'
+import { QuickContact } from '@/components/ride/QuickContact'
 import { DepositInfo } from '@/components/ride/DepositInfo'
-import { RidePhuketProtection } from '@/components/ride/RidePhuketProtection'
 import { StickyBookingBar } from '@/components/ride/StickyBookingBar'
 import { SaveButton } from '@/components/ride/SaveButton'
 import { getPublicInquiries } from '@/app/actions/inquiry-actions'
-import { createClient } from '@/lib/supabase/server'
-import { sanitize } from '@/lib/moderation'
+
+import type { OpeningHoursSchedule } from '@/types'
+
+function getShopOpenStatus(hours: OpeningHoursSchedule | undefined): { isOpen: boolean; label: string } | null {
+  if (!hours) return null
+  const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'] as const
+  const now  = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }))
+  const key  = days[now.getDay()]
+  const day  = hours[key]
+  if (!day) return null
+  if (!day.enabled) return { isOpen: false, label: 'Closed today' }
+  const cur   = now.getHours() * 60 + now.getMinutes()
+  const [oh, om] = day.open.split(':').map(Number)
+  const [ch, cm] = day.close.split(':').map(Number)
+  const open  = oh * 60 + om
+  const close = ch * 60 + cm
+  if (cur < open)  return { isOpen: false, label: `Opens at ${day.open}` }
+  if (cur < close) return { isOpen: true,  label: `Closes at ${day.close}` }
+  for (let i = 1; i <= 7; i++) {
+    const next = hours[days[(now.getDay() + i) % 7]]
+    if (next?.enabled) {
+      const name = i === 1 ? 'Tomorrow' : days[(now.getDay() + i) % 7].charAt(0).toUpperCase() + days[(now.getDay() + i) % 7].slice(1)
+      return { isOpen: false, label: `Opens ${name} at ${next.open}` }
+    }
+  }
+  return { isOpen: false, label: 'Temporarily closed' }
+}
 
 interface ScooterPageProps {
   params: Promise<{ id: string }>
@@ -78,34 +102,12 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
     ? scooter.pricePerDay * 7 - scooter.pricePerWeek
     : 0
 
-  const newListing = isNewListing(scooter.createdAt)
+  const newListing  = isNewListing(scooter.createdAt)
+  const fastShop    = isFastResponder(shop.responseTime)
+  const openStatus  = getShopOpenStatus(shop.openingHours)
 
-  // ── Anti-disintermediation: check if the current user has a confirmed booking ──
-  // Post-booking: real shop name, WhatsApp, phone revealed (Airbnb model).
-  // Pre-booking: alias + internal inquiry system only.
-  let isUnlocked = false
-  try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: confirmedBooking } = await (supabase as any)
-        .from('bookings')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('scooter_id', scooter.id)
-        .in('status', ['confirmed', 'active', 'completed'])
-        .limit(1)
-        .maybeSingle()
-      isUnlocked = Boolean(confirmedBooking)
-    }
-  } catch { /* non-fatal — stays locked */ }
-
-  // Public FAQ from answered inquiries
+  // Public FAQ from answered inquiries (useful SEO content)
   const faqItems = await getPublicInquiries(scooter.id)
-
-  // Sanitise description to strip any contact info that slipped through
-  const safeDescription = sanitize(scooter.description)
 
   return (
     <div className="bg-white min-h-screen">
@@ -183,10 +185,10 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               </div>
             </div>
 
-            {/* Description — sanitised to remove any contact info */}
-            {safeDescription && (
+            {/* Description */}
+            {scooter.description && (
               <p className="text-[#5c5c58] text-[15px] leading-relaxed border-t border-[#f0f0ec] pt-5">
-                {safeDescription}
+                {scooter.description}
               </p>
             )}
 
@@ -244,29 +246,22 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               depositProtected={shop.depositProtectedMember}
             />
 
-            {/* Rental partner */}
+            {/* Rental partner — always visible, direct contact */}
             <div className="bg-[#f8f8f6] rounded-[20px] p-5 border border-[#e8e8e4]">
               <h2 className="text-[15px] font-bold text-[#0f0f0e] mb-4">Rental partner</h2>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[#FF6B35]/10 rounded-full flex items-center justify-center text-[#FF6B35] font-bold text-lg flex-shrink-0">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-11 h-11 bg-[#FF6B35]/10 rounded-full flex items-center justify-center text-[#FF6B35] font-bold text-lg flex-shrink-0">
                   {shop.name[0]}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    {isUnlocked ? (
-                      <Link href={`/shop/${shop.slug}`} className="font-bold text-[#0f0f0e] hover:text-[#FF6B35] transition-colors">
-                        {shop.name}
-                      </Link>
-                    ) : (
-                      <span className="font-bold text-[#0f0f0e]">
-                        {/* Alias revealed on unlock */}
-                        {shop.verified ? `Verified ${shop.location.split(',')[0].trim()} Partner` : `${shop.location.split(',')[0].trim()} Rental Partner`}
-                      </span>
-                    )}
+                    <Link href={`/shop/${shop.slug}`} className="font-bold text-[#0f0f0e] hover:text-[#FF6B35] transition-colors">
+                      {shop.name}
+                    </Link>
                     {shop.verified && <TrustBadge variant="verified" size="xs" />}
+                    {fastShop && <TrustBadge variant="fast_response" size="xs" />}
                   </div>
-                  <div className="flex items-center gap-3 mt-1.5">
-                    {/* Shop rating — only if real reviews exist */}
+                  <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                     {shop.reviewCount > 0 ? (
                       <div className="flex items-center gap-1 text-xs text-[#9c9c98]">
                         <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
@@ -275,59 +270,55 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     ) : (
                       <TrustBadge variant="new_partner" size="xs" />
                     )}
-                    <div className="flex items-center gap-1 text-xs text-[#9c9c98]">
-                      <Clock className="w-3 h-3" />
-                      Responds {shop.responseTime}
-                    </div>
+                    {shop.responseTime && (
+                      <div className="flex items-center gap-1 text-xs text-[#9c9c98]">
+                        <Clock className="w-3 h-3" />
+                        Responds {shop.responseTime}
+                      </div>
+                    )}
+                    {openStatus && (
+                      <div className={`flex items-center gap-1 text-xs font-semibold ${openStatus.isOpen ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${openStatus.isOpen ? 'bg-[#22c55e]' : 'bg-[#9c9c98]'}`} />
+                        {openStatus.label}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-              {/* Direct contact only revealed after confirmed booking */}
-              {isUnlocked ? (
-                <div className="flex gap-2">
-                  {shop.phone && (
-                    <a href={`tel:${shop.phone}`}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors">
-                      <Phone className="w-4 h-4" />Call shop
-                    </a>
-                  )}
-                  {shop.whatsapp && (
-                    <a href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[#f0fdf4] border border-[#22c55e]/20 text-sm font-semibold text-[#16a34a] hover:bg-[#dcfce7] transition-colors">
-                      <MessageCircle className="w-4 h-4" />WhatsApp
-                    </a>
-                  )}
-                </div>
-              ) : (
-                <p className="text-[11px] text-[#9c9c98] flex items-center gap-1.5">
-                  <Lock className="w-3 h-3" />
-                  Contact details available after booking confirmation
-                </p>
-              )}
+
+              {/* Direct contact — always shown */}
+              <div className="flex gap-2">
+                {shop.phone && (
+                  <a href={`tel:${shop.phone}`}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors">
+                    <Phone className="w-4 h-4" />Call
+                  </a>
+                )}
+                {shop.whatsapp && (
+                  <a href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Ride Phuket and I'm interested.`)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[#f0fdf4] border border-[#22c55e]/20 text-sm font-semibold text-[#16a34a] hover:bg-[#dcfce7] transition-colors">
+                    <MessageCircle className="w-4 h-4" />WhatsApp
+                  </a>
+                )}
+              </div>
             </div>
 
-            {/* Shop contact — locked/unlocked (anti-disintermediation) */}
+            {/* Quick questions via WhatsApp */}
+            {(shop.whatsapp || shop.phone) && (
             <div className="bg-[#f8f8f6] rounded-[20px] p-5 border border-[#e8e8e4]">
-              <h2 className="text-[15px] font-bold text-[#0f0f0e] mb-4">
-                {isUnlocked ? 'Your rental partner' : 'Questions about this scooter'}
-              </h2>
-              <ShopContact
-                shop={{
-                  id:           shop.id,
-                  name:         shop.name,
-                  location:     shop.location,
-                  verified:     shop.verified,
-                  reviewCount:  shop.reviewCount,
-                  responseTime: shop.responseTime,
-                  whatsapp:     shop.whatsapp,
-                  phone:        shop.phone,
-                }}
-                scooterId={scooter.id}
-                isUnlocked={isUnlocked}
+              <h2 className="text-[15px] font-bold text-[#0f0f0e] mb-4">Questions? Ask the shop</h2>
+              <QuickContact
+                whatsapp={shop.whatsapp}
+                phone={shop.phone}
+                shopName={shop.name}
+                responseTime={shop.responseTime}
                 context={{ scooterName: scooter.name, location: scooter.location }}
                 questions={['ask_delivery', 'ask_deposit', 'ask_license', 'ask_availability', 'ask_monthly']}
+                variant="full"
               />
             </div>
+            )}
 
             {/* Public FAQ — answered inquiries */}
             {faqItems.length > 0 && (
@@ -413,40 +404,44 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     </div>
                   </div>
 
-                  {/* CTA */}
-                  <Link
-                    href={`/checkout?scooterId=${scooter.id}`}
-                    className="flex items-center justify-center gap-2 w-full py-4 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-all text-base shadow-sm hover:shadow-[0_8px_24px_rgba(255,107,53,0.35)] hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    Reserve — Pay on Delivery
-                    <ChevronRight className="w-5 h-5" />
-                  </Link>
+                  {/* Primary CTA — WhatsApp */}
+                  {shop.whatsapp ? (
+                    <a
+                      href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Ride Phuket and I'm interested.`)}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2.5 w-full py-4 bg-[#16a34a] text-white font-bold rounded-full hover:bg-[#15803d] transition-all text-base shadow-sm hover:shadow-[0_8px_24px_rgba(22,163,74,0.35)] hover:scale-[1.01] active:scale-[0.99]"
+                    >
+                      <MessageCircle className="w-5 h-5" />
+                      WhatsApp the shop
+                    </a>
+                  ) : shop.phone ? (
+                    <a
+                      href={`tel:${shop.phone}`}
+                      className="flex items-center justify-center gap-2.5 w-full py-4 bg-[#0f0f0e] text-white font-bold rounded-full hover:bg-[#2a2a28] transition-all text-base"
+                    >
+                      <Phone className="w-5 h-5" />
+                      Call the shop
+                    </a>
+                  ) : null}
 
-                  {/* Reassurance row */}
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-[#9c9c98]">
-                    <RotateCcw className="w-3 h-3" />
-                    Free cancellation up to 24h before
-                  </div>
+                  {/* Secondary call button (only when WA is primary) */}
+                  {shop.whatsapp && shop.phone && (
+                    <a
+                      href={`tel:${shop.phone}`}
+                      className="flex items-center justify-center gap-2 w-full py-3 rounded-full border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
+                    >
+                      <Phone className="w-4 h-4" />
+                      Call instead
+                    </a>
+                  )}
 
-                  {/* Ride Phuket Protection */}
-                  <RidePhuketProtection
-                    depositProtected={shop.depositProtectedMember}
-                    verified={shop.verified}
-                  />
-
-                  {/* Trust checklist — all factual */}
-                  <div className="pt-3 border-t border-[#f0f0ec] space-y-2">
-                    {[
-                      { icon: Shield,         text: 'Insurance included in price' },
-                      { icon: Zap,            text: 'Instant booking confirmation' },
-                      { icon: MapPin,         text: 'Delivered anywhere in Phuket' },
-                      { icon: MessageCircle,  text: 'WhatsApp support 24/7' },
-                    ].map(({ icon: Icon, text }) => (
-                      <div key={text} className="flex items-center gap-2.5 text-xs text-[#5c5c58]">
-                        <Icon className="w-3.5 h-3.5 text-[#FF6B35] flex-shrink-0" />
-                        {text}
-                      </div>
-                    ))}
+                  {/* Trust strip */}
+                  <div className="flex items-center justify-center gap-4 pt-1 text-xs text-[#9c9c98]">
+                    <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Insurance</span>
+                    <span className="text-[#e8e8e4]">·</span>
+                    <span className="flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Free cancel</span>
+                    <span className="text-[#e8e8e4]">·</span>
+                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> Delivery</span>
                   </div>
                 </div>
               </div>

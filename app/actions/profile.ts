@@ -82,3 +82,48 @@ export async function getShopForOwner(): Promise<{
     return null
   }
 }
+
+export interface FullShopRow {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  logo_url: string | null
+  cover_image: string | null
+  gallery: string[]
+  phone: string | null
+  whatsapp: string | null
+  line_id: string | null
+  telegram: string | null
+  instagram: string | null
+  website: string | null
+  location: string
+  address: string | null
+  lat: number | null
+  lng: number | null
+  google_maps_link: string | null
+  delivery_zones: string[]
+  opening_hours: string | null
+  verified: boolean
+  active: boolean
+}
+
+export async function getFullShopForOwner(): Promise<FullShopRow | null> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from('shops')
+      .select('id,name,slug,description,logo_url,cover_image,gallery,phone,whatsapp,line_id,telegram,instagram,website,location,address,lat,lng,google_maps_link,delivery_zones,opening_hours,verified,active')
+      .eq('owner_id', user.id)
+      .single()
+
+    if (error) return null
+    return data as FullShopRow
+  } catch {
+    return null
+  }
+}

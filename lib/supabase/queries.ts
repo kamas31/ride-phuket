@@ -4,6 +4,7 @@
 
 import type { Scooter, Shop, Booking, MileageRange } from '@/types'
 import { SCOOTERS, SHOPS, MOCK_BOOKINGS } from '@/data/scooters'
+import { getZoneForLocation } from '@/lib/zones'
 
 function isConfigured() {
   return Boolean(
@@ -243,8 +244,8 @@ function mapDbScooter(row: any): Scooter {
     pricePerMonth: row.price_per_month ?? undefined,
     currency: 'THB',
     location: row.location ?? '',
-    lat: row.lat ?? 7.95,
-    lng: row.lng ?? 98.34,
+    lat: row.lat ?? getZoneForLocation(row.location ?? '')?.lat ?? 7.9519,
+    lng: row.lng ?? getZoneForLocation(row.location ?? '')?.lng ?? 98.3381,
     available: row.available,
     rating: row.rating ?? 0,
     reviewCount: row.review_count ?? 0,
@@ -269,6 +270,15 @@ function mapDbScooter(row: any): Scooter {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapDbShop(row: any): Shop {
+  let openingHours
+  if (row.opening_hours) {
+    try {
+      openingHours = typeof row.opening_hours === 'string'
+        ? JSON.parse(row.opening_hours)
+        : row.opening_hours
+    } catch { /* malformed JSON — treat as unset */ }
+  }
+
   return {
     id: row.id,
     name: row.name,
@@ -277,8 +287,8 @@ function mapDbShop(row: any): Shop {
     logo: row.logo_url ?? '',
     location: row.location,
     address: row.address ?? '',
-    lat: row.lat ?? 7.95,
-    lng: row.lng ?? 98.34,
+    lat: row.lat ?? getZoneForLocation(row.location ?? '')?.lat ?? 7.9519,
+    lng: row.lng ?? getZoneForLocation(row.location ?? '')?.lng ?? 98.3381,
     rating: row.rating ?? 0,
     reviewCount: row.review_count ?? 0,
     verified: row.verified,
@@ -287,9 +297,13 @@ function mapDbShop(row: any): Shop {
     whatsapp: row.whatsapp ?? undefined,
     coverImage: row.cover_image ?? null,
     deliveryZones: row.delivery_zones ?? [],
-    openingHours: row.opening_hours ?? undefined,
+    openingHours,
     instagram: row.instagram ?? undefined,
     website: row.website ?? undefined,
+    lineId: row.line_id ?? undefined,
+    telegram: row.telegram ?? undefined,
+    googleMapsLink: row.google_maps_link ?? undefined,
+    gallery: row.gallery ?? [],
     depositProtectedMember: row.deposit_protected_member ?? false,
   }
 }

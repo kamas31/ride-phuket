@@ -236,10 +236,14 @@ export default async function ShopPage({ params }: ShopPageProps) {
                     <MapPin className="w-4 h-4 text-[#9c9c98] flex-shrink-0 mt-0.5" />
                     <span>{shop.address || shop.location + ', Phuket'}</span>
                   </div>
-                  {shop.openingHours && (
+                  {shop.openingHours?.monday && (
                     <div className="flex items-start gap-2.5 text-[#5c5c58]">
                       <Clock className="w-4 h-4 text-[#9c9c98] flex-shrink-0 mt-0.5" />
-                      <span>{shop.openingHours}</span>
+                      <span>
+                        {shop.openingHours.monday.enabled
+                          ? `Mon–Fri ${shop.openingHours.monday.open}–${shop.openingHours.monday.close}`
+                          : 'See shop for hours'}
+                      </span>
                     </div>
                   )}
                   {shop.website && (

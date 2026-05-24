@@ -1,4 +1,20 @@
 export type ScooterCategory = 'automatic' | 'manual' | 'electric'
+
+export interface OpeningHoursDay {
+  enabled: boolean
+  open: string   // "08:00"
+  close: string  // "20:00"
+}
+
+export interface OpeningHoursSchedule {
+  monday:    OpeningHoursDay
+  tuesday:   OpeningHoursDay
+  wednesday: OpeningHoursDay
+  thursday:  OpeningHoursDay
+  friday:    OpeningHoursDay
+  saturday:  OpeningHoursDay
+  sunday:    OpeningHoursDay
+}
 export type BookingStatus = 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled'
 export type DeliveryMethod = 'delivery' | 'pickup'
 export type MileageRange = '0-10000' | '10000-20000' | '20000-30000' | '30000-50000' | '50000+'
@@ -23,9 +39,14 @@ export interface Shop {
   // Premium shop fields (migration 005)
   coverImage?: string | null
   deliveryZones?: string[]
-  openingHours?: string
+  openingHours?: OpeningHoursSchedule
   instagram?: string
   website?: string
+  // Extended fields (migration 013)
+  lineId?: string
+  telegram?: string
+  googleMapsLink?: string
+  gallery?: string[]
   // Deposit protection (migration 011)
   depositProtectedMember?: boolean
 }

@@ -122,7 +122,7 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
               )}
             </div>
             <Link
-              href="/partner"
+              href="/partner/shop"
               className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 bg-[#f8f8f6] border border-[#e8e8e4] rounded-full text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
             >
               <Settings className="w-3.5 h-3.5" />
