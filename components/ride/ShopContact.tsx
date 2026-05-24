@@ -117,7 +117,7 @@ export function ShopContact({
           <div className="flex items-start gap-2 mt-3">
             <Shield className="w-3.5 h-3.5 text-[#22c55e] flex-shrink-0 mt-0.5" />
             <p className="text-[10px] text-[#9c9c98] leading-relaxed">
-              Your booking is protected by Ride Phuket. Full partner details are shared after confirmation.
+              Shop details are shared directly. All rental terms are confirmed between you and the shop.
             </p>
           </div>
         </>

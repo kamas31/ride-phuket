@@ -20,7 +20,7 @@ const ROLE_OPTIONS: {
     icon: '🛵',
     title: 'I\'m a Rider',
     subtitle: 'I want to rent a scooter',
-    perks: ['Browse verified shops', 'WhatsApp contact', 'Hotel delivery', 'Compare prices'],
+    perks: ['Browse verified shops', 'WhatsApp contact', 'Save favourites', 'Compare prices'],
   },
   {
     value: 'shop_owner',

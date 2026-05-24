@@ -11,7 +11,7 @@ const PERKS = [
   { icon: Bike,        text: 'Your scooters live on the map instantly' },
   { icon: TrendingUp,  text: 'Reach international tourists before they land' },
   { icon: Star,        text: 'Collect verified reviews automatically' },
-  { icon: MapPin,      text: 'Hotel delivery integrations built-in' },
+  { icon: MapPin,      text: 'WhatsApp leads delivered directly to you' },
 ]
 
 export default async function PartnerPage() {

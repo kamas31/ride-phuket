@@ -1,28 +1,10 @@
 import Link from 'next/link'
-import { ArrowRight, Shield, ShieldCheck, Truck, ChevronRight, MapPin, RotateCcw, Check, MessageCircle, Unlock, Zap } from 'lucide-react'
+import { ArrowRight, Shield, ShieldCheck, ChevronRight, MapPin, Check, MessageCircle, Unlock, Zap, Search, Bike, Eye } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { LOCATIONS } from '@/constants'
 import { getScooters, getStats } from '@/lib/supabase/queries'
 import { AREAS } from '@/constants/areas'
 import { formatPrice } from '@/lib/utils'
-
-const HOW_IT_WORKS = [
-  {
-    step: '01',
-    title: 'Choose Your Ride',
-    description: 'Browse verified scooters by location, model, and price. Filter by delivery, insurance, and more.',
-  },
-  {
-    step: '02',
-    title: 'Contact the Shop',
-    description: 'Found your scooter? Message the shop directly on WhatsApp — they confirm availability in minutes.',
-  },
-  {
-    step: '03',
-    title: 'We Deliver to You',
-    description: 'Your scooter arrives at your hotel, villa, or any location. Ride and enjoy Phuket.',
-  },
-]
 
 const BENEFITS = [
   {
@@ -38,15 +20,15 @@ const BENEFITS = [
     color: 'bg-[#fff4f0] text-[#FF6B35]',
   },
   {
-    icon: Truck,
-    title: 'Hotel Delivery',
-    description: 'Skip the taxi to the rental shop. Many partner shops deliver directly to your hotel or villa.',
+    icon: Eye,
+    title: 'Transparent Listings',
+    description: 'Real photos, honest specs, and current pricing — no surprises when you show up to the shop.',
     color: 'bg-[#eff6ff] text-[#2563eb]',
   },
   {
     icon: Zap,
     title: 'Fast Responses',
-    description: 'Most shops reply within minutes. Ask about availability, rates, and delivery — all on WhatsApp.',
+    description: 'Most shops reply within minutes. Ask about availability, rates, and your rental — all on WhatsApp.',
     color: 'bg-[#fdf4ff] text-[#9333ea]',
   },
 ]
@@ -150,9 +132,9 @@ export default async function HomePage() {
             style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.48s' }}
           >
             <p className="text-white/72 text-[17px] md:text-[20px] max-w-[30ch] leading-[1.65] mb-10 font-light hero-sub-shadow">
-              Premium scooters delivered to your hotel.
+              Premium scooters from verified local shops.
               <br className="hidden sm:block" />
-              Verified shops. Contact directly on WhatsApp.
+              Contact directly on WhatsApp. No platform fees.
             </p>
           </div>
 
@@ -228,11 +210,11 @@ export default async function HomePage() {
       <div className="bg-white border-b border-[#e8e8e4]">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-6 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           {([
-            { icon: ShieldCheck,    text: 'All shops verified in-person',  color: 'text-[#22c55e]' },
-            { icon: Shield,         text: 'Insurance on every rental',     color: 'text-[#2563eb]' },
-            { icon: Truck,          text: 'Hotel delivery available',      color: 'text-[#FF6B35]' },
-            { icon: Unlock,         text: 'No platform fees ever',         color: 'text-[#9c9c98]' },
-            { icon: MessageCircle,  text: 'Direct WhatsApp contact',       color: 'text-[#22c55e]' },
+            { icon: ShieldCheck,    text: 'All shops verified in-person',    color: 'text-[#22c55e]' },
+            { icon: Check,          text: 'Real photos & honest pricing',     color: 'text-[#5c5c58]' },
+            { icon: Unlock,         text: 'No platform fees ever',            color: 'text-[#9c9c98]' },
+            { icon: MessageCircle,  text: 'Direct WhatsApp contact',          color: 'text-[#22c55e]' },
+            { icon: MapPin,         text: 'Shops across all Phuket areas',    color: 'text-[#FF6B35]' },
           ] as const).map(item => (
             <div key={item.text} className="flex items-center gap-2 flex-shrink-0 text-sm text-[#5c5c58]">
               <item.icon className={`w-4 h-4 flex-shrink-0 ${item.color}`} strokeWidth={1.5} />
@@ -241,6 +223,60 @@ export default async function HomePage() {
           ))}
         </div>
       </div>
+
+      {/* ── HOW RIDE PHUKET WORKS ── */}
+      <section className="bg-[#f8f8f6] border-b border-[#e8e8e4] py-14 md:py-20">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-3">How it works</p>
+            <h2 className="text-[28px] md:text-[38px] font-bold text-[#0f0f0e] leading-tight tracking-tight">
+              How Ride Phuket Works
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-10">
+            {([
+              {
+                n: '01', icon: Search, label: 'Find',
+                body: 'Browse trusted scooter rentals across Phuket — filter by area, model, and price.',
+              },
+              {
+                n: '02', icon: MessageCircle, label: 'Contact',
+                body: 'Message rental shops directly on WhatsApp. No forms, no platform — just direct conversation.',
+              },
+              {
+                n: '03', icon: Bike, label: 'Ride',
+                body: 'Collect your scooter from the shop and explore Phuket on your own terms.',
+              },
+            ] as const).map((step, i, arr) => (
+              <div key={step.n} className="relative bg-white rounded-[20px] border border-[#e8e8e4] p-6 md:p-7">
+                {i < arr.length - 1 && (
+                  <div className="hidden md:block absolute top-9 -right-3 text-[#d0d0cc] text-lg select-none z-10">›</div>
+                )}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 bg-[#fff4f0] rounded-[12px] flex items-center justify-center flex-shrink-0">
+                    <step.icon className="w-5 h-5 text-[#FF6B35]" strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[11px] font-bold text-[#c0c0bc] tracking-[0.15em] uppercase">{step.n}</span>
+                </div>
+                <h3 className="text-[18px] font-bold text-[#0f0f0e] mb-2">{step.label}</h3>
+                <p className="text-[#5c5c58] text-[14px] leading-relaxed">{step.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2.5">
+            {([
+              'No platform fees',
+              'No online payment',
+              'Direct local contact',
+            ] as const).map(text => (
+              <div key={text} className="flex items-center gap-2 text-[13px] text-[#5c5c58]">
+                <Check className="w-3.5 h-3.5 text-[#22c55e] flex-shrink-0" strokeWidth={2.5} />
+                <span className="font-medium">{text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── LOCATION STRIP ── */}
       <section className="bg-[#f8f8f6] border-b border-[#e8e8e4]">
@@ -326,33 +362,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ── */}
-      <section className="py-12 md:py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-2">Simple Process</p>
-            <h2 className="text-[26px] md:text-[34px] font-bold text-[#0f0f0e] leading-tight tracking-tight">
-              From browsing to riding in 3 steps
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {HOW_IT_WORKS.map((step, i) => (
-              <div key={step.step} className="relative bg-white rounded-[20px] p-6 border border-[#e8e8e4] group hover:border-[#FF6B35]/30 hover:shadow-[0_4px_20px_-4px_rgba(255,107,53,0.12)] transition-all">
-                {/* Connector line on desktop */}
-                {i < 2 && (
-                  <div className="hidden md:block absolute top-9 -right-3 w-5 border-t-2 border-dashed border-[#e8e8e4] z-10" />
-                )}
-                <div className="text-[40px] font-bold text-[#f0f0ec] leading-none mb-4 font-mono group-hover:text-[#FF6B35]/20 transition-colors">
-                  {step.step}
-                </div>
-                <h3 className="text-[17px] font-bold text-[#0f0f0e] mb-2">{step.title}</h3>
-                <p className="text-[#5c5c58] text-sm leading-relaxed">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── BENEFITS ── */}
       <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
         <div className="text-center mb-10">
@@ -392,7 +401,7 @@ export default async function HomePage() {
               Your perfect scooter<br />is waiting.
             </h2>
             <p className="text-white/50 text-base mb-8 max-w-sm mx-auto leading-relaxed">
-              Verified shops, real insurance, and delivery to your hotel — the reliable way to explore Phuket.
+              Verified local shops, direct WhatsApp contact — the honest way to explore Phuket.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link

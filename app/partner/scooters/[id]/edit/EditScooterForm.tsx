@@ -419,7 +419,7 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
             <Truck className="w-3.5 h-3.5" /> Services
           </p>
           {[
-            { key: 'deliveryAvailable', label: '🚚 Hotel delivery available' },
+            { key: 'deliveryAvailable', label: '🚚 Delivery available' },
             { key: 'helmetIncluded',    label: '🪖 Helmet included' },
             { key: 'insuranceIncluded', label: '🛡️ Insurance included' },
           ].map(item => (

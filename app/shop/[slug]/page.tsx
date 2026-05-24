@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: ShopPageProps) {
 
   const title = `Scooter Rental in ${data.location} | ${data.name} — Ride Phuket`
   const description = data.description ||
-    `Rent scooters from ${data.name} in ${data.location}, Phuket. ${data.scooters.length} scooters available. Insurance included.`
+    `Rent scooters from ${data.name} in ${data.location}, Phuket. ${data.scooters.length} scooters available. Contact directly on WhatsApp.`
 
   return {
     title,
@@ -172,9 +172,9 @@ export default async function ShopPage({ params }: ShopPageProps) {
               <div className="grid grid-cols-2 gap-2.5">
                 {[
                   { show: scooters.some(s => s.insuranceIncluded), icon: Shield, label: 'Insurance available', color: 'text-[#22c55e]' },
-                  { show: scooters.some(s => s.deliveryAvailable), icon: Zap,    label: 'Hotel delivery',      color: 'text-[#FF6B35]' },
+                  { show: scooters.some(s => s.deliveryAvailable), icon: Zap,    label: 'Delivery available',  color: 'text-[#FF6B35]' },
                   { show: scooters.some(s => s.helmetIncluded),    icon: Check,  label: 'Helmet included',     color: 'text-[#22c55e]' },
-                  { show: true,                                      icon: Check,  label: 'Free cancellation',   color: 'text-[#22c55e]' },
+                  { show: true,                                      icon: Check,  label: 'Flexible rental terms', color: 'text-[#22c55e]' },
                 ].filter(s => s.show).map(item => (
                   <div key={item.label} className="flex items-center gap-2.5 p-3 bg-[#f8f8f6] rounded-[12px] text-sm text-[#5c5c58]">
                     <item.icon className={`w-4 h-4 flex-shrink-0 ${item.color}`} />
@@ -184,10 +184,11 @@ export default async function ShopPage({ params }: ShopPageProps) {
               </div>
             </section>
 
-            {/* Delivery zones */}
+            {/* Delivery zones — shop-specific service */}
             {shop.deliveryZones && shop.deliveryZones.length > 0 && (
               <section>
-                <h2 className="text-[18px] font-bold text-[#0f0f0e] mb-3">Delivery zones</h2>
+                <h2 className="text-[18px] font-bold text-[#0f0f0e] mb-1">Delivery available</h2>
+                <p className="text-sm text-[#9c9c98] mb-3">This shop delivers to the following areas — confirm details directly.</p>
                 <div className="flex flex-wrap gap-2">
                   {shop.deliveryZones.map(zone => (
                     <span key={zone} className="px-3 py-1.5 bg-[#fff4f0] text-[#FF6B35] text-sm font-medium rounded-full border border-[#fed7b0]">

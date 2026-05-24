@@ -340,7 +340,7 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
               </p>
               <button type="button" onClick={() => set('deliveryAvailable', !form.deliveryAvailable)}
                 className="w-full flex items-center justify-between p-4 rounded-[14px] border border-[#e8e8e4] hover:border-[#d0d0cc]">
-                <span className="text-sm font-medium text-[#0f0f0e]">🚚 Hotel delivery available</span>
+                <span className="text-sm font-medium text-[#0f0f0e]">🚚 Delivery available</span>
                 <div className={cn('w-11 h-6 rounded-full transition-colors relative flex-shrink-0', form.deliveryAvailable ? 'bg-[#FF6B35]' : 'bg-[#e8e8e4]')}>
                   <div className={cn('absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform', form.deliveryAvailable ? 'translate-x-5' : 'translate-x-0.5')} />
                 </div>

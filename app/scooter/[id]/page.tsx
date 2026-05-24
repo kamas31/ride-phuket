@@ -395,8 +395,8 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   <div className="space-y-2 text-sm">
                     {scooter.deliveryAvailable && (
                       <div className="flex justify-between text-[#5c5c58]">
-                        <span>Delivery to your hotel</span>
-                        <span className="font-medium text-[#0f0f0e]">{formatPrice(scooter.deliveryFee)}</span>
+                        <span>Delivery available</span>
+                        <span className="font-medium text-[#0f0f0e]">Ask shop</span>
                       </div>
                     )}
                     <div className="flex justify-between text-[#5c5c58]">
@@ -404,8 +404,8 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                       <span className="font-medium text-[#0f0f0e]">{pluralize(scooter.minRentalDays, 'day')}</span>
                     </div>
                     <div className="flex justify-between text-[#5c5c58]">
-                      <span>Insurance</span>
-                      <span className="font-semibold text-[#22c55e]">Included</span>
+                      <span>Rental terms</span>
+                      <span className="font-medium text-[#0f0f0e]">Confirm with shop</span>
                     </div>
                   </div>
 
@@ -442,11 +442,11 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
 
                   {/* Trust strip */}
                   <div className="flex items-center justify-center gap-4 pt-1 text-xs text-[#9c9c98]">
-                    <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Insurance</span>
+                    <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Verified shop</span>
                     <span className="text-[#e8e8e4]">·</span>
                     <span className="flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Flexible terms</span>
                     <span className="text-[#e8e8e4]">·</span>
-                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> Delivery</span>
+                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> Local</span>
                   </div>
                 </div>
               </div>

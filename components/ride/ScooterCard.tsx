@@ -102,7 +102,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
           {scooter.insuranceIncluded && (
             <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm text-white text-[11px] font-medium rounded-full flex items-center gap-1">
               <Shield className="w-2.5 h-2.5 text-[#22c55e]" />
-              Insured
+              Shop insured
             </span>
           )}
         </div>
@@ -179,12 +179,12 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
           {scooter.insuranceIncluded && (
             <span className="flex items-center gap-1 text-[11px] text-[#9c9c98]">
               <Check className="w-3 h-3 text-[#22c55e]" />
-              Insurance
+              Shop insured
             </span>
           )}
           <span className="flex items-center gap-1 text-[11px] text-[#9c9c98] ml-auto">
             <Check className="w-3 h-3 text-[#22c55e]" />
-            Free cancel
+            Flexible terms
           </span>
         </div>
       </div>

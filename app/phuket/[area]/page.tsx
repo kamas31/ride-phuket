@@ -135,10 +135,10 @@ export default async function AreaPage({ params }: PageProps) {
         <div className="bg-[#f8f8f6] border-b border-[#e8e8e4]">
           <div className="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center gap-x-8 gap-y-2">
             {[
-              { icon: Shield, text: 'Insurance included' },
-              { icon: Zap, text: 'Hotel delivery' },
-              { icon: MapPin, text: 'Local verified shops' },
+              { icon: Shield, text: 'Verified local shops' },
+              { icon: MapPin, text: 'Direct shop contact' },
               { icon: Check, text: 'Flexible rental terms' },
+              { icon: Zap, text: 'WhatsApp-first' },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-1.5 text-sm text-[#5c5c58]">
                 <Icon className="w-3.5 h-3.5 text-[#FF6B35]" />

@@ -39,23 +39,13 @@ export const SCOOTER_CATEGORIES = [
 export const TRUST_BADGES = [
   { icon: 'shield', label: 'Verified Partners', desc: 'Every shop is vetted' },
   { icon: 'clock', label: 'Fast Response', desc: 'Most shops reply in minutes' },
-  { icon: 'truck', label: 'Hotel Delivery', desc: 'We come to you' },
+  { icon: 'mapPin', label: 'Local Shops', desc: 'Across all Phuket areas' },
   { icon: 'headphones', label: 'WhatsApp Support', desc: 'Direct shop contact' },
 ] as const
 
 export const BENEFITS = [
   {
-    icon: 'MapPin',
-    title: 'Delivered to You',
-    description: 'Skip the taxi to the rental shop. Shops deliver directly to your hotel, villa, or address.',
-  },
-  {
     icon: 'Shield',
-    title: 'Fully Insured',
-    description: 'Every rental includes basic insurance. Upgrade for full comprehensive cover.',
-  },
-  {
-    icon: 'Star',
     title: 'Vetted Partners',
     description: 'Only top-rated, verified rental shops. Every scooter is serviced and road-ready.',
   },

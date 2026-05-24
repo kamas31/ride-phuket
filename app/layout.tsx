@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  keywords: ['scooter rental phuket', 'motorbike rental phuket', 'scooter delivery phuket', 'honda pcx phuket', 'yamaha nmax phuket'],
+  keywords: ['scooter rental phuket', 'motorbike rental phuket', 'scooter hire phuket', 'honda pcx phuket', 'yamaha nmax phuket'],
   authors: [{ name: SITE_NAME }],
   openGraph: {
     type: 'website',
