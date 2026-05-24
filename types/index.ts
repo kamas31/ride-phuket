@@ -1,3 +1,5 @@
+export type PlanType = 'free' | 'pro' | 'premium' | 'founding_partner'
+
 export type ScooterCategory = 'automatic' | 'manual' | 'electric'
 
 export interface OpeningHoursDay {
@@ -49,6 +51,7 @@ export interface Shop {
   gallery?: string[]
   // Deposit protection (migration 011)
   depositProtectedMember?: boolean
+  planType?: PlanType
 }
 
 export interface Scooter {

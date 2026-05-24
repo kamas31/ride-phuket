@@ -7,8 +7,9 @@ import Image from 'next/image'
 import {
   ArrowLeft, Save, Check, Loader2, Camera, X,
   Phone, MessageCircle, Globe, MapPin, Clock,
-  AtSign, AlertCircle, ImageOff,
+  AtSign, AlertCircle, ImageOff, Sparkles,
 } from 'lucide-react'
+import { PLAN_LABELS, FOUNDING_PARTNER_PERKS, isFoundingPartner } from '@/lib/plans'
 import { createClient } from '@/lib/supabase/client'
 import { updateShop } from '@/app/actions/shop-update'
 import { ImageUploader, type ProcessedImage } from '@/components/ride/ImageUploader'
@@ -424,6 +425,30 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
       </div>
 
       <form id="shop-form" onSubmit={handleSubmit} className="max-w-xl mx-auto px-4 py-6 space-y-5">
+
+        {/* Founding Partner banner */}
+        {isFoundingPartner(shop.plan_type) && (
+          <div className="bg-gradient-to-r from-[#fff8f0] to-[#fffbf0] border border-[#f59e0b]/20 rounded-[16px] px-4 py-3.5 flex items-start gap-3">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FF6B35] to-[#f59e0b] flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
+            </div>
+            <div>
+              <p className="text-[12px] font-bold text-[#92400e]">
+                {PLAN_LABELS[shop.plan_type as keyof typeof PLAN_LABELS]} — all features unlocked
+              </p>
+              <p className="text-[11px] text-[#b45309] mt-0.5 leading-relaxed">
+                You currently have free access to all Pro features as an early partner while Ride Phuket grows. Thank you for being part of this.
+              </p>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {FOUNDING_PARTNER_PERKS.map(perk => (
+                  <span key={perk} className="text-[10px] font-semibold px-2 py-0.5 bg-[#f59e0b]/10 text-[#92400e] rounded-full border border-[#f59e0b]/15">
+                    ✓ {perk}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── 1. Basic Info ── */}
         <Section title="Basic Info">

@@ -62,7 +62,7 @@ export async function updateProfile(updates: {
 
 export async function getShopForOwner(): Promise<{
   id: string; name: string; slug: string; location: string;
-  verified: boolean; active: boolean;
+  verified: boolean; active: boolean; plan_type: string;
 } | null> {
   try {
     const supabase = await createClient()
@@ -72,7 +72,7 @@ export async function getShopForOwner(): Promise<{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from('shops')
-      .select('id,name,slug,location,verified,active')
+      .select('id,name,slug,location,verified,active,plan_type')
       .eq('owner_id', user.id)
       .single()
 
@@ -106,6 +106,7 @@ export interface FullShopRow {
   opening_hours: string | null
   verified: boolean
   active: boolean
+  plan_type: string
 }
 
 export async function getFullShopForOwner(): Promise<FullShopRow | null> {
@@ -117,7 +118,7 @@ export async function getFullShopForOwner(): Promise<FullShopRow | null> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from('shops')
-      .select('id,name,slug,description,logo_url,cover_image,gallery,phone,whatsapp,line_id,telegram,instagram,website,location,address,lat,lng,google_maps_link,delivery_zones,opening_hours,verified,active')
+      .select('id,name,slug,description,logo_url,cover_image,gallery,phone,whatsapp,line_id,telegram,instagram,website,location,address,lat,lng,google_maps_link,delivery_zones,opening_hours,verified,active,plan_type')
       .eq('owner_id', user.id)
       .single()
 

@@ -2,7 +2,7 @@
 // Route Handlers, or Server Actions ('use server' files).
 // Client components must call Server Actions instead.
 
-import type { Scooter, Shop, Booking, MileageRange } from '@/types'
+import type { Scooter, Shop, Booking, MileageRange, PlanType } from '@/types'
 import { SCOOTERS, SHOPS, MOCK_BOOKINGS } from '@/data/scooters'
 import { getZoneForLocation } from '@/lib/zones'
 
@@ -308,6 +308,7 @@ function mapDbShop(row: any): Shop {
     googleMapsLink: row.google_maps_link ?? undefined,
     gallery: row.gallery ?? [],
     depositProtectedMember: row.deposit_protected_member ?? false,
+    planType: (row.plan_type as PlanType) ?? 'founding_partner',
   }
 }
 

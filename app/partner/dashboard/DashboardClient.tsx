@@ -5,17 +5,18 @@ import Link from 'next/link'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import {
   Bike, BookOpen, TrendingUp, Plus,
-  Settings, MapPin, Star,
+  Settings, MapPin, Star, Sparkles, Lock,
   CheckCircle2, Clock, AlertCircle, ChevronRight, ArrowRight, Trash2,
 } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { deleteScooter } from '@/app/actions/scooter-delete'
+import { PLAN_LABELS, FOUNDING_PARTNER_PERKS, isFoundingPartner } from '@/lib/plans'
 import type { Profile } from '@/hooks/useProfile'
 
 interface DashboardClientProps {
   profile: Profile | null
-  shop: { id: string; name: string; slug: string; location: string; verified: boolean; active: boolean } | null
+  shop: { id: string; name: string; slug: string; location: string; verified: boolean; active: boolean; plan_type: string } | null
   scooters: {
     id: string; name: string; brand: string; model: string;
     price_per_day: number; location: string; available: boolean;
@@ -109,12 +110,18 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
                 {profile?.name?.split(' ')[0] ?? 'Partner'} 👋
               </h1>
               {shop && (
-                <div className="flex items-center gap-2 mt-2">
+                <div className="flex flex-wrap items-center gap-2 mt-2">
                   <span className="text-sm font-semibold text-[#0f0f0e]">{shop.name}</span>
                   {shop.verified
                     ? <span className="px-2 py-0.5 bg-[#f0fdf4] text-[#22c55e] text-[10px] font-bold rounded-full uppercase tracking-wider">✓ Verified</span>
                     : <span className="px-2 py-0.5 bg-[#fffbeb] text-[#d97706] text-[10px] font-bold rounded-full uppercase tracking-wider">Pending Review</span>
                   }
+                  {isFoundingPartner(shop.plan_type) && (
+                    <span className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-[#FF6B35]/10 to-[#f59e0b]/10 text-[#d97706] text-[10px] font-bold rounded-full border border-[#f59e0b]/20">
+                      <Sparkles className="w-2.5 h-2.5" />
+                      {PLAN_LABELS[shop.plan_type as keyof typeof PLAN_LABELS] ?? 'Partner'}
+                    </span>
+                  )}
                   <span className="text-[#9c9c98] text-xs flex items-center gap-1">
                     <MapPin className="w-3 h-3" />{shop.location}
                   </span>
@@ -149,6 +156,30 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
               Complete Shop Setup
               <ArrowRight className="w-4 h-4" />
             </Link>
+          </div>
+        )}
+
+        {/* Founding Partner soft banner */}
+        {shop && isFoundingPartner(shop.plan_type) && (
+          <div className="bg-gradient-to-r from-[#fff8f0] to-[#fffbf0] border border-[#f59e0b]/20 rounded-[16px] px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex items-center gap-2.5 flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF6B35] to-[#f59e0b] flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-[13px] font-bold text-[#92400e]">Founding Partner — all features active</p>
+                <p className="text-[11px] text-[#b45309] mt-0.5">
+                  You have free access to all Pro features while Ride Phuket grows.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-1.5 sm:ml-auto">
+              {FOUNDING_PARTNER_PERKS.map(perk => (
+                <span key={perk} className="text-[10px] font-semibold px-2 py-0.5 bg-[#f59e0b]/10 text-[#92400e] rounded-full border border-[#f59e0b]/15">
+                  ✓ {perk}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 
@@ -320,10 +351,10 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
 
         {/* Quick links */}
         {shop && (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { href: '/partner/bookings',   label: 'Manage Bookings',     icon: BookOpen, desc: 'Confirm, cancel, contact riders' },
-              { href: `/shop/${shop.slug}`,  label: 'My Shop Page',        icon: Star,     desc: 'See your public shop profile' },
+              { href: '/partner/bookings',   label: 'Manage Bookings', icon: BookOpen, desc: 'Confirm, cancel, contact riders' },
+              { href: `/shop/${shop.slug}`,  label: 'My Shop Page',    icon: Star,     desc: 'See your public shop profile' },
             ].map(item => (
               <Link
                 key={item.href}
@@ -335,6 +366,16 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
                 <p className="text-xs text-[#9c9c98] mt-0.5">{item.desc}</p>
               </Link>
             ))}
+
+            {/* Analytics — locked, coming soon */}
+            <div className="relative bg-white rounded-[20px] p-5 border border-[#e8e8e4] opacity-70 cursor-not-allowed overflow-hidden">
+              <div className="absolute top-2.5 right-2.5">
+                <span className="text-[9px] font-bold px-1.5 py-0.5 bg-[#f0f0ec] text-[#9c9c98] rounded-full uppercase tracking-wider">Soon</span>
+              </div>
+              <TrendingUp className="w-5 h-5 text-[#9c9c98] mb-3" />
+              <p className="font-semibold text-[#9c9c98] text-sm">Analytics</p>
+              <p className="text-xs text-[#c8c8c4] mt-0.5">Views, leads & booking trends</p>
+            </div>
           </div>
         )}
 
