@@ -5,14 +5,15 @@ import Link from 'next/link'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import {
   Bike, BookOpen, TrendingUp, Plus,
-  Settings, MapPin, Star, Sparkles, Lock,
-  CheckCircle2, Clock, AlertCircle, ChevronRight, ArrowRight, Trash2,
+  Settings, MapPin, Star, Sparkles,
+  CheckCircle2, Clock, ChevronRight, ArrowRight, Trash2,
 } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { deleteScooter } from '@/app/actions/scooter-delete'
 import { PLAN_LABELS, FOUNDING_PARTNER_PERKS, isFoundingPartner } from '@/lib/plans'
 import type { Profile } from '@/hooks/useProfile'
+import type { ShopAnalytics } from '@/app/actions/shop-analytics'
 
 interface DashboardClientProps {
   profile: Profile | null
@@ -23,9 +24,10 @@ interface DashboardClientProps {
     images: string[]; category: string;
   }[]
   bookingStats: { pending: number; active: number; total: number }
+  analytics: ShopAnalytics | null
 }
 
-export default function DashboardClient({ profile, shop, scooters: initial, bookingStats }: DashboardClientProps) {
+export default function DashboardClient({ profile, shop, scooters: initial, bookingStats, analytics }: DashboardClientProps) {
   const [scooters, setScooters] = useState(initial)
   const [togglingId, setTogglingId]   = useState<string | null>(null)
   const [deletingId, setDeletingId]   = useState<string | null>(null) // confirm modal
@@ -349,9 +351,57 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
           </div>
         )}
 
+        {/* Analytics — this month */}
+        {shop && analytics !== null && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-[18px] font-bold text-[#0f0f0e]">Activity</h2>
+                <p className="text-sm text-[#9c9c98] mt-0.5">Last 30 days</p>
+              </div>
+              <TrendingUp className="w-5 h-5 text-[#FF6B35]" />
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+              {[
+                { label: 'Scooter views',  value: analytics.scooterViews,   color: 'text-[#2563eb]',  bg: 'bg-[#eff6ff]' },
+                { label: 'WhatsApp leads', value: analytics.whatsappClicks, color: 'text-[#16a34a]',  bg: 'bg-[#f0fdf4]' },
+                { label: 'Shop views',     value: analytics.shopViews,      color: 'text-[#FF6B35]',  bg: 'bg-[#fff4f0]' },
+                { label: 'Repeat visitors',value: analytics.repeatVisitors, color: 'text-[#7c3aed]',  bg: 'bg-[#f5f3ff]' },
+              ].map(m => (
+                <div key={m.label} className="bg-white rounded-[16px] border border-[#e8e8e4] p-4">
+                  <p className={`text-[26px] font-bold leading-none ${m.color}`}>{m.value}</p>
+                  <p className="text-[11px] text-[#9c9c98] mt-1.5 font-medium">{m.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {(analytics.topScooterName || analytics.phoneClicks > 0) && (
+              <div className="flex flex-wrap gap-2">
+                {analytics.topScooterName && (
+                  <span className="text-[11px] text-[#5c5c58] bg-white border border-[#e8e8e4] rounded-full px-3 py-1.5">
+                    Most viewed: <strong className="text-[#0f0f0e]">{analytics.topScooterName}</strong>
+                  </span>
+                )}
+                {analytics.phoneClicks > 0 && (
+                  <span className="text-[11px] text-[#5c5c58] bg-white border border-[#e8e8e4] rounded-full px-3 py-1.5">
+                    Phone contacts: <strong className="text-[#0f0f0e]">{analytics.phoneClicks}</strong>
+                  </span>
+                )}
+              </div>
+            )}
+
+            {analytics.scooterViews === 0 && analytics.whatsappClicks === 0 && (
+              <p className="text-[12px] text-[#9c9c98] text-center py-2">
+                Share your shop link to start seeing activity here.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Quick links */}
         {shop && (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {[
               { href: '/partner/bookings',   label: 'Manage Bookings', icon: BookOpen, desc: 'Confirm, cancel, contact riders' },
               { href: `/shop/${shop.slug}`,  label: 'My Shop Page',    icon: Star,     desc: 'See your public shop profile' },
@@ -366,16 +416,6 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
                 <p className="text-xs text-[#9c9c98] mt-0.5">{item.desc}</p>
               </Link>
             ))}
-
-            {/* Analytics — locked, coming soon */}
-            <div className="relative bg-white rounded-[20px] p-5 border border-[#e8e8e4] opacity-70 cursor-not-allowed overflow-hidden">
-              <div className="absolute top-2.5 right-2.5">
-                <span className="text-[9px] font-bold px-1.5 py-0.5 bg-[#f0f0ec] text-[#9c9c98] rounded-full uppercase tracking-wider">Soon</span>
-              </div>
-              <TrendingUp className="w-5 h-5 text-[#9c9c98] mb-3" />
-              <p className="font-semibold text-[#9c9c98] text-sm">Analytics</p>
-              <p className="text-xs text-[#c8c8c4] mt-0.5">Views, leads & booking trends</p>
-            </div>
           </div>
         )}
 

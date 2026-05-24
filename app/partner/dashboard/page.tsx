@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getServerProfile, getShopForOwner } from '@/app/actions/profile'
+import { getShopAnalytics } from '@/app/actions/shop-analytics'
 import DashboardClient from './DashboardClient'
 
 export const metadata = { title: 'Partner Dashboard' }
@@ -51,12 +52,15 @@ export default async function DashboardPage() {
     }
   }
 
+  const analytics = shop ? await getShopAnalytics(shop.id) : null
+
   return (
     <DashboardClient
       profile={profile}
       shop={shop}
       scooters={scooters}
       bookingStats={bookingStats}
+      analytics={analytics}
     />
   )
 }

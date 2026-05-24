@@ -16,6 +16,7 @@ import { DepositInfo } from '@/components/ride/DepositInfo'
 import { StickyBookingBar } from '@/components/ride/StickyBookingBar'
 import { SaveButton } from '@/components/ride/SaveButton'
 import { getPublicInquiries } from '@/app/actions/inquiry-actions'
+import { TrackView } from '@/components/analytics/TrackView'
 
 import type { OpeningHoursSchedule } from '@/types'
 
@@ -111,6 +112,8 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
 
   return (
     <div className="bg-white min-h-screen">
+      <TrackView eventType="scooter_view" shopId={shop.id} scooterId={scooter.id} metadata={{ scooterName: scooter.name }} />
+
       {/* Breadcrumb nav */}
       <div className="sticky top-16 z-20 bg-white/90 backdrop-blur-md border-b border-[#e8e8e4]">
         <div className="max-w-5xl mx-auto px-4 h-13 flex items-center gap-3">
@@ -311,6 +314,8 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               <QuickContact
                 whatsapp={shop.whatsapp}
                 phone={shop.phone}
+                shopId={shop.id}
+                scooterId={scooter.id}
                 shopName={shop.name}
                 responseTime={shop.responseTime}
                 context={{ scooterName: scooter.name, location: scooter.location }}

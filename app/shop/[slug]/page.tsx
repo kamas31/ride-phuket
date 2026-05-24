@@ -10,6 +10,7 @@ import { ScooterImage } from '@/components/ride/ScooterImage'
 import { TrustBadge, isNewListing, isFastResponder } from '@/components/ride/TrustBadge'
 import { EmptyReviews } from '@/components/ride/EmptyReviews'
 import { QuickContact } from '@/components/ride/QuickContact'
+import { TrackView } from '@/components/analytics/TrackView'
 
 interface ShopPageProps {
   params: Promise<{ slug: string }>
@@ -53,6 +54,8 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
   return (
     <div className="bg-white min-h-screen">
+      <TrackView eventType="shop_view" shopId={shop.id} />
+
       {/* ── Sticky breadcrumb ── */}
       <div className="sticky top-16 z-20 bg-white/90 backdrop-blur-md border-b border-[#e8e8e4]">
         <div className="max-w-5xl mx-auto px-4 h-11 flex items-center justify-between">
@@ -224,6 +227,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
                 <QuickContact
                   whatsapp={shop.whatsapp}
                   phone={shop.phone}
+                  shopId={shop.id}
                   shopName={shop.name}
                   responseTime={shop.responseTime}
                   context={{ shopName: shop.name, location: shop.location }}
