@@ -2,14 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Map, Bike, User } from 'lucide-react'
+import { Home, Map, Bookmark, Bike, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/explore', label: 'Explore', icon: Map },
-  { href: '/rentals', label: 'Rentals', icon: Bike },
-  { href: '/profile', label: 'Profile', icon: User },
+  { href: '/',        label: 'Home',    icon: Home     },
+  { href: '/explore', label: 'Explore', icon: Map      },
+  { href: '/saved',   label: 'Saved',   icon: Bookmark },
+  { href: '/rentals', label: 'Rentals', icon: Bike     },
+  { href: '/profile', label: 'Profile', icon: User     },
 ]
 
 export default function MobileBottomNav() {
@@ -31,7 +32,7 @@ export default function MobileBottomNav() {
                   'w-5 h-5 transition-colors',
                   active ? 'text-[#FF6B35]' : 'text-[#9c9c98]'
                 )}
-                strokeWidth={active ? 2.5 : 2}
+                strokeWidth={active ? 2.5 : 1.5}
               />
               <span
                 className={cn(

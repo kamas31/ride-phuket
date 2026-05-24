@@ -12,6 +12,8 @@ export type EventType =
   | 'map_pin_click'
   | 'search'
   | 'filter_use'
+  | 'ride_saved'
+  | 'ride_unsaved'
 
 const SESSION_KEY = 'rp_sid'
 
