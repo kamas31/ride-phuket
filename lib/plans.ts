@@ -15,9 +15,19 @@ export interface PlanCapabilities {
   canUseGallery: boolean
   canAppearFeatured: boolean
   canUsePremiumBranding: boolean
-  canAccessAnalytics: boolean
   canShowVerifiedBadge: boolean
   priorityRankingWeight: number // 1.0 = normal; higher = better map/list rank
+  // Analytics capability tiers — use the helper functions below, not these directly
+  canAccessBasicAnalytics: boolean      // view/click counts (all plans)
+  canAccessAdvancedAnalytics: boolean   // conversion rates
+  canAccessLeadInsights: boolean        // hot scooters, underperformers
+  canAccessPerformanceTrends: boolean   // week-over-week trends
+  canAccessShopBenchmarking: boolean    // compare vs zone average
+  canAccessHotScooters: boolean         // hot scooter scoring labels
+  canAccessZoneIntelligence: boolean    // zone-level lead breakdown
+  canAccessPhotoAnalytics: boolean      // photo performance data
+  canAccessResponseRateData: boolean    // response speed signals
+  canAccessExports: boolean             // data export
 }
 
 export const PLAN_CAPABILITIES: Record<PlanType, PlanCapabilities> = {
@@ -28,9 +38,18 @@ export const PLAN_CAPABILITIES: Record<PlanType, PlanCapabilities> = {
     canUseGallery: false,
     canAppearFeatured: false,
     canUsePremiumBranding: false,
-    canAccessAnalytics: false,
     canShowVerifiedBadge: false,
     priorityRankingWeight: 1.0,
+    canAccessBasicAnalytics: true,
+    canAccessAdvancedAnalytics: false,
+    canAccessLeadInsights: false,
+    canAccessPerformanceTrends: false,
+    canAccessShopBenchmarking: false,
+    canAccessHotScooters: false,
+    canAccessZoneIntelligence: false,
+    canAccessPhotoAnalytics: false,
+    canAccessResponseRateData: false,
+    canAccessExports: false,
   },
   pro: {
     maxScooters: 15,
@@ -39,9 +58,18 @@ export const PLAN_CAPABILITIES: Record<PlanType, PlanCapabilities> = {
     canUseGallery: true,
     canAppearFeatured: false,
     canUsePremiumBranding: true,
-    canAccessAnalytics: false,
     canShowVerifiedBadge: true,
     priorityRankingWeight: 1.2,
+    canAccessBasicAnalytics: true,
+    canAccessAdvancedAnalytics: true,
+    canAccessLeadInsights: true,
+    canAccessPerformanceTrends: false,
+    canAccessShopBenchmarking: false,
+    canAccessHotScooters: true,
+    canAccessZoneIntelligence: false,
+    canAccessPhotoAnalytics: false,
+    canAccessResponseRateData: true,
+    canAccessExports: false,
   },
   premium: {
     maxScooters: Infinity,
@@ -50,9 +78,18 @@ export const PLAN_CAPABILITIES: Record<PlanType, PlanCapabilities> = {
     canUseGallery: true,
     canAppearFeatured: true,
     canUsePremiumBranding: true,
-    canAccessAnalytics: true,
     canShowVerifiedBadge: true,
     priorityRankingWeight: 1.5,
+    canAccessBasicAnalytics: true,
+    canAccessAdvancedAnalytics: true,
+    canAccessLeadInsights: true,
+    canAccessPerformanceTrends: true,
+    canAccessShopBenchmarking: true,
+    canAccessHotScooters: true,
+    canAccessZoneIntelligence: true,
+    canAccessPhotoAnalytics: true,
+    canAccessResponseRateData: true,
+    canAccessExports: true,
   },
   founding_partner: {
     maxScooters: Infinity,
@@ -61,9 +98,18 @@ export const PLAN_CAPABILITIES: Record<PlanType, PlanCapabilities> = {
     canUseGallery: true,
     canAppearFeatured: true,
     canUsePremiumBranding: true,
-    canAccessAnalytics: true,
     canShowVerifiedBadge: true,
     priorityRankingWeight: 1.5,
+    canAccessBasicAnalytics: true,
+    canAccessAdvancedAnalytics: true,
+    canAccessLeadInsights: true,
+    canAccessPerformanceTrends: true,
+    canAccessShopBenchmarking: true,
+    canAccessHotScooters: true,
+    canAccessZoneIntelligence: true,
+    canAccessPhotoAnalytics: true,
+    canAccessResponseRateData: true,
+    canAccessExports: true,
   },
 }
 
@@ -85,6 +131,49 @@ export function canAddScooter(planType: PlanType | string | undefined, currentCo
 
 export function isFoundingPartner(planType: PlanType | string | undefined): boolean {
   return planType === 'founding_partner'
+}
+
+// ── Analytics capability helpers ─────────────────────────────────────────────
+// Always use these in components — never read PlanCapabilities fields directly.
+
+export function canAccessBasicAnalytics(planType: PlanType | string | undefined): boolean {
+  return getPlanCapabilities(planType).canAccessBasicAnalytics
+}
+
+export function canAccessAdvancedAnalytics(planType: PlanType | string | undefined): boolean {
+  return getPlanCapabilities(planType).canAccessAdvancedAnalytics
+}
+
+export function canAccessLeadInsights(planType: PlanType | string | undefined): boolean {
+  return getPlanCapabilities(planType).canAccessLeadInsights
+}
+
+export function canAccessPerformanceTrends(planType: PlanType | string | undefined): boolean {
+  return getPlanCapabilities(planType).canAccessPerformanceTrends
+}
+
+export function canAccessShopBenchmarking(planType: PlanType | string | undefined): boolean {
+  return getPlanCapabilities(planType).canAccessShopBenchmarking
+}
+
+export function canAccessHotScooters(planType: PlanType | string | undefined): boolean {
+  return getPlanCapabilities(planType).canAccessHotScooters
+}
+
+export function canAccessZoneIntelligence(planType: PlanType | string | undefined): boolean {
+  return getPlanCapabilities(planType).canAccessZoneIntelligence
+}
+
+export function canAccessPhotoAnalytics(planType: PlanType | string | undefined): boolean {
+  return getPlanCapabilities(planType).canAccessPhotoAnalytics
+}
+
+export function canAccessResponseRateData(planType: PlanType | string | undefined): boolean {
+  return getPlanCapabilities(planType).canAccessResponseRateData
+}
+
+export function canAccessExports(planType: PlanType | string | undefined): boolean {
+  return getPlanCapabilities(planType).canAccessExports
 }
 
 // Soft messaging shown to founding partners (not a paywall — a thank-you)

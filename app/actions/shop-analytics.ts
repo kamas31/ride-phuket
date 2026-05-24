@@ -2,20 +2,30 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 
+export interface ScooterAnalyticsBreakdown {
+  scooterId:   string
+  name:        string
+  views:       number
+  waClicks:    number
+  phoneClicks: number
+}
+
 export interface ShopAnalytics {
-  scooterViews:   number
-  shopViews:      number
-  whatsappClicks: number
-  phoneClicks:    number
-  topScooterName: string | null
-  repeatVisitors: number
-  periodDays:     number
+  scooterViews:      number
+  shopViews:         number
+  whatsappClicks:    number
+  phoneClicks:       number
+  topScooterName:    string | null
+  repeatVisitors:    number
+  periodDays:        number
+  scooterBreakdown:  ScooterAnalyticsBreakdown[]
 }
 
 export async function getShopAnalytics(shopId: string, days = 30): Promise<ShopAnalytics> {
   const empty: ShopAnalytics = {
     scooterViews: 0, shopViews: 0, whatsappClicks: 0,
     phoneClicks: 0, topScooterName: null, repeatVisitors: 0, periodDays: days,
+    scooterBreakdown: [],
   }
 
   try {
@@ -38,19 +48,32 @@ export async function getShopAnalytics(shopId: string, days = 30): Promise<ShopA
     const whatsappClicks = ev.filter(e => e.event_type === 'whatsapp_click').length
     const phoneClicks    = ev.filter(e => e.event_type === 'phone_click').length
 
-    // Top scooter: most scooter_view events
-    const viewCounts = new Map<string, { count: number; name: string }>()
-    for (const e of ev.filter(x => x.event_type === 'scooter_view' && x.scooter_id)) {
-      const k    = e.scooter_id!
-      const name = (e.metadata?.scooterName as string) ?? ''
-      if (!viewCounts.has(k)) viewCounts.set(k, { count: 0, name })
-      viewCounts.get(k)!.count++
+    // Per-scooter breakdown (also used for top scooter + hot scoring)
+    const scooterMap = new Map<string, { name: string; views: number; waClicks: number; phoneClicks: number }>()
+    for (const e of ev) {
+      if (!e.scooter_id) continue
+      if (!scooterMap.has(e.scooter_id)) {
+        scooterMap.set(e.scooter_id, {
+          name: (e.metadata?.scooterName as string) ?? '',
+          views: 0, waClicks: 0, phoneClicks: 0,
+        })
+      }
+      const entry = scooterMap.get(e.scooter_id)!
+      if (e.event_type === 'scooter_view')   entry.views++
+      if (e.event_type === 'whatsapp_click') entry.waClicks++
+      if (e.event_type === 'phone_click')    entry.phoneClicks++
     }
+
+    const scooterBreakdown: ScooterAnalyticsBreakdown[] = [...scooterMap.entries()].map(
+      ([scooterId, v]) => ({ scooterId, ...v })
+    )
+
+    // Top scooter by view count
     let topScooterName: string | null = null
     let topCount = 0
-    viewCounts.forEach(({ count, name }) => {
-      if (count > topCount && name) { topCount = count; topScooterName = name }
-    })
+    for (const { views, name } of scooterMap.values()) {
+      if (views > topCount && name) { topCount = views; topScooterName = name }
+    }
 
     // Repeat visitors: unique sessions with 2+ events
     const sessionCounts = new Map<string, number>()
@@ -60,7 +83,7 @@ export async function getShopAnalytics(shopId: string, days = 30): Promise<ShopA
     }
     const repeatVisitors = [...sessionCounts.values()].filter(c => c >= 2).length
 
-    return { scooterViews, shopViews, whatsappClicks, phoneClicks, topScooterName, repeatVisitors, periodDays: days }
+    return { scooterViews, shopViews, whatsappClicks, phoneClicks, topScooterName, repeatVisitors, periodDays: days, scooterBreakdown }
   } catch {
     return empty
   }
