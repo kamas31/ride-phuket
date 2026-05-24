@@ -1,8 +1,10 @@
 import Link from 'next/link'
-import { ArrowRight, Shield, Zap, Truck, Star, ChevronRight, MapPin, RotateCcw, Check } from 'lucide-react'
+import { ArrowRight, Shield, ShieldCheck, Truck, ChevronRight, MapPin, RotateCcw, Check, MessageCircle, Unlock, Zap } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { LOCATIONS } from '@/constants'
 import { getScooters, getStats } from '@/lib/supabase/queries'
+import { AREAS } from '@/constants/areas'
+import { formatPrice } from '@/lib/utils'
 
 const HOW_IT_WORKS = [
   {
@@ -12,8 +14,8 @@ const HOW_IT_WORKS = [
   },
   {
     step: '02',
-    title: 'Book Instantly',
-    description: 'Select your dates and confirm in seconds. No waiting, no back-and-forth. Confirmed immediately.',
+    title: 'Contact the Shop',
+    description: 'Found your scooter? Message the shop directly on WhatsApp — they confirm availability in minutes.',
   },
   {
     step: '03',
@@ -150,7 +152,7 @@ export default async function HomePage() {
             <p className="text-white/72 text-[17px] md:text-[20px] max-w-[30ch] leading-[1.65] mb-10 font-light hero-sub-shadow">
               Premium scooters delivered to your hotel.
               <br className="hidden sm:block" />
-              Verified shops. Instant booking.
+              Verified shops. Contact directly on WhatsApp.
             </p>
           </div>
 
@@ -225,15 +227,15 @@ export default async function HomePage() {
       {/* ── TRUST STRIP ── */}
       <div className="bg-white border-b border-[#e8e8e4]">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-6 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          {[
-            { emoji: '✅', text: 'All shops verified in-person' },
-            { emoji: '🛡️', text: 'Insurance on every rental' },
-            { emoji: '🚚', text: 'Hotel delivery available' },
-            { emoji: '🔓', text: 'Free cancellation 24h' },
-            { emoji: '💬', text: '24/7 WhatsApp support' },
-          ].map(item => (
+          {([
+            { icon: ShieldCheck,    text: 'All shops verified in-person', color: 'text-[#22c55e]' },
+            { icon: Shield,         text: 'Insurance on every rental',    color: 'text-[#2563eb]' },
+            { icon: Truck,          text: 'Hotel delivery available',     color: 'text-[#FF6B35]' },
+            { icon: Unlock,         text: 'Free cancellation 24h',        color: 'text-[#9c9c98]'  },
+            { icon: MessageCircle,  text: '24/7 WhatsApp support',        color: 'text-[#22c55e]' },
+          ] as const).map(item => (
             <div key={item.text} className="flex items-center gap-2 flex-shrink-0 text-sm text-[#5c5c58]">
-              <span className="text-base">{item.emoji}</span>
+              <item.icon className={`w-4 h-4 flex-shrink-0 ${item.color}`} strokeWidth={1.5} />
               <span className="font-medium whitespace-nowrap">{item.text}</span>
             </div>
           ))}
@@ -294,8 +296,38 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ── */}
+      {/* ── EXPLORE BY AREA ── */}
       <section className="bg-[#f8f8f6] py-12 md:py-16">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex items-end justify-between mb-7">
+            <div>
+              <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-2">By Location</p>
+              <h2 className="text-[26px] md:text-[34px] font-bold text-[#0f0f0e] leading-tight tracking-tight">
+                Where are you staying?
+              </h2>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {AREAS.map(area => (
+              <Link
+                key={area.slug}
+                href={`/phuket/${area.slug}`}
+                className="group flex flex-col p-4 bg-white rounded-[16px] border border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] transition-all"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <MapPin className="w-4 h-4 text-[#FF6B35] mt-0.5" />
+                  <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:text-[#FF6B35] transition-colors" />
+                </div>
+                <p className="font-bold text-[14px] text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors leading-tight">{area.label}</p>
+                <p className="text-[12px] text-[#9c9c98] mt-1">From {formatPrice(area.priceFrom)}/day</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section className="py-12 md:py-16">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-10">
             <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-2">Simple Process</p>

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getServerProfile, getShopForOwner } from '@/app/actions/profile'
 import { getShopAnalytics } from '@/app/actions/shop-analytics'
+import { getActivityFeed } from '@/app/actions/activity-feed'
 import DashboardClient from './DashboardClient'
 
 export const metadata = { title: 'Partner Dashboard' }
@@ -52,7 +53,10 @@ export default async function DashboardPage() {
     }
   }
 
-  const analytics = shop ? await getShopAnalytics(shop.id) : null
+  const [analytics, activityFeed] = await Promise.all([
+    shop ? getShopAnalytics(shop.id) : Promise.resolve(null),
+    shop ? getActivityFeed(shop.id)  : Promise.resolve([]),
+  ])
 
   return (
     <DashboardClient
@@ -61,6 +65,7 @@ export default async function DashboardPage() {
       scooters={scooters}
       bookingStats={bookingStats}
       analytics={analytics}
+      activityFeed={activityFeed}
     />
   )
 }

@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, MapPin, Phone, MessageCircle, Clock,
-  Globe, Shield, Zap, Check, Star, ExternalLink,
+  Globe, Shield, Zap, Check, Star, ExternalLink, Bike,
 } from 'lucide-react'
 import { getShopBySlug } from '@/lib/supabase/queries'
 import { ScooterCard } from '@/components/ride/ScooterCard'
@@ -157,7 +157,9 @@ export default async function ShopPage({ params }: ShopPageProps) {
                 </div>
               ) : (
                 <div className="py-12 text-center border border-[#f0f0ec] rounded-[20px]">
-                  <div className="text-4xl mb-3">🛵</div>
+                  <div className="w-12 h-12 bg-[#f8f8f6] rounded-[16px] flex items-center justify-center mx-auto mb-3">
+                    <Bike className="w-6 h-6 text-[#9c9c98]" strokeWidth={1.5} />
+                  </div>
                   <p className="font-semibold text-[#0f0f0e] mb-1">No scooters available right now</p>
                   <p className="text-sm text-[#9c9c98]">Check back soon or contact the shop directly.</p>
                 </div>

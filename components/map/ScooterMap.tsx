@@ -5,7 +5,7 @@ import mapboxgl from 'mapbox-gl'
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import Link from 'next/link'
-import { X, Check } from 'lucide-react'
+import { X, Check, ArrowRight } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
 import { PHUKET_ZONES, getZoneForLocation, type PhuketZone } from '@/lib/zones'
 import type { Scooter } from '@/types'
@@ -160,7 +160,7 @@ function ShopPopupCard({ agg, onClose }: { agg: ShopAggregate; onClose: () => vo
     : null
 
   return (
-    <div className="relative w-[260px] bg-white rounded-[20px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.18),0_2px_8px_rgba(0,0,0,0.08)]">
+    <div className="relative w-[260px] bg-white rounded-[20px] overflow-hidden shadow-floating">
       <button
         onClick={onClose}
         className="absolute top-2.5 right-2.5 z-10 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-[#f8f8f6] transition-colors"
@@ -207,9 +207,10 @@ function ShopPopupCard({ agg, onClose }: { agg: ShopAggregate; onClose: () => vo
         {agg.slug ? (
           <Link
             href={`/shop/${agg.slug}`}
-            className="flex items-center justify-center w-full py-2.5 bg-[#FF6B35] text-white text-[12px] font-bold rounded-full hover:bg-[#e85d29] transition-colors shadow-[0_2px_8px_rgba(255,107,53,0.35)]"
+            className="flex items-center justify-center gap-1.5 w-full py-2.5 bg-[#FF6B35] text-white text-[12px] font-bold rounded-full hover:bg-[#e85d29] transition-colors shadow-[0_2px_8px_rgba(255,107,53,0.35)]"
           >
-            View shop →
+            View shop
+            <ArrowRight className="w-3 h-3" strokeWidth={2} />
           </Link>
         ) : null}
       </div>

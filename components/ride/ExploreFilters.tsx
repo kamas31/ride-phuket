@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { SlidersHorizontal, X, ChevronDown } from 'lucide-react'
+import { SlidersHorizontal, X, Truck, HardHat, Shield, IdCard } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SCOOTER_CATEGORIES, LOCATIONS, SORT_OPTIONS } from '@/constants'
 import type { FilterState } from '@/types'
@@ -69,52 +69,56 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
         <button
           onClick={() => update({ deliveryNow: !filters.deliveryNow })}
           className={cn(
-            'flex-shrink-0 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
+            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
             filters.deliveryNow
               ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
               : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
           )}
         >
-          🚚 Delivery
+          <Truck className="w-3.5 h-3.5" strokeWidth={1.5} />
+          Delivery
         </button>
 
         {/* Quick: Helmet */}
         <button
           onClick={() => update({ helmetIncluded: !filters.helmetIncluded })}
           className={cn(
-            'flex-shrink-0 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
+            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
             filters.helmetIncluded
               ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
               : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
           )}
         >
-          🪖 Helmet
+          <HardHat className="w-3.5 h-3.5" strokeWidth={1.5} />
+          Helmet
         </button>
 
         {/* Quick: Deposit Protected */}
         <button
           onClick={() => update({ depositProtected: !filters.depositProtected })}
           className={cn(
-            'flex-shrink-0 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
+            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
             filters.depositProtected
               ? 'bg-[#FF6B35] text-white border-[#FF6B35]'
               : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
           )}
         >
-          🛡 Protected
+          <Shield className="w-3.5 h-3.5" strokeWidth={1.5} />
+          Protected
         </button>
 
         {/* Quick: No Passport */}
         <button
           onClick={() => update({ noPassport: !filters.noPassport })}
           className={cn(
-            'flex-shrink-0 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
+            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
             filters.noPassport
               ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
               : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
           )}
         >
-          🪪 No Passport
+          <IdCard className="w-3.5 h-3.5" strokeWidth={1.5} />
+          No Passport
         </button>
 
         {/* Sort */}
@@ -189,20 +193,23 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
 
             {/* Toggles */}
             <div className="space-y-3 mb-8">
-              {[
-                { key: 'deliveryNow',       label: 'Delivery available',          emoji: '🚚' },
-                { key: 'helmetIncluded',    label: 'Helmet included',             emoji: '🪖' },
-                { key: 'depositProtected',  label: 'Deposit Protected (safest)',  emoji: '🛡' },
-                { key: 'noPassport',        label: 'No passport required',        emoji: '🪪' },
-              ].map(({ key, label, emoji }) => (
+              {([
+                { key: 'deliveryNow',       label: 'Delivery available',         icon: Truck    },
+                { key: 'helmetIncluded',    label: 'Helmet included',            icon: HardHat  },
+                { key: 'depositProtected',  label: 'Deposit Protected (safest)', icon: Shield   },
+                { key: 'noPassport',        label: 'No passport required',       icon: IdCard   },
+              ] as const).map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
                   onClick={() => update({ [key]: !filters[key as keyof FilterState] } as Partial<FilterState>)}
                   className="w-full flex items-center justify-between p-4 rounded-[14px] border border-[#e8e8e4] hover:border-[#d0d0cc] transition-colors"
                 >
-                  <span className="text-sm font-medium text-[#0f0f0e]">{emoji} {label}</span>
+                  <span className="flex items-center gap-2.5 text-sm font-medium text-[#0f0f0e]">
+                    <Icon className="w-4 h-4 text-[#9c9c98]" strokeWidth={1.5} />
+                    {label}
+                  </span>
                   <div className={cn(
-                    'w-11 h-6 rounded-full transition-colors relative',
+                    'w-11 h-6 rounded-full transition-colors relative flex-shrink-0',
                     filters[key as keyof FilterState] ? 'bg-[#FF6B35]' : 'bg-[#e8e8e4]'
                   )}>
                     <div className={cn(

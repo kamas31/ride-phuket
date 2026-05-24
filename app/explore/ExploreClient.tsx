@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { Search, Map, List } from 'lucide-react'
+import { Search, Map, List, Bike } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ExploreFilters } from '@/components/ride/ExploreFilters'
 import { ImageMetricsOverlay } from '@/components/debug/ImageMetricsOverlay'
@@ -282,7 +282,9 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
 function EmptyState() {
   return (
     <div className="text-center py-20">
-      <div className="text-5xl mb-4">🛵</div>
+      <div className="w-14 h-14 bg-[#f8f8f6] rounded-[18px] flex items-center justify-center mx-auto mb-4">
+        <Bike className="w-7 h-7 text-[#9c9c98]" strokeWidth={1.5} />
+      </div>
       <h3 className="text-lg font-bold text-[#0f0f0e] mb-2">No scooters found</h3>
       <p className="text-[#5c5c58] text-sm">Try adjusting your filters or search terms.</p>
     </div>

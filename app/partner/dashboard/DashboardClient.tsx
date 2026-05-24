@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import React, { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import {
   Bike, BookOpen, TrendingUp, Plus,
   Settings, MapPin, Star, Sparkles,
   CheckCircle2, Clock, ChevronRight, ArrowRight, Trash2,
+  MessageCircle, Eye, RotateCcw, Phone, Store, Lightbulb, ShoppingBag,
 } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -14,6 +15,7 @@ import { deleteScooter } from '@/app/actions/scooter-delete'
 import { PLAN_LABELS, FOUNDING_PARTNER_PERKS, isFoundingPartner } from '@/lib/plans'
 import type { Profile } from '@/hooks/useProfile'
 import type { ShopAnalytics } from '@/app/actions/shop-analytics'
+import type { ActivityFeedItem } from '@/app/actions/activity-feed'
 
 interface DashboardClientProps {
   profile: Profile | null
@@ -25,9 +27,19 @@ interface DashboardClientProps {
   }[]
   bookingStats: { pending: number; active: number; total: number }
   analytics: ShopAnalytics | null
+  activityFeed: ActivityFeedItem[]
 }
 
-export default function DashboardClient({ profile, shop, scooters: initial, bookingStats, analytics }: DashboardClientProps) {
+const FEED_ICONS: Record<ActivityFeedItem['icon'], React.ComponentType<{ className?: string }>> = {
+  whatsapp: MessageCircle,
+  eye:      Eye,
+  repeat:   RotateCcw,
+  star:     Star,
+  shop:     Store,
+  phone:    Phone,
+}
+
+export default function DashboardClient({ profile, shop, scooters: initial, bookingStats, analytics, activityFeed }: DashboardClientProps) {
   const [scooters, setScooters] = useState(initial)
   const [togglingId, setTogglingId]   = useState<string | null>(null)
   const [deletingId, setDeletingId]   = useState<string | null>(null) // confirm modal
@@ -146,7 +158,9 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
         {/* No shop yet — onboarding prompt */}
         {!shop && (
           <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-8 text-center">
-            <div className="text-5xl mb-4">🏪</div>
+            <div className="w-16 h-16 bg-[#fff4f0] rounded-[20px] flex items-center justify-center mx-auto mb-4">
+              <ShoppingBag className="w-8 h-8 text-[#FF6B35]" strokeWidth={1.5} />
+            </div>
             <h2 className="text-[20px] font-bold text-[#0f0f0e] mb-2">Set up your shop</h2>
             <p className="text-[#5c5c58] text-sm leading-relaxed mb-6 max-w-sm mx-auto">
               Complete your shop profile to start receiving bookings. Our team will verify your shop within 24 hours.
@@ -220,7 +234,9 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
 
             {scooters.length === 0 ? (
               <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-10 text-center">
-                <div className="text-4xl mb-4">🛵</div>
+                <div className="w-14 h-14 bg-[#f8f8f6] rounded-[18px] flex items-center justify-center mx-auto mb-4">
+                  <Bike className="w-7 h-7 text-[#9c9c98]" strokeWidth={1.5} />
+                </div>
                 <p className="font-bold text-[#0f0f0e] mb-1">No scooters in your fleet yet</p>
                 <p className="text-sm text-[#9c9c98] mb-6">Add your first scooter and start receiving bookings today.</p>
                 <Link
@@ -396,6 +412,90 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
                 Share your shop link to start seeing activity here.
               </p>
             )}
+          </div>
+        )}
+
+        {/* Activity Feed + Shop Insights — side-by-side on desktop */}
+        {shop && (activityFeed.length > 0 || scooters.length > 0) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            {/* Activity Feed */}
+            {activityFeed.length > 0 && (
+              <div>
+                <h2 className="text-[18px] font-bold text-[#0f0f0e] mb-1">Recent Activity</h2>
+                <p className="text-sm text-[#9c9c98] mb-4">Last 7 days</p>
+                <div className="bg-white rounded-[20px] border border-[#e8e8e4] divide-y divide-[#f0f0ec] overflow-hidden">
+                  {activityFeed.map(item => {
+                    const Icon = FEED_ICONS[item.icon]
+                    return (
+                      <div key={item.id} className="flex items-start gap-3 p-4">
+                        <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center flex-shrink-0 ${item.bg}`}>
+                          <Icon className={`w-4 h-4 ${item.color}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] text-[#0f0f0e] leading-snug">{item.message}</p>
+                          <p className="text-[11px] text-[#9c9c98] mt-0.5">{item.timeAgo}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Shop Insights — heuristic tips from real scooter data */}
+            {scooters.length > 0 && (() => {
+              const tips: { icon: React.ComponentType<{ className?: string }>; color: string; bg: string; text: string }[] = []
+
+              const noPhotos   = scooters.filter(s => !s.images?.length)
+              const unavail    = scooters.filter(s => !s.available)
+              const hasWA      = analytics && analytics.whatsappClicks > 0
+              const lowViews   = analytics && analytics.scooterViews < 5 && analytics.scooterViews >= 0
+              const repeatHigh = analytics && analytics.repeatVisitors >= 3
+
+              if (noPhotos.length > 0)
+                tips.push({ icon: Eye, color: 'text-[#FF6B35]', bg: 'bg-[#fff4f0]',
+                  text: `${noPhotos.length} scooter${noPhotos.length > 1 ? 's have' : ' has'} no photos — add images to get more views` })
+
+              if (unavail.length === scooters.length)
+                tips.push({ icon: CheckCircle2, color: 'text-[#dc2626]', bg: 'bg-[#fef2f2]',
+                  text: 'All your scooters are marked unavailable — turn some on to appear in search results' })
+
+              if (lowViews && !hasWA)
+                tips.push({ icon: TrendingUp, color: 'text-[#2563eb]', bg: 'bg-[#eff6ff]',
+                  text: 'Share your shop link in local Facebook groups or tourist forums to get your first leads' })
+
+              if (repeatHigh)
+                tips.push({ icon: Star, color: 'text-[#d97706]', bg: 'bg-[#fffbeb]',
+                  text: `${analytics!.repeatVisitors} repeat visitors this week — they're interested but haven't reached out yet. Try adding a weekly price.` })
+
+              if (!shop.verified)
+                tips.push({ icon: Sparkles, color: 'text-[#7c3aed]', bg: 'bg-[#f5f3ff]',
+                  text: 'Complete verification to unlock the Verified badge and rank higher in search' })
+
+              if (tips.length === 0) return null
+
+              return (
+                <div>
+                  <h2 className="text-[18px] font-bold text-[#0f0f0e] mb-1 flex items-center gap-2">
+                    <Lightbulb className="w-5 h-5 text-[#d97706]" />
+                    Shop Insights
+                  </h2>
+                  <p className="text-sm text-[#9c9c98] mb-4">Personalised tips to grow faster</p>
+                  <div className="space-y-2.5">
+                    {tips.slice(0, 4).map((tip, i) => {
+                      const TipIcon = tip.icon
+                      return (
+                        <div key={i} className={`flex items-start gap-3 p-4 rounded-[16px] border border-[#e8e8e4] ${tip.bg}`}>
+                          <TipIcon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${tip.color}`} />
+                          <p className="text-[13px] text-[#0f0f0e] leading-snug">{tip.text}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         )}
 
