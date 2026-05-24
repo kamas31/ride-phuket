@@ -23,10 +23,11 @@ export const LOCATIONS = [
 export const PRICE_RANGE = { min: 150, max: 2000 }
 
 export const SORT_OPTIONS = [
-  { value: 'price_asc', label: 'Price: Low to High' },
-  { value: 'price_desc', label: 'Price: High to Low' },
-  { value: 'rating', label: 'Top Rated' },
-  { value: 'distance', label: 'Nearest First' },
+  { value: 'recommended', label: 'Recommended' },
+  { value: 'price_asc',   label: 'Price: Low to High' },
+  { value: 'price_desc',  label: 'Price: High to Low' },
+  { value: 'rating',      label: 'Top Rated' },
+  { value: 'distance',    label: 'Nearest First' },
 ] as const
 
 export const SCOOTER_CATEGORIES = [

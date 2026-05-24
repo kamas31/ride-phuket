@@ -158,7 +158,7 @@ export interface FilterState {
   deliveryNow: boolean
   helmetIncluded: boolean
   location: string | 'all'
-  sortBy: 'price_asc' | 'price_desc' | 'rating' | 'distance'
+  sortBy: 'recommended' | 'price_asc' | 'price_desc' | 'rating' | 'distance'
   depositProtected: boolean  // Ride Phuket Deposit Protection enrolled shops
   noPassport: boolean        // no passport required (standard scooters only)
 }

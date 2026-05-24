@@ -96,10 +96,16 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
           )}
         </div>
 
-        {/* Top-right: save heart + insurance */}
+        {/* Top-right: save heart + trust indicators */}
         <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
           <SaveButton scooterId={scooter.id} size="sm" />
-          {scooter.insuranceIncluded && (
+          {scooter.shop?.verified && (
+            <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm text-white text-[11px] font-medium rounded-full flex items-center gap-1">
+              <Check className="w-2.5 h-2.5 text-[#22c55e]" />
+              Verified
+            </span>
+          )}
+          {scooter.insuranceIncluded && !scooter.shop?.verified && (
             <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm text-white text-[11px] font-medium rounded-full flex items-center gap-1">
               <Shield className="w-2.5 h-2.5 text-[#22c55e]" />
               Shop insured

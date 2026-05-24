@@ -224,7 +224,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
             <div className="flex gap-3">
               <button
                 onClick={() => {
-                  onChange({ priceMin: 150, priceMax: 2000, category: 'all', deliveryNow: false, helmetIncluded: false, location: 'all', sortBy: 'rating', depositProtected: false, noPassport: false })
+                  onChange({ priceMin: 150, priceMax: 2000, category: 'all', deliveryNow: false, helmetIncluded: false, location: 'all', sortBy: 'recommended', depositProtected: false, noPassport: false })
                 }}
                 className="flex-1 py-3 rounded-full border border-[#e8e8e4] text-sm font-semibold text-[#5c5c58] hover:bg-[#f8f8f6] transition-colors"
               >

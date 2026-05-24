@@ -8,6 +8,7 @@ import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ExploreFilters } from '@/components/ride/ExploreFilters'
 import { ImageMetricsOverlay } from '@/components/debug/ImageMetricsOverlay'
 import { cn } from '@/lib/utils'
+import { sortByRecommended } from '@/lib/ridescore'
 import type { Scooter, FilterState } from '@/types'
 
 const ScooterMap = dynamic(() => import('@/components/map/ScooterMap'), {
@@ -26,7 +27,7 @@ const DEFAULT_FILTERS: FilterState = {
   deliveryNow: false,
   helmetIncluded: false,
   location: 'all',
-  sortBy: 'rating',
+  sortBy: 'recommended',
   depositProtected: false,
   noPassport: false,
 }
@@ -113,6 +114,7 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
       return true
     })
 
+    if (filters.sortBy === 'recommended') list = sortByRecommended(list)
     if (filters.sortBy === 'price_asc')  list = [...list].sort((a, b) => a.pricePerDay - b.pricePerDay)
     if (filters.sortBy === 'price_desc') list = [...list].sort((a, b) => b.pricePerDay - a.pricePerDay)
     if (filters.sortBy === 'rating')     list = [...list].sort((a, b) => b.rating - a.rating)
