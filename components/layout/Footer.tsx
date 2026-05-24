@@ -3,9 +3,9 @@ import { MapPin, Share2, Globe } from 'lucide-react'
 import { SITE_NAME, SITE_DESCRIPTION } from '@/constants'
 
 const FOOTER_LINKS = {
-  Product: [
+  Discover: [
     { href: '/explore', label: 'Explore Scooters' },
-    { href: '/bookings', label: 'My Rentals' },
+    { href: '/rentals', label: 'My Rentals' },
     { href: '/auth/login', label: 'Sign In' },
   ],
   Locations: [
@@ -23,7 +23,6 @@ const FOOTER_LINKS = {
   Legal: [
     { href: '/terms', label: 'Terms of Service' },
     { href: '/privacy', label: 'Privacy Policy' },
-    { href: '/insurance', label: 'Insurance Policy' },
   ],
 }
 
@@ -42,6 +41,9 @@ export default function Footer() {
             </Link>
             <p className="mt-4 text-[#9c9c98] text-sm leading-relaxed max-w-xs">
               {SITE_DESCRIPTION}
+            </p>
+            <p className="mt-3 text-[#5c5c58] text-xs font-medium leading-relaxed max-w-xs">
+              Find scooters. Contact shops directly. No platform fees.
             </p>
             <div className="flex items-center gap-3 mt-5">
               <a

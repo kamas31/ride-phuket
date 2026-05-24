@@ -49,7 +49,7 @@ const CONFIG: Record<TrustBadgeVariant, BadgeConfig> = {
     cls: 'bg-[#f0fdf4] text-[#16a34a] border-[#bbf7d0]',
   },
   insurance: {
-    label: 'Insured',
+    label: 'Shop insured',
     icon: Shield,
     cls: 'bg-[#f0fdf4] text-[#16a34a] border-[#bbf7d0]',
   },
@@ -97,7 +97,7 @@ const CONFIG: Record<TrustBadgeVariant, BadgeConfig> = {
     cls: 'bg-[#f8f8f6] text-[#5c5c58] border-[#e8e8e4]',
   },
   instant_booking: {
-    label: 'Instant Booking',
+    label: 'Available now',
     icon: Zap,
     cls: 'bg-[#fff4f0] text-[#FF6B35] border-[#fed7b0]',
   },

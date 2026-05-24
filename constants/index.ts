@@ -58,6 +58,6 @@ export const BENEFITS = [
 
 export const NAV_LINKS = [
   { href: '/explore', label: 'Explore' },
-  { href: '/bookings', label: 'My Rentals' },
+  { href: '/rentals', label: 'My Rentals' },
   { href: '/profile', label: 'Profile' },
 ] as const

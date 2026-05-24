@@ -81,7 +81,7 @@ export function ShopContact({
         <>
           <div className="flex items-center gap-1.5 px-3 py-2 bg-[#f0fdf4] rounded-[10px] border border-[#22c55e]/20 mb-4">
             <Check className="w-3.5 h-3.5 text-[#22c55e] flex-shrink-0" />
-            <p className="text-xs text-[#16a34a] font-medium">Booking confirmed — full contact unlocked</p>
+            <p className="text-xs text-[#16a34a] font-medium">Shop confirmed — contact details unlocked</p>
           </div>
           <QuickContact
             whatsapp={shop.whatsapp}

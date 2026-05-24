@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 const NAV_ITEMS = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/explore', label: 'Explore', icon: Map },
-  { href: '/bookings', label: 'Rentals', icon: Bike },
+  { href: '/rentals', label: 'Rentals', icon: Bike },
   { href: '/profile', label: 'Profile', icon: User },
 ]
 

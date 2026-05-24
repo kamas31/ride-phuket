@@ -1,12 +1,6 @@
 import { Shield, Check } from 'lucide-react'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// RidePhuketProtection — trust block
-//
-// Shown in the right column of the scooter detail page (booking card area).
-// Creates emotional trust without requiring real insurance infrastructure.
-// All claims are accurate representations of platform protections.
-// ─────────────────────────────────────────────────────────────────────────────
+// RidePhuketProtection — informational trust block shown on scooter detail page.
 
 interface RidePhuketProtectionProps {
   depositProtected?: boolean
@@ -43,8 +37,8 @@ export function RidePhuketProtection({
           <Shield className="w-4 h-4 text-white" />
         </div>
         <div>
-          <p className="text-sm font-bold text-[#0f0f0e] leading-tight">Ride Phuket Protection</p>
-          <p className="text-[10px] text-[#9c9c98] mt-0.5">Every rental partner provides</p>
+          <p className="text-sm font-bold text-[#0f0f0e] leading-tight">Rental Partner Info</p>
+          <p className="text-[10px] text-[#9c9c98] mt-0.5">What to expect from this shop</p>
         </div>
       </div>
 
@@ -64,7 +58,7 @@ export function RidePhuketProtection({
         <div className="px-4 py-2.5 bg-[#fff4f0] border-t border-[#f0ede8]">
           <p className="text-[10px] text-[#c2410c] flex items-center gap-1.5">
             <Shield className="w-3 h-3" />
-            <strong>Deposit Protected</strong> — Mediation available if needed
+            <strong>Deposit Protection</strong> — Enrolled in our deposit dispute program
           </p>
         </div>
       )}

@@ -448,6 +448,9 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     <span className="text-[#e8e8e4]">·</span>
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> Local</span>
                   </div>
+                  <p className="text-center text-[10px] text-[#c0c0bc] pt-1 leading-relaxed">
+                    Ride Phuket is a discovery marketplace — rental terms are arranged directly with the shop.
+                  </p>
                 </div>
               </div>
             </div>

@@ -14,11 +14,11 @@ import type { ShopBookingRow } from '@/lib/supabase/queries'
 
 // ── Status badge config ────────────────────────────────────────
 const STATUS_CFG = {
-  pending:   { label: 'Pending',   cls: 'bg-[#fffbeb] text-[#d97706] border-[#fde68a]' },
-  confirmed: { label: 'Confirmed', cls: 'bg-[#eff6ff] text-[#2563eb] border-[#bfdbfe]' },
-  active:    { label: 'Active',    cls: 'bg-[#f0fdf4] text-[#16a34a] border-[#bbf7d0]' },
-  completed: { label: 'Completed', cls: 'bg-[#f8f8f6] text-[#9c9c98] border-[#e8e8e4]' },
-  cancelled: { label: 'Cancelled', cls: 'bg-[#fef2f2] text-[#dc2626] border-[#fecaca]' },
+  pending:   { label: 'New inquiry', cls: 'bg-[#fffbeb] text-[#d97706] border-[#fde68a]' },
+  confirmed: { label: 'Confirmed',   cls: 'bg-[#eff6ff] text-[#2563eb] border-[#bfdbfe]' },
+  active:    { label: 'Active',      cls: 'bg-[#f0fdf4] text-[#16a34a] border-[#bbf7d0]' },
+  completed: { label: 'Completed',   cls: 'bg-[#f8f8f6] text-[#9c9c98] border-[#e8e8e4]' },
+  cancelled: { label: 'Declined',    cls: 'bg-[#fef2f2] text-[#dc2626] border-[#fecaca]' },
 } as const
 
 type StatusKey = keyof typeof STATUS_CFG
