@@ -244,8 +244,11 @@ function mapDbScooter(row: any): Scooter {
     pricePerMonth: row.price_per_month ?? undefined,
     currency: 'THB',
     location: row.location ?? '',
-    lat: row.lat ?? getZoneForLocation(row.location ?? '')?.lat ?? 7.9519,
-    lng: row.lng ?? getZoneForLocation(row.location ?? '')?.lng ?? 98.3381,
+    // Prefer shop precise coordinates (set via PinPickerMap), fall back to scooter's own,
+    // then zone centre, then Phuket island centre.
+    // Use || (not ??) so that 0 values also fall through to the next candidate.
+    lat: row.shops?.lat || row.lat || getZoneForLocation(row.location ?? '')?.lat || 7.9519,
+    lng: row.shops?.lng || row.lng || getZoneForLocation(row.location ?? '')?.lng || 98.3381,
     available: row.available,
     rating: row.rating ?? 0,
     reviewCount: row.review_count ?? 0,

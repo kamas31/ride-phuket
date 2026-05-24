@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
+// CSS loaded globally via <link> in app/layout.tsx
 
 interface PinPickerMapProps {
   lat: number
