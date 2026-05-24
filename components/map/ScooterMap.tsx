@@ -5,53 +5,65 @@ import mapboxgl from 'mapbox-gl'
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import Link from 'next/link'
-import { X, Zap, Check } from 'lucide-react'
-import { getScooterCover } from '@/lib/utils'
+import { X, Check } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
-import { ScooterImage } from '@/components/ride/ScooterImage'
 import { PHUKET_ZONES, getZoneForLocation, type PhuketZone } from '@/lib/zones'
 import type { Scooter } from '@/types'
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
-// ── Coordinate resolution ─────────────────────────────────────
-// Base coords come from scooter.lat/lng (already resolved to shop coords
-// in mapDbScooter). This function just makes the call site explicit.
-function baseCoords(scooter: Scooter): [number, number] {
-  return [scooter.lng, scooter.lat] // [lng, lat] as Mapbox expects
+// ── Shop aggregate ─────────────────────────────────────────────
+interface ShopAggregate {
+  shopId: string
+  slug: string
+  name: string
+  logo: string
+  verified: boolean
+  count: number
+  minPrice: number
+  maxPrice: number
+  minCc: number | null
+  maxCc: number | null
+  lat: number
+  lng: number
 }
 
-// For multiple scooters sharing the same location, spread them in a small
-// circle at render time only — source data is untouched.
-function buildSpreadMap(scooters: Scooter[]): Map<string, [number, number]> {
-  const result = new Map<string, [number, number]>()
+function parseCc(engine: string): number | null {
+  const match = engine?.match(/(\d+)/)
+  return match ? parseInt(match[1], 10) : null
+}
 
-  // Group by rounded position (4 decimal places ≈ 11m precision)
-  const byPos = new Map<string, string[]>()
+function buildShopAggregates(scooters: Scooter[]): ShopAggregate[] {
+  const map = new Map<string, ShopAggregate>()
   for (const s of scooters) {
-    const key = `${s.lat.toFixed(4)},${s.lng.toFixed(4)}`
-    if (!byPos.has(key)) byPos.set(key, [])
-    byPos.get(key)!.push(s.id)
-  }
-
-  for (const s of scooters) {
-    const key   = `${s.lat.toFixed(4)},${s.lng.toFixed(4)}`
-    const group = byPos.get(key)!
-    const idx   = group.indexOf(s.id)
-
-    if (group.length === 1) {
-      result.set(s.id, [s.lng, s.lat])
-    } else {
-      const angle  = (idx / group.length) * 2 * Math.PI
-      const r      = 0.00035 // ~35 m visual spread radius
-      const cosLat = Math.cos(s.lat * (Math.PI / 180))
-      result.set(s.id, [
-        s.lng + (Math.cos(angle) * r) / cosLat,
-        s.lat + Math.sin(angle) * r,
-      ])
+    if (!s.shopId || !s.lat || !s.lng) continue
+    if (!map.has(s.shopId)) {
+      map.set(s.shopId, {
+        shopId: s.shopId,
+        slug:     s.shop?.slug     ?? '',
+        name:     s.shop?.name     ?? '',
+        logo:     s.shop?.logo     ?? '',
+        verified: s.shop?.verified ?? false,
+        count: 0,
+        minPrice: s.pricePerDay,
+        maxPrice: s.pricePerDay,
+        minCc: null,
+        maxCc: null,
+        lat: s.lat,
+        lng: s.lng,
+      })
+    }
+    const agg = map.get(s.shopId)!
+    agg.count++
+    agg.minPrice = Math.min(agg.minPrice, s.pricePerDay)
+    agg.maxPrice = Math.max(agg.maxPrice, s.pricePerDay)
+    const cc = parseCc(s.specs?.engine ?? '')
+    if (cc !== null) {
+      agg.minCc = agg.minCc === null ? cc : Math.min(agg.minCc, cc)
+      agg.maxCc = agg.maxCc === null ? cc : Math.max(agg.maxCc, cc)
     }
   }
-  return result
+  return Array.from(map.values())
 }
 
 // ── Zone Label — white floating pill ──────────────────────────
@@ -95,13 +107,17 @@ function ZoneLabel({
   )
 }
 
-// ── Price Pin — premium Airbnb-style ──────────────────────────
-function PricePin({
-  price, active, onClick, onEnter, onLeave,
+// ── Shop Pin — shows count + price range ──────────────────────
+function ShopPin({
+  count, minPrice, maxPrice, active, onClick, onEnter, onLeave,
 }: {
-  price: number; active: boolean
+  count: number; minPrice: number; maxPrice: number; active: boolean
   onClick: () => void; onEnter: () => void; onLeave: () => void
 }) {
+  const priceLabel = minPrice === maxPrice
+    ? formatPrice(minPrice)
+    : `${formatPrice(minPrice)}–${formatPrice(maxPrice)}`
+
   return (
     <div
       className="flex flex-col items-center cursor-pointer select-none group"
@@ -111,32 +127,40 @@ function PricePin({
     >
       <div
         className={cn(
-          'px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap border-2 border-white transition-all duration-200',
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap border-2 border-white transition-all duration-200',
           active
             ? 'bg-[#FF6B35] text-white shadow-[0_4px_14px_rgba(255,107,53,0.5),0_0_0_3px_rgba(255,107,53,0.2)] scale-[1.12]'
             : 'bg-white text-[#0f0f0e] shadow-[0_2px_8px_rgba(0,0,0,0.20)] group-hover:shadow-[0_4px_14px_rgba(0,0,0,0.28)] group-hover:scale-105',
         )}
       >
-        {formatPrice(price)}
+        <span className={cn(
+          'text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none',
+          active ? 'bg-white/25 text-white' : 'bg-[#f0f0ec] text-[#5c5c58]',
+        )}>
+          {count}
+        </span>
+        {priceLabel}
       </div>
-      {/* Pin tail */}
-      <div
-        className={cn(
-          'w-0 h-0 -mt-[1px] border-l-[4px] border-r-[4px] border-l-transparent border-r-transparent transition-all',
-          active ? 'border-t-[6px] border-t-[#FF6B35]' : 'border-t-[6px] border-t-white',
-        )}
-      />
+      <div className={cn(
+        'w-0 h-0 -mt-[1px] border-l-[4px] border-r-[4px] border-l-transparent border-r-transparent transition-all',
+        active ? 'border-t-[6px] border-t-[#FF6B35]' : 'border-t-[6px] border-t-white',
+      )} />
     </div>
   )
 }
 
-// ── Popup card — bright white premium ─────────────────────────
-function ScooterPopupCard({ scooter, onClose }: { scooter: Scooter; onClose: () => void }) {
-  const year = scooter.year ?? new Date().getFullYear()
-  const cat  = scooter.category.charAt(0).toUpperCase() + scooter.category.slice(1)
+// ── Shop Popup Card ────────────────────────────────────────────
+function ShopPopupCard({ agg, onClose }: { agg: ShopAggregate; onClose: () => void }) {
+  const priceLabel = agg.minPrice === agg.maxPrice
+    ? formatPrice(agg.minPrice)
+    : `${formatPrice(agg.minPrice)}–${formatPrice(agg.maxPrice)}`
+
+  const ccLabel = (agg.minCc !== null && agg.maxCc !== null)
+    ? (agg.minCc === agg.maxCc ? `${agg.minCc}cc` : `${agg.minCc}–${agg.maxCc}cc`)
+    : null
 
   return (
-    <div className="relative w-[280px] bg-white rounded-[20px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.18),0_2px_8px_rgba(0,0,0,0.08)]">
+    <div className="relative w-[260px] bg-white rounded-[20px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.18),0_2px_8px_rgba(0,0,0,0.08)]">
       <button
         onClick={onClose}
         className="absolute top-2.5 right-2.5 z-10 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-[#f8f8f6] transition-colors"
@@ -144,43 +168,50 @@ function ScooterPopupCard({ scooter, onClose }: { scooter: Scooter; onClose: () 
         <X className="w-3.5 h-3.5 text-[#5c5c58]" />
       </button>
 
-      <ScooterImage
-        src={getScooterCover(scooter)}
-        alt={scooter.name}
-        className="h-40"
-        objectFit="contain"
-        sizes="280px"
-      />
-
       <div className="p-4">
-        <h3 className="font-bold text-[15px] text-[#0f0f0e] mb-0.5 pr-6 leading-tight">{scooter.name}</h3>
-        <p className="text-[12px] text-[#9c9c98] mb-3">{year} · {cat}</p>
-
-        <div className="flex items-center gap-1.5 mb-3 flex-wrap">
-          {scooter.shop?.verified && (
-            <span className="flex items-center gap-1 text-[10px] font-semibold text-[#16a34a] bg-[#f0fdf4] px-2 py-0.5 rounded-full">
-              <Check className="w-2.5 h-2.5" />Verified
-            </span>
+        {/* Shop identity */}
+        <div className="flex items-center gap-3 mb-4">
+          {agg.logo ? (
+            <img src={agg.logo} alt={agg.name} className="w-11 h-11 rounded-xl object-cover flex-shrink-0" />
+          ) : (
+            <div className="w-11 h-11 bg-[#FF6B35]/10 rounded-xl flex items-center justify-center text-[#FF6B35] font-bold text-lg flex-shrink-0">
+              {agg.name[0] ?? '?'}
+            </div>
           )}
-          {scooter.deliveryAvailable && (
-            <span className="flex items-center gap-1 text-[10px] font-semibold text-[#FF6B35] bg-[#fff4f0] px-2 py-0.5 rounded-full">
-              <Zap className="w-2.5 h-2.5" />Delivery
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-[22px] font-bold text-[#0f0f0e] leading-none">{formatPrice(scooter.pricePerDay)}</span>
-            <span className="text-[#9c9c98] text-[12px] ml-1">/day</span>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-bold text-[14px] text-[#0f0f0e] leading-tight truncate">{agg.name}</h3>
+            {agg.verified && (
+              <span className="flex items-center gap-1 text-[10px] font-semibold text-[#16a34a] mt-0.5">
+                <Check className="w-2.5 h-2.5" />Verified
+              </span>
+            )}
           </div>
-          <Link
-            href={`/scooter/${scooter.id}`}
-            className="px-4 py-2.5 bg-[#FF6B35] text-white text-[11px] font-bold rounded-full hover:bg-[#e85d29] transition-colors shadow-[0_2px_8px_rgba(255,107,53,0.35)]"
-          >
-            View →
-          </Link>
         </div>
+
+        {/* Stats grid */}
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <div className="bg-[#f8f8f6] rounded-[10px] p-2.5 text-center">
+            <p className="text-[20px] font-bold text-[#0f0f0e] leading-none">{agg.count}</p>
+            <p className="text-[10px] text-[#9c9c98] mt-0.5">scooter{agg.count !== 1 ? 's' : ''}</p>
+          </div>
+          <div className="bg-[#f8f8f6] rounded-[10px] p-2.5 text-center">
+            <p className="text-[13px] font-bold text-[#0f0f0e] leading-tight">{priceLabel}</p>
+            <p className="text-[10px] text-[#9c9c98] mt-0.5">/day</p>
+          </div>
+        </div>
+
+        {ccLabel && (
+          <p className="text-[11px] text-[#9c9c98] mb-3 text-center">Engine: {ccLabel}</p>
+        )}
+
+        {agg.slug ? (
+          <Link
+            href={`/shop/${agg.slug}`}
+            className="flex items-center justify-center w-full py-2.5 bg-[#FF6B35] text-white text-[12px] font-bold rounded-full hover:bg-[#e85d29] transition-colors shadow-[0_2px_8px_rgba(255,107,53,0.35)]"
+          >
+            View shop →
+          </Link>
+        ) : null}
       </div>
     </div>
   )
@@ -201,10 +232,10 @@ function MapSkeleton({ className }: { className?: string }) {
 // ── Main component ─────────────────────────────────────────────
 interface ScooterMapProps {
   scooters: Scooter[]
-  selectedId?: string
-  hoveredId?: string
-  onSelect: (id: string | null) => void
-  onHover?: (id: string | null) => void
+  selectedId?: string   // shop ID
+  hoveredId?: string    // shop ID
+  onSelect: (shopId: string | null) => void
+  onHover?: (shopId: string | null) => void
   onBoundsChange?: (bounds: { sw: [number, number]; ne: [number, number] }) => void
   onZoneClick?: (zoneKey: string | null) => void
   activeZone?: string | null
@@ -228,8 +259,8 @@ export default function ScooterMap({
   const [hoveredZone, setHoveredZone] = useState<string | null>(null)
   const [showSearchHere, setShowSearchHere] = useState(false)
 
-  // Visual-only spread: multiple scooters at same shop → tiny circle layout
-  const spreadMap = useMemo(() => buildSpreadMap(scooters), [scooters])
+  // Group filtered scooters into one aggregate per shop
+  const aggregates = useMemo(() => buildShopAggregates(scooters), [scooters])
 
   // Stable callback refs
   const onBoundsChangeRef = useRef(onBoundsChange)
@@ -241,9 +272,9 @@ export default function ScooterMap({
   useEffect(() => { onSelectRef.current       = onSelect       }, [onSelect])
   useEffect(() => { onHoverRef.current        = onHover        }, [onHover])
 
-  // Scooter marker refs
+  // Shop marker refs — keyed by shopId
   const markersRef    = useRef<Map<string, { marker: mapboxgl.Marker; root: Root; container: HTMLDivElement }>>(new Map())
-  const scootersById  = useRef<Map<string, Scooter>>(new Map())
+  const aggregatesById = useRef<Map<string, ShopAggregate>>(new Map())
   const prevActiveIds = useRef(new Set<string>())
   const popupRef      = useRef<{ popup: mapboxgl.Popup; root: Root; container: HTMLDivElement } | null>(null)
 
@@ -287,7 +318,7 @@ export default function ScooterMap({
     map.on('load', () => {
       map.resize()
 
-      // ── Zone label markers (created once) ──────────────────────
+      // Zone label markers (created once)
       PHUKET_ZONES.forEach(zone => {
         const container = document.createElement('div')
         container.style.zIndex = '5'
@@ -353,15 +384,15 @@ export default function ScooterMap({
     })
   }, [ready, hoveredZone, activeZone, zoneCounts]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Effect 1: Create/remove scooter markers + fitBounds ───────
+  // ── Effect 1: Create/remove shop markers + fitBounds ─────────
   useEffect(() => {
     if (!ready || !mapRef.current) return
     const map = mapRef.current
 
-    scootersById.current.clear()
-    scooters.forEach(s => scootersById.current.set(s.id, s))
+    aggregatesById.current.clear()
+    aggregates.forEach(agg => aggregatesById.current.set(agg.shopId, agg))
 
-    const currentIds = new Set(scooters.map(s => s.id))
+    const currentIds = new Set(aggregates.map(a => a.shopId))
     markersRef.current.forEach((entry, id) => {
       if (!currentIds.has(id)) {
         entry.root.unmount()
@@ -371,43 +402,42 @@ export default function ScooterMap({
       }
     })
 
-    scooters.forEach(scooter => {
-      const lngLat = spreadMap.get(scooter.id) ?? baseCoords(scooter)
-      if (!markersRef.current.has(scooter.id)) {
+    aggregates.forEach(agg => {
+      if (!markersRef.current.has(agg.shopId)) {
         const container = document.createElement('div')
         const marker = new mapboxgl.Marker({ element: container, anchor: 'bottom' })
-          .setLngLat(lngLat)
+          .setLngLat([agg.lng, agg.lat])
           .addTo(map)
         const root = createRoot(container)
-        markersRef.current.set(scooter.id, { marker, root, container })
+        markersRef.current.set(agg.shopId, { marker, root, container })
         container.addEventListener('click', e => e.stopPropagation())
       }
-      const active = scooter.id === selectedId || scooter.id === hoveredId
-      const { root } = markersRef.current.get(scooter.id)!
+      const active = agg.shopId === selectedId || agg.shopId === hoveredId
+      const { root } = markersRef.current.get(agg.shopId)!
       root.render(
-        <PricePin
-          price={scooter.pricePerDay}
+        <ShopPin
+          count={agg.count}
+          minPrice={agg.minPrice}
+          maxPrice={agg.maxPrice}
           active={active}
-          onClick={() => onSelectRef.current(scooter.id === selectedId ? null : scooter.id)}
-          onEnter={() => onHoverRef.current?.(scooter.id)}
+          onClick={() => onSelectRef.current(agg.shopId === selectedId ? null : agg.shopId)}
+          onEnter={() => onHoverRef.current?.(agg.shopId)}
           onLeave={() => onHoverRef.current?.(null)}
         />,
       )
-      markersRef.current.get(scooter.id)!.marker.getElement().style.zIndex = active ? '20' : '10'
+      markersRef.current.get(agg.shopId)!.marker.getElement().style.zIndex = active ? '20' : '10'
     })
 
-    if (scooters.length === 1) {
-      const [lng, lat] = baseCoords(scooters[0])
-      map.flyTo({ center: [lng, lat], zoom: 14, duration: 900 })
-    } else if (scooters.length > 1) {
-      // Use base (un-spread) coords for bounds so fitBounds is accurate
-      const lngs = scooters.map(s => s.lng)
-      const lats = scooters.map(s => s.lat)
+    if (aggregates.length === 1) {
+      map.flyTo({ center: [aggregates[0].lng, aggregates[0].lat], zoom: 14, duration: 900 })
+    } else if (aggregates.length > 1) {
+      const lngs = aggregates.map(a => a.lng)
+      const lats = aggregates.map(a => a.lat)
       const sw: [number, number] = [Math.min(...lngs) - 0.01, Math.min(...lats) - 0.01]
       const ne: [number, number] = [Math.max(...lngs) + 0.01, Math.max(...lats) + 0.01]
       map.fitBounds([sw, ne], { padding: { top: 80, bottom: 80, left: 60, right: 60 }, maxZoom: 14, duration: 900 })
     }
-  }, [scooters, spreadMap, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [aggregates, ready]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Effect 2: Update marker appearance on hover/select ────────
   useEffect(() => {
@@ -416,12 +446,14 @@ export default function ScooterMap({
       [selectedId, hoveredId].filter((id): id is string => Boolean(id)),
     )
     const updateMarker = (id: string, active: boolean) => {
-      const entry   = markersRef.current.get(id)
-      const scooter = scootersById.current.get(id)
-      if (!entry || !scooter) return
+      const entry = markersRef.current.get(id)
+      const agg   = aggregatesById.current.get(id)
+      if (!entry || !agg) return
       entry.root.render(
-        <PricePin
-          price={scooter.pricePerDay}
+        <ShopPin
+          count={agg.count}
+          minPrice={agg.minPrice}
+          maxPrice={agg.maxPrice}
           active={active}
           onClick={() => onSelectRef.current(id === selectedId ? null : id)}
           onEnter={() => onHoverRef.current?.(id)}
@@ -435,7 +467,7 @@ export default function ScooterMap({
     prevActiveIds.current = newActiveIds
   }, [selectedId, hoveredId, ready]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Popup for selected scooter ─────────────────────────────────
+  // ── Popup for selected shop ────────────────────────────────────
   useEffect(() => {
     if (!ready || !mapRef.current) return
     const map = mapRef.current
@@ -447,9 +479,8 @@ export default function ScooterMap({
     }
     if (!selectedId) return
 
-    const scooter = scooters.find(s => s.id === selectedId)
-    if (!scooter) return
-    const lngLat = spreadMap.get(scooter.id) ?? baseCoords(scooter)
+    const agg = aggregatesById.current.get(selectedId)
+    if (!agg) return
 
     const container = document.createElement('div')
     const popup = new mapboxgl.Popup({
@@ -459,14 +490,14 @@ export default function ScooterMap({
       anchor: 'bottom',
       className: 'scooter-popup',
     })
-      .setLngLat(lngLat)
+      .setLngLat([agg.lng, agg.lat])
       .setDOMContent(container)
       .addTo(map)
 
     const root = createRoot(container)
-    root.render(<ScooterPopupCard scooter={scooter} onClose={() => onSelectRef.current(null)} />)
+    root.render(<ShopPopupCard agg={agg} onClose={() => onSelectRef.current(null)} />)
     popupRef.current = { popup, root, container }
-  }, [selectedId, scooters, spreadMap, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedId, ready]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!TOKEN) {
     return (
@@ -489,7 +520,7 @@ export default function ScooterMap({
     setShowSearchHere(false)
   }
 
-  const activeZoneName = activeZone ? PHUKET_ZONES.find(z => z.key === activeZone)?.name : null
+  const activeZoneName  = activeZone ? PHUKET_ZONES.find(z => z.key === activeZone)?.name : null
   const activeZoneCount = activeZone ? (zoneCounts[activeZone] ?? 0) : 0
 
   return (

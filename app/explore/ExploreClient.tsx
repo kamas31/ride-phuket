@@ -38,13 +38,18 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
 
   const [filters, setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
   const [search, setSearch]           = useState('')
-  const [selectedId, setSelectedId]   = useState<string | null>(null)
-  const [hoveredId, setHoveredId]     = useState<string | null>(null)
+  const [selectedId, setSelectedId]   = useState<string | null>(null) // shop ID
+  const [hoveredId, setHoveredId]     = useState<string | null>(null) // shop ID
   const [showMap, setShowMap]         = useState(true)
   const [mobileView, setMobileView]   = useState<MobileView>('list')
   const [mapBounds, setMapBounds]     = useState<{ sw: [number, number]; ne: [number, number] } | null>(null)
 
-  const cardRefs  = useRef<Record<string, HTMLDivElement | null>>({})
+  const handleZoneClick = useCallback((key: string | null) => {
+    setFilters(prev => ({ ...prev, location: key ?? 'all' }))
+  }, [])
+
+  const cardRefs   = useRef<Record<string, HTMLDivElement | null>>({})
+  const filteredRef = useRef<Scooter[]>([])
   // Debounce timer for hover — prevents cascade re-renders on fast mouse movement
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Track which scooter pages have been prefetched to avoid duplicate prefetches
@@ -54,18 +59,22 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
     cardRefs.current[id] = el
   }, [])
 
-  const handleSelectFromMap = useCallback((id: string | null) => {
-    setSelectedId(id)
-    if (id && cardRefs.current[id]) {
-      cardRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  // Receive shop ID from map, scroll to first scooter card of that shop
+  const handleSelectFromMap = useCallback((shopId: string | null) => {
+    setSelectedId(shopId)
+    if (shopId) {
+      const firstScooter = filteredRef.current.find(s => s.shopId === shopId)
+      if (firstScooter && cardRefs.current[firstScooter.id]) {
+        cardRefs.current[firstScooter.id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
     }
   }, [])
 
   // ── Debounced hover — avoids thrashing ScooterMap marker updates ─
   // 40ms debounce: imperceptible to the user, cuts re-renders by ~10× on fast mousing.
-  const handleHoverEnter = useCallback((id: string) => {
+  const handleHoverEnter = useCallback((shopId: string) => {
     if (hoverTimer.current) clearTimeout(hoverTimer.current)
-    hoverTimer.current = setTimeout(() => setHoveredId(id), 40)
+    hoverTimer.current = setTimeout(() => setHoveredId(shopId), 40)
   }, [])
 
   const handleHoverLeave = useCallback(() => {
@@ -107,24 +116,25 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
     if (filters.sortBy === 'price_asc')  list = [...list].sort((a, b) => a.pricePerDay - b.pricePerDay)
     if (filters.sortBy === 'price_desc') list = [...list].sort((a, b) => b.pricePerDay - a.pricePerDay)
     if (filters.sortBy === 'rating')     list = [...list].sort((a, b) => b.rating - a.rating)
+    filteredRef.current = list
     return list
-  }, [filters, search, initialScooters])
+  }, [filters, search, initialScooters, mapBounds])
 
-  // Shared card wrapper — handles hover/select ring + prefetch
+  // Shared card wrapper — rings compare by shopId so the whole shop highlights together
   const CardWrapper = useCallback(({ scooter, className }: { scooter: Scooter; className?: string }) => (
     <div
       ref={setCardRef(scooter.id)}
-      onClick={() => setSelectedId(prev => prev === scooter.id ? null : scooter.id)}
+      onClick={() => setSelectedId(prev => prev === scooter.shopId ? null : scooter.shopId)}
       onMouseEnter={() => {
-        handleHoverEnter(scooter.id)
+        if (scooter.shopId) handleHoverEnter(scooter.shopId)
         prefetchScooter(scooter.id)
       }}
       onMouseLeave={handleHoverLeave}
       onTouchStart={() => prefetchScooter(scooter.id)}
       className={cn(
         'transition-all duration-150',
-        selectedId === scooter.id ? 'ring-2 ring-[#FF6B35] rounded-[20px]' : '',
-        hoveredId === scooter.id && selectedId !== scooter.id ? 'ring-1 ring-[#FF6B35]/40 rounded-[20px]' : '',
+        selectedId === scooter.shopId ? 'ring-2 ring-[#FF6B35] rounded-[20px]' : '',
+        hoveredId === scooter.shopId && selectedId !== scooter.shopId ? 'ring-1 ring-[#FF6B35]/40 rounded-[20px]' : '',
         className
       )}
     >
@@ -133,9 +143,9 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
   ), [setCardRef, handleHoverEnter, handleHoverLeave, prefetchScooter, selectedId, hoveredId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="min-h-screen bg-[#f8f8f6]">
+    <div className="min-h-screen bg-white">
       {/* ── Sticky top bar ── */}
-      <div className="sticky top-16 z-30 bg-white border-b border-[#e8e8e4] shadow-sm">
+      <div className="sticky top-16 z-30 bg-white border-b border-[#e8e8e4]">
         <div className="max-w-6xl mx-auto px-4 py-3">
           {/* Search row — includes mobile List/Map toggle */}
           <div className="flex items-center gap-2 mb-3">
@@ -200,7 +210,7 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
 
         {/* ── DESKTOP LAYOUT ── */}
         <div className="hidden lg:flex gap-5">
-          <div className={showMap ? 'w-full lg:w-[48%]' : 'w-full'}>
+          <div className={showMap ? 'w-full lg:w-[42%]' : 'w-full'}>
             {filtered.length === 0 ? <EmptyState /> : (
               <div className={`grid gap-3 ${showMap ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
                 {filtered.map(scooter => (
@@ -211,7 +221,7 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
           </div>
 
           {showMap && (
-            <div className="w-full lg:w-[52%]">
+            <div className="w-full lg:w-[58%]">
               <div className="sticky top-36">
                 <ScooterMap
                   scooters={filtered}
@@ -220,6 +230,8 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
                   onSelect={handleSelectFromMap}
                   onHover={setHoveredId}
                   onBoundsChange={setMapBounds}
+                  onZoneClick={handleZoneClick}
+                  activeZone={filters.location === 'all' ? null : filters.location}
                   className="h-[calc(100vh-10rem)] min-h-[480px]"
                 />
               </div>
@@ -237,7 +249,7 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
                   <div
                     key={scooter.id}
                     onTouchStart={() => prefetchScooter(scooter.id)}
-                    onClick={() => setSelectedId(prev => prev === scooter.id ? null : scooter.id)}
+                    onClick={() => setSelectedId(prev => prev === scooter.shopId ? null : scooter.shopId)}
                   >
                     <ScooterCard scooter={scooter} xs />
                   </div>
@@ -254,7 +266,9 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
                 if (id) setMobileView('list')
               }}
               onHover={setHoveredId}
-              className="h-[calc(100svh-14rem)] min-h-[400px]"
+              onZoneClick={handleZoneClick}
+              activeZone={filters.location === 'all' ? null : filters.location}
+              className="h-[calc(100svh-13rem)] min-h-[420px]"
             />
           )}
         </div>
