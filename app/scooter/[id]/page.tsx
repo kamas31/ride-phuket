@@ -17,6 +17,8 @@ import { StickyBookingBar } from '@/components/ride/StickyBookingBar'
 import { SaveButton } from '@/components/ride/SaveButton'
 import { getPublicInquiries } from '@/app/actions/inquiry-actions'
 import { TrackView } from '@/components/analytics/TrackView'
+import { TrustSignals } from '@/components/trust/TrustSignals'
+import { getPrimaryTrustSignals } from '@/lib/trust-signals'
 
 import type { OpeningHoursSchedule } from '@/types'
 
@@ -103,9 +105,26 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
     ? scooter.pricePerDay * 7 - scooter.pricePerWeek
     : 0
 
-  const newListing  = isNewListing(scooter.createdAt)
-  const fastShop    = isFastResponder(shop.responseTime)
-  const openStatus  = getShopOpenStatus(shop.openingHours)
+  const newListing   = isNewListing(scooter.createdAt)
+  const fastShop     = isFastResponder(shop.responseTime)
+  const openStatus   = getShopOpenStatus(shop.openingHours)
+
+  const primaryTrust = getPrimaryTrustSignals({
+    shop: {
+      id:                    shop.id,
+      verified:              shop.verified,
+      phone:                 shop.phone,
+      whatsapp:              shop.whatsapp,
+      description:           shop.description,
+      address:               shop.address,
+      logo:                  shop.logo,
+      openingHours:          shop.openingHours,
+      gallery:               shop.gallery,
+      depositProtectedMember: shop.depositProtectedMember,
+      responseTime:          shop.responseTime,
+    },
+    scooters: [{ images: scooter.images, category: scooter.category, createdAt: scooter.createdAt, available: scooter.available }],
+  })
 
   // Public FAQ from answered inquiries (useful SEO content)
   const faqItems = await getPublicInquiries(scooter.id)
@@ -288,6 +307,11 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   </div>
                 </div>
               </div>
+
+              {/* Trust signals — 1-2 subtle signals to increase conversion confidence */}
+              {primaryTrust.length > 0 && (
+                <TrustSignals signals={primaryTrust} max={2} size="xs" className="mb-4" />
+              )}
 
               {/* Direct contact — always shown */}
               <div className="flex gap-2">

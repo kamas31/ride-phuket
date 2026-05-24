@@ -11,6 +11,8 @@ import { TrustBadge, isNewListing, isFastResponder } from '@/components/ride/Tru
 import { EmptyReviews } from '@/components/ride/EmptyReviews'
 import { QuickContact } from '@/components/ride/QuickContact'
 import { TrackView } from '@/components/analytics/TrackView'
+import { TrustSignals } from '@/components/trust/TrustSignals'
+import { getTrustSignals } from '@/lib/trust-signals'
 
 interface ShopPageProps {
   params: Promise<{ slug: string }>
@@ -46,11 +48,33 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
   const { scooters, ...shop } = data
 
-  const newPartner   = shop.reviewCount === 0 && shop.verified
+  const newPartner    = shop.reviewCount === 0 && shop.verified
   const fastResponder = isFastResponder(shop.responseTime)
-  const waLink       = shop.whatsapp
+  const waLink        = shop.whatsapp
     ? `https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(shop.name)}%2C%20I%20found%20you%20on%20Ride%20Phuket%20and%20would%20like%20to%20rent%20a%20scooter.`
     : null
+
+  const trustSignals = getTrustSignals({
+    shop: {
+      id:                    shop.id,
+      verified:              shop.verified,
+      phone:                 shop.phone,
+      whatsapp:              shop.whatsapp,
+      description:           shop.description,
+      address:               shop.address,
+      logo:                  shop.logo,
+      openingHours:          shop.openingHours,
+      gallery:               shop.gallery,
+      depositProtectedMember: shop.depositProtectedMember,
+      responseTime:          shop.responseTime,
+    },
+    scooters: scooters.map(s => ({
+      images:    s.images,
+      category:  s.category,
+      createdAt: s.createdAt,
+      available: s.available,
+    })),
+  })
 
   return (
     <div className="bg-white min-h-screen">
@@ -135,6 +159,11 @@ export default async function ShopPage({ params }: ShopPageProps) {
               {scooters.some(s => s.deliveryAvailable) && <TrustBadge variant="delivery"  size="sm" />}
               {newPartner         && <TrustBadge variant="new_partner"    size="sm" />}
             </div>
+
+            {/* Trust signals — subtle marketplace trust layer */}
+            {trustSignals.length > 0 && (
+              <TrustSignals signals={trustSignals} max={5} size="xs" className="-mt-2" />
+            )}
 
             {/* Description */}
             {shop.description && (
