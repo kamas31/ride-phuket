@@ -38,7 +38,6 @@ interface ImageUploaderProps {
 
 // ── Image processing pipeline ──────────────────────────────────
 
-const TARGET_ASPECT = 16 / 9
 const MAX_WIDTH_PX  = 1600
 const MAX_SIZE_KB   = 800
 const MIN_SRC_WIDTH = 400
@@ -59,9 +58,6 @@ const SCREENSHOT_DIMS: [number, number][] = [
 // ── Quality analysis functions ─────────────────────────────────
 
 function detectScreenshot(w: number, h: number): { rejected: boolean; reason?: string } {
-  if (h > w * 1.5) {
-    return { rejected: true, reason: 'Please upload a horizontal scooter photo — portrait images are not accepted.' }
-  }
   for (const [sw, sh] of SCREENSHOT_DIMS) {
     if (Math.abs(w - sw) <= 5 && Math.abs(h - sh) <= 5) {
       return { rejected: true, reason: 'Screenshots are not allowed. Please upload a real scooter photo.' }
@@ -119,8 +115,6 @@ function computeSharpness(ctx: CanvasRenderingContext2D, w: number, h: number): 
 function computeQualityScore(
   brightness: number,
   sharpness: number,
-  origW: number,
-  origH: number,
 ): ImageQualityScore {
   // Brightness score: optimal 80–200 (0-255 raw)
   let bScore: number
@@ -137,15 +131,7 @@ function computeQualityScore(
   else if (sharpness < 100) sScore = 45 + ((sharpness - 20) / 80) * 40
   else                      sScore = Math.min(100, 85 + ((sharpness - 100) / 200) * 15)
 
-  // Composition: favor 16:9 landscape
-  const ratio  = origW / origH
-  const diff   = Math.abs(ratio - TARGET_ASPECT) / TARGET_ASPECT
-  const cScore =
-    diff < 0.10 ? 100 :
-    diff < 0.30 ? 100 - ((diff - 0.10) / 0.20) * 30 :
-    diff < 0.80 ?  70 - ((diff - 0.30) / 0.50) * 40 : 30
-
-  const score = Math.round(bScore * 0.40 + sScore * 0.40 + cScore * 0.20)
+  const score = Math.round(bScore * 0.50 + sScore * 0.50)
   const overall: ImageQualityScore['overall'] =
     score >= 75 ? 'excellent' : score >= 50 ? 'good' : 'poor'
 
@@ -154,7 +140,7 @@ function computeQualityScore(
     score,
     brightness:  Math.round(Math.max(0, Math.min(100, bScore))),
     sharpness:   Math.round(Math.max(0, Math.min(100, sScore))),
-    composition: Math.round(Math.max(0, Math.min(100, cScore))),
+    composition: 100,
   }
 }
 
@@ -184,7 +170,7 @@ async function processImageFile(file: File): Promise<ProcessResult> {
       URL.revokeObjectURL(srcUrl)
 
       // ── Minimum size ───────────────────────────────────────
-      if (img.width < MIN_SRC_WIDTH || img.height < MIN_SRC_WIDTH / TARGET_ASPECT) {
+      if (img.width < MIN_SRC_WIDTH || img.height < MIN_SRC_WIDTH / 2) {
         resolve({ ok: false, fileName: file.name, reason: `Image too small (min ${MIN_SRC_WIDTH}px wide). Use a higher quality photo.` })
         return
       }
@@ -196,28 +182,18 @@ async function processImageFile(file: File): Promise<ProcessResult> {
         return
       }
 
-      // ── Centered 16:9 crop ─────────────────────────────────
-      let srcX = 0, srcY = 0, srcW = img.width, srcH = img.height
-      if (img.width / img.height > TARGET_ASPECT) {
-        srcW = img.height * TARGET_ASPECT
-        srcX = (img.width - srcW) / 2
-      } else {
-        srcH = img.width / TARGET_ASPECT
-        srcY = (img.height - srcH) * 0.35
-      }
+      // ── Output dimensions — preserve original aspect ratio ─
+      const outW = Math.round(Math.min(img.width, MAX_WIDTH_PX))
+      const outH = Math.round(outW * (img.height / img.width))
 
-      // ── Output dimensions ──────────────────────────────────
-      const outW = Math.round(Math.min(srcW, MAX_WIDTH_PX))
-      const outH = Math.round(outW / TARGET_ASPECT)
-
-      // ── Draw ───────────────────────────────────────────────
+      // ── Draw (full image, no crop) ─────────────────────────
       const canvas = document.createElement('canvas')
       canvas.width  = outW
       canvas.height = outH
       const ctx = canvas.getContext('2d')!
       ctx.imageSmoothingEnabled = true
       ctx.imageSmoothingQuality = 'high'
-      ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, outW, outH)
+      ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, outW, outH)
 
       // ── Quality analysis (on processed canvas) ─────────────
       const brightness = computeBrightness(ctx, outW, outH)
@@ -232,7 +208,7 @@ async function processImageFile(file: File): Promise<ProcessResult> {
         return
       }
 
-      const quality = computeQualityScore(brightness, sharpness, img.width, img.height)
+      const quality = computeQualityScore(brightness, sharpness)
 
       // ── WebP compression (target ≤ 800 KB) ─────────────────
       const tryExport = (quality: number): Promise<Blob | null> =>
@@ -418,7 +394,7 @@ export function ImageUploader({
             <>
               <Loader2 className="w-8 h-8 text-[#FF6B35] animate-spin" />
               <p className="text-sm font-medium text-[#FF6B35]">Processing photos…</p>
-              <p className="text-xs text-[#9c9c98]">Resizing, cropping and analysing quality</p>
+              <p className="text-xs text-[#9c9c98]">Resizing and analysing quality…</p>
             </>
           ) : (
             <>
@@ -430,7 +406,7 @@ export function ImageUploader({
                   {dragOver ? 'Drop photos here' : 'Drag & drop or tap to upload'}
                 </p>
                 <p className="text-xs text-[#9c9c98] mt-0.5">
-                  JPEG, PNG, WebP · Auto-cropped to 16:9 · Max {MAX_SIZE_KB}KB
+                  JPEG, PNG, WebP · Original aspect ratio preserved · Max {MAX_SIZE_KB}KB
                 </p>
               </div>
               <p className="text-xs text-[#5c5c58] mt-1">
@@ -469,12 +445,12 @@ export function ImageUploader({
                 <GripVertical className="w-4 h-4" />
               </div>
 
-              {/* Thumbnail — always 16:9 */}
+              {/* Thumbnail */}
               <div
                 className="relative flex-shrink-0 w-24 rounded-[8px] overflow-hidden bg-[#f0f0ec]"
-                style={{ aspectRatio: '16/9' }}
+                style={{ aspectRatio: '4/3' }}
               >
-                <Image src={img.previewUrl} alt={`Photo ${idx + 1}`} fill className="object-cover" unoptimized />
+                <Image src={img.previewUrl} alt={`Photo ${idx + 1}`} fill className="object-contain" unoptimized />
                 {img.isCover && (
                   <div className="absolute inset-0 ring-2 ring-[#FF6B35] ring-inset rounded-[8px] pointer-events-none" />
                 )}
@@ -499,7 +475,7 @@ export function ImageUploader({
                   <QualityBadge quality={img.quality} />
                 </div>
                 <p className="text-[10px] text-[#9c9c98] mt-0.5">
-                  {img.sizeKb} KB · WebP · 16:9 · {img.quality.score}/100
+                  {img.sizeKb} KB · WebP · {img.quality.score}/100
                 </p>
               </div>
 
