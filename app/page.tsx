@@ -3,7 +3,7 @@ import { ArrowRight, Shield, ShieldCheck, ChevronRight, MapPin, Check, MessageCi
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { LOCATIONS } from '@/constants'
 import { getScooters, getStats } from '@/lib/supabase/queries'
-import { AREAS } from '@/constants/areas'
+import { computeLiveAreas } from '@/lib/live-areas'
 import { formatPrice } from '@/lib/utils'
 
 const BENEFITS = [
@@ -40,21 +40,8 @@ export default async function HomePage() {
   ])
   const featuredScooters = allScooters.slice(0, 4)
 
-  // Derive live zones from real inventory — zero extra DB query.
-  // Only areas with at least one available scooter are shown.
-  // priceFrom = real MIN(price_per_day) from actual listings.
-  const liveAreas = AREAS
-    .map(area => {
-      const zoneScooters = allScooters.filter(s =>
-        s.location.toLowerCase().includes(area.name.toLowerCase())
-      )
-      if (zoneScooters.length === 0) return null
-      const minPrice = Math.min(...zoneScooters.map(s => s.pricePerDay))
-      return { ...area, priceFrom: minPrice }
-    })
-    .filter((a): a is NonNullable<typeof a> => a !== null)
-
-  // Location strip — only areas with real scooters
+  // Derive live zones from already-fetched scooters — zero extra DB call.
+  const liveAreas  = computeLiveAreas(allScooters)
   const liveAreaIds = new Set(liveAreas.map(a => a.slug))
   const popularLocations = LOCATIONS.slice(1, 7).filter(loc => liveAreaIds.has(loc.id))
 

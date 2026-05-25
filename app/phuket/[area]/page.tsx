@@ -4,7 +4,8 @@ import { ArrowRight, MapPin, Shield, Zap, Check, ChevronRight } from 'lucide-rea
 import type { Metadata } from 'next'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { getScooters } from '@/lib/supabase/queries'
-import { AREAS, getArea } from '@/constants/areas'
+import { getArea, AREAS } from '@/constants/areas'
+import { getLiveAreas, getAreaMinPrice } from '@/lib/live-areas'
 import { formatPrice } from '@/lib/utils'
 import { SITE_NAME, SITE_URL } from '@/constants'
 
@@ -21,7 +22,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const area = getArea(slug)
   if (!area) return {}
 
-  const title = `Scooter Rental ${area.label}, Phuket — From ${formatPrice(area.priceFrom)}/day`
+  // Use real DB price if available — getLiveAreas() is cached per request
+  const liveAreas  = await getLiveAreas()
+  const liveArea   = liveAreas.find(a => a.slug === slug)
+  const priceLabel = liveArea ? ` — From ${formatPrice(liveArea.priceFrom)}/day` : ''
+  const title      = `Scooter Rental ${area.label}, Phuket${priceLabel}`
   const description = area.description
 
   return {
@@ -49,7 +54,12 @@ export default async function AreaPage({ params }: PageProps) {
   const area = getArea(slug)
   if (!area) notFound()
 
-  const areaScooters = await getScooters({ location: area.name.toLowerCase() })
+  const [areaScooters, liveAreas] = await Promise.all([
+    getScooters({ location: area.name.toLowerCase() }),
+    getLiveAreas(),
+  ])
+  const realMinPrice = getAreaMinPrice(areaScooters, area.name)
+  const otherAreas = liveAreas.filter(a => a.slug !== slug)
 
   // Schema.org LocalBusiness structured data (no mock data — omit offers if inventory is empty)
   const jsonLd: Record<string, unknown> = {
@@ -63,7 +73,7 @@ export default async function AreaPage({ params }: PageProps) {
       name: 'Phuket',
       addressCountry: 'TH',
     },
-    priceRange: `฿${area.priceFrom}–฿2000`,
+    ...(realMinPrice !== null && { priceRange: `฿${realMinPrice}–฿2000` }),
     ...(areaScooters.length > 0 && {
       hasOfferCatalog: {
         '@type': 'OfferCatalog',
@@ -121,7 +131,10 @@ export default async function AreaPage({ params }: PageProps) {
                   <ArrowRight className="w-5 h-5" />
                 </Link>
                 <div className="flex items-center gap-2 px-5 py-4 text-white/60 text-sm">
-                  From <strong className="text-white">{formatPrice(area.priceFrom)}/day</strong> · Contact directly
+                  {realMinPrice !== null && (
+                    <>From <strong className="text-white">{formatPrice(realMinPrice)}/day</strong> · </>
+                  )}
+                  Contact directly
                 </div>
               </div>
             </div>
@@ -225,25 +238,27 @@ export default async function AreaPage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* Other areas */}
-        <section className="max-w-5xl mx-auto px-4 py-12">
-          <h2 className="text-[20px] font-bold text-[#0f0f0e] mb-6">Other areas in Phuket</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {AREAS.filter(a => a.slug !== slug).map(other => (
-              <Link
-                key={other.slug}
-                href={`/phuket/${other.slug}`}
-                className="flex items-center justify-between px-4 py-3.5 bg-[#f8f8f6] rounded-[14px] border border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] group transition-all"
-              >
-                <div>
-                  <p className="font-semibold text-sm text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors">{other.label}</p>
-                  <p className="text-xs text-[#9c9c98]">From {formatPrice(other.priceFrom)}/day</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-[#9c9c98] group-hover:text-[#FF6B35] transition-colors" />
-              </Link>
-            ))}
-          </div>
-        </section>
+        {/* Other areas — only live zones with real inventory */}
+        {otherAreas.length > 0 && (
+          <section className="max-w-5xl mx-auto px-4 py-12">
+            <h2 className="text-[20px] font-bold text-[#0f0f0e] mb-6">Other areas in Phuket</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {otherAreas.map(other => (
+                <Link
+                  key={other.slug}
+                  href={`/phuket/${other.slug}`}
+                  className="flex items-center justify-between px-4 py-3.5 bg-[#f8f8f6] rounded-[14px] border border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] group transition-all"
+                >
+                  <div>
+                    <p className="font-semibold text-sm text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors">{other.label}</p>
+                    <p className="text-xs text-[#9c9c98]">From {formatPrice(other.priceFrom)}/day</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#9c9c98] group-hover:text-[#FF6B35] transition-colors" />
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* CTA */}
         <section className="max-w-5xl mx-auto px-4 pb-16">
