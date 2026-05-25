@@ -13,11 +13,14 @@ interface SavedRidesContentProps {
 }
 
 export function SavedRidesContent({ initialScooters, savedIds }: SavedRidesContentProps) {
-  const { isSaved, initFromIds, count, hydrated } = useSaved()
+  const { isSaved, initFromIds, pruneOrphanIds, count, hydrated } = useSaved()
 
-  // Hydrate localStorage from DB on mount (cross-device sync)
+  // Hydrate localStorage from DB on mount (cross-device sync).
+  // Then prune any stale IDs: if a scooter was deleted from the DB, the server
+  // returns only the IDs it actually found — anything else is orphaned.
   useEffect(() => {
     initFromIds(savedIds)
+    pruneOrphanIds(initialScooters.map(s => s.id))
   }, [])  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter out scooters the user just removed (optimistic removes)

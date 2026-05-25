@@ -2,8 +2,9 @@
 // Route Handlers, or Server Actions ('use server' files).
 // Client components must call Server Actions instead.
 
-import type { Scooter, Shop, Booking, MileageRange, PlanType } from '@/types'
-import { getZoneForLocation } from '@/lib/zones'
+import type { Scooter, Shop, Booking } from '@/types'
+import { normalizeScooter } from '@/lib/normalize/normalize-scooter'
+import { normalizeShop } from '@/lib/normalize/normalize-shop'
 
 function isConfigured() {
   return Boolean(
@@ -40,7 +41,7 @@ export async function getScooters(filters?: {
   const { data, error } = await query
   if (error || !data) return []
 
-  return data.map(mapDbScooter)
+  return data.map(normalizeScooter)
 }
 
 export async function getScooterById(id: string): Promise<Scooter | null> {
@@ -56,7 +57,7 @@ export async function getScooterById(id: string): Promise<Scooter | null> {
     .single()
 
   if (error || !data) return null
-  return mapDbScooter(data)
+  return normalizeScooter(data)
 }
 
 // ── BOOKINGS ────────────────────────────────────────────────
@@ -211,93 +212,6 @@ export async function createBooking(payload: {
 
 // createShopApplication removed — use app/actions/partner.ts:submitPartnerApplication
 
-// ── HELPERS ──────────────────────────────────────────────────
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapDbScooter(row: any): Scooter {
-  return {
-    id: row.id,
-    shopId: row.shop_id,
-    shop: row.shops ? mapDbShop(row.shops) : undefined,
-    name: row.name ?? 'Scooter',
-    brand: row.brand ?? '',
-    model: row.model ?? '',
-    year: row.year ?? new Date().getFullYear(),
-    category: row.category ?? 'automatic',
-    images: row.images ?? [],
-    coverImage: row.cover_image ?? null,
-    pricePerDay: row.price_per_day ?? 0,
-    pricePerWeek: row.price_per_week ?? undefined,
-    pricePerMonth: row.price_per_month ?? undefined,
-    currency: 'THB',
-    location: row.location ?? '',
-    // Prefer shop precise coordinates (set via PinPickerMap), fall back to scooter's own,
-    // then zone centre, then Phuket island centre.
-    // Use || (not ??) so that 0 values also fall through to the next candidate.
-    lat: row.shops?.lat || row.lat || getZoneForLocation(row.location ?? '')?.lat || 7.9519,
-    lng: row.shops?.lng || row.lng || getZoneForLocation(row.location ?? '')?.lng || 98.3381,
-    available: row.available ?? false,
-    rating: row.rating ?? 0,
-    reviewCount: row.review_count ?? 0,
-    features: Array.isArray(row.features) ? row.features : [],
-    specs: (row.specs && typeof row.specs === 'object') ? row.specs : {},
-    deliveryAvailable: row.delivery_available ?? false,
-    deliveryFee: row.delivery_fee ?? 0,
-    helmetIncluded: row.helmet_included ?? false,
-    insuranceIncluded: row.insurance_included ?? false,
-    minRentalDays: row.min_rental_days ?? 1,
-    description: row.description ?? '',
-    createdAt: row.created_at ?? undefined,
-    mileageRange: (row.mileage_range as MileageRange) ?? undefined,
-    depositAmount: row.deposit_amount ?? undefined,
-    depositType: row.deposit_type ?? undefined,
-    passportRequired: row.passport_required ?? false,
-    passportCopyAllowed: row.passport_copy_allowed ?? true,
-    isPremiumBike: row.is_premium_bike ?? false,
-    depositNotes: row.deposit_notes ?? undefined,
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapDbShop(row: any): Shop {
-  let openingHours
-  if (row.opening_hours) {
-    try {
-      openingHours = typeof row.opening_hours === 'string'
-        ? JSON.parse(row.opening_hours)
-        : row.opening_hours
-    } catch { /* malformed JSON — treat as unset */ }
-  }
-
-  return {
-    id: row.id,
-    name: row.name ?? 'Shop',
-    slug: row.slug ?? row.id,
-    description: row.description ?? '',
-    logo: row.logo_url ?? '',
-    location: row.location,
-    address: row.address ?? '',
-    lat: row.lat ?? getZoneForLocation(row.location ?? '')?.lat ?? 7.9519,
-    lng: row.lng ?? getZoneForLocation(row.location ?? '')?.lng ?? 98.3381,
-    rating: row.rating ?? 0,
-    reviewCount: row.review_count ?? 0,
-    verified: row.verified,
-    responseTime: row.response_time ?? '< 15 min',
-    phone: row.phone ?? '',
-    whatsapp: row.whatsapp ?? undefined,
-    coverImage: row.cover_image ?? null,
-    deliveryZones: row.delivery_zones ?? [],
-    openingHours,
-    instagram: row.instagram ?? undefined,
-    website: row.website ?? undefined,
-    lineId: row.line_id ?? undefined,
-    telegram: row.telegram ?? undefined,
-    googleMapsLink: row.google_maps_link ?? undefined,
-    gallery: row.gallery ?? [],
-    depositProtectedMember: row.deposit_protected_member ?? false,
-    planType: (row.plan_type as PlanType) ?? 'founding_partner',
-  }
-}
 
 // ── SCOOTERS BY IDS (wishlist / saved page) ─────────────────
 export async function getScootersByIds(ids: string[]): Promise<Scooter[]> {
@@ -313,7 +227,7 @@ export async function getScootersByIds(ids: string[]): Promise<Scooter[]> {
     .in('id', ids)
 
   if (error || !data) return []
-  return data.map(mapDbScooter)
+  return data.map(normalizeScooter)
 }
 
 // ── SHOP BY SLUG ────────────────────────────────────────────
@@ -343,8 +257,8 @@ export async function getShopBySlug(slug: string): Promise<ShopWithFleet | null>
     .eq('available', true)
     .order('created_at', { ascending: false })
 
-  const shop = mapDbShop(shopRow)
-  const scooters = (scooterRows ?? []).map(mapDbScooter)
+  const shop = normalizeShop(shopRow)
+  const scooters = (scooterRows ?? []).map(normalizeScooter)
   return { ...shop, scooters }
 }
 

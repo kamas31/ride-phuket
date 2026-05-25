@@ -145,9 +145,9 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         {/* Category + engine */}
         <div className="flex items-center gap-2 mb-3">
           <Badge variant={scooter.category === 'automatic' ? 'brand' : 'default'}>
-            {scooter.category.charAt(0).toUpperCase() + scooter.category.slice(1)}
+            {scooter.category ? scooter.category.charAt(0).toUpperCase() + scooter.category.slice(1) : 'Scooter'}
           </Badge>
-          <span className="text-xs text-[#9c9c98]">{scooter.specs.engine}</span>
+          <span className="text-xs text-[#9c9c98]">{scooter.specs?.engine}</span>
         </div>
 
         {/* Price */}

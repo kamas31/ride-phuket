@@ -61,6 +61,18 @@ export function useSaved() {
     })
   }, [])
 
+  // Remove IDs from localStorage that are NOT in validIds.
+  // Call after fetching saved scooters from the server to auto-clean stale/deleted IDs.
+  // An ID not returned by the server means the scooter was deleted or is orphaned.
+  const pruneOrphanIds = useCallback((validIds: string[]) => {
+    const valid = new Set(validIds)
+    setSaved(prev => {
+      const pruned = new Set([...prev].filter(id => valid.has(id)))
+      if (pruned.size !== prev.size) writeToStorage(pruned)
+      return pruned
+    })
+  }, [])
+
   const isSaved = useCallback((id: string) => saved.has(id), [saved])
 
   return {
@@ -69,6 +81,7 @@ export function useSaved() {
     isSaved,
     toggle,
     initFromIds,
+    pruneOrphanIds,
     hydrated,
   }
 }
