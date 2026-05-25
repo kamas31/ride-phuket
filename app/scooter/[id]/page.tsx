@@ -5,7 +5,7 @@ import {
   Phone, MessageCircle, Clock, RotateCcw,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
-import { getScooters, getScooterById } from '@/lib/supabase/queries'
+import { getScooterById } from '@/lib/supabase/queries'
 import { formatPrice, formatPricePerDay, pluralize, getScooterCover } from '@/lib/utils'
 import { ImageGallery } from '@/components/ride/ImageGallery'
 import { TrustBadge, isNewListing, isFastResponder } from '@/components/ride/TrustBadge'
@@ -56,16 +56,7 @@ interface ScooterPageProps {
   params: Promise<{ id: string }>
 }
 
-export const revalidate = 60
-
-export async function generateStaticParams() {
-  try {
-    const scooters = await getScooters({ available: true })
-    return scooters.map(s => ({ id: s.id }))
-  } catch {
-    return []
-  }
-}
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: ScooterPageProps) {
   try {
