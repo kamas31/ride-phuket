@@ -223,7 +223,7 @@ function mapDbScooter(row: any): Scooter {
     brand: row.brand,
     model: row.model,
     year: row.year ?? new Date().getFullYear(),
-    category: row.category,
+    category: row.category ?? 'automatic',
     images: row.images ?? [],
     coverImage: row.cover_image ?? null,
     pricePerDay: row.price_per_day,
@@ -271,8 +271,8 @@ function mapDbShop(row: any): Shop {
 
   return {
     id: row.id,
-    name: row.name,
-    slug: row.slug,
+    name: row.name ?? 'Shop',
+    slug: row.slug ?? row.id,
     description: row.description ?? '',
     logo: row.logo_url ?? '',
     location: row.location,

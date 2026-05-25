@@ -13,7 +13,8 @@ interface ImageGalleryProps {
 
 const SPRING = 'cubic-bezier(0.34, 1.56, 0.64, 1)'
 
-export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
+export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalleryProps) {
+  const images = rawImages?.length ? rawImages : []
   const coverIdx = coverImage ? Math.max(0, images.indexOf(coverImage)) : 0
   const [active, setActive] = useState(coverIdx)
   const hasMultiple = images.length > 1
@@ -58,6 +59,19 @@ export function ImageGallery({ images, name, coverImage }: ImageGalleryProps) {
     touchStartX.current = null
     touchStartY.current = null
     isScrolling.current = null
+  }
+
+  // No images — render a consistent warm-sand placeholder (same as ScooterImage fallback)
+  if (!images.length) {
+    return (
+      <div className="space-y-3">
+        <div className="relative md:rounded-[24px] overflow-hidden bg-[#f3f3ef]" style={{ minHeight: 240 }}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#f0ede8] via-[#ece8e2] to-[#e4e0da]">
+            <span className="text-[10px] font-medium text-[#b8b3ac] tracking-wide uppercase">No photos yet</span>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const prevIdx = (active - 1 + images.length) % images.length
