@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useRef, useCallback } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { Search, Map, List, Bike } from 'lucide-react'
@@ -42,6 +42,19 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
   const [selectedId, setSelectedId]   = useState<string | null>(null) // shop ID
   const [hoveredId, setHoveredId]     = useState<string | null>(null) // shop ID
   const [showMap, setShowMap]         = useState(true)
+
+  // Persist map visibility across sessions — read after hydration to avoid SSR mismatch
+  useEffect(() => {
+    if (localStorage.getItem('rp_show_map') === 'false') setShowMap(false)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const toggleMap = useCallback(() => {
+    setShowMap(prev => {
+      const next = !prev
+      try { localStorage.setItem('rp_show_map', String(next)) } catch {}
+      return next
+    })
+  }, [])
   const [mobileView, setMobileView]   = useState<MobileView>('list')
   const [mapBounds, setMapBounds]     = useState<{ sw: [number, number]; ne: [number, number] } | null>(null)
 
@@ -162,6 +175,20 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
               />
             </div>
 
+            {/* Desktop map toggle — pill, stays in sticky bar */}
+            <button
+              onClick={toggleMap}
+              className={cn(
+                'hidden lg:flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium flex-shrink-0 transition-colors',
+                showMap
+                  ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
+                  : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
+              )}
+            >
+              <Map className="w-3.5 h-3.5" />
+              {showMap ? 'Hide map' : 'Show map'}
+            </button>
+
             {/* Mobile toggle — inside sticky bar, always accessible */}
             <div className="flex lg:hidden items-center gap-0.5 bg-[#f0f0ec] rounded-full p-1 flex-shrink-0">
               <button
@@ -196,23 +223,19 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-5">
-        {/* Count + Desktop map toggle */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Result count */}
+        <div className="mb-4">
           <p className="text-sm text-[#5c5c58]">
             <span className="font-bold text-[#0f0f0e]">{filtered.length}</span> scooters available
           </p>
-          <button
-            onClick={() => setShowMap(!showMap)}
-            className="hidden lg:flex items-center gap-1.5 text-sm font-semibold text-[#FF6B35] hover:text-[#e85d29] transition-colors"
-          >
-            <Map className="w-4 h-4" />
-            {showMap ? 'Hide Map' : 'Show Map'}
-          </button>
         </div>
 
         {/* ── DESKTOP LAYOUT ── */}
         <div className="hidden lg:flex gap-5">
-          <div className={showMap ? 'w-full lg:w-[42%]' : 'w-full'}>
+          <div
+            className="min-w-0 transition-all duration-300 ease-in-out"
+            style={{ width: showMap ? '42%' : '100%' }}
+          >
             {filtered.length === 0 ? <EmptyState /> : (
               <div className={`grid gap-3 ${showMap ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
                 {filtered.map(scooter => (
@@ -223,7 +246,7 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
           </div>
 
           {showMap && (
-            <div className="w-full lg:w-[58%]">
+            <div className="flex-1 min-w-0">
               <div className="sticky top-36">
                 <ScooterMap
                   scooters={filtered}

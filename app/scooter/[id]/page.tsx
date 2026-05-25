@@ -97,8 +97,15 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
   const isValidSpec = (v: string | undefined) =>
     v && v.trim().length > 0 && !/^n\/?a$/i.test(v.trim())
 
+  // Append "cc" only when value is a bare number — "125" → "125cc", "Electric" stays
+  const fmtEngine = (v: string | undefined) => {
+    if (!v) return v
+    const t = v.trim()
+    return /^\d+(\.\d+)?$/.test(t) ? `${t}cc` : t
+  }
+
   const SPEC_ROWS = [
-    { label: 'Engine',      value: scooter.specs?.engine },
+    { label: 'Engine',      value: fmtEngine(scooter.specs?.engine) },
     { label: 'Power',       value: scooter.specs?.power },
     { label: 'Fuel Tank',   value: scooter.specs?.fuelCapacity },
     { label: 'Consumption', value: scooter.specs?.consumption },

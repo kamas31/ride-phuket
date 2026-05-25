@@ -28,7 +28,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
 
   return (
     <>
-      {/* Filter bar */}
+      {/* ── Quick filter bar ── */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
         {/* All filters toggle */}
         <button
@@ -49,8 +49,8 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
           )}
         </button>
 
-        {/* Quick category filters */}
-        {SCOOTER_CATEGORIES.map(cat => (
+        {/* Category chips — Recommended, Automatic, Manual only (Electric lives in full filter modal) */}
+        {SCOOTER_CATEGORIES.filter(cat => cat.value !== 'electric').map(cat => (
           <button
             key={cat.value}
             onClick={() => update({ category: cat.value as FilterState['category'] })}
@@ -61,11 +61,11 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
                 : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
             )}
           >
-            {cat.label}
+            {cat.value === 'all' ? 'Recommended' : cat.label}
           </button>
         ))}
 
-        {/* Quick: Delivery */}
+        {/* Delivery */}
         <button
           onClick={() => update({ deliveryNow: !filters.deliveryNow })}
           className={cn(
@@ -79,35 +79,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
           Delivery
         </button>
 
-        {/* Quick: Helmet */}
-        <button
-          onClick={() => update({ helmetIncluded: !filters.helmetIncluded })}
-          className={cn(
-            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
-            filters.helmetIncluded
-              ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
-              : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
-          )}
-        >
-          <HardHat className="w-3.5 h-3.5" strokeWidth={1.5} />
-          Helmet
-        </button>
-
-        {/* Quick: Deposit Protected */}
-        <button
-          onClick={() => update({ depositProtected: !filters.depositProtected })}
-          className={cn(
-            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
-            filters.depositProtected
-              ? 'bg-[#FF6B35] text-white border-[#FF6B35]'
-              : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
-          )}
-        >
-          <Shield className="w-3.5 h-3.5" strokeWidth={1.5} />
-          Protected
-        </button>
-
-        {/* Quick: No Passport */}
+        {/* No Passport */}
         <button
           onClick={() => update({ noPassport: !filters.noPassport })}
           className={cn(
@@ -135,97 +107,106 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
         </div>
       </div>
 
-      {/* Filter drawer */}
+      {/* ── Filter modal ── */}
       {showPanel && (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center">
+          {/* Backdrop */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowPanel(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[28px] p-6 max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[18px] font-bold text-[#0f0f0e]">Filters</h3>
+
+          {/* Panel — bottom sheet on mobile, centered dialog on desktop */}
+          <div className="relative w-full md:max-w-[520px] bg-white rounded-t-[24px] md:rounded-[20px] shadow-xl max-h-[88vh] md:max-h-[78vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-white px-6 pt-5 pb-4 flex items-center justify-between border-b border-[#f0f0ec]">
+              <h3 className="text-[16px] font-bold text-[#0f0f0e]">Filters</h3>
               <button
                 onClick={() => setShowPanel(false)}
-                className="w-8 h-8 rounded-full bg-[#f0f0ec] flex items-center justify-center"
+                className="w-8 h-8 rounded-full bg-[#f0f0ec] flex items-center justify-center hover:bg-[#e8e8e4] transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Price range */}
-            <div className="mb-6">
-              <label className="text-sm font-semibold text-[#0f0f0e] mb-3 block">
-                Max price: <span className="text-[#FF6B35]">฿{filters.priceMax}/day</span>
-              </label>
-              <input
-                type="range"
-                min={150}
-                max={2000}
-                step={50}
-                value={filters.priceMax}
-                onChange={e => update({ priceMax: Number(e.target.value) })}
-                className="w-full accent-[#FF6B35]"
-              />
-              <div className="flex justify-between text-xs text-[#9c9c98] mt-1">
-                <span>฿150</span>
-                <span>฿2,000</span>
+            <div className="px-6 py-5 space-y-6">
+              {/* Price range */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-semibold text-[#0f0f0e]">Max daily price</p>
+                  <span className="text-sm font-bold text-[#FF6B35]">฿{filters.priceMax}</span>
+                </div>
+                <input
+                  type="range"
+                  min={150}
+                  max={2000}
+                  step={50}
+                  value={filters.priceMax}
+                  onChange={e => update({ priceMax: Number(e.target.value) })}
+                  className="w-full accent-[#FF6B35]"
+                />
+                <div className="flex justify-between text-xs text-[#9c9c98] mt-1.5">
+                  <span>฿150</span>
+                  <span>฿2,000</span>
+                </div>
+              </div>
+
+              {/* Location */}
+              <div>
+                <p className="text-sm font-semibold text-[#0f0f0e] mb-3">Location</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {LOCATIONS.map(loc => (
+                    <button
+                      key={loc.id}
+                      onClick={() => update({ location: loc.id })}
+                      className={cn(
+                        'px-3 py-2 rounded-[10px] text-sm font-medium border transition-colors text-center truncate',
+                        filters.location === loc.id
+                          ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
+                          : 'bg-[#f8f8f6] text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
+                      )}
+                    >
+                      {loc.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Toggles */}
+              <div>
+                <p className="text-sm font-semibold text-[#0f0f0e] mb-3">Features</p>
+                <div className="space-y-2">
+                  {([
+                    { key: 'deliveryNow',      label: 'Delivery available',         icon: Truck   },
+                    { key: 'helmetIncluded',   label: 'Helmet included',            icon: HardHat },
+                    { key: 'depositProtected', label: 'Deposit Protected',          icon: Shield  },
+                    { key: 'noPassport',       label: 'No passport required',       icon: IdCard  },
+                  ] as const).map(({ key, label, icon: Icon }) => (
+                    <button
+                      key={key}
+                      onClick={() => update({ [key]: !filters[key as keyof FilterState] } as Partial<FilterState>)}
+                      className="w-full flex items-center justify-between px-4 py-3.5 rounded-[12px] border border-[#e8e8e4] hover:border-[#d0d0cc] transition-colors"
+                    >
+                      <span className="flex items-center gap-2.5 text-sm font-medium text-[#0f0f0e]">
+                        <Icon className="w-4 h-4 text-[#9c9c98]" strokeWidth={1.5} />
+                        {label}
+                      </span>
+                      <div className={cn(
+                        'w-10 h-[22px] rounded-full transition-colors relative flex-shrink-0',
+                        filters[key as keyof FilterState] ? 'bg-[#FF6B35]' : 'bg-[#e8e8e4]'
+                      )}>
+                        <div className={cn(
+                          'absolute top-0.5 w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform',
+                          filters[key as keyof FilterState] ? 'translate-x-[22px]' : 'translate-x-0.5'
+                        )} />
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Location */}
-            <div className="mb-6">
-              <label className="text-sm font-semibold text-[#0f0f0e] mb-3 block">Location</label>
-              <div className="grid grid-cols-3 gap-2">
-                {LOCATIONS.map(loc => (
-                  <button
-                    key={loc.id}
-                    onClick={() => update({ location: loc.id })}
-                    className={cn(
-                      'px-3 py-2 rounded-[10px] text-sm font-medium border transition-colors text-center',
-                      filters.location === loc.id
-                        ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
-                        : 'bg-[#f8f8f6] text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
-                    )}
-                  >
-                    {loc.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Toggles */}
-            <div className="space-y-3 mb-8">
-              {([
-                { key: 'deliveryNow',       label: 'Delivery available',         icon: Truck    },
-                { key: 'helmetIncluded',    label: 'Helmet included',            icon: HardHat  },
-                { key: 'depositProtected',  label: 'Deposit Protected (safest)', icon: Shield   },
-                { key: 'noPassport',        label: 'No passport required',       icon: IdCard   },
-              ] as const).map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => update({ [key]: !filters[key as keyof FilterState] } as Partial<FilterState>)}
-                  className="w-full flex items-center justify-between p-4 rounded-[14px] border border-[#e8e8e4] hover:border-[#d0d0cc] transition-colors"
-                >
-                  <span className="flex items-center gap-2.5 text-sm font-medium text-[#0f0f0e]">
-                    <Icon className="w-4 h-4 text-[#9c9c98]" strokeWidth={1.5} />
-                    {label}
-                  </span>
-                  <div className={cn(
-                    'w-11 h-6 rounded-full transition-colors relative flex-shrink-0',
-                    filters[key as keyof FilterState] ? 'bg-[#FF6B35]' : 'bg-[#e8e8e4]'
-                  )}>
-                    <div className={cn(
-                      'absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform',
-                      filters[key as keyof FilterState] ? 'translate-x-5' : 'translate-x-0.5'
-                    )} />
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex gap-3">
+            {/* Footer actions */}
+            <div className="sticky bottom-0 bg-white border-t border-[#f0f0ec] px-6 py-4 flex gap-3">
               <button
-                onClick={() => {
-                  onChange({ priceMin: 150, priceMax: 2000, category: 'all', deliveryNow: false, helmetIncluded: false, location: 'all', sortBy: 'recommended', depositProtected: false, noPassport: false })
-                }}
+                onClick={() => onChange({ priceMin: 150, priceMax: 2000, category: 'all', deliveryNow: false, helmetIncluded: false, location: 'all', sortBy: 'recommended', depositProtected: false, noPassport: false })}
                 className="flex-1 py-3 rounded-full border border-[#e8e8e4] text-sm font-semibold text-[#5c5c58] hover:bg-[#f8f8f6] transition-colors"
               >
                 Reset
