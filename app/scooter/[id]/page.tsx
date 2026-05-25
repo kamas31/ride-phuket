@@ -68,22 +68,28 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: ScooterPageProps) {
-  const { id } = await params
-  const scooter = await getScooterById(id)
-  if (!scooter) return {}
-  const coverUrl = getScooterCover(scooter)
-  return {
-    title: `${scooter.name} — ${formatPricePerDay(scooter.pricePerDay)}`,
-    description: scooter.description,
-    openGraph: {
-      title: `${scooter.name} — ${formatPricePerDay(scooter.pricePerDay)}`,
-      description: scooter.description,
-      ...(coverUrl ? { images: [{ url: coverUrl, width: 1600, height: 900, alt: scooter.name }] } : {}),
-    },
-    twitter: {
-      card: 'summary_large_image',
-      ...(coverUrl ? { images: [coverUrl] } : {}),
-    },
+  try {
+    const { id } = await params
+    const scooter = await getScooterById(id)
+    if (!scooter) return {}
+    const coverUrl = getScooterCover(scooter)
+    const price = scooter.pricePerDay > 0 ? formatPricePerDay(scooter.pricePerDay) : null
+    const title = price ? `${scooter.name} — ${price}` : scooter.name
+    return {
+      title,
+      description: scooter.description || undefined,
+      openGraph: {
+        title,
+        description: scooter.description || undefined,
+        ...(coverUrl ? { images: [{ url: coverUrl, width: 1600, height: 900, alt: scooter.name }] } : {}),
+      },
+      twitter: {
+        card: 'summary_large_image',
+        ...(coverUrl ? { images: [coverUrl] } : {}),
+      },
+    }
+  } catch {
+    return {}
   }
 }
 
@@ -101,12 +107,12 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
     v && v.trim().length > 0 && !/^n\/?a$/i.test(v.trim())
 
   const SPEC_ROWS = [
-    { label: 'Engine',      value: scooter.specs.engine },
-    { label: 'Power',       value: scooter.specs.power },
-    { label: 'Fuel Tank',   value: scooter.specs.fuelCapacity },
-    { label: 'Consumption', value: scooter.specs.consumption },
-    { label: 'Weight',      value: scooter.specs.weight },
-    { label: 'Storage',     value: scooter.specs.storage },
+    { label: 'Engine',      value: scooter.specs?.engine },
+    { label: 'Power',       value: scooter.specs?.power },
+    { label: 'Fuel Tank',   value: scooter.specs?.fuelCapacity },
+    { label: 'Consumption', value: scooter.specs?.consumption },
+    { label: 'Weight',      value: scooter.specs?.weight },
+    { label: 'Storage',     value: scooter.specs?.storage },
   ].filter(r => isValidSpec(r.value))
 
   const weekSavings = scooter.pricePerWeek
