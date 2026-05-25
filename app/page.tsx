@@ -39,7 +39,24 @@ export default async function HomePage() {
     getStats(),
   ])
   const featuredScooters = allScooters.slice(0, 4)
-  const popularLocations = LOCATIONS.slice(1, 7)
+
+  // Derive live zones from real inventory — zero extra DB query.
+  // Only areas with at least one available scooter are shown.
+  // priceFrom = real MIN(price_per_day) from actual listings.
+  const liveAreas = AREAS
+    .map(area => {
+      const zoneScooters = allScooters.filter(s =>
+        s.location.toLowerCase().includes(area.name.toLowerCase())
+      )
+      if (zoneScooters.length === 0) return null
+      const minPrice = Math.min(...zoneScooters.map(s => s.pricePerDay))
+      return { ...area, priceFrom: minPrice }
+    })
+    .filter((a): a is NonNullable<typeof a> => a !== null)
+
+  // Location strip — only areas with real scooters
+  const liveAreaIds = new Set(liveAreas.map(a => a.slug))
+  const popularLocations = LOCATIONS.slice(1, 7).filter(loc => liveAreaIds.has(loc.id))
 
   // Real trust stats — numbers only shown when > 0, otherwise qualitative
   const trustItems = [
@@ -343,22 +360,29 @@ export default async function HomePage() {
               </h2>
             </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {AREAS.map(area => (
-              <Link
-                key={area.slug}
-                href={`/phuket/${area.slug}`}
-                className="group flex flex-col p-4 bg-white rounded-[16px] border border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] transition-all"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <MapPin className="w-4 h-4 text-[#FF6B35] mt-0.5" />
-                  <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:text-[#FF6B35] transition-colors" />
-                </div>
-                <p className="font-bold text-[14px] text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors leading-tight">{area.label}</p>
-                <p className="text-[12px] text-[#9c9c98] mt-1">From {formatPrice(area.priceFrom)}/day</p>
-              </Link>
-            ))}
-          </div>
+          {liveAreas.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {liveAreas.map(area => (
+                <Link
+                  key={area.slug}
+                  href={`/phuket/${area.slug}`}
+                  className="group flex flex-col p-4 bg-white rounded-[16px] border border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] transition-all"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <MapPin className="w-4 h-4 text-[#FF6B35] mt-0.5" />
+                    <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:text-[#FF6B35] transition-colors" />
+                  </div>
+                  <p className="font-bold text-[14px] text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors leading-tight">{area.label}</p>
+                  <p className="text-[12px] text-[#9c9c98] mt-1">From {formatPrice(area.priceFrom)}/day</p>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-[20px] border border-[#e8e8e4]">
+              <p className="text-[#5c5c58] font-medium mb-1">New rental partners are joining Ride Phuket.</p>
+              <p className="text-[#9c9c98] text-sm">Check back soon — or browse all available scooters now.</p>
+            </div>
+          )}
         </div>
       </section>
 
