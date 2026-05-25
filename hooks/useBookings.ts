@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { isSupabaseConfigured, createClient } from '@/lib/supabase/client'
-import { MOCK_BOOKINGS } from '@/data/scooters'
 import type { Booking } from '@/types'
 
 export function useBookings(userId: string | undefined) {
@@ -16,7 +15,6 @@ export function useBookings(userId: string | undefined) {
     }
 
     if (!isSupabaseConfigured()) {
-      setBookings(MOCK_BOOKINGS)
       setLoading(false)
       return
     }
@@ -29,9 +27,7 @@ export function useBookings(userId: string | undefined) {
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .then(({ data, error }) => {
-        if (error || !data) {
-          setBookings(MOCK_BOOKINGS)
-        } else {
+        if (!error && data) {
           setBookings(data as unknown as Booking[])
         }
         setLoading(false)

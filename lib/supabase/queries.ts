@@ -3,7 +3,6 @@
 // Client components must call Server Actions instead.
 
 import type { Scooter, Shop, Booking, MileageRange, PlanType } from '@/types'
-import { SCOOTERS, SHOPS, MOCK_BOOKINGS } from '@/data/scooters'
 import { getZoneForLocation } from '@/lib/zones'
 
 function isConfigured() {
@@ -20,7 +19,7 @@ export async function getScooters(filters?: {
   category?: string
   available?: boolean
 }): Promise<Scooter[]> {
-  if (!isConfigured()) return applyFilters(SCOOTERS, filters)
+  if (!isConfigured()) return []
 
   const { createClient } = await import('./server')
   const supabase = await createClient()
@@ -39,13 +38,13 @@ export async function getScooters(filters?: {
   }
 
   const { data, error } = await query
-  if (error || !data) return applyFilters(SCOOTERS, filters)
+  if (error || !data) return []
 
   return data.map(mapDbScooter)
 }
 
 export async function getScooterById(id: string): Promise<Scooter | null> {
-  if (!isConfigured()) return SCOOTERS.find(s => s.id === id) ?? null
+  if (!isConfigured()) return null
 
   const { createClient } = await import('./server')
   const supabase = await createClient()
@@ -56,14 +55,14 @@ export async function getScooterById(id: string): Promise<Scooter | null> {
     .eq('id', id)
     .single()
 
-  if (error || !data) return SCOOTERS.find(s => s.id === id) ?? null
+  if (error || !data) return null
   return mapDbScooter(data)
 }
 
 // ── BOOKINGS ────────────────────────────────────────────────
 
 export async function getUserBookings(userId: string): Promise<Booking[]> {
-  if (!isConfigured()) return MOCK_BOOKINGS
+  if (!isConfigured()) return []
 
   const { createClient } = await import('./server')
   const supabase = await createClient()
@@ -74,7 +73,7 @@ export async function getUserBookings(userId: string): Promise<Booking[]> {
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
-  if (error || !data) return MOCK_BOOKINGS
+  if (error || !data) return []
   return data as unknown as Booking[]
 }
 
@@ -214,18 +213,6 @@ export async function createBooking(payload: {
 
 // ── HELPERS ──────────────────────────────────────────────────
 
-function applyFilters(scooters: Scooter[], filters?: { location?: string; category?: string }) {
-  return scooters.filter(s => {
-    if (filters?.location && filters.location !== 'all') {
-      if (!s.location.toLowerCase().includes(filters.location)) return false
-    }
-    if (filters?.category && filters.category !== 'all') {
-      if (s.category !== filters.category) return false
-    }
-    return true
-  })
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapDbScooter(row: any): Scooter {
   return {
@@ -315,7 +302,7 @@ function mapDbShop(row: any): Shop {
 // ── SCOOTERS BY IDS (wishlist / saved page) ─────────────────
 export async function getScootersByIds(ids: string[]): Promise<Scooter[]> {
   if (!ids.length) return []
-  if (!isConfigured()) return SCOOTERS.filter(s => ids.includes(s.id))
+  if (!isConfigured()) return []
 
   const { createClient } = await import('./server')
   const supabase = await createClient()
@@ -333,12 +320,7 @@ export async function getScootersByIds(ids: string[]): Promise<Scooter[]> {
 export type ShopWithFleet = Shop & { scooters: Scooter[] }
 
 export async function getShopBySlug(slug: string): Promise<ShopWithFleet | null> {
-  if (!isConfigured()) {
-    const shop = SHOPS.find(s => s.slug === slug)
-    if (!shop) return null
-    const scooters = SCOOTERS.filter(s => s.shopId === shop.id && s.available)
-    return { ...shop, scooters }
-  }
+  if (!isConfigured()) return null
 
   const { createClient } = await import('./server')
   const supabase = await createClient()

@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { ArrowRight, MapPin, Shield, Zap, Check, ChevronRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import { ScooterCard } from '@/components/ride/ScooterCard'
-import { SCOOTERS } from '@/data/scooters'
 import { getScooters } from '@/lib/supabase/queries'
 import { AREAS, getArea } from '@/constants/areas'
 import { formatPrice } from '@/lib/utils'
@@ -50,14 +49,10 @@ export default async function AreaPage({ params }: PageProps) {
   const area = getArea(slug)
   if (!area) notFound()
 
-  // Fetch live scooters filtered by area, fall back to mock if DB unavailable
-  const liveScooters = await getScooters({ location: area.name.toLowerCase() })
-  const fallback = SCOOTERS.filter(s => s.location.toLowerCase().includes(area.name.toLowerCase()))
-  const areaScooters = liveScooters.length > 0 ? liveScooters : (fallback.length > 0 ? fallback : SCOOTERS.slice(0, 4))
-  const displayScooters = areaScooters
+  const areaScooters = await getScooters({ location: area.name.toLowerCase() })
 
-  // Schema.org LocalBusiness structured data
-  const jsonLd = {
+  // Schema.org LocalBusiness structured data (no mock data — omit offers if inventory is empty)
+  const jsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: `${SITE_NAME} — ${area.label}`,
@@ -69,16 +64,18 @@ export default async function AreaPage({ params }: PageProps) {
       addressCountry: 'TH',
     },
     priceRange: `฿${area.priceFrom}–฿2000`,
-    hasOfferCatalog: {
-      '@type': 'OfferCatalog',
-      name: 'Scooter Rentals',
-      itemListElement: displayScooters.slice(0, 3).map(s => ({
-        '@type': 'Offer',
-        name: s.name,
-        price: s.pricePerDay,
-        priceCurrency: 'THB',
-      })),
-    },
+    ...(areaScooters.length > 0 && {
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: 'Scooter Rentals',
+        itemListElement: areaScooters.slice(0, 3).map(s => ({
+          '@type': 'Offer',
+          name: s.name,
+          price: s.pricePerDay,
+          priceCurrency: 'THB',
+        })),
+      },
+    }),
   }
 
   return (
@@ -157,18 +154,36 @@ export default async function AreaPage({ params }: PageProps) {
                 Scooters in {area.label}
               </h2>
             </div>
-            <Link
-              href={`/explore?location=${slug}`}
-              className="flex items-center gap-1 text-sm font-semibold text-[#FF6B35] hover:gap-2 transition-all"
-            >
-              All scooters <ChevronRight className="w-4 h-4" />
-            </Link>
+            {areaScooters.length > 0 && (
+              <Link
+                href={`/explore?location=${slug}`}
+                className="flex items-center gap-1 text-sm font-semibold text-[#FF6B35] hover:gap-2 transition-all"
+              >
+                All scooters <ChevronRight className="w-4 h-4" />
+              </Link>
+            )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {displayScooters.slice(0, 4).map(scooter => (
-              <ScooterCard key={scooter.id} scooter={scooter} />
-            ))}
-          </div>
+          {areaScooters.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {areaScooters.slice(0, 4).map(scooter => (
+                <ScooterCard key={scooter.id} scooter={scooter} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-14 bg-[#f8f8f6] rounded-[20px] border border-[#e8e8e4]">
+              <p className="text-[#5c5c58] font-medium mb-1">No listings in {area.label} yet</p>
+              <p className="text-[#9c9c98] text-sm mb-5">
+                Browse all available scooters across Phuket.
+              </p>
+              <Link
+                href="/explore"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF6B35] text-white text-sm font-semibold rounded-full hover:bg-[#e85d29] transition-colors"
+              >
+                Explore all scooters
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* Area highlights */}

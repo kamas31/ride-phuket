@@ -3,30 +3,61 @@
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { ArrowLeft, MessageCircle, Phone, MapPin, Check } from 'lucide-react'
+import { ArrowLeft, MessageCircle, Phone, MapPin, Check, Search } from 'lucide-react'
 import { ScooterImage } from '@/components/ride/ScooterImage'
-import { SCOOTERS } from '@/data/scooters'
 import { getScooterAction } from '@/app/actions/scooter'
 import { formatPrice, getScooterCover } from '@/lib/utils'
 import type { Scooter } from '@/types'
 
 function ContactShopContent() {
   const params = useSearchParams()
-  const scooterId = params.get('scooterId') || SCOOTERS[0].id
+  const scooterId = params.get('scooterId')
 
-  const [scooter, setScooter] = useState<Scooter>(
-    SCOOTERS.find(s => s.id === scooterId) ?? SCOOTERS[0]
-  )
+  const [scooter, setScooter] = useState<Scooter | null>(null)
+  const [loading, setLoading] = useState(!!scooterId)
 
   useEffect(() => {
-    getScooterAction(scooterId).then(live => { if (live) setScooter(live) })
+    if (!scooterId) return
+    getScooterAction(scooterId).then(live => {
+      setScooter(live)
+      setLoading(false)
+    })
   }, [scooterId])
 
-  const shop = scooter.shop
+  // No scooterId param or scooter not found — send user to explore
+  if (!scooterId || (!loading && !scooter)) {
+    return (
+      <div className="min-h-screen bg-[#f8f8f6] flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <div className="w-16 h-16 bg-[#f8f8f6] border border-[#e8e8e4] rounded-full flex items-center justify-center mx-auto mb-4">
+            <Search className="w-7 h-7 text-[#c8c8c4]" strokeWidth={1.5} />
+          </div>
+          <h1 className="text-[18px] font-bold text-[#0f0f0e] mb-2">No scooter selected</h1>
+          <p className="text-[#9c9c98] text-sm mb-6">Browse available scooters and tap &ldquo;Contact Shop&rdquo; to continue.</p>
+          <Link
+            href="/explore"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF6B35] text-white text-sm font-semibold rounded-full hover:bg-[#e85d29] transition-colors"
+          >
+            Explore scooters
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f8f8f6] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  const shop = scooter!.shop
 
   const waUrl = shop?.whatsapp
     ? `https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(
-        `Hi! I found your ${scooter.name} on Ride Phuket and I'd like to arrange a rental.`
+        `Hi! I found your ${scooter!.name} on Ride Phuket and I'd like to arrange a rental.`
       )}`
     : null
 
@@ -35,7 +66,7 @@ function ContactShopContent() {
       {/* Header */}
       <div className="bg-white border-b border-[#e8e8e4]">
         <div className="max-w-md mx-auto px-4 py-4 flex items-center gap-4">
-          <Link href={`/scooter/${scooter.id}`} className="text-[#5c5c58] hover:text-[#0f0f0e] transition-colors">
+          <Link href={`/scooter/${scooter!.id}`} className="text-[#5c5c58] hover:text-[#0f0f0e] transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <h1 className="font-bold text-[17px] text-[#0f0f0e]">Contact the Shop</h1>
@@ -46,19 +77,19 @@ function ContactShopContent() {
         {/* Scooter summary */}
         <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-5 flex gap-4 items-center">
           <ScooterImage
-            src={getScooterCover(scooter)}
-            alt={scooter.name}
+            src={getScooterCover(scooter!)}
+            alt={scooter!.name}
             className="w-20 h-16 rounded-[12px] flex-shrink-0"
             sizes="80px"
           />
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-[#0f0f0e] truncate text-[15px]">{scooter.name}</h3>
+            <h3 className="font-bold text-[#0f0f0e] truncate text-[15px]">{scooter!.name}</h3>
             <div className="flex items-center gap-1 text-xs text-[#9c9c98] mt-0.5">
               <MapPin className="w-3 h-3" />
-              {scooter.location}
+              {scooter!.location}
             </div>
             <p className="text-sm font-bold text-[#FF6B35] mt-1.5">
-              {formatPrice(scooter.pricePerDay)}
+              {formatPrice(scooter!.pricePerDay)}
               <span className="text-xs font-normal text-[#9c9c98]">/day</span>
             </p>
           </div>
@@ -105,7 +136,7 @@ function ContactShopContent() {
           )}
           {!waUrl && !shop?.phone && (
             <Link
-              href={`/explore`}
+              href="/explore"
               className="flex items-center justify-center gap-2.5 w-full py-4 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-base"
             >
               Browse other scooters
