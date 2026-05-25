@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  User, Shield, BookOpen, Star, Bell, Globe, LogOut,
+  Shield, Heart, Star, Bell, Globe, LogOut,
   ChevronRight, Check, Camera, Phone, Mail, LayoutDashboard
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
@@ -37,10 +37,9 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
       ]
     }] : []),
     {
-      title: 'Rentals',
+      title: 'Saved',
       items: [
-        { icon: BookOpen, label: 'My Bookings', href: '/bookings', badge: null },
-        { icon: Star, label: 'My Reviews', href: '#', badge: null },
+        { icon: Heart, label: 'Saved Scooters', href: '/saved', badge: null },
       ]
     },
     {

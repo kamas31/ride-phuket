@@ -5,7 +5,7 @@ import { SITE_NAME, SITE_DESCRIPTION } from '@/constants'
 const FOOTER_LINKS = {
   Discover: [
     { href: '/explore', label: 'Explore Scooters' },
-    { href: '/rentals', label: 'My Rentals' },
+    { href: '/saved', label: 'Saved Scooters' },
     { href: '/auth/login', label: 'Sign In' },
   ],
   Locations: [

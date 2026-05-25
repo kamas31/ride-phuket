@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { UserRole } from '@/lib/supabase/types'
 
 // Routes that require authentication (any role)
-const AUTH_REQUIRED = ['/bookings', '/profile', '/checkout']
+const AUTH_REQUIRED = ['/profile', '/checkout']
 
 // Routes that require shop_owner — all /partner sub-routes except the landing
 // /partner itself is the shop-creation form (accessible to authenticated riders too)
