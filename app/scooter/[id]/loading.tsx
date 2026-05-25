@@ -48,7 +48,7 @@ export default function ScooterLoading() {
             </div>
           </div>
 
-          {/* Right column — booking card */}
+          {/* Right column — contact card */}
           <div className="lg:col-span-2 mt-8 lg:mt-0">
             <div className="bg-white rounded-[24px] border border-[#e8e8e4] overflow-hidden p-6 space-y-4">
               <div className="space-y-2 pb-4 border-b border-[#f0f0ec]">

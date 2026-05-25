@@ -3,13 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  Shield, Heart, Star, Bell, Globe, LogOut,
-  ChevronRight, Check, Camera, Phone, Mail, LayoutDashboard
+  Shield, Heart, Star, LogOut,
+  ChevronRight, Check, Phone, Mail, LayoutDashboard
 } from 'lucide-react'
-import { Badge } from '@/components/ui/Badge'
 import { useAuth } from '@/hooks/useAuth'
 import { updateProfile } from '@/app/actions/profile'
-import { getInitials, formatPrice } from '@/lib/utils'
+import { getInitials } from '@/lib/utils'
 import type { Profile } from '@/hooks/useProfile'
 
 interface ProfileClientProps {
@@ -42,13 +41,6 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
         { icon: Heart, label: 'Saved Scooters', href: '/saved', badge: null },
       ]
     },
-    {
-      title: 'Account',
-      items: [
-        { icon: Bell, label: 'Notifications', href: '#', badge: null },
-        { icon: Globe, label: 'Language & Currency', href: '#', badge: 'EN · THB' },
-      ]
-    },
   ]
 
   const handleSave = async () => {
@@ -67,13 +59,8 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
         <div className="max-w-xl mx-auto px-4 pt-20 pb-6">
           <div className="flex items-start gap-5">
             {/* Avatar */}
-            <div className="relative">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
-                {getInitials(profile?.name ?? user.email)}
-              </div>
-              <button className="absolute bottom-0 right-0 w-7 h-7 bg-white border border-[#e8e8e4] rounded-full flex items-center justify-center shadow-sm hover:bg-[#f8f8f6] transition-colors">
-                <Camera className="w-3.5 h-3.5 text-[#5c5c58]" />
-              </button>
+            <div className="w-20 h-20 bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+              {getInitials(profile?.name ?? user.email)}
             </div>
 
             {/* Info */}
@@ -187,20 +174,7 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
               <p className="text-xs text-[#16a34a]/70 mt-0.5">Identity confirmed. Full platform access granted.</p>
             </div>
           </div>
-        ) : (
-          <div className="flex items-center justify-between gap-4 px-5 py-4 bg-[#fffbeb] border border-[#f59e0b]/20 rounded-[20px]">
-            <div className="flex items-center gap-3">
-              <Shield className="w-5 h-5 text-[#f59e0b]" />
-              <div>
-                <p className="font-bold text-[#92400e] text-sm">Get Verified</p>
-                <p className="text-xs text-[#92400e]/70">Upload ID to unlock all features</p>
-              </div>
-            </div>
-            <button className="px-4 py-2 bg-[#f59e0b] text-white text-xs font-bold rounded-full hover:bg-[#d97706] transition-colors flex-shrink-0">
-              Verify
-            </button>
-          </div>
-        )}
+        ) : null}
 
         {/* Menu sections */}
         {MENU_SECTIONS.map(section => (

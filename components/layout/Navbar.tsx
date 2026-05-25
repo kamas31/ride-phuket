@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { MapPin, Menu, X, BookOpen, LayoutDashboard, LogOut, ChevronDown, Heart } from 'lucide-react'
+import { MapPin, Menu, X, LogOut, ChevronDown } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { SITE_NAME } from '@/constants'

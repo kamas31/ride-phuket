@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { MapPin, Share2, Globe } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import { SITE_NAME, SITE_DESCRIPTION } from '@/constants'
 
 const FOOTER_LINKS = {
@@ -18,7 +18,6 @@ const FOOTER_LINKS = {
   ],
   Partners: [
     { href: '/partner', label: 'List Your Scooters' },
-    { href: '/partner', label: 'Partner Program' },
   ],
   Legal: [
     { href: '/terms', label: 'Terms of Service' },
@@ -45,26 +44,6 @@ export default function Footer() {
             <p className="mt-3 text-[#5c5c58] text-xs font-medium leading-relaxed max-w-xs">
               Find scooters. Contact shops directly. No platform fees.
             </p>
-            <div className="flex items-center gap-3 mt-5">
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
-              >
-                <Share2 className="w-4 h-4" />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
-              >
-                <Globe className="w-4 h-4" />
-              </a>
-            </div>
           </div>
 
           {/* Links */}

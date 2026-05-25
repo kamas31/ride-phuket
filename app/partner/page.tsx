@@ -45,7 +45,7 @@ export default async function PartnerPage() {
             <span className="text-[#FF6B35]">Live in minutes.</span>
           </h1>
           <p className="text-white/60 text-[17px] leading-relaxed max-w-lg mx-auto mb-10">
-            Create your shop, add your fleet, start receiving bookings.
+            Create your shop, add your fleet, start getting contacted directly on WhatsApp.
             No waiting, no approval process.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -78,14 +78,14 @@ export default async function PartnerPage() {
         </div>
       </div>
 
-      {/* Commission */}
+      {/* Pricing */}
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-xs font-semibold text-[#9c9c98] uppercase tracking-widest mb-4">Simple pricing</p>
+        <p className="text-xs font-semibold text-[#9c9c98] uppercase tracking-widest mb-4">Pricing</p>
         <div className="bg-white rounded-[24px] border border-[#e8e8e4] p-8 shadow-sm">
-          <div className="text-[52px] font-bold text-[#0f0f0e] leading-none mb-1">10%</div>
-          <div className="text-[#9c9c98] text-sm mb-6">commission per booking only</div>
+          <div className="text-[52px] font-bold text-[#0f0f0e] leading-none mb-1">Free</div>
+          <div className="text-[#9c9c98] text-sm mb-6">No platform fees, ever</div>
           <div className="space-y-2.5 text-sm text-left mb-8">
-            {['Setup: Free', 'Monthly fee: Free', 'Listing: Free', 'Support: Free'].map(item => (
+            {['Setup: Free', 'Monthly fee: Free', 'Listing: Free', 'WhatsApp leads: Free'].map(item => (
               <div key={item} className="flex items-center gap-2 text-[#5c5c58]">
                 <div className="w-4 h-4 rounded-full bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
                   <svg className="w-2.5 h-2.5 text-[#22c55e]" fill="none" viewBox="0 0 12 12">
