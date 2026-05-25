@@ -92,14 +92,14 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
           {/* Single container: rounded corners + overflow-hidden for border-radius only.
               Image defines height naturally — nothing constrains it. */}
           <div className="relative md:rounded-[24px] overflow-hidden bg-[#f3f3ef] group">
-            <div className="flex items-center justify-center p-4 md:p-6">
+            <div className="flex items-center justify-center p-3 md:p-4">
               <Image
                 src={images[active]}
                 alt={`${name} — photo ${active + 1}`}
                 width={1600}
                 height={1200}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 700px"
-                className="w-full h-auto object-contain"
+                className="w-full h-auto object-contain md:max-h-[420px]"
                 priority
               />
             </div>

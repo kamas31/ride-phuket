@@ -158,9 +158,9 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-6 md:py-8">
-        <div className="lg:grid lg:grid-cols-5 lg:gap-10">
+        <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-8">
           {/* ── LEFT COLUMN ── */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="space-y-6">
             {/* Sentinel — triggers the sticky booking bar when scrolled past */}
             <div id="sticky-booking-sentinel" className="-mt-1" aria-hidden />
 
@@ -389,7 +389,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
           </div>
 
           {/* ── RIGHT COLUMN: Booking card ── */}
-          <div className="lg:col-span-2 mt-8 lg:mt-0">
+          <div className="mt-8 lg:mt-0">
             <div className="sticky top-32">
               <div className="bg-white rounded-[24px] border border-[#e8e8e4] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.10),0_1px_4px_-1px_rgba(0,0,0,0.05)] overflow-hidden">
 
