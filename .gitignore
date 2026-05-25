@@ -40,4 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
+# playwright
+/playwright-report/
+/test-results/
+
+# claude code local settings
+.claude/settings.local.json

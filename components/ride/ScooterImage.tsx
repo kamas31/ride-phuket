@@ -54,11 +54,12 @@ export function ScooterImage({
 
       {src ? (
         <>
-          {/* Shimmer sweep — GPU-accelerated, hidden once image is loaded */}
+          {/* Shimmer sweep — GPU-accelerated, fades out as image loads */}
           {!loaded && (
             <div
               className="shimmer-sweep absolute inset-0 pointer-events-none"
               style={{ zIndex: 1 }}
+              aria-hidden="true"
             />
           )}
 
@@ -68,7 +69,9 @@ export function ScooterImage({
             fill
             className={cn(
               objectFit === 'contain' ? 'object-contain' : 'object-cover',
-              hover && 'group-hover:scale-[1.04] transition-transform duration-500',
+              hover && 'group-hover:scale-[1.03] transition-transform duration-700 ease-out',
+              'transition-opacity duration-300',
+              loaded ? 'opacity-100' : 'opacity-0',
             )}
             sizes={sizes}
             priority={priority}

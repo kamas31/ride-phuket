@@ -26,13 +26,18 @@ export default function MobileBottomNav() {
               href={href}
               className="flex-1 flex flex-col items-center gap-1 py-3 transition-colors"
             >
-              <Icon
-                className={cn(
-                  'w-5 h-5 transition-colors',
-                  active ? 'text-[#FF6B35]' : 'text-[#9c9c98]'
-                )}
-                strokeWidth={active ? 2.5 : 1.5}
-              />
+              <div className={cn(
+                'flex items-center justify-center w-10 h-7 rounded-full transition-colors duration-200',
+                active ? 'bg-[#FF6B35]/12' : 'bg-transparent'
+              )}>
+                <Icon
+                  className={cn(
+                    'w-5 h-5 transition-colors',
+                    active ? 'text-[#FF6B35]' : 'text-[#9c9c98]'
+                  )}
+                  strokeWidth={active ? 2.5 : 1.5}
+                />
+              </div>
               <span
                 className={cn(
                   'text-[10px] font-medium transition-colors',

@@ -40,8 +40,8 @@ export function ImageMetricsOverlay() {
   if (!visible) return null
 
   return (
-    <div className="fixed bottom-4 left-4 z-[9999] select-none">
-      <div className="bg-[#0f0f0e]/92 text-white rounded-[14px] border border-white/10 p-3.5 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5)] min-w-[170px]">
+    <div className="fixed top-20 right-4 z-[9999] select-none pointer-events-none">
+      <div className="bg-[#0f0f0e]/92 text-white rounded-[14px] border border-white/10 p-3.5 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5)] min-w-[170px] pointer-events-none">
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/40">
@@ -49,7 +49,7 @@ export function ImageMetricsOverlay() {
           </span>
           <button
             onClick={() => setVisible(false)}
-            className="text-white/30 hover:text-white/80 transition-colors text-sm leading-none"
+            className="text-white/30 hover:text-white/80 transition-colors text-sm leading-none pointer-events-auto"
             aria-label="Close"
           >
             ×
@@ -84,7 +84,7 @@ export function ImageMetricsOverlay() {
 
         <button
           onClick={reset}
-          className="text-[10px] text-white/25 hover:text-white/60 transition-colors"
+          className="text-[10px] text-white/25 hover:text-white/60 transition-colors pointer-events-auto"
         >
           reset session
         </button>

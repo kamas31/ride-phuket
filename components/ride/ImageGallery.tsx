@@ -94,12 +94,13 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
           <div className="relative md:rounded-[24px] overflow-hidden bg-[#f3f3ef] group">
             <div className="flex items-center justify-center p-3 md:p-4">
               <Image
+                key={images[active]}
                 src={images[active]}
                 alt={`${name} — photo ${active + 1}`}
                 width={1600}
                 height={1200}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 700px"
-                className="w-full h-auto object-contain md:max-h-[420px]"
+                className="w-full h-auto object-contain md:max-h-[420px] animate-fade-in"
                 priority
               />
             </div>
@@ -108,14 +109,14 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
               <>
                 <button
                   onClick={prev}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm opacity-60 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-white z-10"
                   aria-label="Previous image"
                 >
                   <ChevronLeft className="w-5 h-5 text-[#0f0f0e]" />
                 </button>
                 <button
                   onClick={next}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm opacity-60 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-white z-10"
                   aria-label="Next image"
                 >
                   <ChevronRight className="w-5 h-5 text-[#0f0f0e]" />

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { SlidersHorizontal, X, Truck, HardHat, Shield, IdCard } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SCOOTER_CATEGORIES, LOCATIONS, SORT_OPTIONS } from '@/constants'
@@ -34,7 +35,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
         <button
           onClick={() => setShowPanel(true)}
           className={cn(
-            'flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors',
+            'flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors active:scale-[0.96]',
             activeFilterCount > 0
               ? 'bg-[#FF6B35] text-white border-[#FF6B35]'
               : 'bg-white text-[#0f0f0e] border-[#e8e8e4] hover:border-[#d0d0cc]'
@@ -55,7 +56,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
             key={cat.value}
             onClick={() => update({ category: cat.value as FilterState['category'] })}
             className={cn(
-              'flex-shrink-0 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
+              'flex-shrink-0 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap active:scale-[0.96]',
               filters.category === cat.value
                 ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
                 : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
@@ -69,7 +70,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
         <button
           onClick={() => update({ deliveryNow: !filters.deliveryNow })}
           className={cn(
-            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
+            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap active:scale-[0.96]',
             filters.deliveryNow
               ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
               : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
@@ -83,7 +84,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
         <button
           onClick={() => update({ noPassport: !filters.noPassport })}
           className={cn(
-            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap',
+            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap active:scale-[0.96]',
             filters.noPassport
               ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
               : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
@@ -107,9 +108,9 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
         </div>
       </div>
 
-      {/* ── Filter modal ── */}
-      {showPanel && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center">
+      {/* ── Filter modal — portalled to document.body to escape sticky z-30 stacking context ── */}
+      {showPanel && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-end md:items-center md:justify-center">
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowPanel(false)} />
 
@@ -219,7 +220,8 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

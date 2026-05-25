@@ -175,22 +175,14 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         </div>
 
         {/* Trust micro-row */}
-        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#f0f0ec]">
-          {scooter.helmetIncluded && (
-            <span className="flex items-center gap-1 text-[11px] text-[#9c9c98]">
-              <Check className="w-3 h-3 text-[#22c55e]" />
-              Helmet
-            </span>
-          )}
-          {scooter.insuranceIncluded && (
-            <span className="flex items-center gap-1 text-[11px] text-[#9c9c98]">
-              <Check className="w-3 h-3 text-[#22c55e]" />
-              Shop insured
-            </span>
-          )}
-          <span className="flex items-center gap-1 text-[11px] text-[#9c9c98] ml-auto">
-            <Check className="w-3 h-3 text-[#22c55e]" />
-            Flexible terms
+        <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-[#f0f0ec]">
+          <Check className="w-3 h-3 text-[#22c55e] flex-shrink-0" />
+          <span className="text-[11px] text-[#9c9c98]">
+            {[
+              scooter.helmetIncluded && 'Helmet',
+              scooter.insuranceIncluded && 'Insured',
+              'Flexible terms',
+            ].filter(Boolean).join(' · ')}
           </span>
         </div>
       </div>
