@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   Shield, Heart, Star, LogOut,
-  ChevronRight, Check, Phone, Mail, LayoutDashboard
+  ChevronRight, Check, Phone, Mail, LayoutDashboard, Trash2
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { updateProfile } from '@/app/actions/profile'
+import { updateProfile, deleteAccount } from '@/app/actions/profile'
 import { getInitials } from '@/lib/utils'
 import type { Profile } from '@/hooks/useProfile'
 
@@ -18,11 +19,15 @@ interface ProfileClientProps {
 
 export default function ProfileClient({ user, profile }: ProfileClientProps) {
   const { signOut } = useAuth()
+  const router = useRouter()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(profile?.name ?? '')
   const [phone, setPhone] = useState(profile?.phone ?? '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm' | 'deleting'>('idle')
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const isShopOwner = profile?.role === 'shop_owner'
   const memberSince = new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
@@ -50,6 +55,20 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
     setSaved(true)
     setEditing(false)
     setTimeout(() => setSaved(false), 3000)
+  }
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') return
+    setDeleteStep('deleting')
+    setDeleteError(null)
+    const { error } = await deleteAccount()
+    if (error) {
+      setDeleteError(error)
+      setDeleteStep('confirm')
+      return
+    }
+    await signOut()
+    router.replace('/')
   }
 
   return (
@@ -211,6 +230,58 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
           <LogOut className="w-4 h-4" />
           Sign Out
         </button>
+
+        {/* Delete account */}
+        <div className="pt-2">
+          {deleteStep === 'idle' && (
+            <button
+              onClick={() => setDeleteStep('confirm')}
+              className="w-full flex items-center justify-center gap-2 py-3 text-sm text-[#9c9c98] hover:text-[#ef4444] transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete Account
+            </button>
+          )}
+
+          {(deleteStep === 'confirm' || deleteStep === 'deleting') && (
+            <div className="bg-white border border-[#fecaca] rounded-[16px] p-5 space-y-3">
+              <p className="text-sm font-semibold text-[#0f0f0e]">Delete your account?</p>
+              <p className="text-xs text-[#5c5c58] leading-relaxed">
+                This permanently deletes your account and all associated data. This action cannot be undone.
+              </p>
+              <div>
+                <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">
+                  Type DELETE to confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  className="w-full px-3 py-2.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[10px] text-sm focus:outline-none focus:border-[#ef4444] transition-colors"
+                />
+              </div>
+              {deleteError && (
+                <p className="text-xs text-[#ef4444]">{deleteError}</p>
+              )}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setDeleteStep('idle'); setDeleteConfirmText(''); setDeleteError(null) }}
+                  className="flex-1 py-2.5 text-sm text-[#5c5c58] border border-[#e8e8e4] rounded-full hover:bg-[#f8f8f6] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleteConfirmText !== 'DELETE' || deleteStep === 'deleting'}
+                  className="flex-1 py-2.5 text-sm font-bold text-white bg-[#ef4444] rounded-full hover:bg-[#dc2626] transition-colors disabled:opacity-40"
+                >
+                  {deleteStep === 'deleting' ? 'Deleting…' : 'Delete Forever'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         <p className="text-center text-xs text-[#9c9c98] pb-4">
           Ride Phuket · <span className="capitalize">{profile?.role?.replace('_', ' ') ?? 'rider'}</span> account

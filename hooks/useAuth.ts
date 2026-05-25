@@ -12,6 +12,7 @@ interface AuthState {
   signInWithGoogle: (role?: UserRole) => Promise<void>
   signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>
   signUpWithEmail: (email: string, password: string, name: string, role?: UserRole) => Promise<{ error: string | null }>
+  resetPassword: (email: string) => Promise<{ error: string | null }>
 }
 
 export function useAuth(): AuthState {
@@ -80,5 +81,14 @@ export function useAuth(): AuthState {
     return { error: error?.message ?? null }
   }, [])
 
-  return { user, loading, signOut, signInWithGoogle, signInWithEmail, signUpWithEmail }
+  const resetPassword = useCallback(async (email: string) => {
+    if (!isSupabaseConfigured()) return { error: null }
+    const supabase = createClient()
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    })
+    return { error: error?.message ?? null }
+  }, [])
+
+  return { user, loading, signOut, signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword }
 }

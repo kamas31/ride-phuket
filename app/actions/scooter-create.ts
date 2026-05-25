@@ -55,9 +55,6 @@ async function withTimeout<T = any>(promise: Promise<T>, ms: number, label: stri
 }
 
 export async function createScooter(payload: CreateScooterPayload): Promise<CreateScooterResult> {
-  const t0 = Date.now()
-  console.log('[createScooter] ▶ START', payload.name, '| shop:', payload.shopId?.slice(0, 8))
-
   try {
     // ── 1. Validate ───────────────────────────────────────────
     if (!payload.name?.trim())
@@ -68,7 +65,6 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
       return { success: false, error: 'Shop ID missing.', errorCode: 'VALIDATION' }
 
     // ── 2. Auth ───────────────────────────────────────────────
-    console.log('[createScooter] Step 2: auth.getUser')
     let userId: string
     try {
       const userClient = await withTimeout(createClient(), 8000, 'createClient')
@@ -76,14 +72,12 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
         userClient.auth.getUser(), 8000, 'auth.getUser'
       )
       if (authErr || !user) {
-        console.warn('[createScooter] Step 2 no user:', authErr?.message)
         return { success: false, error: 'Not authenticated.', errorCode: 'UNAUTHENTICATED' }
       }
       userId = user.id
-      console.log('[createScooter] Step 2 OK:', userId.slice(0, 8), `(${Date.now() - t0}ms)`)
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
-      console.error('[createScooter] Step 2 THREW:', msg)
+      console.error('[createScooter] auth THREW:', msg)
       return { success: false, error: `Auth failed: ${msg}`, errorCode: 'AUTH_FAILED' }
     }
 
@@ -98,7 +92,6 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
     }
 
     // ── 4. Verify shop ownership ──────────────────────────────
-    console.log('[createScooter] Step 4: verify shop ownership')
     try {
       const shopResult = await withTimeout(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,17 +100,14 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
       )
       const shop = shopResult.data
       if (!shop) {
-        console.warn('[createScooter] Step 4: shop not found')
         return { success: false, error: 'Shop not found.', errorCode: 'SHOP_NOT_FOUND' }
       }
       if (shop.owner_id !== userId) {
-        console.warn('[createScooter] Step 4: ownership mismatch', shop.owner_id, '≠', userId.slice(0, 8))
         return { success: false, error: 'You do not own this shop.', errorCode: 'UNAUTHORIZED' }
       }
-      console.log('[createScooter] Step 4 OK', `(${Date.now() - t0}ms)`)
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
-      console.error('[createScooter] Step 4 THREW:', msg)
+      console.error('[createScooter] shop check THREW:', msg)
       return { success: false, error: `Shop check failed: ${msg}`, errorCode: 'SHOP_CHECK_FAILED' }
     }
 
@@ -148,16 +138,7 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
       available:          true,
     }
 
-    console.log('[createScooter] Step 5: insert payload ready', {
-      name: insertPayload.name,
-      price_per_day: insertPayload.price_per_day,
-      category: insertPayload.category,
-      images_count: insertPayload.images.length,
-      features_count: insertPayload.features.length,
-    })
-
     // ── 6. INSERT ─────────────────────────────────────────────
-    console.log('[createScooter] Step 6: DB insert')
     let scooterId: string
     try {
       const insertResult = await withTimeout(
@@ -168,12 +149,7 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
       const { data: scooter, error: insertErr } = insertResult
 
       if (insertErr) {
-        console.error('[createScooter] Step 6 DB error:', {
-          message: insertErr.message,
-          code:    insertErr.code,
-          hint:    insertErr.hint,
-          details: insertErr.details,
-        })
+        console.error('[createScooter] DB insert error:', insertErr.code, insertErr.message)
         if (insertErr.code === '42501') {
           return { success: false, error: 'Permission denied. Run migration 003 in Supabase.', errorCode: 'PERMISSION_DENIED' }
         }
@@ -184,29 +160,24 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
       }
 
       scooterId = scooter.id
-      console.log('[createScooter] Step 6 OK: scooter created', scooterId, `(${Date.now() - t0}ms)`)
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
-      console.error('[createScooter] Step 6 THREW:', msg)
+      console.error('[createScooter] insert THREW:', msg)
       return { success: false, error: `Insert failed: ${msg}`, errorCode: 'INSERT_FAILED' }
     }
 
     // ── 7. Revalidate cache (non-blocking) ────────────────────
-    console.log('[createScooter] Step 7: revalidatePath')
     try {
       revalidatePath('/partner/dashboard')
-    } catch (e) {
-      // Non-fatal — cache revalidation failure doesn't affect the user
-      console.warn('[createScooter] revalidatePath failed (non-fatal):', e instanceof Error ? e.message : String(e))
+    } catch {
+      // Non-fatal
     }
 
-    const totalMs = Date.now() - t0
-    console.log(`[createScooter] ✅ COMPLETE in ${totalMs}ms | scooter: ${scooterId}`)
     return { success: true, scooterId }
 
   } catch (unhandled) {
     const msg = unhandled instanceof Error ? unhandled.message : String(unhandled)
-    console.error('[createScooter] ❌ UNHANDLED EXCEPTION:', msg)
+    console.error('[createScooter] UNHANDLED EXCEPTION:', msg)
     return { success: false, error: `Unexpected error: ${msg.slice(0, 120)}`, errorCode: 'UNHANDLED' }
   }
 }

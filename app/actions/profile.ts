@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { Profile } from '@/hooks/useProfile'
 
 export async function getServerProfile(): Promise<Profile | null> {
@@ -107,6 +108,20 @@ export interface FullShopRow {
   verified: boolean
   active: boolean
   plan_type: string
+}
+
+export async function deleteAccount(): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not authenticated' }
+
+    const admin = createAdminClient()
+    const { error } = await admin.auth.admin.deleteUser(user.id)
+    return { error: error?.message ?? null }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Unknown error' }
+  }
 }
 
 export async function getFullShopForOwner(): Promise<FullShopRow | null> {

@@ -1,7 +1,7 @@
 {
   "name": "Ride Phuket",
   "short_name": "Ride Phuket",
-  "description": "Premium scooter rentals in Phuket. Book in minutes.",
+  "description": "Find and contact scooter shops directly in Phuket. No booking fees.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -28,9 +28,9 @@
       "description": "Browse available scooters"
     },
     {
-      "name": "My Bookings",
-      "url": "/bookings",
-      "description": "View your rentals"
+      "name": "Saved Scooters",
+      "url": "/saved",
+      "description": "View your saved scooters"
     }
   ],
   "categories": ["travel", "lifestyle", "transportation"]

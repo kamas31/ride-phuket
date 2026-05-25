@@ -37,9 +37,6 @@ async function withTimeout<T = any>(promise: Promise<T>, ms: number, label: stri
 }
 
 export async function createShop(payload: CreateShopPayload): Promise<CreateShopResult> {
-  const t0 = Date.now()
-  console.log('[createShop] ▶ START', JSON.stringify({ shopName: payload.shopName, location: payload.location }))
-
   // ── Top-level guard: nothing can throw out of this function ──
   try {
 
@@ -49,7 +46,6 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
     if (!payload.phone?.trim())    return { success: false, error: 'Phone number is required.', errorCode: 'VALIDATION' }
 
     // ── 2. Get current user ──────────────────────────────────
-    console.log('[createShop] Step 2: getUser')
     let userId: string
 
     try {
@@ -61,38 +57,31 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
       )
 
       if (authErr) {
-        console.error('[createShop] auth error:', authErr.message, authErr.status)
+        console.error('[createShop] auth error:', authErr.message)
         return { success: false, error: 'Authentication error — please sign in again.', errorCode: 'AUTH_ERROR' }
       }
       if (!user) {
-        console.warn('[createShop] no user in session')
         return { success: false, error: 'You must be signed in to create a shop.', errorCode: 'UNAUTHENTICATED' }
       }
 
       userId = user.id
-      console.log('[createShop] Step 2 OK: user', userId.slice(0, 8), `(${Date.now() - t0}ms)`)
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
-      console.error('[createShop] Step 2 THREW:', msg)
-      // If auth fails due to timeout or key format, we can still check via admin
-      // as a fallback — but for security we must reject
+      console.error('[createShop] auth THREW:', msg)
       return { success: false, error: `Auth check failed: ${msg}`, errorCode: 'AUTH_TIMEOUT' }
     }
 
     // ── 3. Init admin client ─────────────────────────────────
-    console.log('[createShop] Step 3: createAdminClient')
     let admin: ReturnType<typeof createAdminClient>
     try {
       admin = createAdminClient()
-      console.log('[createShop] Step 3 OK', `(${Date.now() - t0}ms)`)
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
-      console.error('[createShop] Step 3 THREW:', msg)
+      console.error('[createShop] admin init THREW:', msg)
       return { success: false, error: 'Server configuration error.', errorCode: 'ADMIN_INIT_FAILED' }
     }
 
     // ── 4. Check no existing shop ────────────────────────────
-    console.log('[createShop] Step 4: check existing shop')
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const checkResult = await withTimeout(
@@ -100,20 +89,11 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
         8000,
         'check-existing-shop'
       )
-      const existing = checkResult.data
-      if (existing) {
-        console.log('[createShop] Step 4: shop already exists:', existing.id)
+      if (checkResult.data) {
         return { success: false, error: 'You already have a shop registered.', errorCode: 'ALREADY_EXISTS' }
       }
-      console.log('[createShop] Step 4 OK: no existing shop', `(${Date.now() - t0}ms)`)
-    } catch (e) {
-      // PGRST116 = no rows — that's fine, means no existing shop
-      const msg = e instanceof Error ? e.message : String(e)
-      if (!msg.includes('PGRST116') && !msg.includes('Timeout')) {
-        console.warn('[createShop] Step 4 non-fatal error:', msg)
-      } else {
-        console.log('[createShop] Step 4 OK: no existing shop (PGRST116)', `(${Date.now() - t0}ms)`)
-      }
+    } catch {
+      // PGRST116 = no rows — fine, means no existing shop
     }
 
     // ── 5. Build slug ────────────────────────────────────────
@@ -124,7 +104,6 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
       .slice(0, 50) + '-' + Math.random().toString(36).slice(2, 6)
 
     // ── 6. Insert shop ───────────────────────────────────────
-    console.log('[createShop] Step 6: insert shop', { slug, location: payload.location })
     let shopId: string
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -149,12 +128,7 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
       )
 
       if (insertErr) {
-        console.error('[createShop] Step 6 DB error:', {
-          message: insertErr.message,
-          code:    insertErr.code,
-          hint:    insertErr.hint,
-          details: insertErr.details,
-        })
+        console.error('[createShop] DB insert error:', insertErr.code, insertErr.message)
         if (insertErr.code === '23505') {
           return { success: false, error: 'A shop with this name already exists. Try a slightly different name.', errorCode: 'DUPLICATE' }
         }
@@ -165,15 +139,13 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
       }
 
       shopId = shop.id
-      console.log('[createShop] Step 6 OK: shop created', shopId, `(${Date.now() - t0}ms)`)
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
-      console.error('[createShop] Step 6 THREW:', msg)
+      console.error('[createShop] insert THREW:', msg)
       return { success: false, error: `Shop creation failed: ${msg}`, errorCode: 'INSERT_FAILED' }
     }
 
     // ── 7. Link shop to profile ──────────────────────────────
-    console.log('[createShop] Step 7: update profile')
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: profileErr } = await withTimeout(
@@ -185,13 +157,10 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
         'update-profile'
       )
       if (profileErr) {
-        // Non-fatal but log it — migrations might not be applied yet
-        console.warn('[createShop] Step 7 profile update failed (non-fatal):', profileErr.message, profileErr.code)
-      } else {
-        console.log('[createShop] Step 7 OK: profile updated', `(${Date.now() - t0}ms)`)
+        console.error('[createShop] profile update failed (non-fatal):', profileErr.message)
       }
     } catch (e) {
-      console.warn('[createShop] Step 7 THREW (non-fatal):', e instanceof Error ? e.message : String(e))
+      console.error('[createShop] profile update THREW (non-fatal):', e instanceof Error ? e.message : String(e))
     }
 
     // ── 8. Revalidate ────────────────────────────────────────
@@ -202,14 +171,11 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
       // Non-fatal
     }
 
-    const totalMs = Date.now() - t0
-    console.log(`[createShop] ✅ COMPLETE in ${totalMs}ms | shop: ${shopId}`)
     return { success: true, shopId }
 
   } catch (unhandled) {
-    // Absolute last resort — should never reach here
     const msg = unhandled instanceof Error ? unhandled.message : String(unhandled)
-    console.error('[createShop] ❌ UNHANDLED EXCEPTION:', msg, unhandled)
+    console.error('[createShop] UNHANDLED EXCEPTION:', msg)
     return {
       success: false,
       error: `Unexpected error — please try again. (${msg.slice(0, 100)})`,
