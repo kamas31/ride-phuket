@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>Ride Phuket — Mark (charcoal)</title>
+
+  <g transform="translate(272 232)">
+    <path d="M 0 0 H 280&#xA;         C 360 0 416 70 416 158&#xA;         C 416 230 376 286 316 308&#xA;         C 372 388 428 480 480 560&#xA;         H 366&#xA;         C 314 480 264 392 210 320&#xA;         H 92 V 240 H 266&#xA;         C 300 240 322 212 322 158&#xA;         C 322 108 300 92 266 92&#xA;         H 92 V 0 Z" fill="#1A1611"></path>
+  </g>
+
+  <circle cx="784" cy="816" r="28" fill="#CD5E33"></circle>
+</svg>
