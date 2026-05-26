@@ -9,6 +9,7 @@ import { ExploreFilters } from '@/components/ride/ExploreFilters'
 import { ImageMetricsOverlay } from '@/components/debug/ImageMetricsOverlay'
 import { cn } from '@/lib/utils'
 import { sortByRecommended } from '@/lib/ridescore'
+import { trackEvent } from '@/lib/analytics'
 import type { Scooter, FilterState } from '@/types'
 
 const ScooterMap = dynamic(() => import('@/components/map/ScooterMap'), {
@@ -137,6 +138,14 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
 
   // Keep ref in sync after render so handleSelectFromMap always sees the latest filtered list
   useEffect(() => { filteredRef.current = filtered }, [filtered])
+
+  // Track empty search results — fires when a real search/filter yields nothing
+  useEffect(() => {
+    if (filtered.length === 0 && (search || filters.category !== 'all' || filters.location !== 'all')) {
+      trackEvent({ eventType: 'empty_search', metadata: { search, category: filters.category, location: filters.location } })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtered.length === 0, search, filters.category, filters.location])
 
   // Shared card wrapper — rings compare by shopId so the whole shop highlights together
   const CardWrapper = useCallback(({ scooter, className }: { scooter: Scooter; className?: string }) => (

@@ -7,11 +7,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: SITE_URL,                  lastModified: now, changeFrequency: 'daily',   priority: 1    },
-    { url: `${SITE_URL}/explore`,     lastModified: now, changeFrequency: 'hourly',  priority: 0.9  },
-    { url: `${SITE_URL}/partner`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7  },
-    { url: `${SITE_URL}/bookings`,    lastModified: now, changeFrequency: 'always',  priority: 0.5  },
-    { url: `${SITE_URL}/profile`,     lastModified: now, changeFrequency: 'monthly', priority: 0.3  },
+    { url: SITE_URL,               lastModified: now, changeFrequency: 'daily',   priority: 1   },
+    { url: `${SITE_URL}/explore`, lastModified: now, changeFrequency: 'hourly',  priority: 0.9 },
+    { url: `${SITE_URL}/partner`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/contact`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
   ]
 
   const areaRoutes: MetadataRoute.Sitemap = AREAS.map(a => ({

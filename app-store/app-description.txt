@@ -1,0 +1,54 @@
+APP NAME
+Ride Phuket
+
+SUBTITLE (30 chars max)
+Find & Contact Scooter Shops
+
+CATEGORY
+Travel  (primary)
+Lifestyle  (secondary)
+
+DESCRIPTION (4000 chars max)
+---
+Find the right scooter rental in Phuket and contact the shop directly — no booking fees, no platform charges, no middlemen.
+
+Ride Phuket is a scooter rental marketplace for Phuket, Thailand. Browse verified local rental shops, compare scooters by price, location, and features, then reach out directly via WhatsApp or phone.
+
+HOW IT WORKS
+
+1. Browse scooters — filter by area, price, and features like delivery, helmet included, or deposit type
+2. Tap any scooter to see full details — photos, daily/weekly/monthly rates, deposit rules, shop info
+3. Contact the shop directly — one tap to open WhatsApp or call
+
+NO BOOKING SYSTEM
+There is no online payment, no in-app reservation, and no platform fees for riders. All rental terms are agreed directly between you and the shop.
+
+FOR RIDERS
+- Browse scooters across all Phuket areas: Patong, Kata, Karon, Rawai, Chalong, Nai Harn, Surin, Bang Tao, Phuket Town, and more
+- Filter by price, delivery availability, helmet inclusion, deposit type
+- See real photos, engine specs, and deposit requirements upfront
+- Save favourites to your list
+- Ask pre-contact questions and see public answers from shops
+
+FOR RENTAL SHOPS (Partner Dashboard)
+- List your fleet with photos, pricing, and availability
+- Manage scooter availability in real time
+- View inquiry activity and WhatsApp engagement
+- Founding Partner program with advanced analytics
+
+PRIVACY
+Ride Phuket does not share personal data with third parties. Contact with shops happens directly via WhatsApp — Ride Phuket does not intercept or record these conversations.
+
+---
+
+KEYWORDS (100 chars max)
+scooter rental,phuket,motorbike hire,honda,yamaha,thailand,patong,kata,rawai
+
+SUPPORT URL
+https://ridephuket.com/contact
+
+PRIVACY POLICY URL
+https://ridephuket.com/privacy
+
+MARKETING URL (optional)
+https://ridephuket.com

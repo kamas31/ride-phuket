@@ -19,6 +19,7 @@ import {
 import { computeConversionRate, getConversionInsight } from '@/lib/lead-analytics'
 import { rankScootersByHotScore, getHotStatusLabel } from '@/lib/hot-scooters'
 import { UpgradeTeaser } from '@/components/partner/UpgradeTeaser'
+import { TrackView } from '@/components/analytics/TrackView'
 import type { Profile } from '@/hooks/useProfile'
 import type { ShopAnalytics } from '@/app/actions/shop-analytics'
 import type { ActivityFeedItem } from '@/app/actions/activity-feed'
@@ -134,6 +135,7 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
 
   return (
     <div className="min-h-screen bg-[#f8f8f6]">
+      <TrackView eventType="partner_dashboard" shopId={shop?.id} />
       {/* Header */}
       <div className="bg-white border-b border-[#e8e8e4]">
         <div className="max-w-5xl mx-auto px-4 pt-20 pb-6">

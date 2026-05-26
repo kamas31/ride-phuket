@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { MapPin, Mail, Lock, Eye, EyeOff, ArrowLeft, User, Check } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { trackEvent } from '@/lib/analytics'
 import { SITE_NAME } from '@/constants'
 import type { UserRole } from '@/lib/supabase/types'
 
@@ -58,6 +59,7 @@ function SignupForm() {
       setError(err)
       setSubmitting(false)
     } else {
+      trackEvent({ eventType: 'auth_signup', metadata: { role } })
       setSuccess(true)
     }
   }

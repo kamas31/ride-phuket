@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MapPin, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { trackEvent } from '@/lib/analytics'
 import { SITE_NAME } from '@/constants'
 
 function LoginForm() {
@@ -38,7 +39,7 @@ function LoginForm() {
     setSubmitting(true)
     const { error: err } = await signInWithEmail(email, password)
     if (err) { setError(err); setSubmitting(false) }
-    else { router.replace(redirect) }
+    else { trackEvent({ eventType: 'auth_login' }); router.replace(redirect) }
   }
 
   const handleResetPassword = async (e: React.FormEvent) => {

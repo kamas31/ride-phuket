@@ -14,6 +14,10 @@ export type EventType =
   | 'filter_use'
   | 'ride_saved'
   | 'ride_unsaved'
+  | 'empty_search'        // search/filter returned 0 results
+  | 'auth_signup'         // user completed registration
+  | 'auth_login'          // user completed login
+  | 'partner_dashboard'   // shop owner viewed their dashboard
 
 const SESSION_KEY = 'rp_sid'
 

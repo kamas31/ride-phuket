@@ -1,0 +1,51 @@
+SCREENSHOT REQUIREMENTS — App Store Connect
+==========================================
+
+Required sizes for iPhone:
+- 6.9" (1320×2868 or 1290×2796): iPhone 16 Pro Max / 15 Pro Max
+- 6.5" (1284×2778 or 1242×2688): iPhone 14 Plus / 13 Pro Max (if not auto-generated)
+
+Required sizes for iPad (if submitting universal):
+- 13" iPad Pro (2064×2752): iPad Pro M4
+- 12.9" iPad Pro (2048×2732): iPad Pro
+
+SCREEN PRIORITY ORDER
+
+1. EXPLORE — Grid of scooters
+   Route: /explore
+   What to show: 2-column scooter card grid, sticky search bar, filter pill bar visible
+   Device state: filter "Patong" selected, 6+ cards visible
+
+2. SCOOTER DETAIL — Hero image + price
+   Route: /scooter/[id]
+   What to show: large photo carousel, scooter name + price, "Message on WhatsApp" CTA prominent
+
+3. SCOOTER DETAIL — Specs + deposit
+   Route: /scooter/[id] (scrolled)
+   What to show: engine specs, deposit section, availability badge
+
+4. SAVED SCOOTERS
+   Route: /saved
+   What to show: list of saved scooters with names + prices
+
+5. FILTER SHEET
+   Route: /explore (filter sheet open)
+   What to show: area selector, price slider, feature toggles (delivery, helmet, deposit)
+
+6. PARTNER DASHBOARD
+   Route: /partner/dashboard
+   What to show: fleet list, analytics preview — only include if targeting shop owners
+
+CAPTURE INSTRUCTIONS
+- Use real data (no mock/placeholder scooters visible)
+- Use light mode
+- Hide iOS status bar or use clean status bar (time: 9:41, full battery, full signal)
+- No personal account info visible in screenshots
+- Crop to exact required dimensions before upload
+
+TEXT OVERLAY SUGGESTIONS (optional, add in post-processing)
+1. "Find scooters in Phuket"
+2. "Browse & compare — no fees"
+3. "Contact shops directly"
+4. "Save your favourites"
+5. "Filter by area, price & features"

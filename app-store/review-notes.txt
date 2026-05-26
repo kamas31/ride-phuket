@@ -1,0 +1,71 @@
+APP STORE REVIEW NOTES — Ride Phuket
+====================================
+
+WHAT THIS APP IS
+Ride Phuket is a scooter rental MARKETPLACE/DIRECTORY for Phuket, Thailand.
+It is NOT a booking platform. It does NOT process payments.
+It does NOT facilitate in-app reservations.
+
+The app helps riders find local rental shops and contact them directly via WhatsApp or phone.
+All rental agreements are made directly between the rider and the shop.
+
+REVIEWER ACCOUNT (Rider)
+Email: [INSERT REVIEW ACCOUNT EMAIL]
+Password: [INSERT REVIEW ACCOUNT PASSWORD]
+
+REVIEWER ACCOUNT (Shop Owner — to test partner dashboard)
+Email: [INSERT SHOP OWNER EMAIL]
+Password: [INSERT SHOP OWNER PASSWORD]
+Note: This account has an active shop listing so all partner features are visible.
+
+KEY FLOWS TO TEST
+
+1. BROWSE WITHOUT ACCOUNT
+   - Open app → tap Explore
+   - Browse scooters, filter by area/price
+   - Tap any scooter → view details, photos, deposit info
+   - Tap WhatsApp button → opens WhatsApp (external app)
+   - No account required for browsing
+
+2. SAVE A SCOOTER (requires account)
+   - Tap the heart/save icon on any scooter
+   - App prompts sign-in if not authenticated
+   - After sign-in: saved scooters appear in Saved tab
+
+3. CONTACT A SHOP
+   - Tap "Message on WhatsApp" on any scooter detail page
+   - Opens WhatsApp with pre-filled message to the shop
+   - This is a direct external link — Ride Phuket does not intermediate
+
+4. PARTNER DASHBOARD (shop owner account)
+   - Sign in with shop owner account
+   - Tap Partner in navigation
+   - Dashboard shows fleet, analytics, and inquiry activity
+   - Toggle scooter availability in real time
+
+NOTES FOR REVIEWER
+- The "Contact us to unlock" link in the analytics section opens an email to hello@ridephuket.com
+  This is for partner plan upgrades — there is no in-app purchase flow
+- WhatsApp links use standard wa.me deep links — requires WhatsApp installed on device
+- If WhatsApp is not installed, the link opens in Safari (wa.me web fallback)
+- Location data is not collected — the app shows area names (Patong, Kata, etc.) from shop listings
+- The map feature uses Mapbox — no user location is requested or stored
+
+IN-APP PURCHASES
+None. This app has no in-app purchases, subscriptions, or payment flows.
+
+ACCOUNT DELETION
+Available at: Profile → Delete Account
+This permanently deletes the user's account and saved data from Supabase.
+
+SIGN-IN OPTIONS
+- Email + Password
+- Google OAuth (via Supabase)
+
+SCREENSHOTS ORDER (suggested)
+1. Explore page — scooter grid
+2. Scooter detail — photos + price + specs
+3. Contact flow — WhatsApp CTA
+4. Saved scooters list
+5. Partner dashboard (shop owner view)
+6. Filter sheet
