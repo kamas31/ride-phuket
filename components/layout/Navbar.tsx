@@ -233,35 +233,51 @@ export default function Navbar() {
       {menuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setMenuOpen(false)} />
+
           <div className="absolute top-0 right-0 bottom-0 w-72 bg-white shadow-2xl flex flex-col">
-            <div className="h-16 flex items-center justify-between px-5 border-b border-[#e8e8e4]">
+
+            {/* ── Notch / Dynamic Island spacer ───────────────────────────
+                Pushes drawer header below the top safe area.
+                Height = 0 on non-notched devices (no visual change). */}
+            <div aria-hidden="true" className="shrink-0 bg-white" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+
+            {/* ── Drawer header ── */}
+            <div className="h-16 flex items-center justify-between px-5 border-b border-[#e8e8e4] shrink-0">
               <div>
-                <span className="font-bold text-[17px]">{SITE_NAME}</span>
+                <span className="font-bold text-[17px] text-[#0f0f0e]">{SITE_NAME}</span>
                 {profile && (
-                  <p className="text-[10px] text-[#9c9c98] capitalize">{profile.role.replace('_', ' ')}</p>
+                  <p className="text-[10px] text-[#9c9c98] capitalize mt-0.5">{profile.role.replace('_', ' ')}</p>
                 )}
               </div>
-              <button onClick={() => setMenuOpen(false)} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#f0f0ec]">
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-[#5c5c58] hover:bg-[#f0f0ec] transition-colors"
+                aria-label="Close menu"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
+            {/* ── Authenticated user identity card ── */}
             {user && (
-              <div className="px-5 py-4 bg-[#f8f8f6] border-b border-[#e8e8e4]">
+              <div className="px-5 py-4 bg-[#f8f8f6] border-b border-[#e8e8e4] shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#FF6B35] rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-11 h-11 bg-[#FF6B35] rounded-full flex items-center justify-center text-white font-bold text-base flex-shrink-0">
                     {(profile?.name ?? user.email ?? 'U')[0].toUpperCase()}
                   </div>
-                  <div>
-                    <p className="font-semibold text-sm text-[#0f0f0e]">{profile?.name ?? user.email?.split('@')[0]}</p>
-                    <p className="text-[11px] text-[#9c9c98]">{user.email}</p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm text-[#0f0f0e] truncate">
+                      {profile?.name ?? user.email?.split('@')[0]}
+                    </p>
+                    <p className="text-[11px] text-[#9c9c98] truncate">{user.email}</p>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* ── Navigation links — scrollable if content overflows ── */}
             <nav
-              className="flex-1 overflow-y-auto overscroll-contain p-5 flex flex-col gap-1"
+              className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-0.5"
               style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
             >
               {NAV_LINKS.map(link => (
@@ -270,8 +286,10 @@ export default function Navbar() {
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
                   className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-[12px] text-sm font-medium transition-colors',
-                    pathname === link.href ? 'text-[#FF6B35] bg-[#fff4f0]' : 'text-[#5c5c58] hover:text-[#0f0f0e] hover:bg-[#f8f8f6]'
+                    'flex items-center gap-3 px-4 py-4 rounded-[14px] text-sm font-medium transition-colors',
+                    pathname === link.href
+                      ? 'text-[#FF6B35] bg-[#fff4f0]'
+                      : 'text-[#0f0f0e] hover:bg-[#f8f8f6] active:bg-[#f0f0ec]'
                   )}
                 >
                   {link.label}
@@ -279,13 +297,20 @@ export default function Navbar() {
               ))}
             </nav>
 
-            <div className="p-5 border-t border-[#e8e8e4] space-y-2">
+            {/* ── Auth footer — always visible, safe-area-aware ──────────
+                pb calc ensures content clears the home indicator on iPhone X+.
+                Sign Out uses red text (standard destructive pattern: Airbnb, Apple).
+                Guest state shows Sign In + primary CTA. */}
+            <div
+              className="px-4 pt-3 border-t border-[#e8e8e4] shrink-0 space-y-2"
+              style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
+            >
               {user ? (
                 <button
                   onClick={() => { setMenuOpen(false); signOut() }}
-                  className="w-full flex items-center justify-center gap-2 py-3 border border-[#e8e8e4] rounded-full text-sm font-medium text-[#9c9c98] hover:text-[#ef4444] hover:border-[#ef4444] transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-4 rounded-[14px] text-sm font-semibold text-[#ef4444] hover:bg-[#fef2f2] active:bg-[#fee2e2] transition-colors"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-[18px] h-[18px]" />
                   Sign Out
                 </button>
               ) : (
@@ -293,20 +318,21 @@ export default function Navbar() {
                   <Link
                     href="/auth/login"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-center w-full py-3 border border-[#e8e8e4] rounded-full text-sm font-semibold text-[#0f0f0e] hover:bg-[#f8f8f6]"
+                    className="flex items-center justify-center w-full py-4 border border-[#e8e8e4] rounded-[14px] text-sm font-semibold text-[#0f0f0e] hover:bg-[#f8f8f6] active:bg-[#f0f0ec] transition-colors"
                   >
                     Sign In
                   </Link>
                   <Link
                     href={CTA.href}
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-center w-full py-3 bg-[#FF6B35] text-white text-sm font-semibold rounded-full hover:bg-[#e85d29] transition-colors"
+                    className="flex items-center justify-center w-full py-4 bg-[#FF6B35] text-white text-sm font-semibold rounded-[14px] hover:bg-[#e85d29] active:bg-[#d4521f] transition-colors"
                   >
                     {CTA.label}
                   </Link>
                 </>
               )}
             </div>
+
           </div>
         </div>
       )}
