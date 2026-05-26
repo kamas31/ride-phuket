@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { isSupabaseConfigured, createClient } from '@/lib/supabase/client'
 
 const STORAGE_KEY = 'rp_saved_v1'
@@ -35,15 +35,40 @@ export function useSaved() {
     setHydrated(true)
   }, [])
 
-  // Clear saved state on SIGNED_OUT so User B never sees User A's saves.
-  // On SIGNED_IN, initFromIds (called by SavedRidesContent) re-hydrates
-  // from the server for the newly signed-in user.
+  // Track the active user ID so we can detect identity changes.
+  // Using a ref avoids re-subscribing every time the ID changes.
+  const activeUserIdRef = useRef<string | null>(null)
+
+  // Clear saved state when the user identity changes:
+  // - Explicit sign-out (SIGNED_OUT)
+  // - Direct account switch: sign-in as a different user without prior sign-out
+  //   (SIGNED_IN with a different user ID)
+  // On SIGNED_IN after a clear, initFromIds (called by SavedRidesContent)
+  // re-hydrates from the server for the correct user.
   useEffect(() => {
     if (!isSupabaseConfigured()) return
 
     const supabase = createClient()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const incomingId = session?.user?.id ?? null
+
+      if (event === 'INITIAL_SESSION') {
+        // Capture initial identity — never clear on first load
+        activeUserIdRef.current = incomingId
+        return
+      }
+
       if (event === 'SIGNED_OUT') {
+        activeUserIdRef.current = null
+        clearStorage()
+        setSaved(new Set())
+        setHydrated(true)
+        return
+      }
+
+      if (event === 'SIGNED_IN' && incomingId !== activeUserIdRef.current) {
+        // Different user signed in without an explicit sign-out first
+        activeUserIdRef.current = incomingId
         clearStorage()
         setSaved(new Set())
         setHydrated(true)

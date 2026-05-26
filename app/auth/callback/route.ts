@@ -42,13 +42,9 @@ export async function GET(request: NextRequest) {
   let effectiveRole: UserRole
 
   if (existingProfile && !profileErr) {
-    // Existing user → use their stored role, ignore URL param
     effectiveRole = existingProfile.role as UserRole
-    console.log('[callback] existing user, role from profile:', effectiveRole)
   } else {
-    // New user → use URL param (signup flow)
     effectiveRole = roleParam
-    console.log('[callback] new user, role from param:', effectiveRole)
 
     // Create the profile row (the DB trigger may have already done this,
     // but this upsert is safe and fills in the correct role)
@@ -72,7 +68,6 @@ export async function GET(request: NextRequest) {
   // We do this even for existing users so stale JWTs are healed on next login.
   const jwtRole = user.user_metadata?.role as UserRole | undefined
   if (jwtRole !== effectiveRole) {
-    console.log('[callback] syncing metadata:', jwtRole, '→', effectiveRole)
     await supabase.auth.updateUser({ data: { role: effectiveRole } })
   }
 
