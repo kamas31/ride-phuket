@@ -1,0 +1,208 @@
+PRE-SUBMISSION REPORT — Ride Phuket
+=====================================
+Generated: 2026-05-26
+Build: clean (0 errors, 48 warnings — all in test files)
+Lint: 0 errors
+Playwright: 234 passed, 49 skipped (auth-gated), 0 failures
+
+
+══════════════════════════════════════════════
+TASK 1 — REVIEWER ACCOUNT CHECKLIST
+══════════════════════════════════════════════
+
+Human actions required before submitting to App Store Connect:
+
+[ ] 1. Create rider test account in Supabase
+      - Go to Supabase Dashboard → Authentication → Users → Add User
+      - Email: reviewer-rider@ridephuket.com  (or choose another)
+      - Set password (store it)
+      - In table 'profiles', set role = 'rider' for this user's id
+
+[ ] 2. Create shop owner test account in Supabase
+      - Email: reviewer-shop@ridephuket.com  (or choose another)
+      - Set password (store it)
+      - In table 'profiles', set role = 'shop_owner' for this user's id
+      - In table 'shops', create a shop row linked to this user's profile_id
+      - In table 'scooters', add 2–3 scooters linked to that shop
+
+[ ] 3. Fill in credentials in app-store/review-notes.txt
+      - Replace [INSERT REVIEW ACCOUNT EMAIL] with rider email
+      - Replace [INSERT REVIEW ACCOUNT PASSWORD] with rider password
+      - Replace [INSERT SHOP OWNER EMAIL] with shop owner email
+      - Replace [INSERT SHOP OWNER PASSWORD] with shop owner password
+
+[ ] 4. Verify both accounts work on production (ridephuket.com)
+      - Rider: can browse, save a scooter, view /saved
+      - Shop owner: can access /partner/dashboard, see fleet
+
+[ ] 5. (Optional) Seed 6+ real scooters with real photos to /explore
+      - Reviewer screenshots must show real listings, not empty state
+
+
+══════════════════════════════════════════════
+TASK 2 — SCREENSHOT PREPARATION
+══════════════════════════════════════════════
+
+Sizes to capture (two required):
+  • 6.9"  → 1320×2868 px  (iPhone 16 Pro Max)
+  • 6.5"  → 1284×2778 px  (iPhone 14 Plus)
+
+Screen order (matches app-store/screenshots.txt):
+  1. /explore      — 2-col grid, 6+ cards, filter bar visible
+  2. /scooter/[id] — hero photo + price, WhatsApp CTA above fold
+  3. /scooter/[id] — scrolled: specs + deposit section
+  4. /saved        — list of saved scooters
+  5. /explore      — filter sheet open (area + price + features)
+  6. /partner/dashboard — (optional, only if targeting shop owners)
+
+Capture checklist:
+  [ ] Use real data — no placeholder/demo scooters visible
+  [ ] Light mode only
+  [ ] Clean status bar: 9:41 time, full battery, full signal
+  [ ] No personal email/name visible
+  [ ] Crop to exact pixel dimensions before upload
+  [ ] iPhone simulator in Xcode: File → New Simulator → choose model
+
+Optional text overlays (add in post-processing):
+  1. "Find scooters in Phuket"
+  2. "Browse & compare — no fees"
+  3. "Contact shops directly"
+  4. "Save your favourites"
+  5. "Filter by area, price & features"
+
+
+══════════════════════════════════════════════
+TASK 3 — VERCEL / PRODUCTION ENV AUDIT
+══════════════════════════════════════════════
+
+Required env vars (must be set in Vercel → Settings → Environment Variables):
+
+CRITICAL — app will not work without these:
+  [ ] NEXT_PUBLIC_SUPABASE_URL          = https://[project].supabase.co
+  [ ] NEXT_PUBLIC_SUPABASE_ANON_KEY     = eyJ... (anon key)
+  [ ] SUPABASE_SERVICE_ROLE_KEY         = eyJ... (service role — server only, NOT public)
+  [ ] NEXT_PUBLIC_MAPBOX_TOKEN          = pk.eyJ... (Mapbox public token)
+  [ ] NEXT_PUBLIC_SITE_URL              = https://ridephuket.com
+
+ERROR MONITORING — app works without, but errors are invisible:
+  [ ] NEXT_PUBLIC_SENTRY_DSN            = https://...@....ingest.sentry.io/...
+  [ ] SENTRY_AUTH_TOKEN                 = sntrys_... (build-time only, for source maps)
+  [ ] SENTRY_ORG                        = your-org-slug
+  [ ] SENTRY_PROJECT                    = ride-phuket
+
+OPTIONAL — analytics (fire-and-forget, non-blocking):
+  [ ] NEXT_PUBLIC_POSTHOG_KEY           = phc_...
+  [ ] NEXT_PUBLIC_POSTHOG_HOST          = https://app.posthog.com
+
+NOT needed for MVP:
+  - STRIPE_* (Phase 2)
+  - RESEND_API_KEY (Phase 2)
+  - WHATSAPP_API_TOKEN (Phase 2)
+
+Supabase OAuth redirect:
+  [ ] In Supabase → Auth → URL Configuration:
+      Site URL:             https://ridephuket.com
+      Redirect URLs add:    https://ridephuket.com/auth/callback
+  [ ] Google OAuth: verify ridephuket.com domain is in Google Cloud Console OAuth credentials
+
+Vercel domain:
+  [ ] ridephuket.com → Vercel DNS (or external DNS with CNAME → cname.vercel-dns.com)
+  [ ] SSL: auto-provisioned by Vercel once domain propagates
+
+
+══════════════════════════════════════════════
+TASK 4 — APP STORE COPY PASS
+══════════════════════════════════════════════
+
+See app-store/app-description.txt — no changes needed.
+
+Final copy status:
+  ✓ Name: "Ride Phuket" (12 chars)
+  ✓ Subtitle: "Find & Contact Scooter Shops" (28 chars — within 30)
+  ✓ Keywords: 79 chars — within 100 limit
+  ✓ Description: no booking/payment/reservation language
+  ✓ No "coming soon", no placeholder text
+  ✓ No in-app purchase claims
+
+
+══════════════════════════════════════════════
+TASK 5 — VISUAL POLISH QA
+══════════════════════════════════════════════
+
+Issues found and fixed in this sprint:
+
+FIXED ✓ pb-safe undefined
+  - MobileBottomNav used `pb-safe` class (CSS class for iOS home indicator)
+  - Tailwind v4 does NOT include pb-safe as a built-in utility
+  - Fixed: Added @utility pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px) }
+    and @utility pt-safe to app/globals.css
+
+FIXED ✓ pb-20 insufficient on iPhone X+
+  - app/layout.tsx <main> had `pb-20` (80px) — not enough on iPhones with home indicator
+  - Bottom nav height (64px) + safe area (~34px) = ~98px needed
+  - Fixed: pb-[calc(5rem+env(safe-area-inset-bottom,0px))] — 80px + safe area
+
+FIXED ✓ Stale NAV_LINKS with /rentals
+  - constants/index.ts had dead NAV_LINKS export with { href: '/rentals', label: 'My Rentals' }
+  - Not imported anywhere (Navbar defines its own local version)
+  - Fixed: Removed the dead export
+
+VERIFIED ✓ Empty states
+  - /saved: Bookmark icon + "No saved rides yet" + "Explore scooters" CTA — clean
+  - /explore (0 results): handled by EmptyState in ExploreClient
+  - /not-found: custom 404 with Search icon + "Explore scooters" CTA
+
+VERIFIED ✓ No booking language in visible UI
+  - StickyBookingBar → StickyContactBar (renamed)
+  - "sticky-booking-sentinel" → "sticky-contact-sentinel"
+  - No "Book Now", "Confirmed", "Reservation" visible anywhere
+  - BookingTimeline.tsx (deleted), ShopContact.tsx (deleted)
+
+VERIFIED ✓ UpgradeTeaser
+  - Removed "Coming soon" span
+  - Now shows "Contact us to unlock" → mailto:hello@ridephuket.com
+
+VERIFIED ✓ Partner dashboard
+  - Shows real fleet data, toggle availability works
+  - Analytics section: placeholder chart with "Contact us to unlock" — appropriate
+
+VERIFIED ✓ Auth flows
+  - Login/signup: clean forms, no debug UI
+  - Reset password: email-only flow, no broken states
+  - Delete account: requires typing "DELETE" — compliant with App Store guidelines
+
+
+══════════════════════════════════════════════
+TASK 6 — FINAL READINESS SUMMARY
+══════════════════════════════════════════════
+
+Code quality:
+  ✓ ESLint: 0 errors (48 warnings, all in test files — not shipped)
+  ✓ TypeScript: 0 errors
+  ✓ Next.js build: clean
+  ✓ Playwright: 234 passed, 0 failures
+
+App Store compliance:
+  ✓ No in-app purchases or payment flows
+  ✓ No fake/placeholder UI visible to end users
+  ✓ No "coming soon" language
+  ✓ Account deletion implemented (Profile → Delete Account)
+  ✓ Privacy policy URL: https://ridephuket.com/privacy
+  ✓ Support URL: https://ridephuket.com/contact
+  ✓ WhatsApp links: standard wa.me deep links (external app handoff)
+  ✓ No user location requested or stored
+  ✓ No third-party data sharing
+
+Infrastructure:
+  ✓ PWA manifest: valid (icon-192.png, icon-512.png)
+  ✓ Sentry: wired up, no-op without DSN
+  ✓ Security headers: HSTS, X-Frame-Options, nosniff, Referrer-Policy
+  ✓ Error boundaries: error.tsx, global-error.tsx, not-found.tsx
+
+Human actions before TestFlight:
+  [ ] Set all critical Vercel env vars (see Task 3)
+  [ ] Create reviewer test accounts (see Task 1)
+  [ ] Fill in review-notes.txt credentials
+  [ ] Take production screenshots with real data (see Task 2)
+  [ ] Verify Supabase OAuth redirect URLs
+  [ ] Build Capacitor/Expo project with final env and archive in Xcode

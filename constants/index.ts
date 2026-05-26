@@ -56,9 +56,3 @@ export const BENEFITS = [
     description: 'Contact any shop directly on WhatsApp. No middlemen, no platform fees, no waiting.',
   },
 ] as const
-
-export const NAV_LINKS = [
-  { href: '/explore', label: 'Explore' },
-  { href: '/rentals', label: 'My Rentals' },
-  { href: '/profile', label: 'Profile' },
-] as const

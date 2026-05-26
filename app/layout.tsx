@@ -48,6 +48,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   themeColor: '#FF6B35',
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -62,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased">
         <Navbar />
-        <main className="min-h-screen pb-20 md:pb-0">
+        <main className="min-h-screen pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
           {children}
         </main>
         <Footer />

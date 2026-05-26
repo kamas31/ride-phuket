@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* ── Safe area utilities (iOS home indicator / notch) ───── */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
 @theme inline {
   /* Brand colors */
   --color-brand: #FF6B35;
