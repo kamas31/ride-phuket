@@ -204,7 +204,7 @@ test.describe('Session isolation', () => {
     if (await scooterLinks.count() > 0) {
       const saveBtn = page.locator('button[aria-label*="Save"]').first()
       if (await saveBtn.count() > 0) {
-        await saveBtn.click()
+        await saveBtn.dispatchEvent('click')
         await page.waitForTimeout(1_000)
         // Should redirect to login, not crash
         const url = page.url()
