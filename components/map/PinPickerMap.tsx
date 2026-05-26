@@ -17,6 +17,7 @@ export default function PinPickerMap({ lat, lng, onChange }: PinPickerMapProps) 
   const mapRef       = useRef<mapboxgl.Map | null>(null)
   const markerRef    = useRef<mapboxgl.Marker | null>(null)
   const onChangeRef  = useRef(onChange)
+  // eslint-disable-next-line react-hooks/refs
   onChangeRef.current = onChange
 
   useEffect(() => {

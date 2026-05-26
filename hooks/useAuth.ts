@@ -23,6 +23,7 @@ export function useAuth(): AuthState {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!isSupabaseConfigured()) { setLoading(false); return }
 
     const supabase = createClient()

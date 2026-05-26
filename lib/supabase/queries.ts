@@ -253,6 +253,7 @@ export async function getShopBySlug(slug: string): Promise<ShopWithFleet | null>
   const { data: scooterRows } = await (supabase as any)
     .from('scooters')
     .select('*, shops(*)')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .eq('shop_id', (shopRow as any).id)
     .eq('available', true)
     .order('created_at', { ascending: false })

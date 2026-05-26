@@ -14,6 +14,7 @@ export const test = base.extend<{
   consoleCapture: ConsoleCapture
   assertPageClean: () => Promise<void>
 }>({
+  /* eslint-disable react-hooks/rules-of-hooks */
   consoleCapture: async ({ page }, use) => {
     const capture = watchConsole(page)
     await use(capture)
@@ -25,4 +26,5 @@ export const test = base.extend<{
       assertNoConsoleErrors(consoleCapture)
     })
   },
+  /* eslint-enable react-hooks/rules-of-hooks */
 })

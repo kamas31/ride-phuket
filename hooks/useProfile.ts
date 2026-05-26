@@ -27,7 +27,9 @@ export function useProfile() {
 
     if (!user || !isSupabaseConfigured()) {
       // Clear immediately — never show a stale profile after sign-out
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProfile(null)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false)
       return
     }

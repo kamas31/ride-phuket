@@ -30,12 +30,9 @@ export function UpgradeTeaser({ feature, plan = 'pro', className }: UpgradeTease
         <p className="text-[10px] text-[#9c9c98] text-center leading-snug px-4 mt-0.5">
           {feature}
         </p>
-        <a
-          href="/partner/upgrade"
-          className="mt-2.5 text-[10px] font-bold px-3 py-1 bg-[#FF6B35]/10 text-[#FF6B35] rounded-full hover:bg-[#FF6B35]/18 transition-colors"
-        >
-          Upgrade →
-        </a>
+        <span className="mt-2.5 text-[10px] text-[#9c9c98]">
+          Coming soon
+        </span>
       </div>
     </div>
   )

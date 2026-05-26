@@ -379,7 +379,7 @@ export default async function HomePage() {
           <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-2">Why Ride Phuket</p>
           <h2 className="text-[26px] md:text-[34px] font-bold text-[#0f0f0e] leading-tight tracking-tight">
             Street rentals are a gamble.{' '}
-            <span className="text-[#FF6B35]">We're not.</span>
+            <span className="text-[#FF6B35]">We&apos;re not.</span>
           </h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

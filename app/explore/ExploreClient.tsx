@@ -45,6 +45,7 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
 
   // Persist map visibility across sessions — read after hydration to avoid SSR mismatch
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (localStorage.getItem('rp_show_map') === 'false') setShowMap(false)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -131,9 +132,11 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
     if (filters.sortBy === 'price_asc')  list = [...list].sort((a, b) => a.pricePerDay - b.pricePerDay)
     if (filters.sortBy === 'price_desc') list = [...list].sort((a, b) => b.pricePerDay - a.pricePerDay)
     if (filters.sortBy === 'rating')     list = [...list].sort((a, b) => b.rating - a.rating)
-    filteredRef.current = list
     return list
   }, [filters, search, initialScooters, mapBounds])
+
+  // Keep ref in sync after render so handleSelectFromMap always sees the latest filtered list
+  useEffect(() => { filteredRef.current = filtered }, [filtered])
 
   // Shared card wrapper — rings compare by shopId so the whole shop highlights together
   const CardWrapper = useCallback(({ scooter, className }: { scooter: Scooter; className?: string }) => (

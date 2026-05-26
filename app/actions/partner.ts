@@ -83,8 +83,8 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
 
     // ── 4. Check no existing shop ────────────────────────────
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const checkResult = await withTimeout(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (admin as any).from('shops').select('id').eq('owner_id', userId).single() as Promise<{ data: { id: string } | null; error: unknown }>,
         8000,
         'check-existing-shop'
@@ -106,8 +106,8 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
     // ── 6. Insert shop ───────────────────────────────────────
     let shopId: string
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: shop, error: insertErr } = await withTimeout(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (admin as any)
           .from('shops')
           .insert({
@@ -147,8 +147,8 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
 
     // ── 7. Link shop to profile ──────────────────────────────
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: profileErr } = await withTimeout(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (admin as any)
           .from('profiles')
           .update({ shop_id: shopId, role: 'shop_owner' })

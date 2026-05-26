@@ -32,7 +32,7 @@ export function ReviewCard({ review, className }: ReviewCardProps) {
 
       {/* Comment */}
       <p className="text-[#0f0f0e] text-sm leading-relaxed mb-4">
-        "{review.comment}"
+        &ldquo;{review.comment}&rdquo;
       </p>
 
       {/* Author */}

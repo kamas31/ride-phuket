@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { MapPin, Mail, Lock, Eye, EyeOff, ArrowLeft, User, Check } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { SITE_NAME } from '@/constants'
@@ -32,11 +32,9 @@ const ROLE_OPTIONS: {
 ]
 
 function SignupForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') ?? '/'
 
-  const { signUpWithEmail, signInWithGoogle } = useAuth()
+  const { signUpWithEmail } = useAuth()
 
   const [role, setRole] = useState<UserRole>('rider')
   const [step, setStep] = useState<1 | 2>(1)
@@ -173,10 +171,7 @@ function SignupForm() {
               <button
                 type="button"
                 onClick={async () => {
-                  // Store role in sessionStorage so OAuth callback can retrieve it
                   sessionStorage.setItem('signup_role', role)
-                  const { signInWithGoogle } = await import('@/hooks/useAuth').then(m => ({ signInWithGoogle: () => {} }))
-                  // Invoke via module
                   const mod = await import('@/lib/supabase/client')
                   const sb = mod.createClient()
                   await sb.auth.signInWithOAuth({

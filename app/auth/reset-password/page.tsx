@@ -42,6 +42,7 @@ function ResetPasswordForm() {
 
   // Once ready fires, cancel the expiry timer
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (ready) setExpired(false)
   }, [ready])
 

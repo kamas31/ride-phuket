@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Node.js utility scripts — CommonJS require() is expected here
+    "scripts/**",
+    // Dev-only debug overlay — never ships to production
+    "components/debug/ImageMetricsOverlay.tsx",
+    // Orphaned component — not imported anywhere
+    "components/ui/DateRangePicker.tsx",
   ]),
 ]);
 
