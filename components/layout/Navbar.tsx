@@ -236,44 +236,64 @@ export default function Navbar() {
 
           <div className="absolute top-0 right-0 bottom-0 w-72 bg-white shadow-2xl flex flex-col">
 
-            {/* ── Notch / Dynamic Island spacer ───────────────────────────
-                Pushes drawer header below the top safe area.
-                Height = 0 on non-notched devices (no visual change). */}
-            <div aria-hidden="true" className="shrink-0 bg-white" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+            {/* ── Notch / Dynamic Island spacer ── */}
+            <div aria-hidden="true" className="shrink-0" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
 
-            {/* ── Drawer header ── */}
-            <div className="h-16 flex items-center justify-between px-5 border-b border-[#e8e8e4] shrink-0">
-              <div>
-                <span className="font-bold text-[17px] text-[#0f0f0e]">{SITE_NAME}</span>
-                {profile && (
-                  <p className="text-[10px] text-[#9c9c98] capitalize mt-0.5">{profile.role.replace('_', ' ')}</p>
-                )}
-              </div>
-              <button
-                onClick={() => setMenuOpen(false)}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-[#5c5c58] hover:bg-[#f0f0ec] transition-colors"
-                aria-label="Close menu"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            {/* ── Top panel — account identity or guest close row ──────────
+                Authenticated: full profile (avatar, name, email, role).
+                Guest: minimal row so the close button has space to breathe.
+                Close button is absolute top-right in both cases. */}
+            {user ? (
+              <div className="relative shrink-0 px-6 pt-5 pb-6">
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-[#9c9c98] hover:bg-[#f0f0ec] hover:text-[#5c5c58] active:bg-[#e8e8e4] transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X className="w-[18px] h-[18px]" />
+                </button>
 
-            {/* ── Authenticated user identity card ── */}
-            {user && (
-              <div className="px-5 py-4 bg-[#f8f8f6] border-b border-[#e8e8e4] shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 bg-[#FF6B35] rounded-full flex items-center justify-center text-white font-bold text-base flex-shrink-0">
-                    {(profile?.name ?? user.email ?? 'U')[0].toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-sm text-[#0f0f0e] truncate">
-                      {profile?.name ?? user.email?.split('@')[0]}
-                    </p>
-                    <p className="text-[11px] text-[#9c9c98] truncate">{user.email}</p>
-                  </div>
+                {/* Avatar */}
+                <div className="w-14 h-14 bg-[#FF6B35] rounded-full flex items-center justify-center text-white font-bold text-xl select-none">
+                  {(profile?.name ?? user.email ?? 'U')[0].toUpperCase()}
+                </div>
+
+                {/* Name */}
+                <p className="font-bold text-[18px] text-[#0f0f0e] tracking-tight mt-3 leading-tight truncate pr-10">
+                  {profile?.name ?? user.email?.split('@')[0]}
+                </p>
+
+                {/* Email */}
+                <p className="text-[13px] text-[#9c9c98] mt-1 truncate">
+                  {user.email}
+                </p>
+
+                {/* Role badge */}
+                <div className="mt-3">
+                  <span className={cn(
+                    'inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider',
+                    isShopOwner
+                      ? 'bg-[#fff4f0] text-[#FF6B35]'
+                      : 'bg-[#f0f0ec] text-[#5c5c58]'
+                  )}>
+                    {isShopOwner ? 'Shop Owner' : 'Rider'}
+                  </span>
                 </div>
               </div>
+            ) : (
+              <div className="flex items-center justify-end px-5 h-[60px] shrink-0">
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-[#5c5c58] hover:bg-[#f0f0ec] active:bg-[#e8e8e4] transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X className="w-[18px] h-[18px]" />
+                </button>
+              </div>
             )}
+
+            {/* Separator between top panel and nav */}
+            <div aria-hidden="true" className="shrink-0 h-px bg-[#e8e8e4]" />
 
             {/* ── Navigation links — scrollable if content overflows ── */}
             <nav
