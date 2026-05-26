@@ -5,6 +5,9 @@ import { isSupabaseConfigured, createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import type { UserRole } from '@/lib/supabase/types'
 
+// localStorage keys owned by this app — all cleared on sign-out
+const USER_SCOPED_STORAGE_KEYS = ['rp_saved_v1']
+
 interface AuthState {
   user: User | null
   loading: boolean
@@ -24,13 +27,12 @@ export function useAuth(): AuthState {
 
     const supabase = createClient()
 
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
-      setLoading(false)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Use onAuthStateChange as the single source of truth.
+    // INITIAL_SESSION fires synchronously on subscribe with the current
+    // session, eliminating the race between getUser() and later events.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
+      if (event === 'INITIAL_SESSION') setLoading(false)
     })
 
     return () => subscription.unsubscribe()
@@ -40,6 +42,10 @@ export function useAuth(): AuthState {
     if (!isSupabaseConfigured()) return
     const supabase = createClient()
     await supabase.auth.signOut()
+    // Clear all user-scoped caches before navigating away
+    try {
+      USER_SCOPED_STORAGE_KEYS.forEach(k => localStorage.removeItem(k))
+    } catch { /* storage unavailable */ }
     window.location.href = '/'
   }, [])
 
@@ -74,7 +80,6 @@ export function useAuth(): AuthState {
       email,
       password,
       options: {
-        // role stored in user_metadata → read by DB trigger → written to profiles.role
         data: { name, role },
       },
     })

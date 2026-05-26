@@ -24,11 +24,18 @@ export function useProfile() {
 
   useEffect(() => {
     if (authLoading) return
+
     if (!user || !isSupabaseConfigured()) {
+      // Clear immediately — never show a stale profile after sign-out
       setProfile(null)
       setLoading(false)
       return
     }
+
+    // Clear stale data before the fetch starts so no previous user's
+    // profile is ever visible during the transition to the new user.
+    setProfile(null)
+    setLoading(true)
 
     const supabase = createClient()
 
@@ -41,10 +48,8 @@ export function useProfile() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then(({ data, error }: { data: any; error: any }) => {
         if (!error && data) {
-          // ── Happy path: profile found in DB (always preferred) ──────
           setProfile(data as Profile)
 
-          // ── Detect JWT/profile desync and log it ────────────────────
           const jwtRole = user.user_metadata?.role as UserRole | undefined
           if (jwtRole && jwtRole !== data.role) {
             console.warn(
@@ -54,19 +59,12 @@ export function useProfile() {
             )
           }
         } else {
-          // ── Fallback: profile query failed ──────────────────────────
-          // Possible causes:
-          //   1. Migration 002 not run (role column missing)
-          //   2. RLS blocked the query (shouldn't happen for own profile)
-          //   3. Profile row doesn't exist yet (trigger race condition)
-          //
-          // Safe default: use 'rider' — never use JWT role as fallback
-          // because it may be stale (this is what caused the mobile bug).
+          // Fallback: safe default — never promote to shop_owner on error
           console.warn('[useProfile] Profile query failed:', error?.message)
           setProfile({
             id:          user.id,
             name:        (user.user_metadata?.name as string) ?? user.email ?? 'Rider',
-            role:        'rider',  // safe default — never promote to shop_owner on error
+            role:        'rider',
             shop_id:     null,
             avatar_url:  null,
             phone:       null,
@@ -77,7 +75,7 @@ export function useProfile() {
         }
         setLoading(false)
       })
-  }, [user, authLoading])
+  }, [user?.id, authLoading])  // key on user.id — fires exactly when the identity changes
 
   const isShopOwner = profile?.role === 'shop_owner'
   const isRider     = !isShopOwner

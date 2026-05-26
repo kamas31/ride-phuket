@@ -1,15 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-
-// ─────────────────────────────────────────────────────────────────────────────
-// useSaved — optimistic localStorage wishlist with DB sync support
-//
-// V1: localStorage-backed, instant, works without auth.
-// V2 (active): when authenticated, server actions sync to DB in background.
-//   Call initFromIds(serverIds) on mount to merge DB state into local state.
-//   SaveButton handles the DB write via saveRide / unsaveRide server actions.
-// ─────────────────────────────────────────────────────────────────────────────
+import { isSupabaseConfigured, createClient } from '@/lib/supabase/client'
 
 const STORAGE_KEY = 'rp_saved_v1'
 
@@ -26,17 +18,39 @@ function readFromStorage(): Set<string> {
 function writeToStorage(ids: Set<string>): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]))
-  } catch { /* storage full — silently fail */ }
+  } catch { /* storage full */ }
+}
+
+function clearStorage(): void {
+  try { window.localStorage.removeItem(STORAGE_KEY) } catch {}
 }
 
 export function useSaved() {
   const [saved, setSaved] = useState<Set<string>>(new Set())
   const [hydrated, setHydrated] = useState(false)
 
-  // Hydrate from localStorage after mount (avoids SSR mismatch)
+  // Hydrate from localStorage on mount
   useEffect(() => {
     setSaved(readFromStorage())
     setHydrated(true)
+  }, [])
+
+  // Clear saved state on SIGNED_OUT so User B never sees User A's saves.
+  // On SIGNED_IN, initFromIds (called by SavedRidesContent) re-hydrates
+  // from the server for the newly signed-in user.
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return
+
+    const supabase = createClient()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        clearStorage()
+        setSaved(new Set())
+        setHydrated(true)
+      }
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const toggle = useCallback((id: string) => {
@@ -49,9 +63,6 @@ export function useSaved() {
     })
   }, [])
 
-  // Merge server-fetched IDs into local state on mount.
-  // Used by the saved page to hydrate from DB saves (cross-device sync).
-  // Safe to call multiple times — idempotent merge, never overwrites removes.
   const initFromIds = useCallback((ids: string[]) => {
     if (!ids.length) return
     setSaved(prev => {
@@ -61,9 +72,6 @@ export function useSaved() {
     })
   }, [])
 
-  // Remove IDs from localStorage that are NOT in validIds.
-  // Call after fetching saved scooters from the server to auto-clean stale/deleted IDs.
-  // An ID not returned by the server means the scooter was deleted or is orphaned.
   const pruneOrphanIds = useCallback((validIds: string[]) => {
     const valid = new Set(validIds)
     setSaved(prev => {
