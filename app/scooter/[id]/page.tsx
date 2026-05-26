@@ -12,7 +12,7 @@ import { TrustBadge, isNewListing, isFastResponder } from '@/components/ride/Tru
 import { EmptyReviews } from '@/components/ride/EmptyReviews'
 import { QuickContact } from '@/components/ride/QuickContact'
 import { DepositInfo } from '@/components/ride/DepositInfo'
-import { StickyBookingBar } from '@/components/ride/StickyBookingBar'
+import { StickyContactBar } from '@/components/ride/StickyContactBar'
 import { SaveButton } from '@/components/ride/SaveButton'
 import { getPublicInquiries } from '@/app/actions/inquiry-actions'
 import { TrackView } from '@/components/analytics/TrackView'
@@ -168,8 +168,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
         <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-8">
           {/* ── LEFT COLUMN ── */}
           <div className="space-y-6">
-            {/* Sentinel — triggers the sticky booking bar when scrolled past */}
-            <div id="sticky-booking-sentinel" className="-mt-1" aria-hidden />
+            <div id="sticky-contact-sentinel" className="-mt-1" aria-hidden />
 
             {/* Image gallery — edge-to-edge on mobile, rounded on desktop */}
             <div className="-mx-4 md:mx-0">
@@ -395,7 +394,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
             </div>
           </div>
 
-          {/* ── RIGHT COLUMN: Booking card ── */}
+          {/* ── RIGHT COLUMN: Contact card ── */}
           <div className="mt-8 lg:mt-0">
             <div className="sticky top-32">
               <div className="bg-white rounded-[24px] border border-[#e8e8e4] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.10),0_1px_4px_-1px_rgba(0,0,0,0.05)] overflow-hidden">
@@ -495,7 +494,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
       </div>
 
       {/* Mobile sticky contact bar — appears when sentinel scrolls off screen */}
-      <StickyBookingBar
+      <StickyContactBar
         scooterName={scooter.name}
         pricePerDay={scooter.pricePerDay}
         scooterId={scooter.id}

@@ -7,7 +7,7 @@ import { cn, formatPrice } from '@/lib/utils'
 // ─────────────────────────────────────────────────────────────────────────────
 // StickyContactBar — mobile-only sticky CTA bar
 //
-// Appears when the user scrolls past the #sticky-booking-sentinel div.
+// Appears when the user scrolls past the #sticky-contact-sentinel div.
 // Shows price + direct contact CTAs. Hidden on desktop (lg+) where the
 // contact card is always visible in the sidebar.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -21,7 +21,7 @@ interface StickyContactBarProps {
   shopPhone?:    string
 }
 
-export function StickyBookingBar({
+export function StickyContactBar({
   scooterName,
   pricePerDay,
   available = true,
@@ -31,7 +31,7 @@ export function StickyBookingBar({
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const sentinel = document.getElementById('sticky-booking-sentinel')
+    const sentinel = document.getElementById('sticky-contact-sentinel')
     if (!sentinel) return
 
     const observer = new IntersectionObserver(

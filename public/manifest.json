@@ -28,7 +28,7 @@
       "description": "Browse available scooters"
     },
     {
-      "name": "Saved Scooters",
+      "name": "Saved",
       "url": "/saved",
       "description": "View your saved scooters"
     }

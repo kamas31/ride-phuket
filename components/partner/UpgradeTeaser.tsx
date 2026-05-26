@@ -30,9 +30,12 @@ export function UpgradeTeaser({ feature, plan = 'pro', className }: UpgradeTease
         <p className="text-[10px] text-[#9c9c98] text-center leading-snug px-4 mt-0.5">
           {feature}
         </p>
-        <span className="mt-2.5 text-[10px] text-[#9c9c98]">
-          Coming soon
-        </span>
+        <a
+          href="mailto:hello@ridephuket.com"
+          className="mt-2.5 text-[10px] text-[#FF6B35] hover:underline"
+        >
+          Contact us to unlock
+        </a>
       </div>
     </div>
   )
