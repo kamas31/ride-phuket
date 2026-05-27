@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { MapPin } from 'lucide-react'
 import { SITE_NAME, SITE_DESCRIPTION } from '@/constants'
 
 const FOOTER_LINKS = {
@@ -33,9 +32,13 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2 group w-fit">
-              <div className="w-8 h-8 bg-[#FF6B35] rounded-[10px] flex items-center justify-center">
-                <MapPin className="w-4 h-4 text-white" strokeWidth={2.5} />
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/icons/icon-nav.png"
+                alt={SITE_NAME}
+                style={{ width: 38, height: 38, display: 'block' }}
+                className="group-hover:scale-105 transition-transform"
+              />
               <span className="font-bold text-[17px]">{SITE_NAME}</span>
             </Link>
             <p className="mt-4 text-[#9c9c98] text-sm leading-relaxed max-w-xs">

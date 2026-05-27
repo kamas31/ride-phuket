@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { MapPin, Menu, X, LogOut, ChevronDown } from 'lucide-react'
+import { Menu, X, LogOut, ChevronDown } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { SITE_NAME } from '@/constants'
@@ -112,9 +112,13 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-[#FF6B35] rounded-[10px] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-              <MapPin className="w-4 h-4 text-white" strokeWidth={2.5} />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/icons/icon-nav.png"
+              alt={SITE_NAME}
+              style={{ width: 38, height: 38, display: 'block' }}
+              className="group-hover:scale-105 transition-transform"
+            />
             <span className={cn(
               'font-bold text-[17px] tracking-tight transition-colors duration-300',
               isHero ? 'text-white' : 'text-[#0f0f0e]'
