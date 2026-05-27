@@ -25,11 +25,13 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: `${SITE_NAME} — Premium Scooter Rentals in Phuket`,
     description: SITE_DESCRIPTION,
+    images: [{ url: `${SITE_URL}/og.png`, width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: {
     card: 'summary_large_image',
     title: `${SITE_NAME} — Premium Scooter Rentals in Phuket`,
     description: SITE_DESCRIPTION,
+    images: [`${SITE_URL}/og.png`],
   },
   manifest: '/manifest.json',
   icons: {

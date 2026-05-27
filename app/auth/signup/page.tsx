@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { MapPin, Mail, Lock, Eye, EyeOff, ArrowLeft, User, Check } from 'lucide-react'
@@ -46,6 +46,14 @@ function SignupForm() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]       = useState<string | null>(null)
   const [success, setSuccess]   = useState(false)
+  const [isNative, setIsNative] = useState(false)
+
+  // Google OAuth is blocked in WKWebView by Google — hide on native iOS.
+  useEffect(() => {
+    import('@capacitor/core').then(({ Capacitor }) => {
+      setIsNative(Capacitor.isNativePlatform())
+    })
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -169,32 +177,36 @@ function SignupForm() {
                 ))}
               </div>
 
-              {/* Google OAuth shortcut */}
-              <button
-                type="button"
-                onClick={async () => {
-                  sessionStorage.setItem('signup_role', role)
-                  const mod = await import('@/lib/supabase/client')
-                  const sb = mod.createClient()
-                  await sb.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                      redirectTo: `${window.location.origin}/auth/callback?role=${role}`,
-                      queryParams: { prompt: 'select_account' },
-                    }
-                  })
-                }}
-                className="w-full flex items-center justify-center gap-3 py-3 border border-[#e8e8e4] bg-white rounded-[12px] text-sm font-medium text-[#0f0f0e] hover:bg-[#f8f8f6] transition-colors mb-4"
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
-                Continue with Google as {role === 'rider' ? 'Rider' : 'Shop Owner'}
-              </button>
+              {/* Google OAuth shortcut — hidden on native iOS (WKWebView blocked by Google) */}
+              {!isNative && (
+                <>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      sessionStorage.setItem('signup_role', role)
+                      const mod = await import('@/lib/supabase/client')
+                      const sb = mod.createClient()
+                      await sb.auth.signInWithOAuth({
+                        provider: 'google',
+                        options: {
+                          redirectTo: `${window.location.origin}/auth/callback?role=${role}`,
+                          queryParams: { prompt: 'select_account' },
+                        }
+                      })
+                    }}
+                    className="w-full flex items-center justify-center gap-3 py-3 border border-[#e8e8e4] bg-white rounded-[12px] text-sm font-medium text-[#0f0f0e] hover:bg-[#f8f8f6] transition-colors mb-4"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+                    Continue with Google as {role === 'rider' ? 'Rider' : 'Shop Owner'}
+                  </button>
 
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex-1 h-px bg-[#e8e8e4]" />
-                <span className="text-xs text-[#9c9c98] font-medium">or with email</span>
-                <div className="flex-1 h-px bg-[#e8e8e4]" />
-              </div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex-1 h-px bg-[#e8e8e4]" />
+                    <span className="text-xs text-[#9c9c98] font-medium">or with email</span>
+                    <div className="flex-1 h-px bg-[#e8e8e4]" />
+                  </div>
+                </>
+              )}
 
               <button
                 onClick={() => setStep(2)}

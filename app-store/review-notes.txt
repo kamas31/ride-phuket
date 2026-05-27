@@ -59,8 +59,8 @@ Available at: Profile → Delete Account
 This permanently deletes the user's account and saved data from Supabase.
 
 SIGN-IN OPTIONS
-- Email + Password
-- Google OAuth (via Supabase)
+- Email + Password (available on iOS app and web)
+- Google OAuth (web only — not available in iOS app due to Google's WKWebView restriction)
 
 SCREENSHOTS ORDER (suggested)
 1. Explore page — scooter grid

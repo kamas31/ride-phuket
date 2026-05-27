@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# Capacitor — ios/ and android/ are committed (contain the Xcode/Android projects)
+# dist/ is committed (contains the webDir placeholder for cap sync)
+
 # production
 /build
 

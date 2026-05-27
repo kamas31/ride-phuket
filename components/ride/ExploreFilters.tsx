@@ -115,7 +115,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowPanel(false)} />
 
           {/* Panel — bottom sheet on mobile, centered dialog on desktop */}
-          <div className="relative w-full md:max-w-[520px] bg-white rounded-t-[24px] md:rounded-[20px] shadow-xl max-h-[88vh] md:max-h-[78vh] overflow-y-auto">
+          <div className="relative w-full md:max-w-[520px] bg-white rounded-t-[24px] md:rounded-[20px] shadow-xl max-h-[88vh] md:max-h-[78vh] overflow-y-auto overscroll-contain">
             {/* Header */}
             <div className="sticky top-0 bg-white px-6 pt-5 pb-4 flex items-center justify-between border-b border-[#f0f0ec]">
               <h3 className="text-[16px] font-bold text-[#0f0f0e]">Filters</h3>
