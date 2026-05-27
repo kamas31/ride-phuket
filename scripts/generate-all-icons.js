@@ -90,20 +90,21 @@ async function main() {
   await (await iconOnBg(logoAt512, 512, DARK)).toFile(path.join(EXPORTS, 'Koh Ride Icon Android 512.png'))
   console.log('✓ exports/Koh Ride Icon Android 512.png')
 
-  // ── PWA icons (dark bg, maskable-safe at 65%) ──────────────────────────────────
-  await (await iconOnBg(logoAt512, 512, DARK)).toFile(path.join(PUBLIC_ICONS, 'icon-512.png'))
+  // ── PWA icons (dark bg, 80% — within maskable safe zone) ─────────────────────
+  const logoAt512pwa = Math.round(512 * 0.80)
+  await (await iconOnBg(logoAt512pwa, 512, DARK)).toFile(path.join(PUBLIC_ICONS, 'icon-512.png'))
   console.log('✓ public/icons/icon-512.png')
 
-  const logoAt192 = Math.round(192 * 0.65)
+  const logoAt192 = Math.round(192 * 0.80)
   await (await iconOnBg(logoAt192, 192, DARK)).toFile(path.join(PUBLIC_ICONS, 'icon-192.png'))
   console.log('✓ public/icons/icon-192.png')
 
-  const logoAt32 = Math.round(32 * 0.75)
+  const logoAt32 = Math.round(32 * 0.80)
   await (await iconOnBg(logoAt32, 32, DARK)).toFile(path.join(PUBLIC_ICONS, 'icon-32.png'))
   console.log('✓ public/icons/icon-32.png')
 
-  // ── Apple touch icon (180×180, dark bg) ────────────────────────────────────────
-  const logoAt180 = Math.round(180 * 0.65)
+  // ── Apple touch icon (180×180, dark bg, 80%) ───────────────────────────────────
+  const logoAt180 = Math.round(180 * 0.80)
   await (await iconOnBg(logoAt180, 180, DARK)).toFile(path.join(PUBLIC_ICONS, 'apple-touch-icon.png'))
   await (await iconOnBg(logoAt180, 180, DARK)).toFile(path.join(PUBLIC,       'apple-touch-icon.png'))
   console.log('✓ apple-touch-icon.png (×2 paths)')
