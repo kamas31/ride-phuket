@@ -437,7 +437,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
                 {PLAN_LABELS[shop.plan_type as keyof typeof PLAN_LABELS]} — all features unlocked
               </p>
               <p className="text-[11px] text-[#b45309] mt-0.5 leading-relaxed">
-                You currently have free access to all Pro features as an early partner while Ride Phuket grows. Thank you for being part of this.
+                You currently have free access to all Pro features as an early partner while Koh Ride grows. Thank you for being part of this.
               </p>
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {FOUNDING_PARTNER_PERKS.map(perk => (

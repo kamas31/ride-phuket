@@ -1,4 +1,4 @@
-PRE-SUBMISSION REPORT — Ride Phuket
+PRE-SUBMISSION REPORT — Koh Ride
 =====================================
 Generated: 2026-05-26
 Build: clean (0 errors, 48 warnings — all in test files)
@@ -14,12 +14,12 @@ Human actions required before submitting to App Store Connect:
 
 [ ] 1. Create rider test account in Supabase
       - Go to Supabase Dashboard → Authentication → Users → Add User
-      - Email: reviewer-rider@ridephuket.com  (or choose another)
+      - Email: reviewer-rider@kohride.com  (or choose another)
       - Set password (store it)
       - In table 'profiles', set role = 'rider' for this user's id
 
 [ ] 2. Create shop owner test account in Supabase
-      - Email: reviewer-shop@ridephuket.com  (or choose another)
+      - Email: reviewer-shop@kohride.com  (or choose another)
       - Set password (store it)
       - In table 'profiles', set role = 'shop_owner' for this user's id
       - In table 'shops', create a shop row linked to this user's profile_id
@@ -31,7 +31,7 @@ Human actions required before submitting to App Store Connect:
       - Replace [INSERT SHOP OWNER EMAIL] with shop owner email
       - Replace [INSERT SHOP OWNER PASSWORD] with shop owner password
 
-[ ] 4. Verify both accounts work on production (ridephuket.com)
+[ ] 4. Verify both accounts work on production (kohride.com)
       - Rider: can browse, save a scooter, view /saved
       - Shop owner: can access /partner/dashboard, see fleet
 
@@ -82,13 +82,13 @@ CRITICAL — app will not work without these:
   [ ] NEXT_PUBLIC_SUPABASE_ANON_KEY     = eyJ... (anon key)
   [ ] SUPABASE_SERVICE_ROLE_KEY         = eyJ... (service role — server only, NOT public)
   [ ] NEXT_PUBLIC_MAPBOX_TOKEN          = pk.eyJ... (Mapbox public token)
-  [ ] NEXT_PUBLIC_SITE_URL              = https://ridephuket.com
+  [ ] NEXT_PUBLIC_SITE_URL              = https://kohride.com
 
 ERROR MONITORING — app works without, but errors are invisible:
   [ ] NEXT_PUBLIC_SENTRY_DSN            = https://...@....ingest.sentry.io/...
   [ ] SENTRY_AUTH_TOKEN                 = sntrys_... (build-time only, for source maps)
   [ ] SENTRY_ORG                        = your-org-slug
-  [ ] SENTRY_PROJECT                    = ride-phuket
+  [ ] SENTRY_PROJECT                    = koh-ride
 
 OPTIONAL — analytics (fire-and-forget, non-blocking):
   [ ] NEXT_PUBLIC_POSTHOG_KEY           = phc_...
@@ -101,12 +101,12 @@ NOT needed for MVP:
 
 Supabase OAuth redirect:
   [ ] In Supabase → Auth → URL Configuration:
-      Site URL:             https://ridephuket.com
-      Redirect URLs add:    https://ridephuket.com/auth/callback
-  [ ] Google OAuth: verify ridephuket.com domain is in Google Cloud Console OAuth credentials
+      Site URL:             https://kohride.com
+      Redirect URLs add:    https://kohride.com/auth/callback
+  [ ] Google OAuth: verify kohride.com domain is in Google Cloud Console OAuth credentials
 
 Vercel domain:
-  [ ] ridephuket.com → Vercel DNS (or external DNS with CNAME → cname.vercel-dns.com)
+  [ ] kohride.com → Vercel DNS (or external DNS with CNAME → cname.vercel-dns.com)
   [ ] SSL: auto-provisioned by Vercel once domain propagates
 
 
@@ -117,7 +117,7 @@ TASK 4 — APP STORE COPY PASS
 See app-store/app-description.txt — no changes needed.
 
 Final copy status:
-  ✓ Name: "Ride Phuket" (12 chars)
+  ✓ Name: "Koh Ride" (12 chars)
   ✓ Subtitle: "Find & Contact Scooter Shops" (28 chars — within 30)
   ✓ Keywords: 79 chars — within 100 limit
   ✓ Description: no booking/payment/reservation language
@@ -160,7 +160,7 @@ VERIFIED ✓ No booking language in visible UI
 
 VERIFIED ✓ UpgradeTeaser
   - Removed "Coming soon" span
-  - Now shows "Contact us to unlock" → mailto:hello@ridephuket.com
+  - Now shows "Contact us to unlock" → mailto:hello@kohride.com
 
 VERIFIED ✓ Partner dashboard
   - Shows real fleet data, toggle availability works
@@ -187,8 +187,8 @@ App Store compliance:
   ✓ No fake/placeholder UI visible to end users
   ✓ No "coming soon" language
   ✓ Account deletion implemented (Profile → Delete Account)
-  ✓ Privacy policy URL: https://ridephuket.com/privacy
-  ✓ Support URL: https://ridephuket.com/contact
+  ✓ Privacy policy URL: https://kohride.com/privacy
+  ✓ Support URL: https://kohride.com/contact
   ✓ WhatsApp links: standard wa.me deep links (external app handoff)
   ✓ No user location requested or stored
   ✓ No third-party data sharing

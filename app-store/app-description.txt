@@ -1,5 +1,5 @@
 APP NAME
-Ride Phuket
+Koh Ride
 
 SUBTITLE (30 chars max)
 Find & Contact Scooter Shops
@@ -12,7 +12,7 @@ DESCRIPTION (4000 chars max)
 ---
 Find the right scooter rental in Phuket and contact the shop directly — no booking fees, no platform charges, no middlemen.
 
-Ride Phuket is a scooter rental marketplace for Phuket, Thailand. Browse verified local rental shops, compare scooters by price, location, and features, then reach out directly via WhatsApp or phone.
+Koh Ride is a scooter rental marketplace for Phuket, Thailand. Browse verified local rental shops, compare scooters by price, location, and features, then reach out directly via WhatsApp or phone.
 
 HOW IT WORKS
 
@@ -37,7 +37,7 @@ FOR RENTAL SHOPS (Partner Dashboard)
 - Founding Partner program with advanced analytics
 
 PRIVACY
-Ride Phuket does not share personal data with third parties. Contact with shops happens directly via WhatsApp — Ride Phuket does not intercept or record these conversations.
+Koh Ride does not share personal data with third parties. Contact with shops happens directly via WhatsApp — Koh Ride does not intercept or record these conversations.
 
 ---
 
@@ -45,10 +45,10 @@ KEYWORDS (100 chars max)
 scooter rental,phuket,motorbike hire,honda,yamaha,thailand,patong,kata,rawai
 
 SUPPORT URL
-https://ridephuket.com/contact
+https://kohride.com/contact
 
 PRIVACY POLICY URL
-https://ridephuket.com/privacy
+https://kohride.com/privacy
 
 MARKETING URL (optional)
-https://ridephuket.com
+https://kohride.com

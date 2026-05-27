@@ -1,4 +1,4 @@
-# Ride Phuket — Architecture Decision Records
+# Koh Ride — Architecture Decision Records
 
 ---
 

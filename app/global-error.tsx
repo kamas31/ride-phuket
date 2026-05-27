@@ -23,7 +23,7 @@ export default function GlobalError({
           <div style={{ textAlign: 'center', maxWidth: 360 }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🛵</div>
             <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0f0f0e', marginBottom: 8 }}>
-              Ride Phuket
+              Koh Ride
             </h1>
             <p style={{ color: '#9c9c98', fontSize: 14, marginBottom: 24 }}>
               A critical error occurred. Please reload the page.

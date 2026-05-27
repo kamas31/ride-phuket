@@ -1,7 +1,7 @@
-export const SITE_NAME = 'Ride Phuket'
+export const SITE_NAME = 'Koh Ride'
 export const SITE_TAGLINE = 'Premium Scooter Rentals'
 export const SITE_DESCRIPTION = 'Find and contact trusted scooter rentals across Phuket. Compare shops, check availability, and connect directly — no platform fees.'
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ridephuket.com'
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kohride.com'
 
 export const CURRENCY = 'THB'
 export const CURRENCY_SYMBOL = '฿'

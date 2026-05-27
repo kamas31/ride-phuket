@@ -151,7 +151,7 @@ export default function BookingsClient({ bookings: initial, shopId }: BookingsCl
           })
           const waLink = booking.rider?.phone
             ? `https://wa.me/${booking.rider.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                `Hi ${booking.rider.name ?? 'rider'}! This is ${booking.scooters?.name ?? 'your scooter'} shop on Ride Phuket regarding your booking from ${booking.start_date} to ${booking.end_date}.`
+                `Hi ${booking.rider.name ?? 'rider'}! This is ${booking.scooters?.name ?? 'your scooter'} shop on Koh Ride regarding your booking from ${booking.start_date} to ${booking.end_date}.`
               )}`
             : null
 

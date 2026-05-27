@@ -1,6 +1,6 @@
 {
-  "name": "Ride Phuket",
-  "short_name": "Ride Phuket",
+  "name": "Koh Ride",
+  "short_name": "Koh Ride",
   "description": "Find and contact scooter shops directly in Phuket. No booking fees.",
   "start_url": "/",
   "display": "standalone",

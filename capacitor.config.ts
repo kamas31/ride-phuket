@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'com.ridephuket.app',
-  appName: 'Ride Phuket',
+  appId: 'com.kohride.app',
+  appName: 'Koh Ride',
 
   // webDir is required by cap sync even in remote-URL mode.
   // The dist/index.html placeholder satisfies the tooling; the app
@@ -12,7 +12,7 @@ const config: CapacitorConfig = {
   server: {
     // Remote URL mode: WKWebView loads the live production app.
     // No static export required — all SSR routes remain on Vercel.
-    url: 'https://ridephuket.com',
+    url: 'https://kohride.com',
     cleartext: false,
   },
 
@@ -24,7 +24,7 @@ const config: CapacitorConfig = {
     backgroundColor: '#ffffff',
     allowsLinkPreview: false,
     // Append to User-Agent so server analytics can segment native traffic
-    appendUserAgent: 'RidePhuket-iOS',
+    appendUserAgent: 'KohRide-iOS',
   },
 
   plugins: {

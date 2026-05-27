@@ -142,7 +142,7 @@ function LoginForm() {
               ) : (
                 <>
                   <h1 className="text-[22px] font-bold text-[#0f0f0e] mb-1">Welcome back</h1>
-                  <p className="text-sm text-[#9c9c98] mb-6">Sign in to your Ride Phuket account.</p>
+                  <p className="text-sm text-[#9c9c98] mb-6">Sign in to your Koh Ride account.</p>
 
                   {/* Google OAuth — hidden on native iOS (WKWebView blocked by Google) */}
                   {!isNative && (

@@ -10,7 +10,7 @@ const BENEFITS = [
   {
     icon: Shield,
     title: 'Verified Shops Only',
-    description: 'Every rental partner is personally vetted by our team. Only trusted local shops make it onto Ride Phuket.',
+    description: 'Every rental partner is personally vetted by our team. Only trusted local shops make it onto Koh Ride.',
     color: 'bg-[#f0fdf4] text-[#16a34a]',
   },
   {
@@ -228,13 +228,13 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* ── HOW RIDE PHUKET WORKS ── */}
+      {/* ── HOW KOH RIDE WORKS ── */}
       <section className="bg-[#f8f8f6] border-b border-[#e8e8e4] py-14 md:py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-3">How it works</p>
             <h2 className="text-[28px] md:text-[38px] font-bold text-[#0f0f0e] leading-tight tracking-tight">
-              How Ride Phuket Works
+              How Koh Ride Works
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-10">
@@ -366,7 +366,7 @@ export default async function HomePage() {
             </div>
           ) : (
             <div className="text-center py-12 bg-white rounded-[20px] border border-[#e8e8e4]">
-              <p className="text-[#5c5c58] font-medium mb-1">New rental partners are joining Ride Phuket.</p>
+              <p className="text-[#5c5c58] font-medium mb-1">New rental partners are joining Koh Ride.</p>
               <p className="text-[#9c9c98] text-sm">Check back soon — or browse all available scooters now.</p>
             </div>
           )}
@@ -376,7 +376,7 @@ export default async function HomePage() {
       {/* ── BENEFITS ── */}
       <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
         <div className="text-center mb-10">
-          <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-2">Why Ride Phuket</p>
+          <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-2">Why Koh Ride</p>
           <h2 className="text-[26px] md:text-[34px] font-bold text-[#0f0f0e] leading-tight tracking-tight">
             Street rentals are a gamble.{' '}
             <span className="text-[#FF6B35]">We&apos;re not.</span>

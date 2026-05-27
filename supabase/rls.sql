@@ -1,5 +1,5 @@
 -- ============================================================
--- Ride Phuket — Row Level Security Policies
+-- Koh Ride — Row Level Security Policies
 -- ============================================================
 -- Run AFTER schema.sql
 

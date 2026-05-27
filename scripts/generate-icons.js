@@ -6,8 +6,8 @@ const fs    = require('fs')
 const path  = require('path')
 
 const ROOT        = path.join(__dirname, '..')
-const SRC_FULL    = path.join(ROOT, 'exports', 'Ride Phuket Icon 1024.png')
-const SRC_IOS     = path.join(ROOT, 'exports', 'Ride Phuket Icon iOS 1024.png')
+const SRC_FULL    = path.join(ROOT, 'exports', 'Koh Ride Icon 1024.png')
+const SRC_IOS     = path.join(ROOT, 'exports', 'Koh Ride Icon iOS 1024.png')
 const PUBLIC_ICONS = path.join(ROOT, 'public', 'icons')
 
 async function main () {

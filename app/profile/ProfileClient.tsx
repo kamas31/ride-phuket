@@ -284,7 +284,7 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
         </div>
 
         <p className="text-center text-xs text-[#9c9c98] pb-4">
-          Ride Phuket · <span className="capitalize">{profile?.role?.replace('_', ' ') ?? 'rider'}</span> account
+          Koh Ride · <span className="capitalize">{profile?.role?.replace('_', ' ') ?? 'rider'}</span> account
         </p>
       </div>
     </div>

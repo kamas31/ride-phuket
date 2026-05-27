@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Ride Phuket — Full Integration Test Suite
+ * Koh Ride — Full Integration Test Suite
  * Tests: tables, auth, booking insert, partner insert, data reads
  */
 require('dotenv').config({ path: '.env.local' })
@@ -29,7 +29,7 @@ function section(title) { console.log(`\n── ${title} ${'─'.repeat(40 - tit
 
 async function main() {
   console.log('\n╔══════════════════════════════════════════════╗')
-  console.log('║  Ride Phuket — Full Integration Test Suite  ║')
+  console.log('║  Koh Ride — Full Integration Test Suite  ║')
   console.log('╚══════════════════════════════════════════════╝')
 
   // ── 1. ENV ──────────────────────────────────────────────
@@ -64,7 +64,7 @@ async function main() {
   let testUserId = null
 
   // Create test user via admin (bypasses email validation)
-  const testEmail = `ci-test-${Date.now()}@ridephuket.co`
+  const testEmail = `ci-test-${Date.now()}@kohride.co`
   const { data: signupData, error: signupErr } = await supabaseAdmin.auth.admin.createUser({
     email: testEmail,
     password: 'TestPass123!',

@@ -333,7 +333,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   </a>
                 )}
                 {shop.whatsapp && (
-                  <a href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Ride Phuket and I'm interested.`)}`}
+                  <a href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[#f0fdf4] border border-[#22c55e]/20 text-sm font-semibold text-[#16a34a] hover:bg-[#dcfce7] transition-colors">
                     <MessageCircle className="w-4 h-4" />WhatsApp
@@ -447,7 +447,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   {/* Primary CTA — WhatsApp */}
                   {shop.whatsapp ? (
                     <a
-                      href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Ride Phuket and I'm interested.`)}`}
+                      href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
                       target="_blank" rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2.5 w-full py-4 bg-[#16a34a] text-white font-bold rounded-full hover:bg-[#15803d] transition-all text-base shadow-sm hover:shadow-[0_8px_24px_rgba(22,163,74,0.35)] hover:scale-[1.01] active:scale-[0.99]"
                     >
@@ -484,7 +484,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> Local</span>
                   </div>
                   <p className="text-center text-[10px] text-[#c0c0bc] pt-1 leading-relaxed">
-                    Ride Phuket is a discovery marketplace — rental terms are arranged directly with the shop.
+                    Koh Ride is a discovery marketplace — rental terms are arranged directly with the shop.
                   </p>
                 </div>
               </div>

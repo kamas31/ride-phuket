@@ -31,7 +31,7 @@ export function UpgradeTeaser({ feature, plan = 'pro', className }: UpgradeTease
           {feature}
         </p>
         <a
-          href="mailto:hello@ridephuket.com"
+          href="mailto:hello@kohride.com"
           className="mt-2.5 text-[10px] text-[#FF6B35] hover:underline"
         >
           Contact us to unlock

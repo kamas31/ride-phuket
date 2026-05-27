@@ -1,15 +1,13 @@
 import { Shield, Check } from 'lucide-react'
 
-// RidePhuketProtection — informational trust block shown on scooter detail page.
-
-interface RidePhuketProtectionProps {
+interface KohRideProtectionProps {
   depositProtected?: boolean
   verified?: boolean
 }
 
 const BASE_ITEMS = [
   'Verified rental partner',
-  'Listed on Ride Phuket marketplace',
+  'Listed on Koh Ride marketplace',
   'Real availability confirmed directly',
   'Flexible cancellation — confirm with shop',
   'Direct WhatsApp contact 24/7',
@@ -20,10 +18,10 @@ const DEPOSIT_ITEMS = [
   'Pre/post-rental photo evidence',
 ]
 
-export function RidePhuketProtection({
+export function KohRideProtection({
   depositProtected = false,
   verified = false,
-}: RidePhuketProtectionProps) {
+}: KohRideProtectionProps) {
   const items = [
     ...BASE_ITEMS,
     ...(depositProtected ? DEPOSIT_ITEMS : []),

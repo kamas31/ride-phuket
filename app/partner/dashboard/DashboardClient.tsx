@@ -209,7 +209,7 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
               <div>
                 <p className="text-[13px] font-bold text-[#92400e]">Founding Partner — all features active</p>
                 <p className="text-[11px] text-[#b45309] mt-0.5">
-                  You have free access to all Pro features while Ride Phuket grows.
+                  You have free access to all Pro features while Koh Ride grows.
                 </p>
               </div>
             </div>

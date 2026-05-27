@@ -1,8 +1,8 @@
-APP STORE REVIEW NOTES — Ride Phuket
+APP STORE REVIEW NOTES — Koh Ride
 ====================================
 
 WHAT THIS APP IS
-Ride Phuket is a scooter rental MARKETPLACE/DIRECTORY for Phuket, Thailand.
+Koh Ride is a scooter rental MARKETPLACE/DIRECTORY for Phuket, Thailand.
 It is NOT a booking platform. It does NOT process payments.
 It does NOT facilitate in-app reservations.
 
@@ -35,7 +35,7 @@ KEY FLOWS TO TEST
 3. CONTACT A SHOP
    - Tap "Message on WhatsApp" on any scooter detail page
    - Opens WhatsApp with pre-filled message to the shop
-   - This is a direct external link — Ride Phuket does not intermediate
+   - This is a direct external link — Koh Ride does not intermediate
 
 4. PARTNER DASHBOARD (shop owner account)
    - Sign in with shop owner account
@@ -44,7 +44,7 @@ KEY FLOWS TO TEST
    - Toggle scooter availability in real time
 
 NOTES FOR REVIEWER
-- The "Contact us to unlock" link in the analytics section opens an email to hello@ridephuket.com
+- The "Contact us to unlock" link in the analytics section opens an email to hello@kohride.com
   This is for partner plan upgrades — there is no in-app purchase flow
 - WhatsApp links use standard wa.me deep links — requires WhatsApp installed on device
 - If WhatsApp is not installed, the link opens in Safari (wa.me web fallback)

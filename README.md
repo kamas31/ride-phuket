@@ -1,4 +1,4 @@
-# Ride Phuket
+# Koh Ride
 
 **Premium scooter rental marketplace for Phuket, Thailand.**
 

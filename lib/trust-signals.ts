@@ -1,4 +1,4 @@
-// Trust Signal Engine V1 — Ride Phuket Marketplace Trust Layer.
+// Trust Signal Engine V1 — Koh Ride Marketplace Trust Layer.
 //
 // Generates soft, POSITIVE trust signals from observable shop/scooter data.
 // No scores, no ratings, no negative states.
@@ -10,7 +10,7 @@
 //
 // Future hooks (V2):
 //   - 'top_partner'       → response rate > threshold + verified + active
-//   - 'deposit_protected' → enrolled in Ride Phuket Deposit Protection
+//   - 'deposit_protected' → enrolled in Koh Ride Deposit Protection
 //   - 'fast_responder'    → average reply time < 10 min (from WA event timestamps)
 //   - 'repeat_favorite'   → repeat visitor rate > zone average
 //   - 'seasonal_popular'  → high-season demand surge detection
@@ -128,7 +128,7 @@ function marketplaceSignals({ shop, analytics }: TrustSignalInput): TrustSignal[
 
   // Established — account older than 90 days
   if (shop.createdAt && daysSince(shop.createdAt) >= 90) {
-    out.push({ id: 'established', label: 'Established on Ride Phuket', icon: 'shield', tone: 'neutral', priority: 70 })
+    out.push({ id: 'established', label: 'Established on Koh Ride', icon: 'shield', tone: 'neutral', priority: 70 })
   }
 
   // Always show local partner as a reassuring baseline

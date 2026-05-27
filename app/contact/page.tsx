@@ -57,7 +57,7 @@ function ContactShopContent() {
 
   const waUrl = shop?.whatsapp
     ? `https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(
-        `Hi! I found your ${scooter!.name} on Ride Phuket and I'd like to arrange a rental.`
+        `Hi! I found your ${scooter!.name} on Koh Ride and I'd like to arrange a rental.`
       )}`
     : null
 
@@ -97,10 +97,10 @@ function ContactShopContent() {
 
         {/* How it works */}
         <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-5">
-          <p className="text-[13px] font-bold text-[#0f0f0e] mb-3">How Ride Phuket works</p>
+          <p className="text-[13px] font-bold text-[#0f0f0e] mb-3">How Koh Ride works</p>
           <div className="space-y-2.5">
             {[
-              'Ride Phuket connects you with local rental shops — we are not the shop.',
+              'Koh Ride connects you with local rental shops — we are not the shop.',
               'Rental terms, deposit, and payment are arranged directly between you and the shop.',
               'No platform fees, no online payment, no reservation to manage.',
             ].map(item => (

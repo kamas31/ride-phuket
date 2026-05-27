@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Ride Phuket — Database Migration Script
+ * Koh Ride — Database Migration Script
  *
  * Runs schema.sql + rls.sql + (optionally) seed.sql against Supabase.
  *

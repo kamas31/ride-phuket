@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
 export const metadata = {
-  title: 'Privacy Policy — Ride Phuket',
-  description: 'Privacy Policy for Ride Phuket. How we collect, use, and protect your information.',
+  title: 'Privacy Policy — Koh Ride',
+  description: 'Privacy Policy for Koh Ride. How we collect, use, and protect your information.',
 }
 
 const LAST_UPDATED = 'May 2025'
@@ -30,7 +30,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">1. Overview</h2>
               <p>
-                Ride Phuket (&ldquo;we&rdquo;, &ldquo;us&rdquo;) is a scooter rental discovery
+                Koh Ride (&ldquo;we&rdquo;, &ldquo;us&rdquo;) is a scooter rental discovery
                 platform based in Phuket, Thailand. This policy explains what data we collect,
                 how we use it, and your rights regarding it.
               </p>
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
               <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">4. Data Sharing</h2>
               <p className="mb-3">
                 Your personal information is not shared with rental shops. When you contact a shop
-                via WhatsApp, you initiate that conversation directly — Ride Phuket is not involved
+                via WhatsApp, you initiate that conversation directly — Koh Ride is not involved
                 in that exchange.
               </p>
               <p>
@@ -122,7 +122,7 @@ export default function PrivacyPage() {
           <div className="mt-10 pt-6 border-t border-[#f0f0ec] flex items-center gap-4 text-sm text-[#9c9c98]">
             <Link href="/terms" className="hover:text-[#0f0f0e] transition-colors">Terms of Service</Link>
             <span>·</span>
-            <Link href="/" className="hover:text-[#0f0f0e] transition-colors">Back to Ride Phuket</Link>
+            <Link href="/" className="hover:text-[#0f0f0e] transition-colors">Back to Koh Ride</Link>
           </div>
         </div>
       </div>

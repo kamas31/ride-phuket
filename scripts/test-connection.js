@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Ride Phuket — Supabase Connection & Auth Test
+ * Koh Ride — Supabase Connection & Auth Test
  * node scripts/test-connection.js
  */
 require('dotenv').config({ path: '.env.local' })
@@ -12,7 +12,7 @@ const SVC  = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 async function test() {
   console.log('\n═══════════════════════════════════════')
-  console.log('  Ride Phuket — Supabase Connection Test')
+  console.log('  Koh Ride — Supabase Connection Test')
   console.log('═══════════════════════════════════════\n')
 
   // 1. Env vars
@@ -65,7 +65,7 @@ async function test() {
 
   // 6. Sign-up test (creates + deletes a test user)
   console.log('\n5. Auth sign-up flow')
-  const testEmail = `test-${Date.now()}@ridephuket-test.com`
+  const testEmail = `test-${Date.now()}@kohride-test.com`
   try {
     const { data, error } = await supabase.auth.signUp({
       email: testEmail,

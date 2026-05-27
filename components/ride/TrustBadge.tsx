@@ -23,7 +23,7 @@ export type TrustBadgeVariant =
   | 'new_partner'
   | 'fast_response'
   // Deposit protection (v2)
-  | 'deposit_protected'    // shop enrolled in Ride Phuket Deposit Protection
+  | 'deposit_protected'    // shop enrolled in Koh Ride Deposit Protection
   | 'no_passport'          // no passport needed (standard scooters)
   | 'premium_deposit'      // passport required — legit for 500cc+ / high-value bikes
   | 'passport_copy'        // passport copy accepted (not original)

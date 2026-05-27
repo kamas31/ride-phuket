@@ -1,5 +1,5 @@
 -- ============================================================
--- Ride Phuket — Seed Data (Dev/Staging)
+-- Koh Ride — Seed Data (Dev/Staging)
 -- ============================================================
 
 -- Insert demo shops

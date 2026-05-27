@@ -48,7 +48,7 @@ const TEMPLATES: Record<WATemplate, (ctx: WAContext) => string> = {
   booking_confirm: ctx =>
     [
       `Hi${ctx.shopName ? ` ${ctx.shopName}` : ''}!`,
-      `I just booked the ${ctx.scooterName ?? 'scooter'} on Ride Phuket`,
+      `I just booked the ${ctx.scooterName ?? 'scooter'} on Koh Ride`,
       ctx.startDate && ctx.endDate ? `from ${ctx.startDate} to ${ctx.endDate}` : '',
       ctx.bookingRef ? `(Ref: ${ctx.bookingRef}).` : '.',
       'Could you please confirm the details? Thank you!',
@@ -56,17 +56,17 @@ const TEMPLATES: Record<WATemplate, (ctx: WAContext) => string> = {
 
   ask_delivery: ctx =>
     [
-      `Hi! I'm looking at the ${ctx.scooterName ?? 'scooter'} on Ride Phuket.`,
+      `Hi! I'm looking at the ${ctx.scooterName ?? 'scooter'} on Koh Ride.`,
       ctx.location
         ? `Is hotel delivery available to ${ctx.location}? What's the fee?`
         : 'Is hotel delivery available? What areas do you cover and what\'s the fee?',
     ].join(' '),
 
   ask_deposit: ctx =>
-    `Hi! I'm interested in renting the ${ctx.scooterName ?? 'scooter'} on Ride Phuket. What deposit do you require, and is it cash on delivery?`,
+    `Hi! I'm interested in renting the ${ctx.scooterName ?? 'scooter'} on Koh Ride. What deposit do you require, and is it cash on delivery?`,
 
   ask_license: ctx =>
-    `Hi! I'd like to rent the ${ctx.scooterName ?? 'scooter'} on Ride Phuket. What driving license is required? Is an international license acceptable?`,
+    `Hi! I'd like to rent the ${ctx.scooterName ?? 'scooter'} on Koh Ride. What driving license is required? Is an international license acceptable?`,
 
   ask_extension: ctx =>
     [
@@ -82,14 +82,14 @@ const TEMPLATES: Record<WATemplate, (ctx: WAContext) => string> = {
       ctx.startDate && ctx.endDate
         ? `from ${ctx.startDate} to ${ctx.endDate}?`
         : 'for the dates I need?',
-      'I found it on Ride Phuket.',
+      'I found it on Koh Ride.',
     ].join(' '),
 
   ask_monthly: ctx =>
-    `Hi! I'm interested in a long-term rental of the ${ctx.scooterName ?? 'scooter'} on Ride Phuket. What's the monthly rate and what's included?`,
+    `Hi! I'm interested in a long-term rental of the ${ctx.scooterName ?? 'scooter'} on Koh Ride. What's the monthly rate and what's included?`,
 
   general_inquiry: ctx =>
-    `Hi${ctx.shopName ? ` ${ctx.shopName}` : ''}! I found your shop on Ride Phuket and I'm interested in renting${ctx.scooterName ? ` the ${ctx.scooterName}` : ' a scooter'}. Could you help me?`,
+    `Hi${ctx.shopName ? ` ${ctx.shopName}` : ''}! I found your shop on Koh Ride and I'm interested in renting${ctx.scooterName ? ` the ${ctx.scooterName}` : ' a scooter'}. Could you help me?`,
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

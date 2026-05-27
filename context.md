@@ -1,8 +1,8 @@
-# Ride Phuket — Product Context
+# Koh Ride — Product Context
 
 ## Product Vision
 
-Ride Phuket is the premium scooter rental marketplace for Phuket, Thailand.
+Koh Ride is the premium scooter rental marketplace for Phuket, Thailand.
 
 Think: **Airbnb meets Uber for scooter rentals.** A platform where tourists and expats can:
 - Discover available scooters on a map
@@ -158,7 +158,7 @@ Design principles:
 - Branch preview: every PR gets a preview URL
 - Production: auto-deploy from `main`
 - Environment variables: set in Vercel dashboard
-- Domain: ridephuket.com (to be purchased)
+- Domain: kohride.com (to be purchased)
 
 ---
 

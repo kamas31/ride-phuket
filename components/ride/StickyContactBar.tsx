@@ -43,7 +43,7 @@ export function StickyContactBar({
   }, [])
 
   const waUrl = shopWhatsapp
-    ? `https://wa.me/${shopWhatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I'm interested in the ${scooterName} I found on Ride Phuket. Is it available?`)}`
+    ? `https://wa.me/${shopWhatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I'm interested in the ${scooterName} I found on Koh Ride. Is it available?`)}`
     : null
 
   return (

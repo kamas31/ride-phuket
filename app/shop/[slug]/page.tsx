@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: ShopPageProps) {
   const data = await getShopBySlug(slug)
   if (!data) return {}
 
-  const title = `Scooter Rental in ${data.location} | ${data.name} — Ride Phuket`
+  const title = `Scooter Rental in ${data.location} | ${data.name} — Koh Ride`
   const description = data.description ||
     `Rent scooters from ${data.name} in ${data.location}, Phuket. ${data.scooters.length} scooters available. Contact directly on WhatsApp.`
 

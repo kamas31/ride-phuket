@@ -5,8 +5,8 @@ import { getSavedScooters, getSavedRideIds } from '@/app/actions/saved-rides'
 import { SavedRidesContent } from './SavedRidesContent'
 
 export const metadata = {
-  title: 'Saved rides — Ride Phuket',
-  description: 'Your saved scooters on Ride Phuket. Compare listings and contact shops when you\'re ready.',
+  title: 'Saved rides — Koh Ride',
+  description: 'Your saved scooters on Koh Ride. Compare listings and contact shops when you\'re ready.',
 }
 
 export default async function SavedPage() {
