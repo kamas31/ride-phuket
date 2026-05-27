@@ -17,20 +17,28 @@ const DARK   = { r: 32,  g: 43,  b: 45,  alpha: 1 }  // #202B2D
 const ORANGE = { r: 255, g: 107, b: 53,  alpha: 1 }  // #FF6B35
 const WHITE  = { r: 255, g: 255, b: 255, alpha: 1 }
 
-// Resize the mark to `logoSize` px, then composite centred on a `canvasSize` solid canvas.
+// Resize the mark to `logoSize` px, then composite on a `canvasSize` solid canvas.
+// Applies a corrective offset to centre by visual centre-of-mass rather than bounding box.
+// Offsets measured from master (2048×2048): mass is 45 px left / 15 px up of bbox centre
+// after trim — so we shift composite right + down proportionally.
 async function iconOnBg(logoSize, canvasSize, bg) {
-  const logo = await sharp(MASTER)
+  const trimmed = await sharp(MASTER).trim({ threshold: 10 }).toBuffer()
+
+  const logo = await sharp(trimmed)
     .resize(logoSize, logoSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .ensureAlpha()
     .png()
     .toBuffer()
 
-  const pad = Math.round((canvasSize - logoSize) / 2)
+  const basePad   = Math.round((canvasSize - logoSize) / 2)
+  const trimW     = 776  // trimmed mark width in master pixels
+  const corrLeft  = Math.round(45 * logoSize / trimW)  // shift right to centre mass
+  const corrTop   = Math.round(15 * logoSize / trimW)  // shift down  to centre mass
 
   return sharp({
     create: { width: canvasSize, height: canvasSize, channels: 4, background: bg },
   })
-    .composite([{ input: logo, top: pad, left: pad }])
+    .composite([{ input: logo, top: basePad + corrTop, left: basePad + corrLeft }])
     .png()
 }
 
