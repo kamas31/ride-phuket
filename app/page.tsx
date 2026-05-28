@@ -228,15 +228,23 @@ export default async function HomePage() {
       </div>
 
       {/* ── HOW KOH RIDE WORKS ── */}
-      <section className="bg-[#f8f8f6] border-b border-[#e8e8e4] py-14 md:py-20">
+      <section className="bg-[#f8f8f6] border-b border-[#e8e8e4] py-20 md:py-28">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-3">How it works</p>
-            <h2 className="text-[28px] md:text-[38px] font-bold text-[#0f0f0e] leading-tight tracking-tight">
+
+          {/* Header */}
+          <div className="text-center mb-14 md:mb-16">
+            <p className="text-[11px] font-semibold text-[#FF6B35] uppercase tracking-[0.22em] mb-4">How it works</p>
+            <h2 className="text-[32px] md:text-[48px] font-bold text-[#0f0f0e] leading-[1.1] tracking-[-0.03em] mb-5">
               How Koh Ride Works
             </h2>
+            <p className="text-[#9c9c98] text-[16px] max-w-[34ch] mx-auto leading-relaxed">
+              Rent a scooter in Phuket the simple way.
+              Direct, fast, and hassle-free.
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-10">
+
+          {/* Steps */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 mb-14">
             {([
               {
                 n: '01', icon: Search, label: 'Find',
@@ -250,34 +258,40 @@ export default async function HomePage() {
                 n: '03', icon: Bike, label: 'Ride',
                 body: 'Collect your scooter from the shop and explore Phuket on your own terms.',
               },
-            ] as const).map((step, i, arr) => (
-              <div key={step.n} className="relative bg-white rounded-[20px] border border-[#e8e8e4] p-6 md:p-7">
-                {i < arr.length - 1 && (
-                  <div className="hidden md:block absolute top-9 -right-3 text-[#d0d0cc] text-lg select-none z-10">›</div>
-                )}
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 bg-[#fff4f0] rounded-[12px] flex items-center justify-center flex-shrink-0">
+            ] as const).map(step => (
+              <div
+                key={step.n}
+                className="bg-white rounded-[24px] border border-[#ebebea] p-7 md:p-8
+                           shadow-[0_2px_12px_-3px_rgba(0,0,0,0.07),0_1px_3px_-1px_rgba(0,0,0,0.04)]
+                           hover:shadow-[0_10px_36px_-8px_rgba(0,0,0,0.12),0_2px_8px_-2px_rgba(0,0,0,0.06)]
+                           hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <div className="flex items-start justify-between mb-7">
+                  <div className="w-[46px] h-[46px] bg-gradient-to-br from-[#fff4f0] to-[#ffe8de] rounded-[14px] flex items-center justify-center flex-shrink-0">
                     <step.icon className="w-5 h-5 text-[#FF6B35]" strokeWidth={1.5} />
                   </div>
-                  <span className="text-[11px] font-bold text-[#c0c0bc] tracking-[0.15em] uppercase">{step.n}</span>
+                  <span className="text-[11px] font-bold text-[#d4d4d0] tracking-[0.14em] mt-1">{step.n}</span>
                 </div>
-                <h3 className="text-[18px] font-bold text-[#0f0f0e] mb-2">{step.label}</h3>
-                <p className="text-[#5c5c58] text-[14px] leading-relaxed">{step.body}</p>
+                <h3 className="text-[20px] font-bold text-[#0f0f0e] mb-3 tracking-tight">{step.label}</h3>
+                <p className="text-[#5c5c58] text-[14px] leading-[1.75]">{step.body}</p>
               </div>
             ))}
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2.5">
+
+          {/* Reassurance strip */}
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
             {([
               'No platform fees',
               'No online payment',
               'Direct local contact',
             ] as const).map(text => (
-              <div key={text} className="flex items-center gap-2 text-[13px] text-[#5c5c58]">
+              <div key={text} className="flex items-center gap-2 text-[13px] text-[#9c9c98]">
                 <Check className="w-3.5 h-3.5 text-[#22c55e] flex-shrink-0" strokeWidth={2.5} />
                 <span className="font-medium">{text}</span>
               </div>
             ))}
           </div>
+
         </div>
       </section>
 
