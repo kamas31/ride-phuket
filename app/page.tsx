@@ -243,51 +243,93 @@ export default async function HomePage() {
             </p>
           </div>
 
-          {/* Steps */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 mb-14">
+          {/* Steps — flex row with arrow connectors on desktop */}
+          <div className="flex flex-col md:flex-row items-stretch gap-8 md:gap-0 mb-10">
             {([
               {
                 n: '01', icon: Search, label: 'Find',
-                body: 'Browse scooter rentals across Phuket — filter by area, model, and price.',
+                body: 'Browse scooters across Phuket and filter by area, model, and price.',
               },
               {
                 n: '02', icon: MessageCircle, label: 'Contact',
-                body: 'Message rental shops directly on WhatsApp. No forms, no platform — just direct conversation.',
+                body: 'Message rental shops directly on WhatsApp. No forms, no platform — just real conversation.',
               },
               {
                 n: '03', icon: Bike, label: 'Ride',
                 body: 'Collect your scooter from the shop and explore Phuket on your own terms.',
               },
-            ] as const).map(step => (
-              <div
-                key={step.n}
-                className="bg-white rounded-[24px] border border-[#ebebea] p-7 md:p-8
-                           shadow-[0_2px_12px_-3px_rgba(0,0,0,0.07),0_1px_3px_-1px_rgba(0,0,0,0.04)]
-                           hover:shadow-[0_10px_36px_-8px_rgba(0,0,0,0.12),0_2px_8px_-2px_rgba(0,0,0,0.06)]
-                           hover:-translate-y-0.5 transition-all duration-300"
-              >
-                <div className="flex items-start justify-between mb-7">
-                  <div className="w-[46px] h-[46px] bg-gradient-to-br from-[#fff4f0] to-[#ffe8de] rounded-[14px] flex items-center justify-center flex-shrink-0">
-                    <step.icon className="w-5 h-5 text-[#FF6B35]" strokeWidth={1.5} />
+            ] as const).flatMap((step, i) => {
+              const card = (
+                <div
+                  key={step.n}
+                  className="md:flex-1 relative bg-white rounded-[28px] pt-14 pb-8 px-6 text-center
+                             border border-[#f0f0ec]
+                             shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)]"
+                >
+                  {/* Numbered bubble — overlaps card top edge */}
+                  <div
+                    className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10
+                               w-11 h-11 bg-[#FF6B35] rounded-full
+                               flex items-center justify-center"
+                    style={{ boxShadow: '0 0 0 3px #f8f8f6, 0 4px 14px rgba(255,107,53,0.40)' }}
+                  >
+                    <span className="text-white font-bold text-sm leading-none">{step.n}</span>
                   </div>
-                  <span className="text-[11px] font-bold text-[#d4d4d0] tracking-[0.14em] mt-1">{step.n}</span>
+
+                  {/* Illustration area */}
+                  <div className="flex items-center justify-center h-36 mb-5">
+                    <div className="relative w-28 h-28 flex items-center justify-center">
+                      <div
+                        className="absolute inset-0 rounded-full"
+                        style={{ background: 'radial-gradient(circle at 50% 55%, #ffd5c2 0%, #ffe8dc 42%, #fff4f0 65%, transparent 82%)' }}
+                      />
+                      <step.icon className="relative w-16 h-16 text-[#FF6B35]" strokeWidth={1} />
+                    </div>
+                  </div>
+
+                  <h3 className="text-[19px] font-bold text-[#0f0f0e] mb-2.5 tracking-tight">{step.label}</h3>
+                  <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">{step.body}</p>
                 </div>
-                <h3 className="text-[20px] font-bold text-[#0f0f0e] mb-3 tracking-tight">{step.label}</h3>
-                <p className="text-[#5c5c58] text-[14px] leading-[1.75]">{step.body}</p>
-              </div>
-            ))}
+              )
+
+              if (i < 2) {
+                return [
+                  card,
+                  <div
+                    key={`arrow-${i}`}
+                    className="hidden md:flex items-center justify-center w-14 flex-shrink-0"
+                  >
+                    <div
+                      className="w-9 h-9 bg-[#FF6B35] rounded-full flex items-center justify-center"
+                      style={{ boxShadow: '0 4px 14px rgba(255,107,53,0.30)' }}
+                    >
+                      <ChevronRight className="w-[18px] h-[18px] text-white" strokeWidth={2.5} />
+                    </div>
+                  </div>,
+                ]
+              }
+              return [card]
+            })}
           </div>
 
-          {/* Reassurance strip */}
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          {/* Reassurance bar */}
+          <div
+            className="flex flex-wrap md:flex-nowrap items-center justify-center gap-y-3
+                       bg-white rounded-[18px] border border-[#e8e8e4] px-6 md:px-8 py-4"
+            style={{ boxShadow: '0 1px 6px -1px rgba(0,0,0,0.05)' }}
+          >
             {([
-              'No platform fees',
-              'No online payment',
-              'Direct local contact',
-            ] as const).map(text => (
-              <div key={text} className="flex items-center gap-2 text-[13px] text-[#9c9c98]">
-                <Check className="w-3.5 h-3.5 text-[#22c55e] flex-shrink-0" strokeWidth={2.5} />
-                <span className="font-medium">{text}</span>
+              { icon: Check,         text: 'No platform fees',        color: 'text-[#22c55e]' },
+              { icon: Check,         text: 'No online payment',       color: 'text-[#22c55e]' },
+              { icon: MessageCircle, text: 'Direct local contact',    color: 'text-[#22c55e]' },
+              { icon: MapPin,        text: 'Shops across all Phuket', color: 'text-[#FF6B35]' },
+            ] as const).map((item, i) => (
+              <div key={item.text} className="flex items-center">
+                {i > 0 && <div className="hidden md:block w-px h-4 bg-[#e8e8e4] mx-6 flex-shrink-0" />}
+                <div className="flex items-center gap-1.5 text-[13px] text-[#5c5c58] font-medium whitespace-nowrap">
+                  <item.icon className={`w-3.5 h-3.5 flex-shrink-0 ${item.color}`} strokeWidth={2} />
+                  {item.text}
+                </div>
               </div>
             ))}
           </div>
