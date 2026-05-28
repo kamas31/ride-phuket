@@ -2,7 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, LogOut, ChevronDown } from 'lucide-react'
+import {
+  Menu, X, LogOut, ChevronDown,
+  Home, Bike, Heart, BookOpen,
+  LayoutDashboard, ToggleRight, Store, Plus,
+  User, FileText, Shield, HelpCircle,
+} from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { SITE_NAME } from '@/constants'
@@ -24,6 +29,38 @@ function NavLink({ href, label, active, isHero }: {
           : 'text-[#5c5c58] hover:text-[#0f0f0e] hover:bg-[#f8f8f6]'
       )}
     >
+      {label}
+    </Link>
+  )
+}
+
+function DrawerLink({
+  href, icon: Icon, label, pathname, onClick,
+}: {
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  pathname: string
+  onClick: () => void
+}) {
+  const active = pathname === href || (href !== '/' && pathname.startsWith(href + '/'))
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className={cn(
+        'flex items-center gap-3 px-3 py-3 rounded-[12px] text-sm font-medium transition-colors',
+        active
+          ? 'bg-[#fff4f0] text-[#FF6B35]'
+          : 'text-[#0f0f0e] hover:bg-[#f8f8f6] active:bg-[#f0f0ec]'
+      )}
+    >
+      <span className={cn(
+        'w-8 h-8 rounded-[9px] flex items-center justify-center flex-shrink-0',
+        active ? 'bg-[#FF6B35]/10' : 'bg-[#f0f0ec]'
+      )}>
+        <Icon className={cn('w-4 h-4', active ? 'text-[#FF6B35]' : 'text-[#5c5c58]')} />
+      </span>
       {label}
     </Link>
   )
@@ -236,105 +273,108 @@ export default function Navbar() {
       {/* Mobile drawer */}
       {menuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setMenuOpen(false)} />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMenuOpen(false)} />
 
-          <div className="absolute top-0 right-0 bottom-0 w-72 bg-white shadow-2xl flex flex-col">
+          <div className="absolute top-0 right-0 bottom-0 w-[85vw] max-w-[340px] bg-white shadow-2xl flex flex-col">
 
-            {/* ── Notch / Dynamic Island spacer ── */}
+            {/* Safe-area top spacer */}
             <div aria-hidden="true" className="shrink-0" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
 
-            {/* ── Top panel — account identity or guest close row ──────────
-                Authenticated: full profile (avatar, name, email, role).
-                Guest: minimal row so the close button has space to breathe.
-                Close button is absolute top-right in both cases. */}
-            {user ? (
-              <div className="relative shrink-0 px-6 pt-5 pb-6">
-                <button
-                  onClick={() => setMenuOpen(false)}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-[#9c9c98] hover:bg-[#f0f0ec] hover:text-[#5c5c58] active:bg-[#e8e8e4] transition-colors"
-                  aria-label="Close menu"
-                >
-                  <X className="w-[18px] h-[18px]" />
-                </button>
+            {/* ── Header ── */}
+            <div className="shrink-0 flex items-center justify-between px-5 h-14 border-b border-[#f0f0ec]">
+              <div className="flex items-center gap-2.5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/icons/icon-nav.png" alt="Koh Ride" style={{ width: 28, height: 28 }} />
+                <span className="font-bold text-[15px] text-[#0f0f0e]">Koh Ride</span>
+              </div>
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-[#9c9c98] hover:bg-[#f0f0ec] active:bg-[#e8e8e4] transition-colors"
+                aria-label="Close menu"
+              >
+                <X className="w-[18px] h-[18px]" />
+              </button>
+            </div>
 
-                {/* Avatar */}
-                <div className="w-14 h-14 bg-[#FF6B35] rounded-full flex items-center justify-center text-white font-bold text-xl select-none">
+            {/* ── User identity (if logged in) ── */}
+            {user && (
+              <div className="shrink-0 flex items-center gap-3 px-5 py-4 border-b border-[#f0f0ec]">
+                <div className="w-10 h-10 bg-[#FF6B35] rounded-full flex items-center justify-center text-white font-bold text-[15px] flex-shrink-0 select-none">
                   {(profile?.name ?? user.email ?? 'U')[0].toUpperCase()}
                 </div>
-
-                {/* Name */}
-                <p className="font-bold text-[18px] text-[#0f0f0e] tracking-tight mt-3 leading-tight truncate pr-10">
-                  {profile?.name ?? user.email?.split('@')[0]}
-                </p>
-
-                {/* Email */}
-                <p className="text-[13px] text-[#9c9c98] mt-1 truncate">
-                  {user.email}
-                </p>
-
-                {/* Role badge */}
-                <div className="mt-3">
-                  <span className={cn(
-                    'inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider',
-                    isShopOwner
-                      ? 'bg-[#fff4f0] text-[#FF6B35]'
-                      : 'bg-[#f0f0ec] text-[#5c5c58]'
-                  )}>
-                    {isShopOwner ? 'Shop Owner' : 'Rider'}
-                  </span>
+                <div className="min-w-0">
+                  <p className="font-semibold text-[14px] text-[#0f0f0e] truncate leading-tight">
+                    {profile?.name ?? user.email?.split('@')[0]}
+                  </p>
+                  <p className="text-[11px] text-[#9c9c98] truncate mt-0.5">{user.email}</p>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-end px-5 h-[60px] shrink-0">
-                <button
-                  onClick={() => setMenuOpen(false)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-[#5c5c58] hover:bg-[#f0f0ec] active:bg-[#e8e8e4] transition-colors"
-                  aria-label="Close menu"
-                >
-                  <X className="w-[18px] h-[18px]" />
-                </button>
+                <span className={cn(
+                  'ml-auto flex-shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider',
+                  isShopOwner ? 'bg-[#fff4f0] text-[#FF6B35]' : 'bg-[#f0f0ec] text-[#5c5c58]'
+                )}>
+                  {isShopOwner ? 'Partner' : 'Rider'}
+                </span>
               </div>
             )}
 
-            {/* Separator between top panel and nav */}
-            <div aria-hidden="true" className="shrink-0 h-px bg-[#e8e8e4]" />
-
-            {/* ── Navigation links — scrollable if content overflows ── */}
+            {/* ── Navigation ── */}
             <nav
-              className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 flex flex-col gap-0.5"
+              className="flex-1 overflow-y-auto overscroll-contain px-3 py-3 space-y-5"
               style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
             >
-              {NAV_LINKS.map(link => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-4 rounded-[14px] text-sm font-medium transition-colors',
-                    pathname === link.href
-                      ? 'text-[#FF6B35] bg-[#fff4f0]'
-                      : 'text-[#0f0f0e] hover:bg-[#f8f8f6] active:bg-[#f0f0ec]'
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {/* MAIN */}
+              <div>
+                <p className="px-3 mb-1 text-[10px] font-bold text-[#9c9c98] uppercase tracking-widest">Main</p>
+                {[
+                  { href: '/',        icon: Home,      label: 'Home'            },
+                  { href: '/explore', icon: Bike,      label: 'Browse Scooters' },
+                  { href: '/saved',   icon: Heart,     label: 'Favorites'       },
+                ].map(item => (
+                  <DrawerLink key={item.href} {...item} pathname={pathname} onClick={() => setMenuOpen(false)} />
+                ))}
+              </div>
+
+              {/* PARTNER */}
+              {isShopOwner && (
+                <div>
+                  <p className="px-3 mb-1 text-[10px] font-bold text-[#9c9c98] uppercase tracking-widest">Partner</p>
+                  {[
+                    { href: '/partner/dashboard',    icon: LayoutDashboard, label: 'Dashboard'       },
+                    { href: '/partner/availability', icon: ToggleRight,     label: 'Availability'    },
+                    { href: '/partner/bookings',     icon: BookOpen,        label: 'Rental Requests' },
+                    { href: '/partner/shop',         icon: Store,           label: 'Shop Settings'   },
+                    { href: '/partner/scooters/new', icon: Plus,            label: 'Add Scooter'     },
+                  ].map(item => (
+                    <DrawerLink key={item.href} {...item} pathname={pathname} onClick={() => setMenuOpen(false)} />
+                  ))}
+                </div>
+              )}
+
+              {/* ACCOUNT */}
+              <div>
+                <p className="px-3 mb-1 text-[10px] font-bold text-[#9c9c98] uppercase tracking-widest">Account</p>
+                {user && (
+                  <DrawerLink href="/profile" icon={User} label="Profile" pathname={pathname} onClick={() => setMenuOpen(false)} />
+                )}
+                <DrawerLink href="/terms"   icon={FileText} label="Terms of Service" pathname={pathname} onClick={() => setMenuOpen(false)} />
+                <DrawerLink href="/privacy" icon={Shield}   label="Privacy Policy"   pathname={pathname} onClick={() => setMenuOpen(false)} />
+                {!user && (
+                  <DrawerLink href="/partner" icon={HelpCircle} label="List Your Scooters" pathname={pathname} onClick={() => setMenuOpen(false)} />
+                )}
+              </div>
             </nav>
 
-            {/* ── Auth footer — always visible, safe-area-aware ──────────
-                pb calc ensures content clears the home indicator on iPhone X+.
-                Sign Out uses red text (standard destructive pattern: Airbnb, Apple).
-                Guest state shows Sign In + primary CTA. */}
+            {/* ── Auth footer ── */}
             <div
-              className="px-4 pt-3 border-t border-[#e8e8e4] shrink-0 space-y-2"
+              className="shrink-0 px-3 pt-3 border-t border-[#e8e8e4] space-y-2"
               style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
             >
               {user ? (
                 <button
                   onClick={() => { setMenuOpen(false); signOut() }}
-                  className="w-full flex items-center gap-3 px-4 py-4 rounded-[14px] text-sm font-semibold text-[#ef4444] hover:bg-[#fef2f2] active:bg-[#fee2e2] transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-[14px] text-sm font-semibold text-[#ef4444] hover:bg-[#fef2f2] active:bg-[#fee2e2] transition-colors"
                 >
-                  <LogOut className="w-[18px] h-[18px]" />
+                  <LogOut className="w-4 h-4" />
                   Sign Out
                 </button>
               ) : (
@@ -342,14 +382,14 @@ export default function Navbar() {
                   <Link
                     href="/auth/login"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-center w-full py-4 border border-[#e8e8e4] rounded-[14px] text-sm font-semibold text-[#0f0f0e] hover:bg-[#f8f8f6] active:bg-[#f0f0ec] transition-colors"
+                    className="flex items-center justify-center w-full py-3.5 border border-[#e8e8e4] rounded-[14px] text-sm font-semibold text-[#0f0f0e] hover:bg-[#f8f8f6] active:bg-[#f0f0ec] transition-colors"
                   >
                     Sign In
                   </Link>
                   <Link
                     href={CTA.href}
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-center w-full py-4 bg-[#FF6B35] text-white text-sm font-semibold rounded-[14px] hover:bg-[#e85d29] active:bg-[#d4521f] transition-colors"
+                    className="flex items-center justify-center w-full py-3.5 bg-[#FF6B35] text-white text-sm font-semibold rounded-[14px] hover:bg-[#e85d29] active:bg-[#d4521f] transition-colors"
                   >
                     {CTA.label}
                   </Link>

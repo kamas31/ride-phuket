@@ -2,6 +2,7 @@
 
 import React, { useState, useTransition } from 'react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import {
   Bike, BookOpen, TrendingUp, Plus,
@@ -10,8 +11,8 @@ import {
   MessageCircle, Eye, RotateCcw, Phone, Store, Lightbulb, ShoppingBag,
 } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/client'
 import { deleteScooter } from '@/app/actions/scooter-delete'
+import { toggleScooterAvailability } from '@/app/actions/scooter-availability'
 import {
   PLAN_LABELS, FOUNDING_PARTNER_PERKS, isFoundingPartner,
   canAccessAdvancedAnalytics, canAccessHotScooters, canAccessLeadInsights,
@@ -93,18 +94,22 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
   }
 
   async function toggleAvailability(scooterId: string, current: boolean) {
+    // Optimistic update — instant UI feedback
+    setScooters(prev => prev.map(s =>
+      s.id === scooterId ? { ...s, available: !current } : s
+    ))
     setTogglingId(scooterId)
-    const supabase = createClient()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from('scooters')
-      .update({ available: !current })
-      .eq('id', scooterId)
 
-    if (!error) {
+    const result = await toggleScooterAvailability(scooterId, !current)
+
+    if (result.error) {
+      // Revert on failure
       setScooters(prev => prev.map(s =>
-        s.id === scooterId ? { ...s, available: !current } : s
+        s.id === scooterId ? { ...s, available: current } : s
       ))
+      toast.error('Failed to update availability')
+    } else {
+      toast.success(!current ? 'Scooter is now live' : 'Scooter hidden from search')
     }
     setTogglingId(null)
   }
