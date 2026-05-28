@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getServerProfile, getShopForOwner } from '@/app/actions/profile'
 import { getShopAnalytics } from '@/app/actions/shop-analytics'
 import { getActivityFeed } from '@/app/actions/activity-feed'
@@ -32,8 +33,9 @@ export default async function DashboardPage() {
   let bookingStats = { pending: 0, active: 0, total: 0 }
 
   if (shop) {
+    const admin = createAdminClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: sc } = await (supabase as any)
+    const { data: sc } = await (admin as any)
       .from('scooters')
       .select('id,name,brand,model,price_per_day,location,available,images,category')
       .eq('shop_id', shop.id)
