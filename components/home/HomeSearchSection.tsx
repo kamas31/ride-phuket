@@ -95,7 +95,7 @@ export function HomeSearchSection({ scooters }: { scooters: Scooter[] }) {
   const gridScooters = showFallback ? fallbackScooters : directResults
 
   return (
-    <section className="max-w-6xl mx-auto px-4 py-10 md:py-14">
+    <section className="max-w-6xl mx-auto px-4 py-10 md:py-14 overflow-x-hidden">
 
       {/* ── Search bar ── */}
       <div className={cn(
