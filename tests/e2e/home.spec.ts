@@ -19,7 +19,7 @@ test.describe('Home Page', () => {
 
   test('trust strip renders', async ({ page }) => {
     await gotoAndWait(page, '/')
-    await expect(page.getByText(/verified shops/i).first()).toBeVisible()
+    await expect(page.getByText(/real local listings/i).first()).toBeVisible()
     await expect(page.getByText(/no platform fees/i).first()).toBeVisible()
   })
 
@@ -30,7 +30,7 @@ test.describe('Home Page', () => {
     // Either there are cards OR the page still renders cleanly
     const bodyText = await page.textContent('body') ?? ''
     const hasCards = cardCount > 0
-    const hasEmptyState = /new rental partners|check back soon|browse all available/i.test(bodyText)
+    const hasEmptyState = /new scooter listings|check back soon|browse all available/i.test(bodyText)
     expect(hasCards || hasEmptyState).toBe(true)
   })
 
@@ -38,7 +38,7 @@ test.describe('Home Page', () => {
     await gotoAndWait(page, '/')
     const body = await page.textContent('body') ?? ''
     const hasAreas = body.includes('patong') || body.includes('kata') || body.includes('karon')
-    const hasEmptyState = /new rental partners|check back soon/i.test(body)
+    const hasEmptyState = /new scooter listings|check back soon/i.test(body)
     expect(hasAreas || hasEmptyState).toBe(true)
   })
 

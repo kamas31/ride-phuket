@@ -16,7 +16,7 @@ export const AREAS: AreaMeta[] = [
     label: 'Patong Beach',
     description: 'Rent a scooter in Patong Beach, Phuket. Contact local shops directly from ฿250/day.',
     longDescription: 'Patong is the heart of Phuket — vibrant, central, and perfectly positioned to explore the entire island. A scooter here gives you access to everything from the famous Bangla Road to viewpoints, temples, and quiet beaches just 20 minutes away.',
-    highlights: ['Largest selection in Patong', '10+ verified shops', 'Central island location'],
+    highlights: ['Largest selection in Patong', 'Multiple rental shops', 'Central island location'],
     nearbyAttractions: ['Bangla Road', 'Patong Beach', 'Kalim Beach', 'Phuket Viewpoint', 'Big Buddha (25 min)'],
     priceFrom: 250,
   },

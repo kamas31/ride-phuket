@@ -44,7 +44,7 @@ type BadgeConfig = {
 
 const CONFIG: Record<TrustBadgeVariant, BadgeConfig> = {
   verified: {
-    label: 'Verified shop',
+    label: 'Local shop',
     icon: Check,
     cls: 'bg-[#f0fdf4] text-[#16a34a] border-[#bbf7d0]',
   },

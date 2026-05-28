@@ -477,7 +477,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
 
                   {/* Trust strip */}
                   <div className="flex items-center justify-center gap-4 pt-1 text-xs text-[#9c9c98]">
-                    <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Verified shop</span>
+                    <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Local listing</span>
                     <span className="text-[#e8e8e4]">·</span>
                     <span className="flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Flexible terms</span>
                     <span className="text-[#e8e8e4]">·</span>

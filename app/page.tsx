@@ -10,8 +10,8 @@ import { HeroSearch } from '@/components/home/HeroSearch'
 const BENEFITS = [
   {
     icon: Shield,
-    title: 'Verified Shops Only',
-    description: 'Every rental partner is personally vetted by our team. Only trusted local shops make it onto Koh Ride.',
+    title: 'Local Scooter Listings',
+    description: 'Scooters from local shops and independent owners across Phuket. Real photos, honest pricing.',
     color: 'bg-[#f0fdf4] text-[#16a34a]',
   },
   {
@@ -52,8 +52,8 @@ export default async function HomePage() {
       ? { value: String(scooterCount), label: 'Scooters listed' }
       : { value: '✓', label: 'Curated fleet' },
     shopCount > 0
-      ? { value: String(shopCount), label: 'Verified shops' }
-      : { value: '✓', label: 'Verified shops' },
+      ? { value: String(shopCount), label: 'Local listings' }
+      : { value: '✓', label: 'Local listings' },
     { value: '24/7', label: 'WhatsApp contact' },
     { value: '0', label: 'Platform fees' },
   ]
@@ -135,7 +135,7 @@ export default async function HomePage() {
             style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.48s' }}
           >
             <p className="text-white/72 text-[17px] md:text-[20px] max-w-[30ch] leading-[1.65] mb-10 font-light hero-sub-shadow">
-              Premium scooters from verified local shops.
+              Premium scooters from local shops across Phuket.
               <br className="hidden sm:block" />
               Contact directly on WhatsApp. No platform fees.
             </p>
@@ -213,7 +213,7 @@ export default async function HomePage() {
       <div className="bg-white border-b border-[#e8e8e4]">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-6 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           {([
-            { icon: ShieldCheck,    text: 'All shops verified in-person',    color: 'text-[#22c55e]' },
+            { icon: ShieldCheck,    text: 'Real local listings',             color: 'text-[#22c55e]' },
             { icon: Check,          text: 'Real photos & honest pricing',     color: 'text-[#5c5c58]' },
             { icon: Unlock,         text: 'No platform fees ever',            color: 'text-[#9c9c98]' },
             { icon: MessageCircle,  text: 'Direct WhatsApp contact',          color: 'text-[#22c55e]' },
@@ -240,7 +240,7 @@ export default async function HomePage() {
             {([
               {
                 n: '01', icon: Search, label: 'Find',
-                body: 'Browse trusted scooter rentals across Phuket — filter by area, model, and price.',
+                body: 'Browse scooter rentals across Phuket — filter by area, model, and price.',
               },
               {
                 n: '02', icon: MessageCircle, label: 'Contact',
@@ -365,7 +365,7 @@ export default async function HomePage() {
             </div>
           ) : (
             <div className="text-center py-12 bg-white rounded-[20px] border border-[#e8e8e4]">
-              <p className="text-[#5c5c58] font-medium mb-1">New rental partners are joining Koh Ride.</p>
+              <p className="text-[#5c5c58] font-medium mb-1">New scooter listings are being added.</p>
               <p className="text-[#9c9c98] text-sm">Check back soon — or browse all available scooters now.</p>
             </div>
           )}
@@ -411,7 +411,7 @@ export default async function HomePage() {
               Your perfect scooter<br />is waiting.
             </h2>
             <p className="text-white/50 text-base mb-8 max-w-sm mx-auto leading-relaxed">
-              Verified local shops, direct WhatsApp contact — the honest way to explore Phuket.
+              Local scooters, direct WhatsApp contact — the honest way to explore Phuket.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link

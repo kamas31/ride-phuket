@@ -123,7 +123,7 @@ function marketplaceSignals({ shop, analytics }: TrustSignalInput): TrustSignal[
 
   // Trusted by returning visitors (analytics-based)
   if (analytics && analytics.repeatVisitors >= 3) {
-    out.push({ id: 'returning_visitors', label: 'Trusted by returning visitors', icon: 'heart', tone: 'positive', priority: 12 })
+    out.push({ id: 'returning_visitors', label: 'Popular with repeat visitors', icon: 'heart', tone: 'positive', priority: 12 })
   }
 
   // Established — account older than 90 days

@@ -1,6 +1,6 @@
 export const SITE_NAME = 'Koh Ride'
 export const SITE_TAGLINE = 'Premium Scooter Rentals'
-export const SITE_DESCRIPTION = 'Find and contact trusted scooter rentals across Phuket. Compare shops, check availability, and connect directly — no platform fees.'
+export const SITE_DESCRIPTION = 'Find and contact scooter rentals across Phuket. Compare listings, check availability, and connect directly — no platform fees.'
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kohride.com'
 
 export const CURRENCY = 'THB'
@@ -38,7 +38,7 @@ export const SCOOTER_CATEGORIES = [
 ] as const
 
 export const TRUST_BADGES = [
-  { icon: 'shield', label: 'Verified Partners', desc: 'Every shop is vetted' },
+  { icon: 'shield', label: 'Local Listings', desc: 'Scooters across Phuket' },
   { icon: 'clock', label: 'Fast Response', desc: 'Most shops reply in minutes' },
   { icon: 'mapPin', label: 'Local Shops', desc: 'Across all Phuket areas' },
   { icon: 'headphones', label: 'WhatsApp Support', desc: 'Direct shop contact' },
@@ -47,8 +47,8 @@ export const TRUST_BADGES = [
 export const BENEFITS = [
   {
     icon: 'Shield',
-    title: 'Vetted Partners',
-    description: 'Only top-rated, verified rental shops. Every scooter is serviced and road-ready.',
+    title: 'Direct Rentals',
+    description: 'Scooters from local shops and independent owners. Real photos, honest pricing.',
   },
   {
     icon: 'MessageCircle',

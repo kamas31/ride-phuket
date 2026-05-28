@@ -66,7 +66,7 @@ function simpleHash(str: string): number {
 
 // ── Shop alias ────────────────────────────────────────────────────────────────
 //
-// Pre-booking: show "Verified Rawai Partner" instead of the real shop name.
+// Pre-booking: show "Rawai Scooter Rental" instead of the real shop name.
 // This prevents riders from searching the shop directly offline.
 // Post-booking: the real name, WhatsApp, and phone are revealed.
 
@@ -78,9 +78,7 @@ export function getShopAlias(shop: {
   const zone = getZoneForLocation(shop.location)
   const area = zone ? zone.name : (shop.location.split(',')[0] ?? shop.location).trim()
 
-  if ((shop.reviewCount ?? 0) > 0)  return `Trusted ${area} Partner`
-  if (shop.verified)                return `Verified ${area} Partner`
-  return `${area} Rental Partner`
+  return `${area} Scooter Rental`
 }
 
 // ── GeoJSON zone circle (32-vertex polygon) ───────────────────────────────────

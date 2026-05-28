@@ -145,7 +145,7 @@ export default async function AreaPage({ params }: PageProps) {
         <div className="bg-[#f8f8f6] border-b border-[#e8e8e4]">
           <div className="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center gap-x-8 gap-y-2">
             {[
-              { icon: Shield, text: 'Verified local shops' },
+              { icon: Shield, text: 'Local scooter shops' },
               { icon: MapPin, text: 'Direct shop contact' },
               { icon: Check, text: 'Flexible rental terms' },
               { icon: Zap, text: 'WhatsApp-first' },

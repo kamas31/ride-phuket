@@ -6,7 +6,7 @@ interface KohRideProtectionProps {
 }
 
 const BASE_ITEMS = [
-  'Verified rental partner',
+  'Listed on Koh Ride',
   'Listed on Koh Ride marketplace',
   'Real availability confirmed directly',
   'Flexible cancellation — confirm with shop',
@@ -35,7 +35,7 @@ export function KohRideProtection({
           <Shield className="w-4 h-4 text-white" />
         </div>
         <div>
-          <p className="text-sm font-bold text-[#0f0f0e] leading-tight">Rental Partner Info</p>
+          <p className="text-sm font-bold text-[#0f0f0e] leading-tight">Shop Info</p>
           <p className="text-[10px] text-[#9c9c98] mt-0.5">What to expect from this shop</p>
         </div>
       </div>
