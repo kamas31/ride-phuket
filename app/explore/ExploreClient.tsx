@@ -10,6 +10,7 @@ import { ImageMetricsOverlay } from '@/components/debug/ImageMetricsOverlay'
 import { cn } from '@/lib/utils'
 import { sortByRecommended } from '@/lib/ridescore'
 import { trackEvent } from '@/lib/analytics'
+import { createExploreFuse } from '@/lib/fuzzy-search'
 import type { Scooter, FilterState } from '@/types'
 
 const ScooterMap = dynamic(() => import('@/components/map/ScooterMap'), {
@@ -35,11 +36,19 @@ const DEFAULT_FILTERS: FilterState = {
 
 type MobileView = 'list' | 'map'
 
-export default function ExploreClient({ initialScooters }: { initialScooters: Scooter[] }) {
+export default function ExploreClient({
+  initialScooters,
+  initialSearch = '',
+}: {
+  initialScooters: Scooter[]
+  initialSearch?: string
+}) {
   const router = useRouter()
 
   const [filters, setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
-  const [search, setSearch]           = useState('')
+  const [search, setSearch]           = useState(initialSearch)
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch)
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [selectedId, setSelectedId]   = useState<string | null>(null) // shop ID
   const [hoveredId, setHoveredId]     = useState<string | null>(null) // shop ID
   const [showMap, setShowMap]         = useState(true)
@@ -49,6 +58,25 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (localStorage.getItem('rp_show_map') === 'false') setShowMap(false)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fuse instance — rebuilt only when the scooter list changes
+  const fuse = useMemo(() => createExploreFuse(initialScooters), [initialScooters])
+
+  // Debounce search → debouncedSearch so Fuse runs at most once per 200ms
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
+    searchDebounceRef.current = setTimeout(
+      () => setDebouncedSearch(search.trim()),
+      200,
+    )
+    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current) }
+  }, [search])
+
+  // Fuse result IDs — null means no search active (pass all through)
+  const fuseMatchIds = useMemo((): Set<string> | null => {
+    if (!debouncedSearch) return null
+    return new Set(fuse.search(debouncedSearch).map(r => r.item.id))
+  }, [fuse, debouncedSearch])
 
   const toggleMap = useCallback(() => {
     setShowMap(prev => {
@@ -122,10 +150,7 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
         if (lng < mapBounds.sw[0] || lng > mapBounds.ne[0]) return false
         if (lat < mapBounds.sw[1] || lat > mapBounds.ne[1]) return false
       }
-      if (search) {
-        const q = search.toLowerCase()
-        if (!s.name.toLowerCase().includes(q) && !s.location.toLowerCase().includes(q) && !s.brand.toLowerCase().includes(q)) return false
-      }
+      if (fuseMatchIds && !fuseMatchIds.has(s.id)) return false
       return true
     })
 
@@ -134,18 +159,18 @@ export default function ExploreClient({ initialScooters }: { initialScooters: Sc
     if (filters.sortBy === 'price_desc') list = [...list].sort((a, b) => b.pricePerDay - a.pricePerDay)
     if (filters.sortBy === 'rating')     list = [...list].sort((a, b) => b.rating - a.rating)
     return list
-  }, [filters, search, initialScooters, mapBounds])
+  }, [filters, fuseMatchIds, initialScooters, mapBounds])
 
   // Keep ref in sync after render so handleSelectFromMap always sees the latest filtered list
   useEffect(() => { filteredRef.current = filtered }, [filtered])
 
   // Track empty search results — fires when a real search/filter yields nothing
   useEffect(() => {
-    if (filtered.length === 0 && (search || filters.category !== 'all' || filters.location !== 'all')) {
-      trackEvent({ eventType: 'empty_search', metadata: { search, category: filters.category, location: filters.location } })
+    if (filtered.length === 0 && (debouncedSearch || filters.category !== 'all' || filters.location !== 'all')) {
+      trackEvent({ eventType: 'empty_search', metadata: { search: debouncedSearch, category: filters.category, location: filters.location } })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtered.length === 0, search, filters.category, filters.location])
+  }, [filtered.length === 0, debouncedSearch, filters.category, filters.location])
 
   // Shared card wrapper — rings compare by shopId so the whole shop highlights together
   const CardWrapper = useCallback(({ scooter, className }: { scooter: Scooter; className?: string }) => (
