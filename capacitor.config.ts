@@ -17,9 +17,10 @@ const config: CapacitorConfig = {
   },
 
   ios: {
-    // Content inset: 'automatic' matches UIKit conventions.
-    // Safe areas are handled in CSS via env(safe-area-inset-*) + viewport-fit:cover.
-    contentInset: 'automatic',
+    // 'never' lets CSS env(safe-area-inset-*) handle safe areas exclusively.
+    // 'automatic' was causing double safe-area padding: UIKit added its own
+    // inset AND pb-safe (env()) added a second one — nav grew after hydration.
+    contentInset: 'never',
     preferredContentMode: 'mobile',
     backgroundColor: '#ffffff',
     allowsLinkPreview: false,
