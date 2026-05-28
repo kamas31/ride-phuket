@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, Shield, ShieldCheck, ChevronRight, MapPin, Check, MessageCircle, Unlock, Zap, Eye } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { LOCATIONS } from '@/constants'
@@ -247,33 +248,19 @@ export default async function HomePage() {
           <div className="flex flex-col md:flex-row items-stretch gap-8 md:gap-0 mb-10">
 
             {/* ── Card 1: Find ── */}
-            <div className="md:flex-1 relative bg-white rounded-[28px] pt-14 pb-8 px-6 text-center border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)]">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-11 h-11 bg-[#FF6B35] rounded-full flex items-center justify-center" style={{ boxShadow: '0 0 0 3px #f8f8f6, 0 4px 14px rgba(255,107,53,0.40)' }}>
+            <div className="md:flex-1 relative">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-[#FF6B35] rounded-full flex items-center justify-center" style={{ boxShadow: '0 0 0 3px #f8f8f6, 0 4px 14px rgba(255,107,53,0.40)' }}>
                 <span className="text-white font-bold text-sm leading-none">01</span>
               </div>
-              <div className="flex items-center justify-center h-36 mb-5">
-                <div className="relative w-28 h-28 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full" style={{ background: 'radial-gradient(circle at 50% 55%, #ffd5c2 0%, #ffe8dc 42%, #fff4f0 65%, transparent 82%)' }} />
-                  <svg viewBox="0 0 100 100" fill="none" className="relative w-full h-full">
-                    {/* Palm — top right */}
-                    <line x1="83" y1="95" x2="82" y2="64" stroke="#FFBFA6" strokeWidth="2.5" strokeLinecap="round"/>
-                    <path d="M82 66 C74 56 72 44 78 35 C79 47 80 57 82 66Z" fill="#FFBFA6" opacity="0.7"/>
-                    <path d="M82 66 C90 56 92 44 87 35 C85 47 84 57 82 66Z" fill="#FFBFA6" opacity="0.7"/>
-                    {/* Magnifying glass */}
-                    <circle cx="44" cy="44" r="27" fill="#fff4f0" stroke="#FF6B35" strokeWidth="3.5"/>
-                    <path d="M63 63 L78 78" stroke="#FF6B35" strokeWidth="5" strokeLinecap="round"/>
-                    {/* Location pin inside lens */}
-                    <circle cx="44" cy="36" r="6" fill="#FF6B35"/>
-                    <path d="M44 42 L44 54" stroke="#FF6B35" strokeWidth="3" strokeLinecap="round"/>
-                    {/* Tiny scooter inside lens */}
-                    <circle cx="33" cy="56" r="4" fill="none" stroke="#FF6B35" strokeWidth="1.5" opacity="0.45"/>
-                    <circle cx="45" cy="56" r="4" fill="none" stroke="#FF6B35" strokeWidth="1.5" opacity="0.45"/>
-                    <path d="M33 52 L35 46 L42 46 L45 52" fill="none" stroke="#FF6B35" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.45"/>
-                  </svg>
+              <div className="bg-white rounded-[28px] overflow-hidden border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)] h-full flex flex-col">
+                <div className="relative h-52 bg-[#faf8f6] flex-shrink-0">
+                  <Image src="/illustrations/find.png" alt="Find scooters" fill className="object-contain" sizes="(max-width: 768px) 90vw, 30vw" />
+                </div>
+                <div className="px-6 pt-5 pb-7 text-center">
+                  <h3 className="text-[19px] font-bold text-[#0f0f0e] mb-2 tracking-tight">Find</h3>
+                  <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">Browse scooters across Phuket and filter by area, model, and price.</p>
                 </div>
               </div>
-              <h3 className="text-[19px] font-bold text-[#0f0f0e] mb-2.5 tracking-tight">Find</h3>
-              <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">Browse scooters across Phuket and filter by area, model, and price.</p>
             </div>
 
             {/* Arrow 1 → 2 */}
@@ -284,39 +271,19 @@ export default async function HomePage() {
             </div>
 
             {/* ── Card 2: Contact ── */}
-            <div className="md:flex-1 relative bg-white rounded-[28px] pt-14 pb-8 px-6 text-center border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)]">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-11 h-11 bg-[#FF6B35] rounded-full flex items-center justify-center" style={{ boxShadow: '0 0 0 3px #f8f8f6, 0 4px 14px rgba(255,107,53,0.40)' }}>
+            <div className="md:flex-1 relative">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-[#FF6B35] rounded-full flex items-center justify-center" style={{ boxShadow: '0 0 0 3px #f8f8f6, 0 4px 14px rgba(255,107,53,0.40)' }}>
                 <span className="text-white font-bold text-sm leading-none">02</span>
               </div>
-              <div className="flex items-center justify-center h-36 mb-5">
-                <div className="relative w-28 h-28 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full" style={{ background: 'radial-gradient(circle at 50% 55%, #ffd5c2 0%, #ffe8dc 42%, #fff4f0 65%, transparent 82%)' }} />
-                  <svg viewBox="0 0 100 100" fill="none" className="relative w-full h-full">
-                    {/* Palm leaves — left */}
-                    <path d="M14 50 C10 38 18 26 26 32 C22 40 18 46 14 50Z" fill="#FFBFA6" opacity="0.6"/>
-                    <path d="M12 64 C8 52 16 40 24 46 C20 54 16 60 12 64Z" fill="#FFBFA6" opacity="0.45"/>
-                    {/* Palm leaves — right */}
-                    <path d="M86 50 C90 38 82 26 74 32 C78 40 82 46 86 50Z" fill="#FFBFA6" opacity="0.6"/>
-                    {/* Phone frame */}
-                    <rect x="31" y="13" width="38" height="68" rx="7" fill="#fff4f0" stroke="#FF6B35" strokeWidth="3"/>
-                    {/* Screen */}
-                    <rect x="36" y="22" width="28" height="48" rx="4" fill="#ffe8dc"/>
-                    {/* Home indicator */}
-                    <line x1="46" y1="76" x2="54" y2="76" stroke="#FF6B35" strokeWidth="2" strokeLinecap="round" opacity="0.5"/>
-                    {/* Chat bubble (orange) */}
-                    <rect x="38" y="27" width="22" height="13" rx="4" fill="#FF6B35" opacity="0.9"/>
-                    <path d="M40 40 L38 46 L44 40Z" fill="#FF6B35" opacity="0.9"/>
-                    {/* 3 dots in bubble */}
-                    <circle cx="44" cy="33.5" r="1.5" fill="white"/>
-                    <circle cx="50" cy="33.5" r="1.5" fill="white"/>
-                    <circle cx="56" cy="33.5" r="1.5" fill="white"/>
-                    {/* Second chat bubble (light) */}
-                    <rect x="40" y="50" width="20" height="10" rx="4" fill="#FF6B35" opacity="0.3"/>
-                  </svg>
+              <div className="bg-white rounded-[28px] overflow-hidden border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)] h-full flex flex-col">
+                <div className="relative h-52 bg-[#faf8f6] flex-shrink-0">
+                  <Image src="/illustrations/contact.png" alt="Contact the shop" fill className="object-contain" sizes="(max-width: 768px) 90vw, 30vw" />
+                </div>
+                <div className="px-6 pt-5 pb-7 text-center">
+                  <h3 className="text-[19px] font-bold text-[#0f0f0e] mb-2 tracking-tight">Contact</h3>
+                  <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">Message rental shops directly on WhatsApp. No forms, no platform — just real conversation.</p>
                 </div>
               </div>
-              <h3 className="text-[19px] font-bold text-[#0f0f0e] mb-2.5 tracking-tight">Contact</h3>
-              <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">Message rental shops directly on WhatsApp. No forms, no platform — just real conversation.</p>
             </div>
 
             {/* Arrow 2 → 3 */}
@@ -327,45 +294,19 @@ export default async function HomePage() {
             </div>
 
             {/* ── Card 3: Ride ── */}
-            <div className="md:flex-1 relative bg-white rounded-[28px] pt-14 pb-8 px-6 text-center border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)]">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-11 h-11 bg-[#FF6B35] rounded-full flex items-center justify-center" style={{ boxShadow: '0 0 0 3px #f8f8f6, 0 4px 14px rgba(255,107,53,0.40)' }}>
+            <div className="md:flex-1 relative">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-[#FF6B35] rounded-full flex items-center justify-center" style={{ boxShadow: '0 0 0 3px #f8f8f6, 0 4px 14px rgba(255,107,53,0.40)' }}>
                 <span className="text-white font-bold text-sm leading-none">03</span>
               </div>
-              <div className="flex items-center justify-center h-36 mb-5">
-                <div className="relative w-28 h-28 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full" style={{ background: 'radial-gradient(circle at 50% 55%, #ffd5c2 0%, #ffe8dc 42%, #fff4f0 65%, transparent 82%)' }} />
-                  <svg viewBox="0 0 100 100" fill="none" className="relative w-full h-full">
-                    {/* Clouds — top left */}
-                    <ellipse cx="22" cy="26" rx="10" ry="7" fill="#FFBFA6" opacity="0.3"/>
-                    <ellipse cx="32" cy="23" rx="9" ry="7" fill="#FFBFA6" opacity="0.3"/>
-                    <ellipse cx="14" cy="25" rx="7" ry="6" fill="#FFBFA6" opacity="0.25"/>
-                    {/* Palm tree — right */}
-                    <line x1="84" y1="92" x2="82" y2="55" stroke="#FFBFA6" strokeWidth="3" strokeLinecap="round"/>
-                    <path d="M82 57 C72 46 70 34 76 24 C78 36 80 47 82 57Z" fill="#FFBFA6" opacity="0.65"/>
-                    <path d="M82 57 C92 46 94 34 88 24 C86 36 84 47 82 57Z" fill="#FFBFA6" opacity="0.65"/>
-                    <path d="M82 57 C76 63 68 60 66 52 C72 56 77 57 82 57Z" fill="#FFBFA6" opacity="0.45"/>
-                    {/* Ground */}
-                    <line x1="8" y1="88" x2="92" y2="88" stroke="#FFBFA6" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
-                    {/* Rear wheel */}
-                    <circle cx="33" cy="78" r="11" fill="#fff4f0" stroke="#FF6B35" strokeWidth="3"/>
-                    <circle cx="33" cy="78" r="4" fill="#FF6B35" opacity="0.3"/>
-                    {/* Front wheel */}
-                    <circle cx="67" cy="78" r="11" fill="#fff4f0" stroke="#FF6B35" strokeWidth="3"/>
-                    <circle cx="67" cy="78" r="4" fill="#FF6B35" opacity="0.3"/>
-                    {/* Scooter body */}
-                    <path d="M33 67 L40 52 L55 50 L67 67" fill="#fff4f0" stroke="#FF6B35" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    {/* Seat */}
-                    <path d="M42 52 L56 46 L62 52Z" fill="#FF6B35" opacity="0.55"/>
-                    {/* Front fork */}
-                    <line x1="67" y1="67" x2="72" y2="56" stroke="#FF6B35" strokeWidth="2.5" strokeLinecap="round"/>
-                    {/* Handlebar */}
-                    <path d="M72 56 L79 50" stroke="#FF6B35" strokeWidth="2.5" strokeLinecap="round"/>
-                    <circle cx="80" cy="49" r="2.5" fill="#FF6B35" opacity="0.6"/>
-                  </svg>
+              <div className="bg-white rounded-[28px] overflow-hidden border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)] h-full flex flex-col">
+                <div className="relative h-52 bg-[#faf8f6] flex-shrink-0">
+                  <Image src="/illustrations/ride.png" alt="Ride your scooter" fill className="object-contain" sizes="(max-width: 768px) 90vw, 30vw" />
+                </div>
+                <div className="px-6 pt-5 pb-7 text-center">
+                  <h3 className="text-[19px] font-bold text-[#0f0f0e] mb-2 tracking-tight">Ride</h3>
+                  <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">Collect your scooter from the shop and explore Phuket on your own terms.</p>
                 </div>
               </div>
-              <h3 className="text-[19px] font-bold text-[#0f0f0e] mb-2.5 tracking-tight">Ride</h3>
-              <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">Collect your scooter from the shop and explore Phuket on your own terms.</p>
             </div>
 
           </div>
