@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { ArrowRight, Shield, ShieldCheck, ChevronRight, MapPin, Check, MessageCircle, Unlock, Zap, Search, Bike, Eye } from 'lucide-react'
+import { ScooterCard } from '@/components/ride/ScooterCard'
 import { LOCATIONS } from '@/constants'
 import { getScooters, getStats } from '@/lib/supabase/queries'
 import { computeLiveAreas } from '@/lib/live-areas'
 import { formatPrice } from '@/lib/utils'
-import { HomeSearchSection } from '@/components/home/HomeSearchSection'
 import { HeroSearch } from '@/components/home/HeroSearch'
 
 const BENEFITS = [
@@ -39,7 +39,7 @@ export default async function HomePage() {
     getScooters({ available: true }),
     getStats(),
   ])
-  // HomeSearchSection handles its own slicing
+  const featuredScooters = allScooters.slice(0, 4)
 
   // Derive live zones from already-fetched scooters — zero extra DB call.
   const liveAreas  = computeLiveAreas(allScooters)
@@ -302,8 +302,38 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── SEARCH + FEATURED SCOOTERS ── */}
-      <HomeSearchSection scooters={allScooters} />
+      {/* ── FEATURED SCOOTERS ── */}
+      <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+        <div className="flex items-end justify-between mb-7">
+          <div>
+            <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-2">Top Picks</p>
+            <h2 className="text-[26px] md:text-[34px] font-bold text-[#0f0f0e] leading-tight tracking-tight">
+              Most popular scooters
+            </h2>
+          </div>
+          <Link
+            href="/explore"
+            className="hidden md:flex items-center gap-1 text-sm font-semibold text-[#FF6B35] hover:gap-2 transition-all"
+          >
+            View all <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {featuredScooters.map(scooter => (
+            <ScooterCard key={scooter.id} scooter={scooter} />
+          ))}
+        </div>
+
+        <div className="mt-7 text-center md:hidden">
+          <Link
+            href="/explore"
+            className="inline-flex items-center gap-2 px-6 py-3 border border-[#e8e8e4] rounded-full text-sm font-semibold text-[#0f0f0e] hover:bg-[#f8f8f6] transition-colors"
+          >
+            View all scooters <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
 
       {/* ── EXPLORE BY AREA ── */}
       <section className="bg-[#f8f8f6] py-12 md:py-16">
