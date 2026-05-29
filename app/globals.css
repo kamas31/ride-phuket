@@ -52,13 +52,15 @@
   --shadow-nav: 0 1px 0 0 rgba(0, 0, 0, 0.06);
 }
 
-/* Thread page: subtract mobile bottom-nav height so the input bar is never hidden behind it */
+/* Thread page: bottom offset to clear the mobile nav bar (~52px visual height).
+   The env(safe-area-inset-bottom) is NOT included here — the nav already absorbs it
+   internally, and the input bar has its own bottom padding for any residual gap. */
 :root {
   --bottom-nav-h: 0px;
 }
 @media (max-width: 767px) {
   :root {
-    --bottom-nav-h: calc(3.25rem + env(safe-area-inset-bottom, 0px));
+    --bottom-nav-h: 3.25rem; /* matches the nav's visual height, no double-counting */
   }
 }
 

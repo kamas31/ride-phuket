@@ -53,10 +53,18 @@ export default function MessageThread({
     return el.scrollHeight - el.scrollTop - el.clientHeight < 120
   }
 
-  // Lock page scroll so the footer / main padding don't create a second scroll context
+  // Lock page/document scroll while inside the thread.
+  // The thread uses position:fixed and owns the full viewport — the document must
+  // not scroll independently or it creates a competing scroll context on iOS.
   useEffect(() => {
+    const prevHtml = document.documentElement.style.overflow
+    const prevBody = document.body.style.overflow
     document.documentElement.style.overflow = 'hidden'
-    return () => { document.documentElement.style.overflow = '' }
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.documentElement.style.overflow = prevHtml
+      document.body.style.overflow = prevBody
+    }
   }, [])
 
   // Scroll to bottom instantly on first load
@@ -65,8 +73,8 @@ export default function MessageThread({
     if (el) el.scrollTop = el.scrollHeight
   }, [])
 
-  // Smart scroll: only scroll when user was near bottom or sent the message themselves.
-  // Uses scrollTo on the container (not scrollIntoView) so the page never jumps.
+  // Smart scroll: only when user was already near bottom or sent the message.
+  // Uses scrollTo on the container — never scrollIntoView — so the page never jumps.
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
@@ -100,7 +108,7 @@ export default function MessageThread({
             read_at: string | null
             created_at: string
           }
-          // Capture scroll position before state update
+          // Capture scroll position BEFORE the DOM update so we know whether to scroll
           wasNearBottomRef.current = isNearBottom()
           setMessages(prev => {
             if (prev.find(x => x.id === m.id)) return prev
@@ -182,15 +190,18 @@ export default function MessageThread({
 
   const listingUrl = `/scooter/${conversation.scooterId}`
 
+  // position:fixed;inset:0 takes the full viewport independently of the document.
+  // The Navbar (z-50) and MobileBottomNav (z-50) sit above this layer.
+  // paddingTop:64px clears the fixed Navbar.
+  // paddingBottom:var(--bottom-nav-h) clears the mobile bottom nav (0px on desktop).
   return (
     <div
-      className="flex flex-col bg-white"
-      style={{ height: 'calc(100dvh - var(--bottom-nav-h, 0px))', paddingTop: '64px' }}
+      className="fixed inset-0 flex flex-col bg-white"
+      style={{ paddingTop: '64px', paddingBottom: 'var(--bottom-nav-h, 0px)' }}
     >
 
       {/* ── HEADER ── */}
-      <div className="flex-shrink-0 bg-white border-b border-[#e8e8e4] z-10">
-
+      <div className="flex-shrink-0 bg-white border-b border-[#e8e8e4]">
         <div className="max-w-4xl mx-auto flex items-center gap-3 px-3 py-2.5">
           {/* Back */}
           <button
@@ -206,7 +217,6 @@ export default function MessageThread({
             href={listingUrl}
             className="flex items-center gap-2.5 flex-1 min-w-0 group"
           >
-            {/* Scooter image */}
             <div className="relative w-[42px] h-[42px] rounded-[11px] overflow-hidden bg-[#f5f5f2] flex-shrink-0 shadow-sm">
               {conversation.scooterImage ? (
                 <Image
@@ -221,7 +231,6 @@ export default function MessageThread({
               )}
             </div>
 
-            {/* Text stack */}
             <div className="min-w-0 flex-1">
               <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight group-hover:text-[#FF6B35] transition-colors">
                 {conversation.scooterName}
@@ -249,10 +258,15 @@ export default function MessageThread({
       </div>
 
       {/* ── MESSAGES ── */}
-      <div ref={scrollAreaRef} className="flex-1 overflow-y-auto overscroll-contain">
+      {/* -webkit-overflow-scrolling:touch enables native momentum scrolling on iOS */}
+      <div
+        ref={scrollAreaRef}
+        className="flex-1 overflow-y-auto overscroll-contain"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
         <div className="max-w-4xl mx-auto px-4 py-4">
           {groups.length === 0 ? (
-            <div className="flex items-center justify-center" style={{ minHeight: 'calc(100dvh - 220px)' }}>
+            <div className="flex items-center justify-center h-full min-h-[200px]">
               <p className="text-[13px] text-[#b0b0ac] text-center leading-relaxed">
                 No messages yet — say hello!
               </p>
@@ -261,7 +275,6 @@ export default function MessageThread({
             <div className="space-y-0.5">
               {groups.map(group => (
                 <div key={group.date}>
-                  {/* Date divider */}
                   <div className="flex items-center gap-3 my-5">
                     <div className="flex-1 h-px bg-[#f0f0ec]" />
                     <span className="text-[11px] text-[#b0b0ac] font-medium px-1">
@@ -272,6 +285,8 @@ export default function MessageThread({
 
                   <div className="space-y-2">
                     {group.msgs.map(msg => {
+                      // Alignment is determined solely by sender_id vs current user.
+                      // Never inferred from owner/client role — this cannot invert.
                       const isMe = msg.senderId === currentUserId
                       const isOptimistic = msg.id.startsWith('opt-')
                       return (
@@ -310,9 +325,12 @@ export default function MessageThread({
       </div>
 
       {/* ── INPUT BAR ── */}
+      {/* paddingBottom is a fixed 12px — env(safe-area-inset-bottom) is intentionally
+          NOT used here because --bottom-nav-h on mobile already clears the nav which
+          itself absorbs the safe area. Adding env() again would create the double gap. */}
       <div
         className="flex-shrink-0 bg-white border-t border-[#e8e8e4]"
-        style={{ paddingBottom: 'max(10px, env(safe-area-inset-bottom))' }}
+        style={{ paddingBottom: '12px' }}
       >
         <div className="max-w-4xl mx-auto px-3.5 pt-2.5">
           <div className="flex items-end gap-2">
