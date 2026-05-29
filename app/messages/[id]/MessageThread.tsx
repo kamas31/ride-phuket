@@ -41,7 +41,6 @@ export default function MessageThread({
   const [input, setInput] = useState('')
   const [isPending, startTransition] = useTransition()
   const [sendError, setSendError] = useState<string | null>(null)
-  const bottomRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const isInitialMount = useRef(true)
@@ -54,20 +53,28 @@ export default function MessageThread({
     return el.scrollHeight - el.scrollTop - el.clientHeight < 120
   }
 
+  // Lock page scroll so the footer / main padding don't create a second scroll context
+  useEffect(() => {
+    document.documentElement.style.overflow = 'hidden'
+    return () => { document.documentElement.style.overflow = '' }
+  }, [])
+
   // Scroll to bottom instantly on first load
   useEffect(() => {
     const el = scrollAreaRef.current
     if (el) el.scrollTop = el.scrollHeight
   }, [])
 
-  // Smart scroll: only scroll when user was near bottom or sent the message themselves
+  // Smart scroll: only scroll when user was near bottom or sent the message themselves.
+  // Uses scrollTo on the container (not scrollIntoView) so the page never jumps.
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
       return
     }
     if (wasNearBottomRef.current) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+      const el = scrollAreaRef.current
+      if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
     }
   }, [messages])
 
@@ -176,12 +183,13 @@ export default function MessageThread({
   const listingUrl = `/scooter/${conversation.scooterId}`
 
   return (
-    <div className="flex flex-col bg-white" style={{ height: '100dvh' }}>
+    <div
+      className="flex flex-col bg-white"
+      style={{ height: 'calc(100dvh - var(--bottom-nav-h, 0px))', paddingTop: '64px' }}
+    >
 
       {/* ── HEADER ── */}
       <div className="flex-shrink-0 bg-white border-b border-[#e8e8e4] z-10">
-        {/* Spacer for fixed Navbar */}
-        <div className="h-16" aria-hidden />
 
         <div className="max-w-4xl mx-auto flex items-center gap-3 px-3 py-2.5">
           {/* Back */}
@@ -297,7 +305,7 @@ export default function MessageThread({
             <p className="text-center text-[12px] text-red-400 mt-3">{sendError}</p>
           )}
 
-          <div ref={bottomRef} className="h-2" />
+          <div className="h-2" />
         </div>
       </div>
 

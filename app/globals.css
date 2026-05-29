@@ -52,6 +52,16 @@
   --shadow-nav: 0 1px 0 0 rgba(0, 0, 0, 0.06);
 }
 
+/* Thread page: subtract mobile bottom-nav height so the input bar is never hidden behind it */
+:root {
+  --bottom-nav-h: 0px;
+}
+@media (max-width: 767px) {
+  :root {
+    --bottom-nav-h: calc(3.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* Base reset */
 *, *::before, *::after {
   box-sizing: border-box;
