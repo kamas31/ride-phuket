@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Menu, X, LogOut, ChevronDown,
-  Home, Bike, Heart, BookOpen,
+  Home, Bike, Heart, BookOpen, MessageCircle,
   LayoutDashboard, ToggleRight, Store, Plus,
   User, FileText, Shield, HelpCircle,
 } from 'lucide-react'
@@ -110,15 +110,16 @@ export default function Navbar() {
 
   const NAV_LINKS = isShopOwner
     ? [
-        { href: '/partner/dashboard', label: 'Dashboard' },
-        { href: '/explore',           label: 'Explore'   },
-        { href: '/saved',             label: 'Saved'     },
-        { href: '/profile',           label: 'Profile'   },
+        { href: '/partner/dashboard',  label: 'Dashboard' },
+        { href: '/partner/messages',   label: 'Inbox'     },
+        { href: '/explore',            label: 'Explore'   },
+        { href: '/profile',            label: 'Profile'   },
       ]
     : [
-        { href: '/explore', label: 'Explore' },
-        { href: '/saved',   label: 'Saved'   },
-        { href: '/profile', label: 'Profile' },
+        { href: '/explore',   label: 'Explore'  },
+        { href: '/saved',     label: 'Saved'    },
+        { href: '/messages',  label: 'Messages' },
+        { href: '/profile',   label: 'Profile'  },
       ]
 
   const CTA = isShopOwner
@@ -326,9 +327,10 @@ export default function Navbar() {
               <div>
                 <p className="px-3 mb-1 text-[10px] font-bold text-[#9c9c98] uppercase tracking-widest">Main</p>
                 {[
-                  { href: '/',        icon: Home,      label: 'Home'            },
-                  { href: '/explore', icon: Bike,      label: 'Browse Scooters' },
-                  { href: '/saved',   icon: Heart,     label: 'Favorites'       },
+                  { href: '/',          icon: Home,           label: 'Home'            },
+                  { href: '/explore',   icon: Bike,           label: 'Browse Scooters' },
+                  { href: '/saved',     icon: Heart,          label: 'Favorites'       },
+                  { href: '/messages',  icon: MessageCircle,  label: 'Messages'        },
                 ].map(item => (
                   <DrawerLink key={item.href} {...item} pathname={pathname} onClick={() => setMenuOpen(false)} />
                 ))}
@@ -340,6 +342,7 @@ export default function Navbar() {
                   <p className="px-3 mb-1 text-[10px] font-bold text-[#9c9c98] uppercase tracking-widest">Partner</p>
                   {[
                     { href: '/partner/dashboard',    icon: LayoutDashboard, label: 'Dashboard'       },
+                    { href: '/partner/messages',     icon: MessageCircle,   label: 'Inbox'           },
                     { href: '/partner/availability', icon: ToggleRight,     label: 'Availability'    },
                     { href: '/partner/bookings',     icon: BookOpen,        label: 'Rental Requests' },
                     { href: '/partner/shop',         icon: Store,           label: 'Shop Settings'   },
