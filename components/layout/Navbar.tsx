@@ -111,7 +111,7 @@ export default function Navbar() {
   const NAV_LINKS = isShopOwner
     ? [
         { href: '/partner/dashboard',  label: 'Dashboard' },
-        { href: '/partner/messages',   label: 'Inbox'     },
+        { href: '/partner/messages',   label: 'Messages'  },
         { href: '/explore',            label: 'Explore'   },
         { href: '/profile',            label: 'Profile'   },
       ]
