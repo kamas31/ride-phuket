@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MessageCircle, Phone } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
+import { MessageOwnerButton } from '@/app/scooter/[id]/MessageOwnerButton'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // StickyContactBar — mobile-only sticky CTA bar
@@ -19,14 +19,14 @@ interface StickyContactBarProps {
   available?:  boolean
   shopWhatsapp?: string
   shopPhone?:    string
+  // shopWhatsapp / shopPhone kept in props for future secondary contact fallback
 }
 
 export function StickyContactBar({
   scooterName,
   pricePerDay,
+  scooterId,
   available = true,
-  shopWhatsapp,
-  shopPhone,
 }: StickyContactBarProps) {
   const [visible, setVisible] = useState(false)
 
@@ -41,10 +41,6 @@ export function StickyContactBar({
     observer.observe(sentinel)
     return () => observer.disconnect()
   }, [])
-
-  const waUrl = shopWhatsapp
-    ? `https://wa.me/${shopWhatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I'm interested in the ${scooterName} I found on Koh Ride. Is it available?`)}`
-    : null
 
   return (
     <div
@@ -72,32 +68,7 @@ export function StickyContactBar({
         {/* CTAs */}
         {available ? (
           <div className="flex items-center gap-2 flex-shrink-0">
-            {waUrl ? (
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-5 py-3 bg-[#16a34a] text-white font-bold text-sm rounded-full hover:bg-[#15803d] transition-colors shadow-[0_4px_14px_rgba(22,163,74,0.35)] active:scale-[0.97]"
-              >
-                <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
-                Contact shop
-              </a>
-            ) : shopPhone ? (
-              <a
-                href={`tel:${shopPhone}`}
-                className="flex items-center gap-1.5 px-5 py-3 bg-[#0f0f0e] text-white font-bold text-sm rounded-full hover:bg-[#2a2a28] transition-colors active:scale-[0.97]"
-              >
-                <Phone className="w-4 h-4" strokeWidth={1.5} />
-                Call shop
-              </a>
-            ) : (
-              <a
-                href="#contact-rental-shop"
-                className="flex items-center gap-1.5 px-5 py-3 bg-[#FF6B35] text-white font-bold text-sm rounded-full hover:bg-[#e85d29] transition-colors shadow-[0_4px_14px_rgba(255,107,53,0.35)] active:scale-[0.97]"
-              >
-                Contact shop
-              </a>
-            )}
+            <MessageOwnerButton scooterId={scooterId} scooterName={scooterName} variant="sticky" />
           </div>
         ) : (
           <span className="px-5 py-3 bg-[#f0f0ec] text-[#9c9c98] font-semibold text-sm rounded-full flex-shrink-0">

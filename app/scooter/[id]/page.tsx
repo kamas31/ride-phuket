@@ -13,6 +13,7 @@ import { EmptyReviews } from '@/components/ride/EmptyReviews'
 import { QuickContact } from '@/components/ride/QuickContact'
 import { DepositInfo } from '@/components/ride/DepositInfo'
 import { StickyContactBar } from '@/components/ride/StickyContactBar'
+import { MessageOwnerButton } from './MessageOwnerButton'
 import { SaveButton } from '@/components/ride/SaveButton'
 import { getPublicInquiries } from '@/app/actions/inquiry-actions'
 import { TrackView } from '@/components/analytics/TrackView'
@@ -444,36 +445,28 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     </div>
                   </div>
 
-                  {/* Primary CTA — WhatsApp */}
+                  {/* Primary CTA — in-app message */}
+                  <MessageOwnerButton scooterId={scooter.id} scooterName={scooter.name} />
+
+                  {/* Secondary — WhatsApp or phone */}
                   {shop.whatsapp ? (
                     <a
                       href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
                       target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2.5 w-full py-4 bg-[#16a34a] text-white font-bold rounded-full hover:bg-[#15803d] transition-all text-base shadow-sm hover:shadow-[0_8px_24px_rgba(22,163,74,0.35)] hover:scale-[1.01] active:scale-[0.99]"
+                      className="flex items-center justify-center gap-2 w-full py-3 rounded-full border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
                     >
-                      <MessageCircle className="w-5 h-5" />
-                      WhatsApp the shop
+                      <MessageCircle className="w-4 h-4" />
+                      WhatsApp instead
                     </a>
                   ) : shop.phone ? (
-                    <a
-                      href={`tel:${shop.phone}`}
-                      className="flex items-center justify-center gap-2.5 w-full py-4 bg-[#0f0f0e] text-white font-bold rounded-full hover:bg-[#2a2a28] transition-all text-base"
-                    >
-                      <Phone className="w-5 h-5" />
-                      Call the shop
-                    </a>
-                  ) : null}
-
-                  {/* Secondary call button (only when WA is primary) */}
-                  {shop.whatsapp && shop.phone && (
                     <a
                       href={`tel:${shop.phone}`}
                       className="flex items-center justify-center gap-2 w-full py-3 rounded-full border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
                     >
                       <Phone className="w-4 h-4" />
-                      Call instead
+                      Call the shop
                     </a>
-                  )}
+                  ) : null}
 
                   {/* Trust strip */}
                   <div className="flex items-center justify-center gap-4 pt-1 text-xs text-[#9c9c98]">

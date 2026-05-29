@@ -199,6 +199,38 @@ export interface Database {
         }
         Update: Partial<Database['public']['Tables']['reviews']['Insert']>
       }
+      conversations: {
+        Row: {
+          id: string
+          scooter_id: string
+          client_id: string
+          owner_id: string
+          created_at: string
+        }
+        Insert: {
+          scooter_id: string
+          client_id: string
+          owner_id: string
+        }
+        Update: Partial<Database['public']['Tables']['conversations']['Insert']>
+      }
+      messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          sender_id: string
+          content: string
+          read_at: string | null
+          created_at: string
+        }
+        Insert: {
+          conversation_id: string
+          sender_id: string
+          content: string
+          read_at?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['messages']['Insert']>
+      }
     }
   }
 }

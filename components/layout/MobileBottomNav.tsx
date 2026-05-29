@@ -2,18 +2,73 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Map, Bookmark, User } from 'lucide-react'
+import { Home, Map, Bookmark, MessageCircle, User } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { href: '/',        label: 'Home',    icon: Home     },
-  { href: '/explore', label: 'Explore', icon: Map      },
-  { href: '/saved',   label: 'Saved',   icon: Bookmark },
-  { href: '/profile', label: 'Profile', icon: User     },
+  { href: '/',         label: 'Home',     icon: Home          },
+  { href: '/explore',  label: 'Explore',  icon: Map           },
+  { href: '/saved',    label: 'Saved',    icon: Bookmark      },
+  { href: '/messages', label: 'Messages', icon: MessageCircle },
+  { href: '/profile',  label: 'Profile',  icon: User          },
 ]
 
 export default function MobileBottomNav() {
   const pathname = usePathname()
+  const [unread, setUnread] = useState(0)
+
+  useEffect(() => {
+    const supabase = createClient()
+    let userId: string | null = null
+
+    async function fetchUnread(uid: string) {
+      // Get all conversation IDs for this user
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: convos } = await (supabase as any)
+        .from('conversations')
+        .select('id')
+        .or(`client_id.eq.${uid},owner_id.eq.${uid}`)
+
+      if (!convos?.length) { setUnread(0); return }
+
+      const ids = convos.map((c: { id: string }) => c.id)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { count } = await (supabase as any)
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .in('conversation_id', ids)
+        .neq('sender_id', uid)
+        .is('read_at', null)
+
+      setUnread(count ?? 0)
+    }
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      userId = user.id
+      fetchUnread(user.id)
+
+      // Refresh on new messages via Realtime
+      const channel = supabase
+        .channel('nav-unread')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'messages' },
+          () => { if (userId) fetchUnread(userId) },
+        )
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'messages' },
+          () => { if (userId) fetchUnread(userId) },
+        )
+        .subscribe()
+
+      return () => { supabase.removeChannel(channel) }
+    })
+  }, [])
 
   return (
     <nav
@@ -23,6 +78,7 @@ export default function MobileBottomNav() {
       <div className="flex items-center">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href !== '/' && pathname.startsWith(href))
+          const isMessages = href === '/messages'
           return (
             <Link
               key={href}
@@ -30,7 +86,7 @@ export default function MobileBottomNav() {
               className="flex-1 flex flex-col items-center gap-[3px] pt-2 pb-1.5 transition-colors"
             >
               <div className={cn(
-                'flex items-center justify-center w-8 h-[22px] rounded-full transition-colors duration-200',
+                'relative flex items-center justify-center w-8 h-[22px] rounded-full transition-colors duration-200',
                 active ? 'bg-[#FF6B35]/12' : 'bg-transparent'
               )}>
                 <Icon
@@ -40,6 +96,9 @@ export default function MobileBottomNav() {
                   )}
                   strokeWidth={active ? 2.5 : 1.5}
                 />
+                {isMessages && unread > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#FF6B35] rounded-full border border-white" />
+                )}
               </div>
               <span
                 className={cn(
