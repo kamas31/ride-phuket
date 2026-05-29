@@ -42,15 +42,31 @@ export default function MessageThread({
   const [isPending, startTransition] = useTransition()
   const [sendError, setSendError] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const isFirstRender = useRef(true)
+  const isInitialMount = useRef(true)
+  // Captures whether user was near bottom BEFORE a state update triggers a scroll check
+  const wasNearBottomRef = useRef(true)
 
-  // Scroll to bottom — instant on first load, smooth for new messages
+  function isNearBottom(): boolean {
+    const el = scrollAreaRef.current
+    if (!el) return true
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 120
+  }
+
+  // Scroll to bottom instantly on first load
   useEffect(() => {
-    if (isFirstRender.current) {
-      bottomRef.current?.scrollIntoView({ behavior: 'instant' })
-      isFirstRender.current = false
-    } else {
+    const el = scrollAreaRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [])
+
+  // Smart scroll: only scroll when user was near bottom or sent the message themselves
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
+    }
+    if (wasNearBottomRef.current) {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages])
@@ -77,6 +93,8 @@ export default function MessageThread({
             read_at: string | null
             created_at: string
           }
+          // Capture scroll position before state update
+          wasNearBottomRef.current = isNearBottom()
           setMessages(prev => {
             if (prev.find(x => x.id === m.id)) return prev
             return [
@@ -122,6 +140,9 @@ export default function MessageThread({
       readAt: null,
       createdAt: new Date().toISOString(),
     }
+
+    // Own messages always scroll to bottom
+    wasNearBottomRef.current = true
     setMessages(prev => [...prev, optimistic])
 
     startTransition(async () => {
@@ -131,7 +152,6 @@ export default function MessageThread({
         setMessages(prev => prev.filter(m => m.id !== optimistic.id))
         setInput(text)
       } else {
-        // Replace optimistic with confirmed message
         setMessages(prev => prev.map(m => m.id === optimistic.id ? result.message : m))
       }
     })
@@ -163,7 +183,7 @@ export default function MessageThread({
         {/* Spacer for fixed Navbar */}
         <div className="h-16" aria-hidden />
 
-        <div className="flex items-center gap-3 px-3 py-2.5">
+        <div className="max-w-4xl mx-auto flex items-center gap-3 px-3 py-2.5">
           {/* Back */}
           <button
             onClick={() => router.back()}
@@ -221,94 +241,98 @@ export default function MessageThread({
       </div>
 
       {/* ── MESSAGES ── */}
-      <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4">
-        {groups.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-[13px] text-[#b0b0ac] text-center leading-relaxed">
-              No messages yet — say hello!
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-0.5">
-            {groups.map(group => (
-              <div key={group.date}>
-                {/* Date divider */}
-                <div className="flex items-center gap-3 my-5">
-                  <div className="flex-1 h-px bg-[#f0f0ec]" />
-                  <span className="text-[11px] text-[#b0b0ac] font-medium px-1">
-                    {formatDateLabel(group.msgs[0].createdAt)}
-                  </span>
-                  <div className="flex-1 h-px bg-[#f0f0ec]" />
-                </div>
+      <div ref={scrollAreaRef} className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          {groups.length === 0 ? (
+            <div className="flex items-center justify-center" style={{ minHeight: 'calc(100dvh - 220px)' }}>
+              <p className="text-[13px] text-[#b0b0ac] text-center leading-relaxed">
+                No messages yet — say hello!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-0.5">
+              {groups.map(group => (
+                <div key={group.date}>
+                  {/* Date divider */}
+                  <div className="flex items-center gap-3 my-5">
+                    <div className="flex-1 h-px bg-[#f0f0ec]" />
+                    <span className="text-[11px] text-[#b0b0ac] font-medium px-1">
+                      {formatDateLabel(group.msgs[0].createdAt)}
+                    </span>
+                    <div className="flex-1 h-px bg-[#f0f0ec]" />
+                  </div>
 
-                <div className="space-y-2">
-                  {group.msgs.map(msg => {
-                    const isMe = msg.senderId === currentUserId
-                    const isOptimistic = msg.id.startsWith('opt-')
-                    return (
-                      <div key={msg.id} className={cn('flex', isMe ? 'justify-end' : 'justify-start')}>
-                        <div className={cn('flex flex-col gap-0.5 max-w-[78%]', isMe ? 'items-end' : 'items-start')}>
-                          <div
-                            className={cn(
-                              'px-4 py-2.5 text-[14px] leading-relaxed',
-                              isMe
-                                ? 'bg-[#FF6B35] text-white rounded-[20px] rounded-br-[5px]'
-                                : 'bg-[#f2f2ef] text-[#0f0f0e] rounded-[20px] rounded-bl-[5px]',
-                              isOptimistic && 'opacity-55',
-                            )}
-                          >
-                            {msg.content}
+                  <div className="space-y-2">
+                    {group.msgs.map(msg => {
+                      const isMe = msg.senderId === currentUserId
+                      const isOptimistic = msg.id.startsWith('opt-')
+                      return (
+                        <div key={msg.id} className={cn('flex', isMe ? 'justify-end' : 'justify-start')}>
+                          <div className={cn('flex flex-col gap-0.5 max-w-[78%]', isMe ? 'items-end' : 'items-start')}>
+                            <div
+                              className={cn(
+                                'px-4 py-2.5 text-[14px] leading-relaxed',
+                                isMe
+                                  ? 'bg-[#FF6B35] text-white rounded-[20px] rounded-br-[5px]'
+                                  : 'bg-[#f2f2ef] text-[#0f0f0e] rounded-[20px] rounded-bl-[5px]',
+                                isOptimistic && 'opacity-55',
+                              )}
+                            >
+                              {msg.content}
+                            </div>
+                            <span className="text-[10px] text-[#c0c0bc] px-1 leading-none">
+                              {formatTime(msg.createdAt)}
+                            </span>
                           </div>
-                          <span className="text-[10px] text-[#c0c0bc] px-1 leading-none">
-                            {formatTime(msg.createdAt)}
-                          </span>
                         </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {sendError && (
-          <p className="text-center text-[12px] text-red-400 mt-3">{sendError}</p>
-        )}
+          {sendError && (
+            <p className="text-center text-[12px] text-red-400 mt-3">{sendError}</p>
+          )}
 
-        <div ref={bottomRef} className="h-2" />
+          <div ref={bottomRef} className="h-2" />
+        </div>
       </div>
 
       {/* ── INPUT BAR ── */}
       <div
-        className="flex-shrink-0 bg-white border-t border-[#e8e8e4] px-3.5 pt-2.5"
+        className="flex-shrink-0 bg-white border-t border-[#e8e8e4]"
         style={{ paddingBottom: 'max(10px, env(safe-area-inset-bottom))' }}
       >
-        <div className="flex items-end gap-2">
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={handleInput}
-            onKeyDown={handleKeyDown}
-            placeholder="Message…"
-            rows={1}
-            maxLength={1000}
-            className="flex-1 resize-none rounded-[22px] border border-[#e8e8e4] bg-[#f8f8f6] px-4 py-2.5 text-[14px] text-[#0f0f0e] placeholder-[#c8c8c4] focus:outline-none focus:border-[#FF6B35]/60 transition-colors leading-[1.45] overflow-hidden"
-            style={{ minHeight: '40px', maxHeight: '120px' }}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isPending}
-            aria-label="Send message"
-            className={cn(
-              'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150',
-              input.trim() && !isPending
-                ? 'bg-[#FF6B35] text-white shadow-[0_3px_10px_rgba(255,107,53,0.35)] active:scale-90'
-                : 'bg-[#f0f0ec] text-[#c8c8c4]',
-            )}
-          >
-            <Send className="w-4 h-4" strokeWidth={2.2} style={{ transform: 'translateX(1px)' }} />
-          </button>
+        <div className="max-w-4xl mx-auto px-3.5 pt-2.5">
+          <div className="flex items-end gap-2">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              placeholder="Message…"
+              rows={1}
+              maxLength={1000}
+              className="flex-1 resize-none rounded-[22px] border border-[#e8e8e4] bg-[#f8f8f6] px-4 py-2.5 text-[14px] text-[#0f0f0e] placeholder-[#c8c8c4] focus:outline-none focus:border-[#FF6B35]/60 transition-colors leading-[1.45] overflow-hidden"
+              style={{ minHeight: '40px', maxHeight: '120px' }}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!input.trim() || isPending}
+              aria-label="Send message"
+              className={cn(
+                'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150',
+                input.trim() && !isPending
+                  ? 'bg-[#FF6B35] text-white shadow-[0_3px_10px_rgba(255,107,53,0.35)] active:scale-90'
+                  : 'bg-[#f0f0ec] text-[#c8c8c4]',
+              )}
+            >
+              <Send className="w-4 h-4" strokeWidth={2.2} style={{ transform: 'translateX(1px)' }} />
+            </button>
+          </div>
         </div>
       </div>
 
