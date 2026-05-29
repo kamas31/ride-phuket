@@ -21,10 +21,11 @@ export default function MobileBottomNav() {
 
   useEffect(() => {
     const supabase = createClient()
-    let userId: string | null = null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    let currentUserId: string | null = null
 
     async function fetchUnread(uid: string) {
-      // Get all conversation IDs for this user
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: convos } = await (supabase as any)
         .from('conversations')
@@ -46,28 +47,33 @@ export default function MobileBottomNav() {
       setUnread(count ?? 0)
     }
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      userId = user.id
+
+      currentUserId = user.id
       fetchUnread(user.id)
 
-      // Refresh on new messages via Realtime
-      const channel = supabase
+      channel = supabase
         .channel('nav-unread')
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'messages' },
-          () => { if (userId) fetchUnread(userId) },
+          () => { if (currentUserId) fetchUnread(currentUserId) },
         )
         .on(
           'postgres_changes',
           { event: 'UPDATE', schema: 'public', table: 'messages' },
-          () => { if (userId) fetchUnread(userId) },
+          () => { if (currentUserId) fetchUnread(currentUserId) },
         )
         .subscribe()
+    }
 
-      return () => { supabase.removeChannel(channel) }
-    })
+    init()
+
+    return () => {
+      if (channel) supabase.removeChannel(channel)
+    }
   }, [])
 
   return (
@@ -83,29 +89,27 @@ export default function MobileBottomNav() {
             <Link
               key={href}
               href={href}
-              className="flex-1 flex flex-col items-center gap-[3px] pt-2 pb-1.5 transition-colors"
+              className="flex-1 flex flex-col items-center gap-[3px] pt-2 pb-1.5"
             >
               <div className={cn(
-                'relative flex items-center justify-center w-8 h-[22px] rounded-full transition-colors duration-200',
-                active ? 'bg-[#FF6B35]/12' : 'bg-transparent'
+                'relative flex items-center justify-center w-8 h-[22px] rounded-full transition-colors duration-150',
+                active ? 'bg-[#FF6B35]/12' : 'bg-transparent',
               )}>
                 <Icon
                   className={cn(
-                    'w-[18px] h-[18px] transition-colors',
-                    active ? 'text-[#FF6B35]' : 'text-[#9c9c98]'
+                    'w-[18px] h-[18px] transition-colors duration-150',
+                    active ? 'text-[#FF6B35]' : 'text-[#9c9c98]',
                   )}
                   strokeWidth={active ? 2.5 : 1.5}
                 />
                 {isMessages && unread > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#FF6B35] rounded-full border border-white" />
+                  <span className="absolute -top-0.5 -right-1 w-[9px] h-[9px] bg-[#FF6B35] rounded-full border-[1.5px] border-white" />
                 )}
               </div>
-              <span
-                className={cn(
-                  'text-[10px] font-medium leading-none transition-colors',
-                  active ? 'text-[#FF6B35]' : 'text-[#9c9c98]'
-                )}
-              >
+              <span className={cn(
+                'text-[10px] font-medium leading-none transition-colors duration-150',
+                active ? 'text-[#FF6B35]' : 'text-[#9c9c98]',
+              )}>
                 {label}
               </span>
             </Link>

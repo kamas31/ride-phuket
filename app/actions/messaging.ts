@@ -21,9 +21,11 @@ export interface ConversationPreview {
   scooterName: string
   scooterImage: string | null
   scooterPricePerDay: number
+  shopName: string
+  shopSlug: string | null
   clientId: string
   ownerId: string
-  otherUserName: string
+  otherUserName: string    // owner profile name (rider inbox) or rider name (owner inbox)
   lastMessage: string | null
   lastMessageAt: string | null
   unreadCount: number
@@ -35,13 +37,14 @@ export interface ConversationDetail {
   scooterName: string
   scooterImage: string | null
   scooterPricePerDay: number
+  shopName: string
+  shopSlug: string | null
   clientId: string
   ownerId: string
   createdAt: string
 }
 
 // ── getOrCreateConversation ───────────────────────────────────────────────────
-// Idempotent — safe to call multiple times for same scooter/rider pair.
 
 export async function getOrCreateConversation(
   scooterId: string,
@@ -66,7 +69,6 @@ export async function getOrCreateConversation(
   if (!ownerId) return { error: 'Shop owner not found.' }
   if (ownerId === user.id) return { error: 'own_listing' }
 
-  // Upsert: re-uses existing row if unique constraint fires
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('conversations')
@@ -101,7 +103,6 @@ export async function sendMessage(
 
   const admin = createAdminClient()
 
-  // Verify the user is a party in this conversation
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: convo } = await (admin as any)
     .from('conversations')
@@ -142,7 +143,7 @@ export async function sendMessage(
 }
 
 // ── getConversations ──────────────────────────────────────────────────────────
-// Returns all conversations where the current user is the rider (client).
+// Rider inbox: conversations where current user is the client.
 
 export async function getConversations(): Promise<ConversationPreview[]> {
   const supabase = await createClient()
@@ -156,7 +157,7 @@ export async function getConversations(): Promise<ConversationPreview[]> {
     .from('conversations')
     .select(`
       id, scooter_id, client_id, owner_id, created_at,
-      scooters ( name, cover_image, price_per_day ),
+      scooters ( name, cover_image, price_per_day, shops ( name, slug ) ),
       messages ( id, content, created_at, read_at, sender_id )
     `)
     .eq('client_id', user.id)
@@ -164,25 +165,11 @@ export async function getConversations(): Promise<ConversationPreview[]> {
 
   if (!rawConvos) return []
 
-  // Resolve owner display names
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ownerIds: string[] = [...new Set((rawConvos as any[]).map((c) => c.owner_id as string))]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profiles } = await (admin as any)
-    .from('profiles')
-    .select('id, name')
-    .in('id', ownerIds)
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const nameMap: Record<string, string> = {}
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const p of (profiles ?? []) as any[]) nameMap[p.id] = p.name
-
-  return rawConvos.map(buildPreview.bind(null, user.id, nameMap))
+  return (rawConvos as any[]).map(c => buildPreview(user.id, c)) // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 // ── getOwnerConversations ─────────────────────────────────────────────────────
-// Returns all conversations where the current user is the shop owner.
+// Owner inbox: conversations where current user is the shop owner.
 
 export async function getOwnerConversations(): Promise<ConversationPreview[]> {
   const supabase = await createClient()
@@ -196,7 +183,7 @@ export async function getOwnerConversations(): Promise<ConversationPreview[]> {
     .from('conversations')
     .select(`
       id, scooter_id, client_id, owner_id, created_at,
-      scooters ( name, cover_image, price_per_day ),
+      scooters ( name, cover_image, price_per_day, shops ( name, slug ) ),
       messages ( id, content, created_at, read_at, sender_id )
     `)
     .eq('owner_id', user.id)
@@ -204,20 +191,20 @@ export async function getOwnerConversations(): Promise<ConversationPreview[]> {
 
   if (!rawConvos) return []
 
+  // Resolve rider display names
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const clientIds: string[] = [...new Set((rawConvos as any[]).map((c) => c.client_id as string))]
+  const clientIds: string[] = [...new Set((rawConvos as any[]).map(c => c.client_id as string))]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profiles } = await (admin as any)
     .from('profiles')
     .select('id, name')
     .in('id', clientIds)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nameMap: Record<string, string> = {}
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const p of (profiles ?? []) as any[]) nameMap[p.id] = p.name
+  for (const p of (profiles ?? []) as { id: string; name: string }[]) nameMap[p.id] = p.name
 
-  return rawConvos.map(buildPreview.bind(null, user.id, nameMap))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (rawConvos as any[]).map(c => buildPreview(user.id, c, nameMap))
 }
 
 // ── getConversationWithMessages ───────────────────────────────────────────────
@@ -234,13 +221,14 @@ export async function getConversationWithMessages(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: convo } = await (admin as any)
     .from('conversations')
-    .select('id, scooter_id, client_id, owner_id, created_at, scooters(name, cover_image, price_per_day)')
+    .select(`
+      id, scooter_id, client_id, owner_id, created_at,
+      scooters ( name, cover_image, price_per_day, shops ( name, slug ) )
+    `)
     .eq('id', conversationId)
     .single()
 
   if (!convo) return null
-
-  // Auth: must be a party
   if (convo.client_id !== user.id && convo.owner_id !== user.id) return null
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -252,6 +240,8 @@ export async function getConversationWithMessages(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const s = convo.scooters as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const shop = s?.shops as any
 
   return {
     conversation: {
@@ -260,6 +250,8 @@ export async function getConversationWithMessages(
       scooterName: s?.name ?? 'Scooter',
       scooterImage: s?.cover_image ?? null,
       scooterPricePerDay: s?.price_per_day ?? 0,
+      shopName: shop?.name ?? 'Rental shop',
+      shopSlug: shop?.slug ?? null,
       clientId: convo.client_id,
       ownerId: convo.owner_id,
       createdAt: convo.created_at,
@@ -277,7 +269,6 @@ export async function getConversationWithMessages(
 }
 
 // ── markMessagesRead ──────────────────────────────────────────────────────────
-// Marks all messages from the OTHER party as read in this conversation.
 
 export async function markMessagesRead(conversationId: string): Promise<void> {
   const supabase = await createClient()
@@ -305,7 +296,6 @@ export async function getUnreadCount(): Promise<number> {
 
   const admin = createAdminClient()
 
-  // Get all conversation IDs the user is a party to
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: convos } = await (admin as any)
     .from('conversations')
@@ -327,17 +317,26 @@ export async function getUnreadCount(): Promise<number> {
   return count ?? 0
 }
 
-// ── Internal helper ───────────────────────────────────────────────────────────
+// ── Internal ──────────────────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildPreview(userId: string, nameMap: Record<string, string>, c: any): ConversationPreview {
-  const msgs: any[] = c.messages ?? [] // eslint-disable-line @typescript-eslint/no-explicit-any
+function buildPreview(
+  userId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  c: any,
+  nameMap?: Record<string, string>,
+): ConversationPreview {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const msgs: any[] = c.messages ?? []
   const sorted = [...msgs].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )
   const last = sorted[0]
   const unread = msgs.filter(m => m.sender_id !== userId && !m.read_at).length
-  const s = c.scooters as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const s = c.scooters as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const shop = s?.shops as any
 
   const isClient = c.client_id === userId
   const otherUserId = isClient ? c.owner_id : c.client_id
@@ -348,9 +347,11 @@ function buildPreview(userId: string, nameMap: Record<string, string>, c: any): 
     scooterName: s?.name ?? 'Scooter',
     scooterImage: s?.cover_image ?? null,
     scooterPricePerDay: s?.price_per_day ?? 0,
+    shopName: shop?.name ?? 'Rental shop',
+    shopSlug: shop?.slug ?? null,
     clientId: c.client_id,
     ownerId: c.owner_id,
-    otherUserName: nameMap[otherUserId] ?? 'User',
+    otherUserName: nameMap?.[otherUserId] ?? 'User',
     lastMessage: last?.content ?? null,
     lastMessageAt: last?.created_at ?? null,
     unreadCount: unread,
