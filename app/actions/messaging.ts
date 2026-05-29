@@ -142,6 +142,34 @@ export async function sendMessage(
   }
 }
 
+// ── getAllConversations ───────────────────────────────────────────────────────
+// Universal inbox: all conversations where the user is client OR owner.
+// Used by /messages — works for both riders and shop owners.
+
+export async function getAllConversations(): Promise<ConversationPreview[]> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const admin = createAdminClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rawConvos, error } = await (admin as any)
+    .from('conversations')
+    .select(`
+      id, scooter_id, client_id, owner_id, created_at,
+      scooters ( name, cover_image, price_per_day, shops ( name, slug ) ),
+      messages ( id, content, created_at, read_at, sender_id )
+    `)
+    .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
+    .order('created_at', { ascending: false })
+
+  if (error) console.error('[getAllConversations]', error.message)
+  if (!rawConvos) return []
+
+  return (rawConvos as any[]).map(c => buildPreview(user.id, c)) // eslint-disable-line @typescript-eslint/no-explicit-any
+}
+
 // ── getConversations ──────────────────────────────────────────────────────────
 // Rider inbox: conversations where current user is the client.
 

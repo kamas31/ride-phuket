@@ -35,7 +35,7 @@ export default async function PartnerMessagesPage() {
   const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0)
 
   return (
-    <div className="bg-[#f8f8f6] min-h-screen">
+    <div className="bg-[#f8f8f6] min-h-screen pt-16">
       {/* Header */}
       <div className="bg-white border-b border-[#e8e8e4]">
         <div className="max-w-2xl mx-auto px-4 py-6">
