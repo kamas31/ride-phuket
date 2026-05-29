@@ -60,7 +60,10 @@
 }
 @media (max-width: 767px) {
   :root {
-    --bottom-nav-h: 3.25rem; /* matches the nav's visual height, no double-counting */
+    /* 3.25rem = nav content (~49px) + small buffer.
+       min(safe-area, 15px) mirrors the nav's own paddingBottom cap so the thread
+       clears the full nav height on notched devices without over-spacing on others. */
+    --bottom-nav-h: calc(3.25rem + min(env(safe-area-inset-bottom, 0px), 15px));
   }
 }
 
