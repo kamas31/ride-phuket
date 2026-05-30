@@ -5,14 +5,12 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
-  ArrowLeft, Save, Check, Loader2, Camera, X,
-  Phone, MessageCircle, Globe, MapPin, Clock,
-  AtSign, AlertCircle, ImageOff, Sparkles,
+  ArrowLeft, Save, Check, Loader2, Camera,
+  Phone, MessageCircle, Globe, MapPin,
+  AtSign, AlertCircle, ImageOff,
 } from 'lucide-react'
-import { PLAN_LABELS, FOUNDING_PARTNER_PERKS, isFoundingPartner } from '@/lib/plans'
 import { createClient } from '@/lib/supabase/client'
 import { updateShop } from '@/app/actions/shop-update'
-import { ImageUploader, type ProcessedImage } from '@/components/ride/ImageUploader'
 import { cn } from '@/lib/utils'
 import type { FullShopRow } from '@/app/actions/profile'
 import type { OpeningHoursSchedule, OpeningHoursDay } from '@/types'
@@ -257,15 +255,12 @@ interface ShopSettingsClientProps {
   shop: FullShopRow
 }
 
-type SaveState = 'idle' | 'uploading' | 'saving' | 'saved' | 'error'
+type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [error, setError]         = useState<string | null>(null)
   const [showMap, setShowMap]     = useState(false)
-
-  // Gallery images — new uploads
-  const [galleryNew, setGalleryNew] = useState<ProcessedImage[]>([])
 
   const [form, setForm] = useState({
     // Basic
@@ -312,34 +307,13 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
       return { ...f, hours: next }
     })
 
-  // Upload gallery new images → URLs
-  const uploadGallery = async (): Promise<string[]> => {
-    if (!galleryNew.length) return []
-    const supabase = createClient()
-    const urls: string[] = []
-    for (const img of galleryNew) {
-      const path = `shops/${shop.id}/gallery/${Date.now()}-${Math.random().toString(36).slice(2, 6)}.webp`
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error: upErr } = await (supabase as any).storage
-        .from('scooter-images')
-        .upload(path, img.blob, { contentType: 'image/webp', upsert: false })
-      if (upErr) { console.error('[gallery upload]', upErr.message); continue }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: urlData } = (supabase as any).storage
-        .from('scooter-images')
-        .getPublicUrl(data.path)
-      urls.push(urlData.publicUrl)
-    }
-    return urls
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name.trim()) { setError('Shop name is required.'); return }
     if (!form.phone.trim()) { setError('Phone number is required.'); return }
 
     setError(null)
-    setSaveState('uploading')
+    setSaveState('saving')
 
     const timeout = setTimeout(() => {
       setSaveState('error')
@@ -347,9 +321,6 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
     }, 30_000)
 
     try {
-      const newGalleryUrls = await uploadGallery()
-      setSaveState('saving')
-
       const result = await updateShop(shop.id, {
         name:        form.name,
         description: form.description,
@@ -367,14 +338,13 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
         openingHours:   form.hours,
         logoUrl:        form.logoUrl || null,
         coverImage:     form.coverImage || null,
-        gallery:        [...form.galleryUrls, ...newGalleryUrls],
+        gallery:        form.galleryUrls,
       })
 
       clearTimeout(timeout)
 
       if (result.success) {
         setSaveState('saved')
-        setGalleryNew([])
         setTimeout(() => setSaveState('idle'), 2500)
       } else {
         setError(result.error ?? 'Failed to save.')
@@ -387,7 +357,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
     }
   }
 
-  const isBusy = saveState === 'uploading' || saveState === 'saving'
+  const isBusy = saveState === 'saving'
 
   return (
     <div className="min-h-screen bg-[#f8f8f6]">
@@ -414,7 +384,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
             )}
           >
             {isBusy ? (
-              <><Loader2 className="w-3.5 h-3.5 animate-spin" />{saveState === 'uploading' ? 'Uploading…' : 'Saving…'}</>
+              <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving…</>
             ) : saveState === 'saved' ? (
               <><Check className="w-3.5 h-3.5" />Saved</>
             ) : (
@@ -425,30 +395,6 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
       </div>
 
       <form id="shop-form" onSubmit={handleSubmit} className="max-w-xl mx-auto px-4 py-6 space-y-5">
-
-        {/* Founding Partner banner */}
-        {isFoundingPartner(shop.plan_type) && (
-          <div className="bg-gradient-to-r from-[#fff8f0] to-[#fffbf0] border border-[#f59e0b]/20 rounded-[16px] px-4 py-3.5 flex items-start gap-3">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FF6B35] to-[#f59e0b] flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-            </div>
-            <div>
-              <p className="text-[12px] font-bold text-[#92400e]">
-                {PLAN_LABELS[shop.plan_type as keyof typeof PLAN_LABELS]} — all features unlocked
-              </p>
-              <p className="text-[11px] text-[#b45309] mt-0.5 leading-relaxed">
-                You currently have free access to all Pro features as an early partner while Koh Ride grows. Thank you for being part of this.
-              </p>
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {FOUNDING_PARTNER_PERKS.map(perk => (
-                  <span key={perk} className="text-[10px] font-semibold px-2 py-0.5 bg-[#f59e0b]/10 text-[#92400e] rounded-full border border-[#f59e0b]/15">
-                    ✓ {perk}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ── 1. Basic Info ── */}
         <Section title="Basic Info">
@@ -699,39 +645,6 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
             />
           </div>
 
-          {/* Gallery */}
-          <div className="border-t border-[#f0f0ec] pt-4">
-            <p className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-3">
-              Gallery Photos
-            </p>
-
-            {/* Existing gallery */}
-            {form.galleryUrls.length > 0 && (
-              <div className="grid grid-cols-4 gap-2 mb-3">
-                {form.galleryUrls.map((url, i) => (
-                  <div key={url} className="relative group">
-                    <div className="relative h-16 rounded-[8px] overflow-hidden bg-[#f0f0ec]">
-                      <Image src={url} alt={`Gallery ${i + 1}`} fill className="object-cover" unoptimized />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => set('galleryUrls', form.galleryUrls.filter(u => u !== url))}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-white border border-[#fecaca] rounded-full flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-2.5 h-2.5 text-[#dc2626]" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <ImageUploader
-              images={galleryNew}
-              onChange={setGalleryNew}
-              maxImages={Math.max(0, 8 - form.galleryUrls.length)}
-              minImages={0}
-            />
-          </div>
         </Section>
 
         {/* Error */}
@@ -756,7 +669,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
             className="flex-1 flex items-center justify-center gap-2 py-4 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] disabled:opacity-50 transition-colors"
           >
             {isBusy
-              ? <><Loader2 className="w-5 h-5 animate-spin" />{saveState === 'uploading' ? 'Uploading…' : 'Saving…'}</>
+              ? <><Loader2 className="w-5 h-5 animate-spin" />Saving…</>
               : saveState === 'saved'
                 ? <><Check className="w-5 h-5" />Saved!</>
                 : <><Save className="w-5 h-5" />Save Shop Settings</>
