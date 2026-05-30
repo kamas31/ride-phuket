@@ -7,6 +7,7 @@ import { ScooterImage } from '@/components/ride/ScooterImage'
 import {
   Bike, Plus, Settings, MapPin,
   ChevronRight, ArrowRight, Trash2, ShoppingBag,
+  Calendar, ExternalLink, Eye, MessageSquare,
 } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
 import { deleteScooter } from '@/app/actions/scooter-delete'
@@ -34,37 +35,33 @@ interface DashboardClientProps {
   activityFeed: ActivityFeedItem[] // fetched, preserved for future use
 }
 
-export default function DashboardClient({ profile, shop, scooters: initial, bookingStats, analytics }: DashboardClientProps) {
-  const [scooters, setScooters] = useState(initial)
-  const [togglingId, setTogglingId]     = useState<string | null>(null)
-  const [deletingId, setDeletingId]     = useState<string | null>(null)
+export default function DashboardClient({
+  profile, shop, scooters: initial, bookingStats, analytics,
+}: DashboardClientProps) {
+  const [scooters, setScooters]           = useState(initial)
+  const [togglingId, setTogglingId]       = useState<string | null>(null)
+  const [deletingId, setDeletingId]       = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
-  const [deleteError, setDeleteError]   = useState<string | null>(null)
+  const [deleteError, setDeleteError]     = useState<string | null>(null)
 
   const availableCount = scooters.filter(s => s.available).length
   const planType       = shop?.plan_type
 
-  // ── Analytics preserved for future premium plans (not displayed) ──────────
-  const _hasAdvanced    = canAccessAdvancedAnalytics(planType)
+  // ── Analytics preserved for future premium plans ──────────────────────────
+  const _hasAdvanced     = canAccessAdvancedAnalytics(planType)
   const _hasLeadInsights = canAccessLeadInsights(planType)
-  const _conversionRate = analytics
-    ? computeConversionRate(analytics.scooterViews, analytics.whatsappClicks)
-    : 0
+  const _conversionRate  = analytics
+    ? computeConversionRate(analytics.scooterViews, analytics.whatsappClicks) : 0
   const _conversionInsight = analytics
-    ? getConversionInsight(analytics.scooterViews, analytics.whatsappClicks)
-    : null
+    ? getConversionInsight(analytics.scooterViews, analytics.whatsappClicks) : null
   void _hasAdvanced; void _hasLeadInsights; void _conversionRate; void _conversionInsight
 
-  // Hot scooter scores — still rendered in fleet row badges
   const hasHotScooters = canAccessHotScooters(planType)
   const hotScores = hasHotScooters && analytics?.scooterBreakdown?.length
     ? rankScootersByHotScore(analytics.scooterBreakdown.map(b => ({
-        scooterId:   b.scooterId,
-        name:        b.name,
-        views:       b.views,
-        waClicks:    b.waClicks,
-        phoneClicks: b.phoneClicks,
-        periodDays:  analytics.periodDays,
+        scooterId: b.scooterId, name: b.name,
+        views: b.views, waClicks: b.waClicks,
+        phoneClicks: b.phoneClicks, periodDays: analytics.periodDays,
       })))
     : []
   const hotMap = new Map(hotScores.map(h => [h.scooterId, h]))
@@ -87,9 +84,7 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
       s.id === scooterId ? { ...s, available: !current } : s
     ))
     setTogglingId(scooterId)
-
     const result = await toggleScooterAvailability(scooterId, !current)
-
     if (result.error) {
       setScooters(prev => prev.map(s =>
         s.id === scooterId ? { ...s, available: current } : s
@@ -102,64 +97,91 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f8f6]">
+    <div className="min-h-screen bg-[#f5f4f2]">
       <TrackView eventType="partner_dashboard" shopId={shop?.id} />
 
-      {/* ── Section 1: Shop Overview ── */}
+      {/* ─────────────────────────────────────────────────────────────────────
+          HERO — Shop identity & at-a-glance status
+      ──────────────────────────────────────────────────────────────────────── */}
       <div className="bg-white border-b border-[#e8e8e4]">
-        <div className="max-w-2xl mx-auto px-5 pt-20 pb-6">
+        <div className="max-w-4xl mx-auto px-5 sm:px-8 pt-20 pb-7 sm:pb-8">
           <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h1 className="text-[22px] font-bold text-[#0f0f0e] tracking-tight leading-tight truncate">
+
+            <div className="min-w-0 flex-1">
+              {/* Brand label */}
+              <p className="text-[11px] font-semibold text-[#FF6B35] uppercase tracking-[0.14em] mb-2">
+                Partner Dashboard
+              </p>
+
+              {/* Shop name */}
+              <h1 className="text-[26px] sm:text-[30px] font-bold text-[#0f0f0e] tracking-tight leading-tight">
                 {shop?.name ?? profile?.name ?? 'My Shop'}
               </h1>
+
+              {/* Location */}
               {shop && (
-                <p className="text-sm text-[#9c9c98] mt-0.5 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 flex-shrink-0" />
+                <p className="text-[13px] text-[#9c9c98] mt-1 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
                   {shop.location}
                 </p>
               )}
+
+              {/* Status pills */}
               {shop && (
-                <div className="flex items-center gap-2 mt-3 text-[13px]">
-                  <span className={cn('font-semibold', availableCount > 0 ? 'text-[#22c55e]' : 'text-[#9c9c98]')}>
+                <div className="flex flex-wrap items-center gap-2 mt-4">
+                  <span className={cn(
+                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold',
+                    availableCount > 0
+                      ? 'bg-[#dcfce7] text-[#15803d]'
+                      : 'bg-[#f1f5f9] text-[#64748b]',
+                  )}>
+                    <span className={cn(
+                      'w-1.5 h-1.5 rounded-full flex-shrink-0',
+                      availableCount > 0 ? 'bg-[#22c55e]' : 'bg-[#94a3b8]',
+                    )} />
                     {availableCount} Live
                   </span>
-                  <span className="text-[#d0d0cc]">·</span>
-                  <span className="font-medium text-[#0f0f0e]">
+                  <span className="text-[13px] font-medium text-[#6b6b67]">
                     {(analytics?.scooterViews ?? 0).toLocaleString()} Views
                   </span>
                   <span className="text-[#d0d0cc]">·</span>
-                  <span className="font-medium text-[#0f0f0e]">
-                    {analytics?.whatsappClicks ?? 0} {analytics?.whatsappClicks === 1 ? 'Lead' : 'Leads'}
+                  <span className="text-[13px] font-medium text-[#6b6b67]">
+                    {analytics?.whatsappClicks ?? 0} Leads
                   </span>
                 </div>
               )}
             </div>
+
+            {/* Settings */}
             <Link
               href="/partner/shop"
-              className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-[#f8f8f6] border border-[#e8e8e4] text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
+              aria-label="Shop settings"
+              className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-[12px] bg-[#f5f4f2] text-[#5c5c58] hover:bg-[#ececea] hover:text-[#0f0f0e] transition-colors"
             >
               <Settings className="w-4 h-4" />
             </Link>
+
           </div>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-5 py-8 space-y-10">
+      {/* ── Page body ── */}
+      <div className="max-w-4xl mx-auto px-5 sm:px-8 py-8 space-y-8">
 
-        {/* No-shop onboarding */}
+        {/* ── No-shop onboarding ─────────────────────────────────────────── */}
         {!shop && (
-          <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-8 text-center">
-            <div className="w-16 h-16 bg-[#fff4f0] rounded-[20px] flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white rounded-[24px] shadow-[0_2px_20px_-4px_rgba(0,0,0,0.08)] p-10 text-center">
+            <div className="w-16 h-16 bg-[#fff4f0] rounded-[20px] flex items-center justify-center mx-auto mb-5">
               <ShoppingBag className="w-8 h-8 text-[#FF6B35]" strokeWidth={1.5} />
             </div>
-            <h2 className="text-[20px] font-bold text-[#0f0f0e] mb-2">Set up your shop</h2>
-            <p className="text-[#5c5c58] text-sm leading-relaxed mb-6 max-w-sm mx-auto">
-              Complete your shop profile to start receiving rental inquiries. Our team will verify your shop within 24 hours.
+            <h2 className="text-[22px] font-bold text-[#0f0f0e] mb-2">Set up your shop</h2>
+            <p className="text-[14px] text-[#6b6b67] leading-relaxed mb-7 max-w-sm mx-auto">
+              Complete your shop profile to start receiving rental inquiries.
+              Our team will verify your shop within 24 hours.
             </p>
             <Link
               href="/partner"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-sm"
+              className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-[14px] shadow-[0_4px_14px_rgba(255,107,53,0.35)]"
             >
               Complete Shop Setup
               <ArrowRight className="w-4 h-4" />
@@ -167,91 +189,121 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
           </div>
         )}
 
-        {/* ── Section 2: Performance ── */}
+        {/* ─────────────────────────────────────────────────────────────────
+            KPI CARDS — Views + Leads
+        ──────────────────────────────────────────────────────────────────── */}
         {shop && analytics !== null && (
           <div>
-            <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-[0.12em] mb-6">
+            <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-[0.12em] mb-4">
               Last 30 days
             </p>
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <p className="text-[52px] font-bold text-[#0f0f0e] leading-none tabular-nums">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+
+              {/* Listing Views */}
+              <div className="relative bg-white rounded-[20px] p-5 sm:p-6 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)]">
+                <div className="absolute inset-x-0 top-0 h-[3px] bg-[#FF6B35] rounded-t-[20px]" />
+                <Eye className="w-4 h-4 text-[#FF6B35] mb-3 mt-0.5" strokeWidth={2} />
+                <p className="text-[40px] sm:text-[48px] font-bold text-[#0f0f0e] leading-none tabular-nums">
                   {analytics.scooterViews.toLocaleString()}
                 </p>
-                <p className="text-[14px] text-[#9c9c98] mt-2.5">Listing Views</p>
+                <p className="text-[12px] font-medium text-[#9c9c98] mt-2.5">
+                  Listing Views
+                </p>
               </div>
-              <div>
-                <p className="text-[52px] font-bold text-[#0f0f0e] leading-none tabular-nums">
+
+              {/* WhatsApp Leads */}
+              <div className="relative bg-white rounded-[20px] p-5 sm:p-6 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)]">
+                <div className="absolute inset-x-0 top-0 h-[3px] bg-[#25d366] rounded-t-[20px]" />
+                <MessageSquare className="w-4 h-4 text-[#25d366] mb-3 mt-0.5" strokeWidth={2} />
+                <p className="text-[40px] sm:text-[48px] font-bold text-[#0f0f0e] leading-none tabular-nums">
                   {analytics.whatsappClicks.toLocaleString()}
                 </p>
-                <p className="text-[14px] text-[#9c9c98] mt-2.5">
+                <p className="text-[12px] font-medium text-[#9c9c98] mt-2.5">
                   WhatsApp {analytics.whatsappClicks === 1 ? 'Lead' : 'Leads'}
                 </p>
               </div>
+
             </div>
           </div>
         )}
 
-        {/* ── Section 3: Fleet Management ── */}
+        {/* ─────────────────────────────────────────────────────────────────
+            FLEET MANAGEMENT
+        ──────────────────────────────────────────────────────────────────── */}
         {shop && (
           <div>
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[18px] font-bold text-[#0f0f0e]">My Fleet</h2>
+            <div className="flex items-end justify-between mb-4">
+              <div>
+                <h2 className="text-[18px] font-bold text-[#0f0f0e]">My Fleet</h2>
+                {scooters.length > 0 && (
+                  <p className="text-[12px] text-[#9c9c98] mt-0.5">
+                    {scooters.length} {scooters.length === 1 ? 'scooter' : 'scooters'}
+                    {' · '}
+                    {availableCount} live
+                  </p>
+                )}
+              </div>
               <Link
                 href="/partner/scooters/new"
-                className="flex items-center gap-2 px-4 py-2.5 bg-[#FF6B35] text-white text-sm font-semibold rounded-full hover:bg-[#e85d29] transition-all shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#FF6B35] text-white text-[13px] font-semibold rounded-full hover:bg-[#e85d29] active:scale-[0.97] transition-all shadow-[0_2px_8px_rgba(255,107,53,0.28)]"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3.5 h-3.5" />
                 Add Scooter
               </Link>
             </div>
 
             {scooters.length === 0 ? (
-              <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-10 text-center">
-                <div className="w-14 h-14 bg-[#f8f8f6] rounded-[18px] flex items-center justify-center mx-auto mb-4">
+              <div className="bg-white rounded-[24px] shadow-[0_2px_16px_-2px_rgba(0,0,0,0.06)] p-10 text-center">
+                <div className="w-14 h-14 bg-[#f5f4f2] rounded-[18px] flex items-center justify-center mx-auto mb-4">
                   <Bike className="w-7 h-7 text-[#9c9c98]" strokeWidth={1.5} />
                 </div>
-                <p className="font-bold text-[#0f0f0e] mb-1">No scooters in your fleet yet</p>
-                <p className="text-sm text-[#9c9c98] mb-6">Add your first scooter and start receiving rental inquiries today.</p>
+                <p className="text-[15px] font-bold text-[#0f0f0e] mb-1.5">No scooters yet</p>
+                <p className="text-[13px] text-[#9c9c98] mb-6 max-w-xs mx-auto leading-relaxed">
+                  Add your first scooter and start receiving rental inquiries today.
+                </p>
                 <Link
                   href="/partner/scooters/new"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-sm"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-[13px]"
                 >
                   <Plus className="w-4 h-4" />
                   Add Your First Scooter
                 </Link>
               </div>
             ) : (
-              <div className="bg-white rounded-[20px] border border-[#e8e8e4] overflow-hidden divide-y divide-[#f0f0ec]">
+              <div className="space-y-3">
                 {deleteError && (
-                  <div className="px-4 py-3 bg-[#fef2f2] text-[#dc2626] text-xs border-b border-[#fecaca]">
+                  <div className="px-4 py-3 bg-[#fef2f2] text-[#dc2626] text-[12px] rounded-[14px] border border-[#fecaca]">
                     {deleteError}
                   </div>
                 )}
-                {scooters.map((scooter, i) => (
+
+                {scooters.map(scooter => (
                   <div
                     key={scooter.id}
                     className={cn(
-                      'transition-colors',
-                      scooter.available ? 'hover:bg-[#f8f8f6]' : 'bg-[#fafafa] opacity-75 hover:opacity-100'
+                      'bg-white rounded-[20px] overflow-hidden',
+                      'shadow-[0_1px_4px_rgba(0,0,0,0.04),0_2px_12px_-2px_rgba(0,0,0,0.06)]',
+                      'transition-opacity duration-200',
+                      !scooter.available && 'opacity-60',
                     )}
-                    style={{ opacity: 0, animation: `fade-up 0.35s ease forwards ${i * 0.05}s` }}
                   >
-                    {/* Confirm delete inline banner */}
+                    {/* Delete confirm banner */}
                     {deletingId === scooter.id && (
                       <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-[#fef2f2] border-b border-[#fecaca]">
-                        <p className="text-xs text-[#dc2626] font-medium">Delete <strong>{scooter.name}</strong>? This cannot be undone.</p>
+                        <p className="text-[12px] text-[#dc2626] font-medium">
+                          Delete <strong>{scooter.name}</strong>? This cannot be undone.
+                        </p>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <button
                             onClick={() => setDeletingId(null)}
-                            className="text-xs text-[#5c5c58] hover:text-[#0f0f0e] font-medium"
+                            className="text-[12px] text-[#5c5c58] hover:text-[#0f0f0e] font-medium"
                           >
                             Cancel
                           </button>
                           <button
                             onClick={() => handleDelete(scooter.id)}
                             disabled={deleteLoading === scooter.id}
-                            className="px-3 py-1 bg-[#dc2626] text-white text-xs font-bold rounded-full hover:bg-[#b91c1c] disabled:opacity-50 transition-colors"
+                            className="px-3 py-1 bg-[#dc2626] text-white text-[11px] font-bold rounded-full hover:bg-[#b91c1c] disabled:opacity-50 transition-colors"
                           >
                             {deleteLoading === scooter.id ? 'Deleting…' : 'Delete'}
                           </button>
@@ -259,20 +311,25 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
                       </div>
                     )}
 
-                    <div className="flex gap-3 p-3.5 md:p-4 md:gap-4">
+                    <div className="flex gap-3.5 p-4 sm:p-5">
+                      {/* Thumbnail */}
                       <ScooterImage
                         src={scooter.images?.[0]}
                         alt={scooter.name}
-                        className="w-16 h-14 md:w-20 md:h-16 rounded-[10px] flex-shrink-0"
+                        className="w-[72px] h-[62px] sm:w-20 sm:h-[68px] rounded-[14px] flex-shrink-0"
                         sizes="80px"
                       />
+
+                      {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start gap-2">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <p className="font-semibold text-[#0f0f0e] text-sm leading-tight truncate">{scooter.name}</p>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <p className="text-[14px] sm:text-[15px] font-semibold text-[#0f0f0e] leading-tight truncate">
+                                {scooter.name}
+                              </p>
                               {(() => {
-                                const hot = hotMap.get(scooter.id)
+                                const hot   = hotMap.get(scooter.id)
                                 const label = hot ? getHotStatusLabel(hot.status) : null
                                 return label ? (
                                   <span className="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 bg-[#fff4f0] text-[#FF6B35] rounded-full border border-[#fed7b0]">
@@ -281,52 +338,69 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
                                 ) : null
                               })()}
                             </div>
-                            <p className="text-[11px] text-[#9c9c98] mt-0.5 capitalize truncate">
-                              {scooter.category} · {formatPrice(scooter.price_per_day)}/day
+                            <p className="text-[12px] text-[#9c9c98] mt-0.5 capitalize">
+                              {scooter.category}
+                              <span className="mx-1 text-[#d8d8d4]">·</span>
+                              <span className="text-[#5c5c58] font-medium">
+                                {formatPrice(scooter.price_per_day)}/day
+                              </span>
                             </p>
                           </div>
+
+                          {/* Availability toggle */}
                           <button
                             onClick={() => toggleAvailability(scooter.id, scooter.available)}
                             disabled={togglingId === scooter.id}
                             className={cn(
-                              'relative w-11 h-6 rounded-full transition-all duration-200 flex-shrink-0 mt-0.5',
-                              scooter.available ? 'bg-[#22c55e]' : 'bg-[#e8e8e4]',
-                              togglingId === scooter.id && 'opacity-50'
+                              'relative w-11 h-6 rounded-full transition-colors duration-300 flex-shrink-0 mt-0.5',
+                              scooter.available ? 'bg-[#22c55e]' : 'bg-[#e2e2de]',
+                              togglingId === scooter.id && 'opacity-50 cursor-wait',
                             )}
                             aria-label={scooter.available ? 'Mark unavailable' : 'Mark available'}
                           >
                             <div className={cn(
-                              'absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200',
-                              scooter.available ? 'translate-x-5' : 'translate-x-0.5'
+                              'absolute top-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform duration-300',
+                              scooter.available ? 'translate-x-[22px]' : 'translate-x-[3px]',
                             )} />
                           </button>
                         </div>
-                        <div className="flex items-center gap-2 mt-2">
+
+                        {/* Status badge + action row */}
+                        <div className="flex items-center gap-2 mt-3">
                           <span className={cn(
-                            'text-[10px] font-semibold',
-                            scooter.available ? 'text-[#22c55e]' : 'text-[#9c9c98]'
+                            'inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-semibold flex-shrink-0',
+                            scooter.available
+                              ? 'bg-[#dcfce7] text-[#15803d]'
+                              : 'bg-[#f1f5f9] text-[#64748b]',
                           )}>
-                            {scooter.available ? '● Live' : '○ Hidden'}
+                            <span className={cn(
+                              'w-1.5 h-1.5 rounded-full flex-shrink-0',
+                              scooter.available ? 'bg-[#22c55e]' : 'bg-[#94a3b8]',
+                            )} />
+                            {scooter.available ? 'Live' : 'Hidden'}
                           </span>
+
                           <Link
                             href={`/partner/scooters/${scooter.id}/edit`}
-                            className="px-2.5 py-1 rounded-full bg-[#f8f8f6] border border-[#e8e8e4] text-[10px] font-semibold text-[#5c5c58] hover:border-[#FF6B35]/30 hover:text-[#FF6B35] transition-colors"
+                            className="px-3 py-[3px] rounded-full bg-[#f5f4f2] text-[11px] font-semibold text-[#5c5c58] hover:bg-[#ececea] hover:text-[#0f0f0e] transition-colors"
                           >
                             Edit
                           </Link>
+
                           <Link
                             href={`/scooter/${scooter.id}`}
-                            className="w-7 h-7 rounded-full bg-[#f8f8f6] flex items-center justify-center hover:bg-[#f0f0ec] transition-colors"
                             title="View listing"
+                            className="w-[26px] h-[26px] rounded-full bg-[#f5f4f2] flex items-center justify-center hover:bg-[#ececea] transition-colors"
                           >
-                            <ChevronRight className="w-3.5 h-3.5 text-[#9c9c98]" />
+                            <ExternalLink className="w-3 h-3 text-[#9c9c98]" />
                           </Link>
+
                           <button
                             onClick={() => setDeletingId(scooter.id)}
-                            className="ml-auto w-7 h-7 rounded-full bg-[#fef2f2] flex items-center justify-center hover:bg-[#fee2e2] transition-colors"
                             title="Delete scooter"
+                            className="ml-auto w-[26px] h-[26px] rounded-full bg-[#fef2f2] flex items-center justify-center hover:bg-[#fee2e2] transition-colors"
                           >
-                            <Trash2 className="w-3.5 h-3.5 text-[#dc2626]" />
+                            <Trash2 className="w-3 h-3 text-[#dc2626]" />
                           </button>
                         </div>
                       </div>
@@ -338,38 +412,53 @@ export default function DashboardClient({ profile, shop, scooters: initial, book
           </div>
         )}
 
-        {/* ── Section 4: Quick Actions ── */}
+        {/* ─────────────────────────────────────────────────────────────────
+            QUICK ACTIONS
+        ──────────────────────────────────────────────────────────────────── */}
         {shop && (
-          <div className="pb-4">
-            <div className="bg-white rounded-[20px] border border-[#e8e8e4] overflow-hidden divide-y divide-[#f0f0ec]">
+          <div className="pb-6">
+            <div className="bg-white rounded-[20px] overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.04),0_2px_12px_-2px_rgba(0,0,0,0.05)] divide-y divide-[#f2f2ef]">
+
               <Link
                 href="/partner/shop"
-                className="flex items-center justify-between px-5 py-4 text-sm font-medium text-[#0f0f0e] hover:bg-[#f8f8f6] transition-colors"
+                className="flex items-center gap-3.5 px-5 py-4 hover:bg-[#fafaf8] active:bg-[#f5f4f2] transition-colors group"
               >
-                Shop Settings
-                <ChevronRight className="w-4 h-4 text-[#9c9c98]" />
+                <div className="w-8 h-8 bg-[#f5f4f2] rounded-[10px] flex items-center justify-center flex-shrink-0 group-hover:bg-[#ececea] transition-colors">
+                  <Settings className="w-3.5 h-3.5 text-[#5c5c58]" />
+                </div>
+                <span className="flex-1 text-[14px] font-medium text-[#0f0f0e]">Shop Settings</span>
+                <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:translate-x-0.5 transition-transform" />
               </Link>
+
               <Link
                 href={`/shop/${shop.slug}`}
-                className="flex items-center justify-between px-5 py-4 text-sm font-medium text-[#0f0f0e] hover:bg-[#f8f8f6] transition-colors"
+                className="flex items-center gap-3.5 px-5 py-4 hover:bg-[#fafaf8] active:bg-[#f5f4f2] transition-colors group"
               >
-                View Shop Page
-                <ChevronRight className="w-4 h-4 text-[#9c9c98]" />
+                <div className="w-8 h-8 bg-[#f5f4f2] rounded-[10px] flex items-center justify-center flex-shrink-0 group-hover:bg-[#ececea] transition-colors">
+                  <ExternalLink className="w-3.5 h-3.5 text-[#5c5c58]" />
+                </div>
+                <span className="flex-1 text-[14px] font-medium text-[#0f0f0e]">View Shop Page</span>
+                <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:translate-x-0.5 transition-transform" />
               </Link>
+
               <Link
                 href="/partner/bookings"
-                className="flex items-center justify-between px-5 py-4 text-sm font-medium text-[#0f0f0e] hover:bg-[#f8f8f6] transition-colors"
+                className="flex items-center gap-3.5 px-5 py-4 hover:bg-[#fafaf8] active:bg-[#f5f4f2] transition-colors group"
               >
-                <span className="flex items-center gap-2">
-                  Rental Requests
+                <div className="w-8 h-8 bg-[#f5f4f2] rounded-[10px] flex items-center justify-center flex-shrink-0 group-hover:bg-[#ececea] transition-colors">
+                  <Calendar className="w-3.5 h-3.5 text-[#5c5c58]" />
+                </div>
+                <div className="flex-1 flex items-center gap-2">
+                  <span className="text-[14px] font-medium text-[#0f0f0e]">Rental Requests</span>
                   {bookingStats.pending > 0 && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-[#fff4f0] text-[#FF6B35] rounded-full">
+                    <span className="text-[11px] font-bold px-2 py-0.5 bg-[#fff4f0] text-[#FF6B35] rounded-full border border-[#ffd4bb]">
                       {bookingStats.pending}
                     </span>
                   )}
-                </span>
-                <ChevronRight className="w-4 h-4 text-[#9c9c98]" />
+                </div>
+                <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:translate-x-0.5 transition-transform" />
               </Link>
+
             </div>
           </div>
         )}
