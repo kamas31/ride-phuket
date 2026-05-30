@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, MapPin, Phone, MessageCircle, Clock,
-  Globe, Shield, Zap, Check, Star, ExternalLink, Bike,
+  Globe, Shield, Zap, Check, Star, ExternalLink, Bike, Store,
 } from 'lucide-react'
 import { getShopBySlug } from '@/lib/supabase/queries'
 import { ScooterCard } from '@/components/ride/ScooterCard'
@@ -91,8 +91,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
             Explore
           </Link>
           <div className="flex items-center gap-2">
-            {shop.verified && <TrustBadge variant="verified" />}
-            {newPartner   && <TrustBadge variant="new_partner" />}
+            {newPartner && <TrustBadge variant="new_partner" />}
           </div>
         </div>
       </div>
@@ -153,7 +152,6 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
             {/* Trust badges */}
             <div className="flex flex-wrap gap-2">
-              {shop.verified      && <TrustBadge variant="verified"      size="sm" />}
               {fastResponder      && <TrustBadge variant="fast_response"  size="sm" />}
               {scooters.some(s => s.insuranceIncluded) && <TrustBadge variant="insurance" size="sm" />}
               {scooters.some(s => s.deliveryAvailable) && <TrustBadge variant="delivery"  size="sm" />}
@@ -243,13 +241,16 @@ export default async function ShopPage({ params }: ShopPageProps) {
               <div className="bg-white rounded-[20px] border border-[#e8e8e4] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)] p-5">
                 {/* Shop identity */}
                 <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#f0f0ec]">
-                  <div className="w-11 h-11 bg-[#FF6B35]/10 rounded-full flex items-center justify-center text-[#FF6B35] font-bold text-lg flex-shrink-0">
-                    {shop.name[0]}
-                  </div>
+                  {shop.logo ? (
+                    <img src={shop.logo} alt={shop.name} className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-11 h-11 bg-[#f0ede8] rounded-full flex items-center justify-center flex-shrink-0">
+                      <Store className="w-5 h-5 text-[#a09890]" />
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-[#0f0f0e] truncate">{shop.name}</p>
                     <div className="flex flex-wrap gap-1.5 mt-1">
-                      {shop.verified && <TrustBadge variant="verified" size="xs" />}
                       {fastResponder && <TrustBadge variant="fast_response" size="xs" />}
                     </div>
                   </div>

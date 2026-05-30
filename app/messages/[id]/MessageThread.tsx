@@ -1,14 +1,15 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft, Send, ExternalLink } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { sendMessage } from '@/app/actions/messaging'
+import { sendMessage, markMessagesRead } from '@/app/actions/messaging'
 import { formatPrice } from '@/lib/utils'
 import { cn } from '@/lib/utils'
+import ThreadMenu from './ThreadMenu'
 import type { ConversationDetail, Message } from '@/app/actions/messaging'
 
 interface MessageThreadProps {
@@ -41,11 +42,22 @@ export default function MessageThread({
   const [input, setInput] = useState('')
   const [isPending, startTransition] = useTransition()
   const [sendError, setSendError] = useState<string | null>(null)
+  const [localBlockedByMe, setLocalBlockedByMe] = useState(conversation.blockedByMe)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const isInitialMount = useRef(true)
   // Captures whether user was near bottom BEFORE a state update triggers a scroll check
   const wasNearBottomRef = useRef(true)
+  // Prevents scroll when only read_at changed (Seen update)
+  const isSeenUpdateRef = useRef(false)
+
+  const isBlocked = localBlockedByMe || conversation.blockedByThem
+
+  // ID of the last outgoing message that has been read — drives the "Seen" label
+  const lastSeenMsgId = useMemo(() => {
+    const readSent = messages.filter(m => m.senderId === currentUserId && m.readAt !== null)
+    return readSent[readSent.length - 1]?.id ?? null
+  }, [messages, currentUserId])
 
   function isNearBottom(): boolean {
     const el = scrollAreaRef.current
@@ -75,9 +87,14 @@ export default function MessageThread({
 
   // Smart scroll: only when user was already near bottom or sent the message.
   // Uses scrollTo on the container — never scrollIntoView — so the page never jumps.
+  // Skips when the update was only a read_at change (Seen status).
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
+      return
+    }
+    if (isSeenUpdateRef.current) {
+      isSeenUpdateRef.current = false
       return
     }
     if (wasNearBottomRef.current) {
@@ -86,9 +103,10 @@ export default function MessageThread({
     }
   }, [messages])
 
-  // Realtime subscription for new messages in this conversation
+  // Realtime: new messages (INSERT) + read_at updates (UPDATE)
   useEffect(() => {
     const supabase = createClient()
+
     const channel = supabase
       .channel(`thread:${conversation.id}`)
       .on(
@@ -108,7 +126,7 @@ export default function MessageThread({
             read_at: string | null
             created_at: string
           }
-          // Capture scroll position BEFORE the DOM update so we know whether to scroll
+          // Capture scroll position BEFORE the DOM update
           wasNearBottomRef.current = isNearBottom()
           setMessages(prev => {
             if (prev.find(x => x.id === m.id)) return prev
@@ -124,12 +142,39 @@ export default function MessageThread({
               },
             ]
           })
+          // If the incoming message is from the other user, mark it read immediately
+          // so the sender sees "Seen" on their device without waiting for a page reload.
+          if (m.sender_id !== currentUserId) {
+            markMessagesRead(conversation.id).catch(() => {})
+          }
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversation.id}`,
+        },
+        (payload) => {
+          const m = payload.new as {
+            id: string
+            read_at: string | null
+          }
+          // Suppress scroll: a read_at update should never move the view
+          isSeenUpdateRef.current = true
+          setMessages(prev =>
+            prev.map(msg =>
+              msg.id === m.id ? { ...msg, readAt: m.read_at } : msg,
+            ),
+          )
         },
       )
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [conversation.id])
+  }, [conversation.id, currentUserId])
 
   // Auto-resize textarea
   function handleInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -141,7 +186,7 @@ export default function MessageThread({
 
   function handleSend() {
     const text = input.trim()
-    if (!text || isPending) return
+    if (!text || isPending || isBlocked) return
 
     setSendError(null)
     setInput('')
@@ -241,8 +286,8 @@ export default function MessageThread({
             </div>
           </Link>
 
-          {/* Price chip + view listing */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Price chip + view listing + menu */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <span className="text-[12px] font-bold text-[#0f0f0e] bg-[#f5f5f2] px-2.5 py-1 rounded-full">
               {formatPrice(conversation.scooterPricePerDay)}<span className="text-[#9c9c98] font-normal">/day</span>
             </span>
@@ -253,6 +298,11 @@ export default function MessageThread({
             >
               <ExternalLink className="w-[15px] h-[15px] text-[#9c9c98]" />
             </Link>
+            <ThreadMenu
+              conversationId={conversation.id}
+              blockedByMe={localBlockedByMe}
+              onBlockChange={setLocalBlockedByMe}
+            />
           </div>
         </div>
       </div>
@@ -289,6 +339,7 @@ export default function MessageThread({
                       // Never inferred from owner/client role — this cannot invert.
                       const isMe = msg.senderId === currentUserId
                       const isOptimistic = msg.id.startsWith('opt-')
+                      const showSeen = isMe && msg.id === lastSeenMsgId
                       return (
                         <div key={msg.id} className={cn('flex', isMe ? 'justify-end' : 'justify-start')}>
                           <div className={cn('flex flex-col gap-0.5 max-w-[78%]', isMe ? 'items-end' : 'items-start')}>
@@ -304,7 +355,7 @@ export default function MessageThread({
                               {msg.content}
                             </div>
                             <span className="text-[10px] text-[#c0c0bc] px-1 leading-none">
-                              {formatTime(msg.createdAt)}
+                              {showSeen ? 'Seen' : formatTime(msg.createdAt)}
                             </span>
                           </div>
                         </div>
@@ -332,6 +383,13 @@ export default function MessageThread({
         className="flex-shrink-0 bg-white border-t border-[#e8e8e4]"
         style={{ paddingBottom: '12px' }}
       >
+        {isBlocked && (
+          <p className="text-center text-[12px] text-[#b0b0ac] pt-2.5 px-4">
+            {localBlockedByMe
+              ? 'You\'ve blocked this user. Unblock to send messages.'
+              : 'You can\'t reply to this conversation.'}
+          </p>
+        )}
         <div className="max-w-4xl mx-auto px-3.5 pt-2.5">
           <div className="flex items-end gap-2">
             <textarea
@@ -339,19 +397,25 @@ export default function MessageThread({
               value={input}
               onChange={handleInput}
               onKeyDown={handleKeyDown}
-              placeholder="Message…"
+              placeholder={isBlocked ? '' : 'Message…'}
+              disabled={isBlocked}
               rows={1}
               maxLength={1000}
-              className="flex-1 resize-none rounded-[22px] border border-[#e8e8e4] bg-[#f8f8f6] px-4 py-2.5 text-[14px] text-[#0f0f0e] placeholder-[#c8c8c4] focus:outline-none focus:border-[#FF6B35]/60 transition-colors leading-[1.45] overflow-hidden"
+              className={cn(
+                'flex-1 resize-none rounded-[22px] border bg-[#f8f8f6] px-4 py-2.5 text-[14px] text-[#0f0f0e] placeholder-[#c8c8c4] focus:outline-none transition-colors leading-[1.45] overflow-hidden',
+                isBlocked
+                  ? 'border-[#e8e8e4] opacity-40 cursor-not-allowed'
+                  : 'border-[#e8e8e4] focus:border-[#FF6B35]/60',
+              )}
               style={{ minHeight: '40px', maxHeight: '120px' }}
             />
             <button
               onClick={handleSend}
-              disabled={!input.trim() || isPending}
+              disabled={!input.trim() || isPending || isBlocked}
               aria-label="Send message"
               className={cn(
                 'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150',
-                input.trim() && !isPending
+                input.trim() && !isPending && !isBlocked
                   ? 'bg-[#FF6B35] text-white shadow-[0_3px_10px_rgba(255,107,53,0.35)] active:scale-90'
                   : 'bg-[#f0f0ec] text-[#c8c8c4]',
               )}

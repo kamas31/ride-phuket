@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { SITE_NAME, SITE_DESCRIPTION } from '@/constants'
+import { SITE_NAME } from '@/constants'
 
 const FOOTER_LINKS = {
   Discover: [
@@ -42,10 +42,7 @@ export default function Footer() {
               <span className="font-bold text-[17px]">{SITE_NAME}</span>
             </Link>
             <p className="mt-4 text-[#9c9c98] text-sm leading-relaxed max-w-xs">
-              {SITE_DESCRIPTION}
-            </p>
-            <p className="mt-3 text-[#5c5c58] text-xs font-medium leading-relaxed max-w-xs">
-              Find scooters. Contact shops directly. No platform fees.
+              Find the exact scooter you want in Phuket.
             </p>
           </div>
 

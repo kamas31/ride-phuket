@@ -37,9 +37,11 @@ const config: CapacitorConfig = {
       spinnerColor: '#FF6B35',
     },
     StatusBar: {
-      // 'dark' = dark icons on light background (correct for white status bar)
+      // 'dark' = dark icons on light background.
+      // overlaysWebView lets the web content extend behind the status bar;
+      // safe-area-inset-top in CSS then correctly positions the nav content.
       style: 'dark',
-      backgroundColor: '#ffffff',
+      overlaysWebView: true,
     },
   },
 }

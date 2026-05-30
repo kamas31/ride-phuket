@@ -32,7 +32,10 @@ export function MessageOwnerButton({
           router.push(`/auth/login?next=/scooter/${scooterId}`)
           return
         }
-        if (result.error === 'own_listing') return
+        if (result.error === 'own_listing') {
+          setError('This is your own listing.')
+          return
+        }
         setError(result.error)
         return
       }

@@ -5,9 +5,9 @@ import mapboxgl from 'mapbox-gl'
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import Link from 'next/link'
-import { X, Check, ArrowRight } from 'lucide-react'
+import { X, ArrowRight, Store } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
-import { PHUKET_ZONES, getZoneForLocation, type PhuketZone } from '@/lib/zones'
+import { PHUKET_ZONES, getZoneForLocation } from '@/lib/zones'
 import type { Scooter } from '@/types'
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
@@ -66,58 +66,13 @@ function buildShopAggregates(scooters: Scooter[]): ShopAggregate[] {
   return Array.from(map.values())
 }
 
-// ── Zone Label — white floating pill ──────────────────────────
-function ZoneLabel({
-  zone, count, hovered, active, onClick, onEnter, onLeave,
-}: {
-  zone: PhuketZone
-  count: number
-  hovered: boolean
-  active: boolean
-  onClick: () => void
-  onEnter: () => void
-  onLeave: () => void
-}) {
-  const isHighlit = hovered || active
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      className={cn(
-        'flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12px] md:text-[13px] font-semibold select-none transition-all duration-200 whitespace-nowrap',
-        isHighlit
-          ? 'bg-[#FF6B35] text-white shadow-[0_4px_16px_rgba(255,107,53,0.45),0_0_0_2px_rgba(255,107,53,0.2)] scale-105'
-          : 'bg-white text-[#0f172a] shadow-[0_2px_12px_rgba(0,0,0,0.18)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.22)] hover:scale-[1.03]',
-      )}
-    >
-      {zone.name}
-      {count > 0 && (
-        <span
-          className={cn(
-            'text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none',
-            isHighlit ? 'bg-white/25 text-white' : 'bg-[#f0f0ec] text-[#5c5c58]',
-          )}
-        >
-          {count}
-        </span>
-      )}
-    </button>
-  )
-}
-
-// ── Shop Pin — shows count + price range ──────────────────────
+// ── Shop Pin — clean minimal price marker ─────────────────────
 function ShopPin({
-  count, minPrice, maxPrice, active, onClick, onEnter, onLeave,
+  minPrice, active, onClick, onEnter, onLeave,
 }: {
-  count: number; minPrice: number; maxPrice: number; active: boolean
+  minPrice: number; active: boolean
   onClick: () => void; onEnter: () => void; onLeave: () => void
 }) {
-  const priceLabel = minPrice === maxPrice
-    ? formatPrice(minPrice)
-    : `${formatPrice(minPrice)}–${formatPrice(maxPrice)}`
-
   return (
     <div
       className="flex flex-col items-center cursor-pointer select-none group"
@@ -127,23 +82,17 @@ function ShopPin({
     >
       <div
         className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap border-2 border-white transition-all duration-200',
+          'px-2.5 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all duration-200',
           active
-            ? 'bg-[#FF6B35] text-white shadow-[0_4px_14px_rgba(255,107,53,0.5),0_0_0_3px_rgba(255,107,53,0.2)] scale-[1.12]'
-            : 'bg-white text-[#0f0f0e] shadow-[0_2px_8px_rgba(0,0,0,0.20)] group-hover:shadow-[0_4px_14px_rgba(0,0,0,0.28)] group-hover:scale-105',
+            ? 'bg-[#FF6B35] text-white shadow-[0_4px_14px_rgba(255,107,53,0.45)] scale-110'
+            : 'bg-white text-[#0f0f0e] shadow-[0_2px_8px_rgba(0,0,0,0.15)] group-hover:shadow-[0_4px_14px_rgba(0,0,0,0.22)] group-hover:scale-105',
         )}
       >
-        <span className={cn(
-          'text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none',
-          active ? 'bg-white/25 text-white' : 'bg-[#f0f0ec] text-[#5c5c58]',
-        )}>
-          {count}
-        </span>
-        {priceLabel}
+        {formatPrice(minPrice)}+
       </div>
       <div className={cn(
-        'w-0 h-0 -mt-[1px] border-l-[4px] border-r-[4px] border-l-transparent border-r-transparent transition-all',
-        active ? 'border-t-[6px] border-t-[#FF6B35]' : 'border-t-[6px] border-t-white',
+        'w-0 h-0 -mt-px border-l-[4px] border-r-[4px] border-l-transparent border-r-transparent',
+        active ? 'border-t-[5px] border-t-[#FF6B35]' : 'border-t-[5px] border-t-white',
       )} />
     </div>
   )
@@ -174,17 +123,12 @@ function ShopPopupCard({ agg, onClose }: { agg: ShopAggregate; onClose: () => vo
           {agg.logo ? (
             <img src={agg.logo} alt={agg.name} className="w-11 h-11 rounded-xl object-cover flex-shrink-0" />
           ) : (
-            <div className="w-11 h-11 bg-[#FF6B35]/10 rounded-xl flex items-center justify-center text-[#FF6B35] font-bold text-lg flex-shrink-0">
-              {agg.name[0] ?? '?'}
+            <div className="w-11 h-11 bg-[#f0ede8] rounded-xl flex items-center justify-center flex-shrink-0">
+              <Store className="w-5 h-5 text-[#a09890]" />
             </div>
           )}
           <div className="min-w-0 flex-1">
             <h3 className="font-bold text-[14px] text-[#0f0f0e] leading-tight truncate">{agg.name}</h3>
-            {agg.verified && (
-              <span className="flex items-center gap-1 text-[10px] font-semibold text-[#16a34a] mt-0.5">
-                <Check className="w-2.5 h-2.5" />Verified
-              </span>
-            )}
           </div>
         </div>
 
@@ -257,7 +201,6 @@ export default function ScooterMap({
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<mapboxgl.Map | null>(null)
   const [ready, setReady]             = useState(false)
-  const [hoveredZone, setHoveredZone] = useState<string | null>(null)
   const [showSearchHere, setShowSearchHere] = useState(false)
 
   // Group filtered scooters into one aggregate per shop
@@ -279,9 +222,8 @@ export default function ScooterMap({
   const prevActiveIds = useRef(new Set<string>())
   const popupRef      = useRef<{ popup: mapboxgl.Popup; root: Root; container: HTMLDivElement } | null>(null)
 
-  // Zone label marker refs
-  const zoneMarkersRef    = useRef<Map<string, { marker: mapboxgl.Marker; root: Root }>>(new Map())
-  const hoveredZoneKeyRef = useRef<string | null>(null)
+  // Zone marker refs (kept for cleanup safety, no longer rendered)
+  const zoneMarkersRef = useRef<Map<string, { marker: mapboxgl.Marker; root: Root }>>(new Map())
 
   // Scooter count per zone from current filtered list
   const zoneCounts = useMemo(() => {
@@ -319,18 +261,6 @@ export default function ScooterMap({
     map.on('load', () => {
       map.resize()
 
-      // Zone label markers (created once)
-      PHUKET_ZONES.forEach(zone => {
-        const container = document.createElement('div')
-        container.style.zIndex = '5'
-        const marker = new mapboxgl.Marker({ element: container, anchor: 'center' })
-          .setLngLat([zone.lng, zone.lat])
-          .addTo(map)
-        const root = createRoot(container)
-        zoneMarkersRef.current.set(zone.key, { marker, root })
-        container.addEventListener('click', e => e.stopPropagation())
-      })
-
       setReady(true)
     })
 
@@ -354,36 +284,6 @@ export default function ScooterMap({
       setReady(false)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Zone labels: re-render on state change ────────────────────
-  useEffect(() => {
-    if (!ready) return
-    PHUKET_ZONES.forEach(zone => {
-      const entry = zoneMarkersRef.current.get(zone.key)
-      if (!entry) return
-      const count = zoneCounts[zone.key] ?? 0
-      entry.root.render(
-        <ZoneLabel
-          zone={zone}
-          count={count}
-          hovered={hoveredZone === zone.key}
-          active={activeZone === zone.key}
-          onClick={() => {
-            const newKey = zone.key === activeZone ? null : zone.key
-            onZoneClickRef.current?.(newKey)
-          }}
-          onEnter={() => {
-            hoveredZoneKeyRef.current = zone.key
-            setHoveredZone(zone.key)
-          }}
-          onLeave={() => {
-            hoveredZoneKeyRef.current = null
-            setHoveredZone(null)
-          }}
-        />,
-      )
-    })
-  }, [ready, hoveredZone, activeZone, zoneCounts]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Effect 1: Create/remove shop markers + fitBounds ─────────
   useEffect(() => {
@@ -417,9 +317,7 @@ export default function ScooterMap({
       const { root } = markersRef.current.get(agg.shopId)!
       root.render(
         <ShopPin
-          count={agg.count}
           minPrice={agg.minPrice}
-          maxPrice={agg.maxPrice}
           active={active}
           onClick={() => onSelectRef.current(agg.shopId === selectedId ? null : agg.shopId)}
           onEnter={() => onHoverRef.current?.(agg.shopId)}
@@ -452,9 +350,7 @@ export default function ScooterMap({
       if (!entry || !agg) return
       entry.root.render(
         <ShopPin
-          count={agg.count}
           minPrice={agg.minPrice}
-          maxPrice={agg.maxPrice}
           active={active}
           onClick={() => onSelectRef.current(id === selectedId ? null : id)}
           onEnter={() => onHoverRef.current?.(id)}

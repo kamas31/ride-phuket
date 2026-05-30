@@ -25,8 +25,8 @@ interface QuickContactProps {
   context?: WAContext
   /** Which quick-question chips to show. Defaults to a sensible set. */
   questions?: WATemplate[]
-  /** 'compact' = WA button only. 'full' = WA button + question chips */
-  variant?: 'compact' | 'full'
+  /** 'compact' = WA button only. 'full' = WA button + question chips. 'chips_only' = chips only, no CTA */
+  variant?: 'compact' | 'full' | 'chips_only'
   className?: string
 }
 
@@ -56,16 +56,16 @@ export function QuickContact({
 
   return (
     <div className={cn('space-y-3', className)}>
-      {/* Response time signal — only shown if real data exists */}
-      {responseTime && (
+      {/* Response time signal — skip for chips_only (parent handles) */}
+      {responseTime && variant !== 'chips_only' && (
         <div className="flex items-center gap-1.5 text-xs text-[#9c9c98]">
           <Zap className="w-3 h-3 text-[#22c55e]" />
           <span>Usually replies <strong className="text-[#0f0f0e]">{responseTime}</strong></span>
         </div>
       )}
 
-      {/* Primary WhatsApp CTA */}
-      {whatsapp && (
+      {/* Primary WhatsApp CTA — skip for chips_only */}
+      {whatsapp && variant !== 'chips_only' && (
         <a
           href={buildWAUrl(whatsapp, 'general_inquiry', ctx)}
           target="_blank"
@@ -78,8 +78,8 @@ export function QuickContact({
         </a>
       )}
 
-      {/* Phone fallback */}
-      {!whatsapp && phone && (
+      {/* Phone fallback — skip for chips_only */}
+      {!whatsapp && phone && variant !== 'chips_only' && (
         <a
           href={`tel:${phone}`}
           onClick={() => trackEvent({ eventType: 'phone_click', shopId, scooterId })}
@@ -91,7 +91,7 @@ export function QuickContact({
       )}
 
       {/* Quick question chips */}
-      {variant === 'full' && whatsapp && questions.length > 0 && (
+      {(variant === 'full' || variant === 'chips_only') && whatsapp && questions.length > 0 && (
         <div>
           <p className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-2">
             Quick questions

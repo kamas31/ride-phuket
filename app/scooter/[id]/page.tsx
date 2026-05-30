@@ -1,24 +1,23 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
-  ArrowLeft, Star, MapPin, Shield, Zap, Check,
-  Phone, MessageCircle, Clock, RotateCcw,
+  ArrowLeft, Star, MapPin, Zap, Check,
+  Phone, MessageCircle, Store,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { getScooterById } from '@/lib/supabase/queries'
 import { formatPrice, formatPricePerDay, pluralize, getScooterCover } from '@/lib/utils'
 import { ImageGallery } from '@/components/ride/ImageGallery'
-import { TrustBadge, isNewListing, isFastResponder } from '@/components/ride/TrustBadge'
+import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
 import { EmptyReviews } from '@/components/ride/EmptyReviews'
 import { QuickContact } from '@/components/ride/QuickContact'
 import { DepositInfo } from '@/components/ride/DepositInfo'
 import { StickyContactBar } from '@/components/ride/StickyContactBar'
 import { MessageOwnerButton } from './MessageOwnerButton'
+import { WhatsAppButton } from './WhatsAppButton'
 import { SaveButton } from '@/components/ride/SaveButton'
 import { getPublicInquiries } from '@/app/actions/inquiry-actions'
 import { TrackView } from '@/components/analytics/TrackView'
-import { TrustSignals } from '@/components/trust/TrustSignals'
-import { getPrimaryTrustSignals } from '@/lib/trust-signals'
 
 import type { OpeningHoursSchedule } from '@/types'
 
@@ -118,26 +117,8 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
     ? scooter.pricePerDay * 7 - scooter.pricePerWeek
     : 0
 
-  const newListing   = isNewListing(scooter.createdAt)
-  const fastShop     = isFastResponder(shop.responseTime)
-  const openStatus   = getShopOpenStatus(shop.openingHours)
-
-  const primaryTrust = getPrimaryTrustSignals({
-    shop: {
-      id:                    shop.id,
-      verified:              shop.verified,
-      phone:                 shop.phone,
-      whatsapp:              shop.whatsapp,
-      description:           shop.description,
-      address:               shop.address,
-      logo:                  shop.logo,
-      openingHours:          shop.openingHours,
-      gallery:               shop.gallery,
-      depositProtectedMember: shop.depositProtectedMember,
-      responseTime:          shop.responseTime,
-    },
-    scooters: [{ images: scooter.images, category: scooter.category, createdAt: scooter.createdAt, available: scooter.available }],
-  })
+  const newListing = isNewListing(scooter.createdAt)
+  const openStatus = getShopOpenStatus(shop.openingHours)
 
   // Public FAQ from answered inquiries (useful SEO content)
   const faqItems = await getPublicInquiries(scooter.id)
@@ -159,14 +140,13 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
           </Link>
           <div className="ml-auto flex items-center gap-2">
             {newListing && <TrustBadge variant="new_listing" />}
-            {shop.verified && <TrustBadge variant="verified" />}
             <SaveButton scooterId={scooter.id} size="md" />
           </div>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-6 md:py-8">
-        <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-8">
+        <div>
           {/* ── LEFT COLUMN ── */}
           <div className="space-y-6">
             <div id="sticky-contact-sentinel" className="-mt-1" aria-hidden />
@@ -219,9 +199,89 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               </div>
             </div>
 
+            {/* Pricing */}
+            <div className="rounded-[20px] border border-[#e8e8e4] overflow-hidden">
+              <div className={`grid divide-x divide-[#e8e8e4] ${
+                scooter.pricePerWeek && scooter.pricePerMonth ? 'grid-cols-3' :
+                (scooter.pricePerWeek || scooter.pricePerMonth) ? 'grid-cols-2' :
+                'grid-cols-1'
+              }`}>
+
+                {/* Daily */}
+                <div className="bg-[#f8f8f6] px-3 py-2.5 text-center">
+                  <p className="text-[9px] font-semibold text-[#9c9c98] uppercase tracking-widest mb-1.5">Daily</p>
+                  <p className="text-[16px] font-bold text-[#0f0f0e] leading-none tabular-nums">
+                    {formatPrice(scooter.pricePerDay)}
+                  </p>
+                  <p className="text-[10px] text-[#b0b0ac] mt-1">/day</p>
+                </div>
+
+                {/* Weekly */}
+                {scooter.pricePerWeek && (
+                  <div className="bg-[#f8f8f6] px-3 py-2.5 text-center">
+                    <p className="text-[9px] font-semibold text-[#9c9c98] uppercase tracking-widest mb-1.5">Weekly</p>
+                    <p className="text-[16px] font-bold text-[#0f0f0e] leading-none tabular-nums">
+                      {formatPrice(scooter.pricePerWeek)}
+                    </p>
+                    <p className="text-[10px] text-[#b0b0ac] mt-1">/week</p>
+                    {weekSavings > 0 && (
+                      <p className="text-[9px] font-semibold text-[#22c55e] mt-1.5">
+                        Save {formatPrice(weekSavings)}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Monthly */}
+                {scooter.pricePerMonth && (
+                  <div className="bg-[#f8f8f6] px-3 py-2.5 text-center">
+                    <p className="text-[9px] font-semibold text-[#FF6B35] uppercase tracking-widest mb-1.5">Monthly</p>
+                    <p className="text-[16px] font-bold text-[#0f0f0e] leading-none tabular-nums">
+                      {formatPrice(scooter.pricePerMonth)}
+                    </p>
+                    <p className="text-[10px] text-[#b0b0ac] mt-1">/month</p>
+                  </div>
+                )}
+              </div>
+
+              {scooter.minRentalDays > 1 && (
+                <div className="bg-[#f8f8f6] border-t border-[#e8e8e4] px-4 py-2.5 text-center">
+                  <p className="text-[11px] text-[#9c9c98]">
+                    Minimum rental: <span className="font-medium text-[#5c5c58]">{pluralize(scooter.minRentalDays, 'day')}</span>
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Quick contact — two side-by-side buttons below pricing */}
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <MessageOwnerButton scooterId={scooter.id} scooterName={scooter.name} />
+              </div>
+              {shop.whatsapp ? (
+                <WhatsAppButton
+                  href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
+                  shopId={shop.id}
+                  scooterId={scooter.id}
+                  className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full bg-[#16a34a] text-white text-[15px] font-bold hover:bg-[#15803d] transition-colors active:scale-[0.98]"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  WhatsApp
+                </WhatsAppButton>
+              ) : shop.phone ? (
+                <a
+                  href={`tel:${shop.phone}`}
+                  className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full border border-[#e8e8e4] text-[#5c5c58] text-[15px] font-medium hover:border-[#d0d0cc] transition-colors active:scale-[0.98]"
+                >
+                  <Phone className="w-5 h-5" />
+                  Call
+                </a>
+              ) : null}
+            </div>
+
             {/* Description */}
             {scooter.description && (
-              <p className="text-[#5c5c58] text-[15px] leading-relaxed border-t border-[#f0f0ec] pt-5">
+              <p className="text-[#5c5c58] text-[15px] leading-relaxed">
                 {scooter.description}
               </p>
             )}
@@ -243,12 +303,6 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     <Check className="w-3 h-3 text-[#22c55e]" />
                   </div>
                   Flexible rental terms
-                </div>
-                <div className="flex items-center gap-2 text-sm text-[#5c5c58]">
-                  <div className="w-5 h-5 rounded-full bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
-                    <Check className="w-3 h-3 text-[#22c55e]" />
-                  </div>
-                  24/7 roadside support
                 </div>
               </div>
             </div>
@@ -280,86 +334,102 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               depositProtected={shop.depositProtectedMember}
             />
 
-            {/* Rental partner — always visible, direct contact */}
-            <div id="contact-rental-shop" className="bg-[#f8f8f6] rounded-[20px] p-5 border border-[#e8e8e4]">
-              <h2 className="text-[15px] font-bold text-[#0f0f0e] mb-4">Rental partner</h2>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-11 h-11 bg-[#FF6B35]/10 rounded-full flex items-center justify-center text-[#FF6B35] font-bold text-lg flex-shrink-0">
-                  {shop.name?.[0] ?? '?'}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Link href={`/shop/${shop.slug}`} className="font-bold text-[#0f0f0e] hover:text-[#FF6B35] transition-colors">
-                      {shop.name}
-                    </Link>
-                    {shop.verified && <TrustBadge variant="verified" size="xs" />}
-                    {fastShop && <TrustBadge variant="fast_response" size="xs" />}
+            {/* Reviews — real or empty state, never fake */}
+            <div>
+              <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-4 flex items-center gap-2">
+                {scooter.reviewCount > 0 ? (
+                  <>
+                    <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
+                    {scooter.rating.toFixed(1)} · {scooter.reviewCount} {scooter.reviewCount === 1 ? 'review' : 'reviews'}
+                  </>
+                ) : (
+                  'Reviews'
+                )}
+              </h2>
+              <EmptyReviews scooterName={scooter.reviewCount === 0 ? scooter.name : undefined} />
+            </div>
+
+            {/* Rental partner — unified contact card */}
+            <div id="contact-rental-shop" className="bg-[#f8f8f6] rounded-[24px] p-6 border border-[#e8e8e4]">
+
+              {/* Shop identity */}
+              <div className="flex items-center gap-3.5 mb-5">
+                {shop.logo ? (
+                  <img src={shop.logo} alt={shop.name ?? ''} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-12 h-12 bg-[#f0ede8] rounded-full flex items-center justify-center flex-shrink-0">
+                    <Store className="w-5 h-5 text-[#a09890]" />
                   </div>
-                  <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                    {shop.reviewCount > 0 ? (
-                      <div className="flex items-center gap-1 text-xs text-[#9c9c98]">
+                )}
+                <div className="min-w-0">
+                  <Link href={`/shop/${shop.slug}`} className="font-bold text-[15px] text-[#0f0f0e] hover:text-[#FF6B35] transition-colors leading-tight block">
+                    {shop.name}
+                  </Link>
+                  <div className="flex items-center gap-2.5 mt-1 flex-wrap">
+                    {shop.reviewCount > 0 && (
+                      <span className="flex items-center gap-1 text-xs text-[#9c9c98]">
                         <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
-                        {shop.rating.toFixed(1)} · {shop.reviewCount} reviews
-                      </div>
-                    ) : (
-                      <TrustBadge variant="new_partner" size="xs" />
-                    )}
-                    {shop.responseTime && (
-                      <div className="flex items-center gap-1 text-xs text-[#9c9c98]">
-                        <Clock className="w-3 h-3" />
-                        Responds {shop.responseTime}
-                      </div>
+                        {shop.rating.toFixed(1)} · {shop.reviewCount} {shop.reviewCount === 1 ? 'review' : 'reviews'}
+                      </span>
                     )}
                     {openStatus && (
-                      <div className={`flex items-center gap-1 text-xs font-semibold ${openStatus.isOpen ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${openStatus.isOpen ? 'bg-[#22c55e]' : 'bg-[#9c9c98]'}`} />
+                      <span className={`flex items-center gap-1.5 text-xs font-medium ${openStatus.isOpen ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${openStatus.isOpen ? 'bg-[#22c55e]' : 'bg-[#d0d0cc]'}`} />
                         {openStatus.label}
-                      </div>
+                      </span>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Trust signals — 1-2 subtle signals to increase conversion confidence */}
-              {primaryTrust.length > 0 && (
-                <TrustSignals signals={primaryTrust} max={2} size="xs" className="mb-4" />
+              <div className="border-t border-[#efefed] mb-5" />
+
+              {/* Response time */}
+              {shop.responseTime && (
+                <p className="text-[13px] text-[#9c9c98] mb-4">
+                  Usually replies <span className="text-[#5c5c58] font-medium">{shop.responseTime}</span>
+                </p>
               )}
 
-              {/* Direct contact — always shown */}
-              <div className="flex gap-2">
-                {shop.phone && (
-                  <a href={`tel:${shop.phone}`}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors">
-                    <Phone className="w-4 h-4" />Call
-                  </a>
-                )}
-                {shop.whatsapp && (
-                  <a href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[#f0fdf4] border border-[#22c55e]/20 text-sm font-semibold text-[#16a34a] hover:bg-[#dcfce7] transition-colors">
-                    <MessageCircle className="w-4 h-4" />WhatsApp
-                  </a>
-                )}
-              </div>
-            </div>
+              {/* CTAs */}
+              <div className="space-y-3">
+                <MessageOwnerButton scooterId={scooter.id} scooterName={scooter.name} />
 
-            {/* Quick questions via WhatsApp */}
-            {(shop.whatsapp || shop.phone) && (
-            <div className="bg-[#f8f8f6] rounded-[20px] p-5 border border-[#e8e8e4]">
-              <h2 className="text-[15px] font-bold text-[#0f0f0e] mb-4">Questions? Ask the shop</h2>
-              <QuickContact
-                whatsapp={shop.whatsapp}
-                phone={shop.phone}
-                shopId={shop.id}
-                scooterId={scooter.id}
-                shopName={shop.name}
-                responseTime={shop.responseTime}
-                context={{ scooterName: scooter.name, location: scooter.location }}
-                questions={['ask_delivery', 'ask_deposit', 'ask_license', 'ask_availability', 'ask_monthly']}
-                variant="full"
-              />
+                {shop.whatsapp ? (
+                  <WhatsAppButton
+                    href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
+                    shopId={shop.id}
+                    scooterId={scooter.id}
+                    className="flex items-center justify-center gap-2.5 w-full py-4 rounded-[14px] bg-[#16a34a] text-white text-[15px] font-bold hover:bg-[#15803d] transition-colors active:scale-[0.98]"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    Message on WhatsApp
+                  </WhatsAppButton>
+                ) : shop.phone ? (
+                  <a
+                    href={`tel:${shop.phone}`}
+                    className="flex items-center justify-center gap-2.5 w-full py-4 rounded-[14px] bg-[#0f0f0e] text-white text-[15px] font-bold hover:bg-[#2a2a28] transition-colors active:scale-[0.98]"
+                  >
+                    <Phone className="w-5 h-5" />
+                    Call the shop
+                  </a>
+                ) : null}
+              </div>
+
+              {/* Quick question chips */}
+              {shop.whatsapp && (
+                <QuickContact
+                  whatsapp={shop.whatsapp}
+                  shopId={shop.id}
+                  scooterId={scooter.id}
+                  shopName={shop.name}
+                  context={{ scooterName: scooter.name, location: scooter.location }}
+                  questions={['ask_delivery', 'ask_deposit', 'ask_license', 'ask_availability', 'ask_monthly']}
+                  variant="chips_only"
+                  className="mt-4"
+                />
+              )}
             </div>
-            )}
 
             {/* Public FAQ — answered inquiries */}
             {faqItems.length > 0 && (
@@ -378,111 +448,8 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               </div>
             )}
 
-            {/* Reviews — real or empty state, never fake */}
-            <div>
-              <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-4 flex items-center gap-2">
-                {scooter.reviewCount > 0 ? (
-                  <>
-                    <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
-                    {scooter.rating.toFixed(1)} · {scooter.reviewCount} {scooter.reviewCount === 1 ? 'review' : 'reviews'}
-                  </>
-                ) : (
-                  'Reviews'
-                )}
-              </h2>
-              {/* EmptyReviews until real reviews are fetched from DB */}
-              <EmptyReviews scooterName={scooter.reviewCount === 0 ? scooter.name : undefined} />
-            </div>
           </div>
 
-          {/* ── RIGHT COLUMN: Contact card ── */}
-          <div className="mt-8 lg:mt-0">
-            <div className="sticky top-32">
-              <div className="bg-white rounded-[24px] border border-[#e8e8e4] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.10),0_1px_4px_-1px_rgba(0,0,0,0.05)] overflow-hidden">
-
-                {/* Price header */}
-                <div className="px-6 pt-6 pb-4 border-b border-[#f0f0ec]">
-                  <div className="flex items-baseline gap-1.5 mb-1">
-                    <span className="text-[34px] font-bold text-[#0f0f0e] leading-none">
-                      {formatPrice(scooter.pricePerDay)}
-                    </span>
-                    <span className="text-[#9c9c98] text-base">/day</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    {scooter.pricePerWeek && (
-                      <span className="text-[#9c9c98]">{formatPrice(scooter.pricePerWeek)}/week</span>
-                    )}
-                    {weekSavings > 0 && (
-                      <span className="text-[#22c55e] font-semibold text-xs bg-[#f0fdf4] px-2 py-0.5 rounded-full">
-                        Save {formatPrice(weekSavings)} weekly
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="px-6 py-5 space-y-4">
-                  {/* Availability */}
-                  <div className="flex items-center gap-2 p-3 bg-[#f0fdf4] rounded-[12px]">
-                    <div className="w-2 h-2 bg-[#22c55e] rounded-full flex-shrink-0" />
-                    <span className="text-sm font-semibold text-[#16a34a]">Available · Contact to rent</span>
-                  </div>
-
-                  {/* Line items */}
-                  <div className="space-y-2 text-sm">
-                    {scooter.deliveryAvailable && (
-                      <div className="flex justify-between text-[#5c5c58]">
-                        <span>Delivery available</span>
-                        <span className="font-medium text-[#0f0f0e]">Ask shop</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between text-[#5c5c58]">
-                      <span>Minimum rental</span>
-                      <span className="font-medium text-[#0f0f0e]">{pluralize(scooter.minRentalDays, 'day')}</span>
-                    </div>
-                    <div className="flex justify-between text-[#5c5c58]">
-                      <span>Rental terms</span>
-                      <span className="font-medium text-[#0f0f0e]">Confirm with shop</span>
-                    </div>
-                  </div>
-
-                  {/* Primary CTA — in-app message */}
-                  <MessageOwnerButton scooterId={scooter.id} scooterName={scooter.name} />
-
-                  {/* Secondary — WhatsApp or phone */}
-                  {shop.whatsapp ? (
-                    <a
-                      href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
-                      target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full py-3 rounded-full border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      WhatsApp instead
-                    </a>
-                  ) : shop.phone ? (
-                    <a
-                      href={`tel:${shop.phone}`}
-                      className="flex items-center justify-center gap-2 w-full py-3 rounded-full border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
-                    >
-                      <Phone className="w-4 h-4" />
-                      Call the shop
-                    </a>
-                  ) : null}
-
-                  {/* Trust strip */}
-                  <div className="flex items-center justify-center gap-4 pt-1 text-xs text-[#9c9c98]">
-                    <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Local listing</span>
-                    <span className="text-[#e8e8e4]">·</span>
-                    <span className="flex items-center gap-1"><RotateCcw className="w-3 h-3" /> Flexible terms</span>
-                    <span className="text-[#e8e8e4]">·</span>
-                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> Local</span>
-                  </div>
-                  <p className="text-center text-[10px] text-[#c0c0bc] pt-1 leading-relaxed">
-                    Koh Ride is a discovery marketplace — rental terms are arranged directly with the shop.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 

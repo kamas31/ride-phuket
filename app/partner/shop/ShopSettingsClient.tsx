@@ -468,12 +468,6 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
               className="w-full px-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] transition-colors resize-none"
             />
           </div>
-          {shop.verified && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-[#f0fdf4] rounded-[10px]">
-              <Check className="w-3.5 h-3.5 text-[#22c55e]" />
-              <span className="text-xs font-medium text-[#16a34a]">Verified partner</span>
-            </div>
-          )}
         </Section>
 
         {/* ── 2. Contact & Social ── */}

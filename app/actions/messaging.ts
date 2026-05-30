@@ -42,6 +42,8 @@ export interface ConversationDetail {
   clientId: string
   ownerId: string
   createdAt: string
+  blockedByMe: boolean
+  blockedByThem: boolean
 }
 
 // ── getOrCreateConversation ───────────────────────────────────────────────────
@@ -106,7 +108,7 @@ export async function sendMessage(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: convo } = await (admin as any)
     .from('conversations')
-    .select('id, client_id, owner_id')
+    .select('id, client_id, owner_id, scooters(name, shops(name))')
     .eq('id', conversationId)
     .single()
 
@@ -114,6 +116,19 @@ export async function sendMessage(
   if (convo.client_id !== user.id && convo.owner_id !== user.id) {
     return { error: 'Unauthorized.' }
   }
+
+  const otherUserId = convo.client_id === user.id ? convo.owner_id : convo.client_id
+
+  // Check if either party has blocked the other
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: block } = await (admin as any)
+    .from('blocked_users')
+    .select('id')
+    .or(`and(blocker_id.eq.${user.id},blocked_id.eq.${otherUserId}),and(blocker_id.eq.${otherUserId},blocked_id.eq.${user.id})`)
+    .limit(1)
+    .maybeSingle()
+
+  if (block) return { error: 'You cannot send messages in this conversation.' }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
@@ -130,6 +145,21 @@ export async function sendMessage(
   revalidatePath('/messages')
   revalidatePath('/partner/messages')
 
+  // Push notification — fire and forget, never blocks message delivery
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const scooterName = (convo.scooters as any)?.name ?? 'Scooter'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const shopName = (convo.scooters as any)?.shops?.name ?? 'Rental shop'
+    const isOwnerSending = convo.owner_id === user.id
+    const body = isOwnerSending
+      ? `${shopName} replied about ${scooterName}`
+      : `New message about ${scooterName}`
+    await sendMessagePush(otherUserId, 'Koh Ride', body, { conversationId }, admin)
+  } catch {
+    // Never surface push errors to the caller
+  }
+
   return {
     message: {
       id: data.id,
@@ -140,6 +170,44 @@ export async function sendMessage(
       createdAt: data.created_at,
     },
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function sendMessagePush(
+  userId: string,
+  title: string,
+  body: string,
+  data: Record<string, string>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  admin: any,
+): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rows } = await (admin as any)
+    .from('push_tokens')
+    .select('token')
+    .eq('user_id', userId)
+
+  if (!rows?.length) return
+
+  const valid = (rows as { token: string }[])
+    .map(r => r.token)
+    .filter(t => t.startsWith('ExponentPushToken[') || t.startsWith('ExpoPushToken['))
+
+  if (!valid.length) return
+
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  }
+  if (process.env.EXPO_ACCESS_TOKEN) {
+    headers['Authorization'] = `Bearer ${process.env.EXPO_ACCESS_TOKEN}`
+  }
+
+  await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(valid.map(to => ({ to, sound: 'default', title, body, data }))),
+  })
 }
 
 // ── getAllConversations ───────────────────────────────────────────────────────
@@ -259,12 +327,35 @@ export async function getConversationWithMessages(
   if (!convo) return null
   if (convo.client_id !== user.id && convo.owner_id !== user.id) return null
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rawMsgs } = await (admin as any)
-    .from('messages')
-    .select('id, conversation_id, sender_id, content, read_at, created_at')
-    .eq('conversation_id', conversationId)
-    .order('created_at', { ascending: true })
+  const otherUserId = convo.client_id === user.id ? convo.owner_id : convo.client_id
+
+  // Fetch block status and messages in parallel
+  const [
+    { data: blockedByMeRow },
+    { data: blockedByThemRow },
+    { data: rawMsgs },
+  ] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (admin as any)
+      .from('blocked_users')
+      .select('id')
+      .eq('blocker_id', user.id)
+      .eq('blocked_id', otherUserId)
+      .maybeSingle(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (admin as any)
+      .from('blocked_users')
+      .select('id')
+      .eq('blocker_id', otherUserId)
+      .eq('blocked_id', user.id)
+      .maybeSingle(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (admin as any)
+      .from('messages')
+      .select('id, conversation_id, sender_id, content, read_at, created_at')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true }),
+  ])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const s = convo.scooters as any
@@ -283,6 +374,8 @@ export async function getConversationWithMessages(
       clientId: convo.client_id,
       ownerId: convo.owner_id,
       createdAt: convo.created_at,
+      blockedByMe: !!blockedByMeRow,
+      blockedByThem: !!blockedByThemRow,
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     messages: (rawMsgs ?? []).map((m: any) => ({

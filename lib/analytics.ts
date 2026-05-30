@@ -42,6 +42,17 @@ export function trackEvent(params: {
   metadata?: Record<string, unknown>
 }): void {
   if (typeof window === 'undefined') return
+
+  // Dedup scooter_view: one view per scooter per 30 minutes per browser
+  if (params.eventType === 'scooter_view' && params.scooterId) {
+    try {
+      const key = `rv_${params.scooterId}`
+      const last = localStorage.getItem(key)
+      if (last && Date.now() - parseInt(last) < 30 * 60 * 1000) return
+      localStorage.setItem(key, String(Date.now()))
+    } catch {}
+  }
+
   const sessionId = getSessionId()
   fetch('/api/events', {
     method: 'POST',

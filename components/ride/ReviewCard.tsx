@@ -42,9 +42,6 @@ export function ReviewCard({ review, className }: ReviewCardProps) {
         </div>
         <div>
           <p className="text-sm font-semibold text-[#0f0f0e]">{review.userName}</p>
-          {review.verified && (
-            <p className="text-xs text-[#22c55e]">✓ Verified rental</p>
-          )}
         </div>
       </div>
     </div>

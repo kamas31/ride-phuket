@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { ArrowRight, Shield, ShieldCheck, ChevronRight, MapPin, Check, MessageCircle, Unlock, Zap, Eye } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { LOCATIONS } from '@/constants'
-import { getScooters, getStats } from '@/lib/supabase/queries'
+import { getScooters } from '@/lib/supabase/queries'
 import { computeLiveAreas } from '@/lib/live-areas'
 import { formatPrice } from '@/lib/utils'
 import { HeroSearch } from '@/components/home/HeroSearch'
@@ -36,28 +36,13 @@ const BENEFITS = [
 ]
 
 export default async function HomePage() {
-  const [allScooters, { shopCount, scooterCount }] = await Promise.all([
-    getScooters({ available: true }),
-    getStats(),
-  ])
-  const featuredScooters = allScooters.slice(0, 4)
+  const allScooters = await getScooters({ available: true })
+  const featuredScooters = allScooters.slice(0, 6)
 
   // Derive live zones from already-fetched scooters — zero extra DB call.
   const liveAreas  = computeLiveAreas(allScooters)
   const liveAreaIds = new Set(liveAreas.map(a => a.slug))
   const popularLocations = LOCATIONS.slice(1, 7).filter(loc => liveAreaIds.has(loc.id))
-
-  // Real trust stats — numbers only shown when > 0, otherwise qualitative
-  const trustItems = [
-    scooterCount > 0
-      ? { value: String(scooterCount), label: 'Scooters listed' }
-      : { value: '✓', label: 'Curated fleet' },
-    shopCount > 0
-      ? { value: String(shopCount), label: 'Local listings' }
-      : { value: '✓', label: 'Local listings' },
-    { value: '24/7', label: 'WhatsApp contact' },
-    { value: '0', label: 'Platform fees' },
-  ]
 
   return (
     <div className="flex flex-col">
@@ -146,7 +131,7 @@ export default async function HomePage() {
           <div
             style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.62s' }}
           >
-            <div className="flex flex-col sm:flex-row items-center gap-3 mb-12">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
               <Link
                 href="/explore"
                 className="flex items-center gap-2.5 px-9 py-[15px] bg-[#FF6B35] text-white text-[15px] font-bold rounded-full
@@ -170,31 +155,6 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Stats glass card — entrance 0.8s */}
-          <div
-            className="w-full max-w-xl"
-            style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.8s' }}
-          >
-            <div className="px-5 py-4 bg-white/[0.07] backdrop-blur-md border border-white/[0.1] rounded-2xl">
-              <div className="flex flex-wrap items-center justify-center gap-y-3">
-                {trustItems.map((item, i) => (
-                  <div key={item.label} className="flex items-center">
-                    {i > 0 && (
-                      <div className="w-px h-7 bg-white/[0.15] mx-5 flex-shrink-0" />
-                    )}
-                    <div className="text-center">
-                      <div className="text-white font-bold text-[22px] md:text-[24px] leading-none tracking-tight">
-                        {item.value}
-                      </div>
-                      <div className="text-white/48 text-[11px] mt-1.5 font-medium tracking-wide uppercase">
-                        {item.label}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Scroll indicator — entrance 1.1s */}
@@ -253,7 +213,7 @@ export default async function HomePage() {
                 <span className="text-white font-bold text-sm leading-none">01</span>
               </div>
               <div className="bg-white rounded-[28px] overflow-hidden border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)] h-full flex flex-col">
-                <div className="relative h-52 bg-[#faf8f6] flex-shrink-0">
+                <div className="relative h-52 bg-white flex-shrink-0">
                   <Image src="/illustrations/find.png" alt="Find scooters" fill className="object-contain" sizes="(max-width: 768px) 90vw, 30vw" />
                 </div>
                 <div className="px-6 pt-5 pb-7 text-center">
@@ -276,7 +236,7 @@ export default async function HomePage() {
                 <span className="text-white font-bold text-sm leading-none">02</span>
               </div>
               <div className="bg-white rounded-[28px] overflow-hidden border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)] h-full flex flex-col">
-                <div className="relative h-52 bg-[#faf8f6] flex-shrink-0">
+                <div className="relative h-52 bg-white flex-shrink-0">
                   <Image src="/illustrations/contact.png" alt="Contact the shop" fill className="object-contain" sizes="(max-width: 768px) 90vw, 30vw" />
                 </div>
                 <div className="px-6 pt-5 pb-7 text-center">
@@ -299,7 +259,7 @@ export default async function HomePage() {
                 <span className="text-white font-bold text-sm leading-none">03</span>
               </div>
               <div className="bg-white rounded-[28px] overflow-hidden border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)] h-full flex flex-col">
-                <div className="relative h-52 bg-[#faf8f6] flex-shrink-0">
+                <div className="relative h-52 bg-white flex-shrink-0">
                   <Image src="/illustrations/ride.png" alt="Ride your scooter" fill className="object-contain" sizes="(max-width: 768px) 90vw, 30vw" />
                 </div>
                 <div className="px-6 pt-5 pb-7 text-center">
@@ -363,7 +323,7 @@ export default async function HomePage() {
           <div>
             <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-2">Top Picks</p>
             <h2 className="text-[26px] md:text-[34px] font-bold text-[#0f0f0e] leading-tight tracking-tight">
-              Most popular scooters
+              Recently added
             </h2>
           </div>
           <Link
@@ -374,7 +334,7 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {featuredScooters.map(scooter => (
             <ScooterCard key={scooter.id} scooter={scooter} />
           ))}

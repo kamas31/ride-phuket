@@ -231,6 +231,53 @@ export interface Database {
         }
         Update: Partial<Database['public']['Tables']['messages']['Insert']>
       }
+      push_tokens: {
+        Row: {
+          id: string
+          user_id: string
+          token: string
+          platform: 'ios' | 'android'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          token: string
+          platform: 'ios' | 'android'
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['push_tokens']['Insert']>
+      }
+      blocked_users: {
+        Row: {
+          id: string
+          blocker_id: string
+          blocked_id: string
+          created_at: string
+        }
+        Insert: {
+          blocker_id: string
+          blocked_id: string
+        }
+        Update: Partial<Database['public']['Tables']['blocked_users']['Insert']>
+      }
+      message_reports: {
+        Row: {
+          id: string
+          reporter_id: string
+          conversation_id: string
+          reason: 'spam' | 'scam' | 'harassment' | 'other'
+          details: string | null
+          created_at: string
+        }
+        Insert: {
+          reporter_id: string
+          conversation_id: string
+          reason: 'spam' | 'scam' | 'harassment' | 'other'
+          details?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['message_reports']['Insert']>
+      }
     }
   }
 }

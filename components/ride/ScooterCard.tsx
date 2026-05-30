@@ -2,7 +2,7 @@
 
 import { memo } from 'react'
 import Link from 'next/link'
-import { Star, MapPin, Zap, Shield, Check } from 'lucide-react'
+import { Star, MapPin, Zap, Check } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import { SaveButton } from '@/components/ride/SaveButton'
@@ -17,8 +17,26 @@ interface ScooterCardProps {
   xs?: boolean  // 2-column mobile grid: aspect-ratio image, minimal content
 }
 
+// Unified glass pill for image overlays
+function OverlayBadge({
+  icon: Icon,
+  label,
+  iconCls,
+}: {
+  icon?: React.ElementType
+  label: string
+  iconCls?: string
+}) {
+  return (
+    <span className="flex items-center gap-1 px-2 py-[5px] bg-black/45 backdrop-blur-[6px] border border-white/[0.12] rounded-full text-white text-[10px] font-medium leading-none whitespace-nowrap">
+      {Icon && <Icon className={cn('w-2.5 h-2.5 flex-shrink-0', iconCls)} />}
+      {label}
+    </span>
+  )
+}
+
 export const ScooterCard = memo(function ScooterCard({ scooter, className, compact = false, xs = false }: ScooterCardProps) {
-  // xs variant: used in 2-column mobile grids. Shows essential info only.
+  // xs variant: minimal 2-column mobile grid card
   if (xs) return (
     <Link
       href={`/scooter/${scooter.id}`}
@@ -53,13 +71,35 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         <h3 className="font-bold text-[12px] text-[#0f0f0e] leading-tight truncate mb-0.5 group-hover:text-[#FF6B35] transition-colors">
           {scooter.name}
         </h3>
-        <div className="flex items-baseline gap-1">
-          <span className="text-[13px] font-bold text-[#0f0f0e] leading-none">{formatPrice(scooter.pricePerDay)}</span>
-          <span className="text-[10px] text-[#9c9c98]">/day</span>
+        <div className="space-y-0.5">
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-[13px] font-bold text-[#0f0f0e] leading-none tabular-nums">{formatPrice(scooter.pricePerDay)}</span>
+            <span className="text-[10px] text-[#9c9c98]">/day</span>
+          </div>
+          {(scooter.pricePerWeek || scooter.pricePerMonth) && (
+            <p className="text-[10px] text-[#9c9c98] leading-tight tabular-nums">
+              {[
+                scooter.pricePerWeek  && `${formatPrice(scooter.pricePerWeek)}/wk`,
+                scooter.pricePerMonth && `${formatPrice(scooter.pricePerMonth)}/mo`,
+              ].filter(Boolean).join(' · ')}
+            </p>
+          )}
         </div>
       </div>
     </Link>
   )
+
+  // Build overlay badges: top-left, horizontal, max 2
+  // Priority: Unavailable > Delivery > Insured
+  const overlayBadges: Array<{ key: string; icon?: React.ElementType; label: string; iconCls?: string }> = []
+  if (!scooter.available) {
+    overlayBadges.push({ key: 'unavailable', label: 'Unavailable' })
+  } else {
+    if (scooter.deliveryAvailable) {
+      overlayBadges.push({ key: 'delivery', icon: Zap, label: 'Delivery', iconCls: 'text-[#FF6B35]' })
+    }
+  }
+  const visibleBadges = overlayBadges.slice(0, 2)
 
   return (
     <Link
@@ -76,61 +116,41 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
       <ScooterImage
         src={getScooterCover(scooter)}
         alt={scooter.name}
-        className={compact ? 'h-44' : 'h-52'}
+        className={compact ? 'h-40 sm:h-44' : 'h-40 sm:h-52'}
         overlay
         hover
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
       >
-        {/* Top-left badges */}
-        <div className="absolute top-3 left-3 flex gap-1.5">
-          {!scooter.available && (
-            <span className="px-2.5 py-1 bg-black/70 backdrop-blur-sm text-white text-[11px] font-medium rounded-full">
-              Unavailable
-            </span>
-          )}
-          {scooter.deliveryAvailable && scooter.available && (
-            <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm text-white text-[11px] font-medium rounded-full flex items-center gap-1">
-              <Zap className="w-2.5 h-2.5 text-[#FF6B35]" />
-              Delivery
-            </span>
-          )}
-        </div>
+        {/* Top-left: badges — horizontal row, max 2 */}
+        {visibleBadges.length > 0 && (
+          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+            {visibleBadges.map(b => (
+              <OverlayBadge key={b.key} icon={b.icon} label={b.label} iconCls={b.iconCls} />
+            ))}
+          </div>
+        )}
 
-        {/* Top-right: save heart + trust indicators */}
-        <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+        {/* Top-right: save heart only */}
+        <div className="absolute top-2.5 right-2.5">
           <SaveButton scooterId={scooter.id} size="sm" />
-          {scooter.shop?.verified && (
-            <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm text-white text-[11px] font-medium rounded-full flex items-center gap-1">
-              <Check className="w-2.5 h-2.5 text-[#22c55e]" />
-              Verified
-            </span>
-          )}
-          {scooter.insuranceIncluded && !scooter.shop?.verified && (
-            <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm text-white text-[11px] font-medium rounded-full flex items-center gap-1">
-              <Shield className="w-2.5 h-2.5 text-[#22c55e]" />
-              Shop insured
-            </span>
-          )}
         </div>
       </ScooterImage>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
+
         {/* Location & Rating */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1 text-[#9c9c98] text-xs">
-            <MapPin className="w-3 h-3" />
-            <span>{scooter.location}</span>
-            {scooter.shop?.verified && (
-              <span className="ml-1 text-[#22c55e] font-medium">· Verified</span>
-            )}
+        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+          <div className="flex items-center gap-1 text-[#9c9c98] text-[10px] sm:text-xs min-w-0">
+            <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
+            <span className="truncate">{scooter.location}</span>
           </div>
           {/* Only show rating when there are real reviews — never show hardcoded 4.8 */}
           {scooter.reviewCount > 0 ? (
-            <div className="flex items-center gap-1">
-              <Star className="w-3.5 h-3.5 text-[#FF6B35] fill-[#FF6B35]" />
-              <span className="text-xs font-bold text-[#0f0f0e]">{scooter.rating.toFixed(1)}</span>
-              <span className="text-xs text-[#9c9c98]">({scooter.reviewCount})</span>
+            <div className="flex items-center gap-0.5 flex-shrink-0 ml-1">
+              <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
+              <span className="text-[10px] sm:text-xs font-bold text-[#0f0f0e]">{scooter.rating.toFixed(1)}</span>
+              <span className="hidden sm:inline text-xs text-[#9c9c98] ml-0.5">({scooter.reviewCount})</span>
             </div>
           ) : isNewListing(scooter.createdAt) ? (
             <TrustBadge variant="new_listing" />
@@ -138,46 +158,40 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         </div>
 
         {/* Name */}
-        <h3 className="font-bold text-[15px] text-[#0f0f0e] leading-tight mb-2 group-hover:text-[#FF6B35] transition-colors">
+        <h3 className="font-bold text-[13px] sm:text-[15px] text-[#0f0f0e] leading-tight mb-2 group-hover:text-[#FF6B35] transition-colors line-clamp-1">
           {scooter.name}
         </h3>
 
-        {/* Category + engine */}
-        <div className="flex items-center gap-2 mb-3">
+        {/* Category + engine — hidden on mobile (too cramped in 2-col grid) */}
+        <div className="hidden sm:flex items-center gap-2 mb-3">
           <Badge variant={scooter.category === 'automatic' ? 'brand' : 'default'}>
             {scooter.category ? scooter.category.charAt(0).toUpperCase() + scooter.category.slice(1) : 'Scooter'}
           </Badge>
           <span className="text-xs text-[#9c9c98]">{scooter.specs?.engine}</span>
         </div>
 
-        {/* Price */}
-        <div className="flex items-end justify-between gap-2">
-          <div className="flex-shrink-0">
-            <span className="text-[22px] font-bold text-[#0f0f0e] leading-none">
+        {/* Price — daily anchor, wk/mo secondary */}
+        <div className="space-y-0.5">
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-[16px] sm:text-[18px] font-bold text-[#0f0f0e] leading-none tabular-nums">
               {formatPrice(scooter.pricePerDay)}
             </span>
-            <span className="text-[#9c9c98] text-sm ml-1">/day</span>
+            <span className="text-[10px] sm:text-[11px] text-[#9c9c98]">/day</span>
           </div>
           {(scooter.pricePerWeek || scooter.pricePerMonth) && (
-            <div className="text-right flex-shrink-0 space-y-0.5 pb-0.5">
-              {scooter.pricePerWeek && (
-                <div className="text-[11px] text-[#9c9c98] leading-tight">
-                  {formatPrice(scooter.pricePerWeek)}/wk
-                </div>
-              )}
-              {scooter.pricePerMonth && (
-                <div className="text-[11px] text-[#9c9c98] leading-tight">
-                  {formatPrice(scooter.pricePerMonth)}/mo
-                </div>
-              )}
-            </div>
+            <p className="text-[11px] sm:text-[12px] text-[#9c9c98] leading-tight tabular-nums">
+              {[
+                scooter.pricePerWeek  && `${formatPrice(scooter.pricePerWeek)}/wk`,
+                scooter.pricePerMonth && `${formatPrice(scooter.pricePerMonth)}/mo`,
+              ].filter(Boolean).join(' · ')}
+            </p>
           )}
         </div>
 
         {/* Trust micro-row */}
-        <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-[#f0f0ec]">
-          <Check className="w-3 h-3 text-[#22c55e] flex-shrink-0" />
-          <span className="text-[11px] text-[#9c9c98]">
+        <div className="flex items-center gap-1.5 mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-[#f0f0ec]">
+          <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#22c55e] flex-shrink-0" />
+          <span className="text-[9px] sm:text-[11px] text-[#9c9c98] truncate">
             {[
               scooter.helmetIncluded && 'Helmet',
               scooter.insuranceIncluded && 'Insured',
@@ -185,6 +199,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
             ].filter(Boolean).join(' · ')}
           </span>
         </div>
+
       </div>
     </Link>
   )

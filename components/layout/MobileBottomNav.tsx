@@ -2,12 +2,20 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Map, Bookmark, MessageCircle, User } from 'lucide-react'
+import { Home, Map, Bookmark, MessageCircle, User, Radio, Store } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useProfile } from '@/hooks/useProfile'
 import { cn } from '@/lib/utils'
 
-const NAV_ITEMS = [
+type NavItem = {
+  href: string
+  label: string
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
+  isActive?: (pathname: string) => boolean
+}
+
+const RIDER_NAV: NavItem[] = [
   { href: '/',         label: 'Home',     icon: Home          },
   { href: '/explore',  label: 'Explore',  icon: Map           },
   { href: '/saved',    label: 'Saved',    icon: Bookmark      },
@@ -15,9 +23,29 @@ const NAV_ITEMS = [
   { href: '/profile',  label: 'Profile',  icon: User          },
 ]
 
+const OWNER_NAV: NavItem[] = [
+  { href: '/',                     label: 'Home',    icon: Home          },
+  { href: '/explore',              label: 'Explore', icon: Map           },
+  { href: '/partner/availability', label: 'Live',    icon: Radio         },
+  { href: '/partner/messages',     label: 'Messages',icon: MessageCircle },
+  {
+    href: '/partner/dashboard',
+    label: 'Shop',
+    icon: Store,
+    isActive: (p) =>
+      p.startsWith('/partner') &&
+      !p.startsWith('/partner/availability') &&
+      !p.startsWith('/partner/messages'),
+  },
+]
+
 export default function MobileBottomNav() {
   const pathname = usePathname()
+  const { profile } = useProfile()
   const [unread, setUnread] = useState(0)
+
+  const isOwner = profile?.role === 'shop_owner'
+  const navItems = isOwner ? OWNER_NAV : RIDER_NAV
 
   useEffect(() => {
     const supabase = createClient()
@@ -82,9 +110,11 @@ export default function MobileBottomNav() {
       style={{ paddingBottom: 'min(env(safe-area-inset-bottom, 0px), 15px)' }}
     >
       <div className="flex items-center">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || (href !== '/' && pathname.startsWith(href))
-          const isMessages = href === '/messages'
+        {navItems.map(({ href, label, icon: Icon, isActive: customActive }) => {
+          const active = customActive
+            ? customActive(pathname)
+            : pathname === href || (href !== '/' && pathname.startsWith(href))
+          const isMessages = href === '/messages' || href === '/partner/messages'
           return (
             <Link
               key={href}
