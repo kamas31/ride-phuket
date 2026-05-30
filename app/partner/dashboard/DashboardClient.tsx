@@ -190,63 +190,73 @@ export default function DashboardClient({
         )}
 
         {/* ─────────────────────────────────────────────────────────────────
-            PERFORMANCE — single premium card
+            PERFORMANCE — 4-column metrics card
         ──────────────────────────────────────────────────────────────────── */}
         {shop && analytics !== null && (
           <div className="bg-white rounded-[16px] overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)]">
+
+            {/* Header */}
             <div className="px-5 pt-4 pb-3 border-b border-[#f2f2ef] flex items-center justify-between">
               <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-[0.12em]">
                 Performance
               </p>
               <p className="text-[11px] text-[#c8c8c4]">Last 30 days</p>
             </div>
-            <div className="px-5 py-4 flex flex-wrap items-center gap-x-3 gap-y-2">
 
-              {/* Live Scooters — real-time */}
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] flex-shrink-0" />
-                <span className="text-[15px] font-bold text-[#0f0f0e] tabular-nums leading-none">
-                  {availableCount}
-                </span>
-                <span className="text-[13px] font-medium text-[#9c9c98]">Live Scooters</span>
-              </span>
+            {/* 4-column grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#f2f2ef]">
 
-              <span className="text-[#d8d8d4] select-none">·</span>
+              {/* Col 1 — Live Scooters */}
+              <div className="px-5 py-5 flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#22c55e] flex-shrink-0" />
+                  <p className="text-[28px] font-bold text-[#0f0f0e] leading-none tabular-nums">
+                    {availableCount}
+                  </p>
+                </div>
+                <p className="text-[12px] font-medium text-[#9c9c98] leading-snug">
+                  Live Scooters
+                </p>
+              </div>
 
-              {/* In-App Leads */}
-              <span className="flex items-center gap-1.5">
-                <MessageCircle className="w-3.5 h-3.5 text-[#FF6B35] flex-shrink-0" strokeWidth={2} />
-                <span className="text-[15px] font-bold text-[#0f0f0e] tabular-nums leading-none">
-                  {analytics.inAppLeads}
-                </span>
-                <span className="text-[13px] font-medium text-[#9c9c98]">In-App Leads</span>
-              </span>
+              {/* Col 2 — In-App Leads */}
+              <div className="px-5 py-5 flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-[#FF6B35] flex-shrink-0" strokeWidth={2} />
+                  <p className="text-[28px] font-bold text-[#0f0f0e] leading-none tabular-nums">
+                    {analytics.inAppLeads}
+                  </p>
+                </div>
+                <p className="text-[12px] font-medium text-[#9c9c98] leading-snug">
+                  {analytics.inAppLeads === 1 ? 'In-App Lead' : 'In-App Leads'}
+                </p>
+              </div>
 
-              <span className="text-[#d8d8d4] select-none">·</span>
+              {/* Col 3 — WhatsApp Leads */}
+              <div className="px-5 py-5 flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-[#25d366] flex-shrink-0" strokeWidth={2} />
+                  <p className="text-[28px] font-bold text-[#0f0f0e] leading-none tabular-nums">
+                    {analytics.whatsappClicks}
+                  </p>
+                </div>
+                <p className="text-[12px] font-medium text-[#9c9c98] leading-snug">
+                  {analytics.whatsappClicks === 1 ? 'WhatsApp Lead' : 'WhatsApp Leads'}
+                </p>
+              </div>
 
-              {/* WhatsApp Leads */}
-              <span className="flex items-center gap-1.5">
-                <MessageSquare className="w-3.5 h-3.5 text-[#25d366] flex-shrink-0" strokeWidth={2} />
-                <span className="text-[15px] font-bold text-[#0f0f0e] tabular-nums leading-none">
-                  {analytics.whatsappClicks}
-                </span>
-                <span className="text-[13px] font-medium text-[#9c9c98]">WhatsApp Leads</span>
-              </span>
-
-              {analytics.topScooterName && (
-                <>
-                  <span className="text-[#d8d8d4] select-none">·</span>
-
-                  {/* Top Scooter */}
-                  <span className="flex items-center gap-1.5">
-                    <Star className="w-3.5 h-3.5 text-[#f59e0b] flex-shrink-0" strokeWidth={2} />
-                    <span className="text-[15px] font-bold text-[#0f0f0e] leading-none max-w-[140px] truncate">
-                      {analytics.topScooterName}
-                    </span>
-                    <span className="text-[13px] font-medium text-[#9c9c98]">Top Scooter</span>
-                  </span>
-                </>
-              )}
+              {/* Col 4 — Most Viewed */}
+              <div className="px-5 py-5 flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <Star className="w-4 h-4 text-[#f59e0b] flex-shrink-0" strokeWidth={2} />
+                  <p className="text-[18px] font-bold text-[#0f0f0e] leading-tight truncate">
+                    {analytics.topScooterName ?? '—'}
+                  </p>
+                </div>
+                <p className="text-[12px] font-medium text-[#9c9c98] leading-snug">
+                  Most Viewed
+                </p>
+              </div>
 
             </div>
           </div>
