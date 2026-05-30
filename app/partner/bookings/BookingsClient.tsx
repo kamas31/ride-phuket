@@ -93,7 +93,7 @@ export default function BookingsClient({ bookings: initial, shopId }: BookingsCl
           </Link>
           <div className="flex items-end justify-between">
             <div>
-              <h1 className="text-[24px] font-bold text-[#0f0f0e] tracking-tight">Inquiries</h1>
+              <h1 className="text-[24px] font-bold text-[#0f0f0e] tracking-tight">Rental Requests</h1>
               <p className="text-sm text-[#9c9c98] mt-0.5">{bookings.length} total</p>
             </div>
             {counts['pending'] > 0 && (
@@ -133,11 +133,11 @@ export default function BookingsClient({ bookings: initial, shopId }: BookingsCl
         {sorted.length === 0 && (
           <div className="text-center py-16">
             <Bike className="w-10 h-10 text-[#e8e8e4] mx-auto mb-3" />
-            <p className="font-semibold text-[#0f0f0e] mb-1">No inquiries yet</p>
+            <p className="font-semibold text-[#0f0f0e] mb-1">No rental requests yet</p>
             <p className="text-sm text-[#9c9c98]">
               {filter === 'all'
-                ? 'Inquiries will appear here once riders contact your shop.'
-                : `No ${STATUS_CFG[filter as StatusKey]?.label.toLowerCase()} inquiries.`
+                ? 'Rental requests will appear here once riders contact your shop.'
+                : `No ${STATUS_CFG[filter as StatusKey]?.label.toLowerCase()} requests.`
               }
             </p>
           </div>
