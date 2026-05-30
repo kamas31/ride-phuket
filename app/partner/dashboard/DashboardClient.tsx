@@ -7,7 +7,7 @@ import { ScooterImage } from '@/components/ride/ScooterImage'
 import {
   Bike, Plus, Settings, MapPin,
   ChevronRight, ArrowRight, Trash2, ShoppingBag,
-  ExternalLink, Eye, MessageSquare,
+  ExternalLink, MessageCircle, MessageSquare, Star,
 } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
 import { deleteScooter } from '@/app/actions/scooter-delete'
@@ -190,36 +190,64 @@ export default function DashboardClient({
         )}
 
         {/* ─────────────────────────────────────────────────────────────────
-            PERFORMANCE — single integrated block
+            PERFORMANCE — single premium card
         ──────────────────────────────────────────────────────────────────── */}
         {shop && analytics !== null && (
           <div className="bg-white rounded-[16px] overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)]">
-            <div className="px-5 pt-4 pb-3 border-b border-[#f2f2ef]">
+            <div className="px-5 pt-4 pb-3 border-b border-[#f2f2ef] flex items-center justify-between">
               <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-[0.12em]">
-                Last 30 days
+                Performance
               </p>
+              <p className="text-[11px] text-[#c8c8c4]">Last 30 days</p>
             </div>
-            <div className="grid grid-cols-2 divide-x divide-[#f2f2ef]">
-              <div className="px-5 py-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <Eye className="w-3.5 h-3.5 text-[#FF6B35] flex-shrink-0" strokeWidth={2} />
-                  <p className="text-[26px] font-bold text-[#0f0f0e] leading-none tabular-nums">
-                    {analytics.scooterViews.toLocaleString()}
-                  </p>
-                </div>
-                <p className="text-[12px] font-medium text-[#9c9c98]">Listing Views</p>
-              </div>
-              <div className="px-5 py-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <MessageSquare className="w-3.5 h-3.5 text-[#25d366] flex-shrink-0" strokeWidth={2} />
-                  <p className="text-[26px] font-bold text-[#0f0f0e] leading-none tabular-nums">
-                    {analytics.whatsappClicks.toLocaleString()}
-                  </p>
-                </div>
-                <p className="text-[12px] font-medium text-[#9c9c98]">
-                  WhatsApp {analytics.whatsappClicks === 1 ? 'Lead' : 'Leads'}
-                </p>
-              </div>
+            <div className="px-5 py-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+
+              {/* Live Scooters — real-time */}
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] flex-shrink-0" />
+                <span className="text-[15px] font-bold text-[#0f0f0e] tabular-nums leading-none">
+                  {availableCount}
+                </span>
+                <span className="text-[13px] font-medium text-[#9c9c98]">Live Scooters</span>
+              </span>
+
+              <span className="text-[#d8d8d4] select-none">·</span>
+
+              {/* In-App Leads */}
+              <span className="flex items-center gap-1.5">
+                <MessageCircle className="w-3.5 h-3.5 text-[#FF6B35] flex-shrink-0" strokeWidth={2} />
+                <span className="text-[15px] font-bold text-[#0f0f0e] tabular-nums leading-none">
+                  {analytics.inAppLeads}
+                </span>
+                <span className="text-[13px] font-medium text-[#9c9c98]">In-App Leads</span>
+              </span>
+
+              <span className="text-[#d8d8d4] select-none">·</span>
+
+              {/* WhatsApp Leads */}
+              <span className="flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-[#25d366] flex-shrink-0" strokeWidth={2} />
+                <span className="text-[15px] font-bold text-[#0f0f0e] tabular-nums leading-none">
+                  {analytics.whatsappClicks}
+                </span>
+                <span className="text-[13px] font-medium text-[#9c9c98]">WhatsApp Leads</span>
+              </span>
+
+              {analytics.topScooterName && (
+                <>
+                  <span className="text-[#d8d8d4] select-none">·</span>
+
+                  {/* Top Scooter */}
+                  <span className="flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 text-[#f59e0b] flex-shrink-0" strokeWidth={2} />
+                    <span className="text-[15px] font-bold text-[#0f0f0e] leading-none max-w-[140px] truncate">
+                      {analytics.topScooterName}
+                    </span>
+                    <span className="text-[13px] font-medium text-[#9c9c98]">Top Scooter</span>
+                  </span>
+                </>
+              )}
+
             </div>
           </div>
         )}

@@ -15,6 +15,7 @@ export interface ShopAnalytics {
   shopViews:         number
   whatsappClicks:    number
   phoneClicks:       number
+  inAppLeads:        number
   topScooterName:    string | null
   repeatVisitors:    number
   periodDays:        number
@@ -24,7 +25,7 @@ export interface ShopAnalytics {
 export async function getShopAnalytics(shopId: string, days = 30): Promise<ShopAnalytics> {
   const empty: ShopAnalytics = {
     scooterViews: 0, shopViews: 0, whatsappClicks: 0,
-    phoneClicks: 0, topScooterName: null, repeatVisitors: 0, periodDays: days,
+    phoneClicks: 0, inAppLeads: 0, topScooterName: null, repeatVisitors: 0, periodDays: days,
     scooterBreakdown: [],
   }
 
@@ -83,7 +84,26 @@ export async function getShopAnalytics(shopId: string, days = 30): Promise<ShopA
     }
     const repeatVisitors = [...sessionCounts.values()].filter(c => c >= 2).length
 
-    return { scooterViews, shopViews, whatsappClicks, phoneClicks, topScooterName, repeatVisitors, periodDays: days, scooterBreakdown }
+    // In-app leads: conversations started in the period for scooters belonging to this shop
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: shopScooters } = await (admin as any)
+      .from('scooters')
+      .select('id')
+      .eq('shop_id', shopId)
+    const scooterIds: string[] = (shopScooters ?? []).map((s: { id: string }) => s.id)
+
+    let inAppLeads = 0
+    if (scooterIds.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { count } = await (admin as any)
+        .from('conversations')
+        .select('id', { count: 'exact', head: true })
+        .in('scooter_id', scooterIds)
+        .gte('created_at', cutoff)
+      inAppLeads = count ?? 0
+    }
+
+    return { scooterViews, shopViews, whatsappClicks, phoneClicks, inAppLeads, topScooterName, repeatVisitors, periodDays: days, scooterBreakdown }
   } catch {
     return empty
   }
