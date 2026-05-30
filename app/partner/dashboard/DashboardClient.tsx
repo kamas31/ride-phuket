@@ -7,7 +7,7 @@ import { ScooterImage } from '@/components/ride/ScooterImage'
 import {
   Bike, Plus, Settings, MapPin,
   ChevronRight, ArrowRight, Trash2, ShoppingBag,
-  Calendar, ExternalLink, Eye, MessageSquare,
+  ExternalLink, Eye, MessageSquare,
 } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
 import { deleteScooter } from '@/app/actions/scooter-delete'
@@ -36,7 +36,7 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({
-  profile, shop, scooters: initial, bookingStats, analytics,
+  profile, shop, scooters: initial, bookingStats: _bookingStats, analytics,
 }: DashboardClientProps) {
   const [scooters, setScooters]           = useState(initial)
   const [togglingId, setTogglingId]       = useState<string | null>(null)
@@ -438,23 +438,6 @@ export default function DashboardClient({
                 <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:translate-x-0.5 transition-transform" />
               </Link>
 
-              <Link
-                href="/partner/bookings"
-                className="flex items-center gap-3.5 px-5 py-4 hover:bg-[#fafaf8] active:bg-[#f5f4f2] transition-colors group"
-              >
-                <div className="w-8 h-8 bg-[#f5f4f2] rounded-[10px] flex items-center justify-center flex-shrink-0 group-hover:bg-[#ececea] transition-colors">
-                  <Calendar className="w-3.5 h-3.5 text-[#5c5c58]" />
-                </div>
-                <div className="flex-1 flex items-center gap-2">
-                  <span className="text-[14px] font-medium text-[#0f0f0e]">Rental Requests</span>
-                  {bookingStats.pending > 0 && (
-                    <span className="text-[11px] font-bold px-2 py-0.5 bg-[#fff4f0] text-[#FF6B35] rounded-full border border-[#ffd4bb]">
-                      {bookingStats.pending}
-                    </span>
-                  )}
-                </div>
-                <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:translate-x-0.5 transition-transform" />
-              </Link>
 
             </div>
           </div>
