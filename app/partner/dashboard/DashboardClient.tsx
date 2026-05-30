@@ -200,22 +200,28 @@ export default function DashboardClient({
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
 
               {/* Listing Views */}
-              <div className="relative bg-white rounded-[14px] py-4 px-3 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)] text-center">
-                <div className="absolute inset-x-0 top-0 h-[3px] bg-[#FF6B35] rounded-t-[14px]" />
-                <p className="text-[28px] font-bold text-[#0f0f0e] leading-none tabular-nums mt-1">
-                  {analytics.scooterViews.toLocaleString()}
-                </p>
+              <div className="relative bg-white rounded-[14px] px-4 py-3.5 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)]">
+                <div className="absolute inset-x-0 top-0 h-[2.5px] bg-[#FF6B35] rounded-t-[14px]" />
+                <div className="flex items-center gap-2 mt-0.5">
+                  <Eye className="w-3.5 h-3.5 text-[#FF6B35] flex-shrink-0" strokeWidth={2} />
+                  <p className="text-[22px] font-bold text-[#0f0f0e] leading-none tabular-nums">
+                    {analytics.scooterViews.toLocaleString()}
+                  </p>
+                </div>
                 <p className="text-[11px] font-medium text-[#9c9c98] mt-1.5">
                   Listing Views
                 </p>
               </div>
 
               {/* WhatsApp Leads */}
-              <div className="relative bg-white rounded-[14px] py-4 px-3 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)] text-center">
-                <div className="absolute inset-x-0 top-0 h-[3px] bg-[#25d366] rounded-t-[14px]" />
-                <p className="text-[28px] font-bold text-[#0f0f0e] leading-none tabular-nums mt-1">
-                  {analytics.whatsappClicks.toLocaleString()}
-                </p>
+              <div className="relative bg-white rounded-[14px] px-4 py-3.5 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)]">
+                <div className="absolute inset-x-0 top-0 h-[2.5px] bg-[#25d366] rounded-t-[14px]" />
+                <div className="flex items-center gap-2 mt-0.5">
+                  <MessageSquare className="w-3.5 h-3.5 text-[#25d366] flex-shrink-0" strokeWidth={2} />
+                  <p className="text-[22px] font-bold text-[#0f0f0e] leading-none tabular-nums">
+                    {analytics.whatsappClicks.toLocaleString()}
+                  </p>
+                </div>
                 <p className="text-[11px] font-medium text-[#9c9c98] mt-1.5">
                   WA {analytics.whatsappClicks === 1 ? 'Lead' : 'Leads'}
                 </p>
