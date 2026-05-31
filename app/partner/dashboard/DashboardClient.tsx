@@ -29,6 +29,7 @@ interface DashboardClientProps {
     id: string; name: string; brand: string; model: string;
     price_per_day: number; location: string; available: boolean;
     images: string[]; category: string;
+    specs: Record<string, string>;
   }[]
   bookingStats: { pending: number; active: number; total: number }
   analytics: ShopAnalytics | null
@@ -46,6 +47,15 @@ export default function DashboardClient({
 
   const availableCount = scooters.filter(s => s.available).length
   const offlineCount   = scooters.length - availableCount
+
+  // Sort fleet by engine displacement (cc) ascending; unknown cc goes last
+  const parseCC = (engine: string | undefined): number => {
+    const n = parseInt((engine ?? '').replace(/[^\d]/g, ''), 10)
+    return isNaN(n) ? Infinity : n
+  }
+  const sortedScooters = [...scooters].sort(
+    (a, b) => parseCC(a.specs?.engine) - parseCC(b.specs?.engine)
+  )
   const planType       = shop?.plan_type
   const [fleetOpen, setFleetOpen] = useState(false)
 
@@ -314,7 +324,7 @@ export default function DashboardClient({
                   </div>
                 )}
 
-                {scooters.map(scooter => (
+                {sortedScooters.map(scooter => (
                   <div
                     key={scooter.id}
                     className={cn(

@@ -28,6 +28,7 @@ export default async function DashboardPage() {
     id: string; name: string; brand: string; model: string;
     price_per_day: number; location: string; available: boolean;
     images: string[]; category: string;
+    specs: Record<string, string>;
   }[] = []
 
   let bookingStats = { pending: 0, active: 0, total: 0 }
@@ -37,7 +38,7 @@ export default async function DashboardPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: sc } = await (admin as any)
       .from('scooters')
-      .select('id,name,brand,model,price_per_day,location,available,images,category')
+      .select('id,name,brand,model,price_per_day,location,available,images,category,specs')
       .eq('shop_id', shop.id)
       .order('price_per_day')
     scooters = sc ?? []
