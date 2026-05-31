@@ -80,14 +80,13 @@ export default async function HomePage() {
         />
 
         {/* ── MOBILE LAYOUT ── */}
-        <div className="md:hidden relative flex-1 flex flex-col justify-between px-5 pt-24 pb-4">
+        <div className="md:hidden relative flex-1 flex flex-col justify-between px-5 pt-24 pb-8">
 
-          {/* Top block: search → headline → description → CTA (tight) */}
+          {/* Top: search + headline + description */}
           <div>
             <div style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.05s' }}>
               <HeroSearch />
             </div>
-
             <div
               className="flex flex-col items-center text-center"
               style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.18s' }}
@@ -96,53 +95,23 @@ export default async function HomePage() {
                 <span className="text-white block">Explore Phuket</span>
                 <span className="block" style={{ color: '#FF6B35' }}>your way.</span>
               </h1>
-
-              <p className="text-white/75 text-[14px] leading-[1.4] mb-4" style={{ maxWidth: '260px' }}>
+              <p className="text-white/75 text-[14px] leading-[1.4]" style={{ maxWidth: '260px' }}>
                 Find your perfect scooter in Phuket.
               </p>
-
-              <Link
-                href="/explore"
-                className="flex items-center justify-center gap-2 w-full py-[13px] bg-[#FF6B35] text-white text-[14px] font-bold rounded-full
-                           shadow-[0_4px_20px_rgba(255,107,53,0.5)]
-                           active:scale-[0.97] transition-all duration-200"
-              >
-                Explore Scooters
-                <ArrowRight className="w-4 h-4" />
-              </Link>
             </div>
           </div>
 
-          {/* Bottom: feature cards — mockup style, scooter visible in gap above */}
-          <div style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.35s' }}>
-            <div
-              className="overflow-hidden rounded-[14px]"
-              style={{
-                background: 'rgba(0,0,0,0.62)',
-                backdropFilter: 'blur(18px)',
-                WebkitBackdropFilter: 'blur(18px)',
-                border: '1px solid rgba(255,255,255,0.07)',
-              }}
+          {/* Bottom: single CTA — image breathes in the gap above */}
+          <div style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.32s' }}>
+            <Link
+              href="/explore"
+              className="flex items-center justify-center gap-2 w-full py-[13px] bg-[#FF6B35] text-white text-[14px] font-bold rounded-full
+                         shadow-[0_4px_20px_rgba(255,107,53,0.5)]
+                         active:scale-[0.97] transition-all duration-200"
             >
-              <div className="grid grid-cols-3">
-                {([
-                  { icon: ShieldCheck,   label: 'Find Your\nDream Bike' },
-                  { icon: MapPin,        label: 'Compare\nShops' },
-                  { icon: MessageCircle, label: 'Instant\nMessaging' },
-                ] as const).map((item, i) => (
-                  <div
-                    key={item.label}
-                    className={cn(
-                      'flex flex-col items-center justify-center gap-1.5 px-2 py-3 text-center',
-                      i < 2 && 'border-r border-white/[0.07]'
-                    )}
-                  >
-                    <item.icon className="w-[18px] h-[18px] text-[#FF6B35]" strokeWidth={1.8} />
-                    <span className="text-white text-[10px] font-semibold leading-tight whitespace-pre-line">{item.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+              Explore Scooters
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
 
         </div>
