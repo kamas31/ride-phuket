@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import {
   Bike, Plus, Settings, MapPin,
-  ChevronRight, ArrowRight, Trash2, ShoppingBag,
+  ChevronDown, ChevronRight, ArrowRight, Trash2, ShoppingBag,
   ExternalLink, Eye, MessageCircle, MessageSquare, Star,
 } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
@@ -45,7 +45,9 @@ export default function DashboardClient({
   const [deleteError, setDeleteError]     = useState<string | null>(null)
 
   const availableCount = scooters.filter(s => s.available).length
+  const offlineCount   = scooters.length - availableCount
   const planType       = shop?.plan_type
+  const [fleetOpen, setFleetOpen] = useState(false)
 
   // ── Analytics preserved for future premium plans ──────────────────────────
   const _hasAdvanced     = canAccessAdvancedAnalytics(planType)
@@ -238,31 +240,56 @@ export default function DashboardClient({
         )}
 
         {/* ─────────────────────────────────────────────────────────────────
-            FLEET MANAGEMENT
+            FLEET MANAGEMENT — collapsible accordion
         ──────────────────────────────────────────────────────────────────── */}
         {shop && (
           <div>
-            <div className="flex items-end justify-between mb-4">
-              <div>
-                <h2 className="text-[18px] font-bold text-[#0f0f0e]">My Fleet</h2>
-                {scooters.length > 0 && (
-                  <p className="text-[12px] text-[#9c9c98] mt-0.5">
-                    {scooters.length} {scooters.length === 1 ? 'scooter' : 'scooters'}
-                    {' · '}
-                    {availableCount} live
-                  </p>
-                )}
+            {/* Accordion header — always visible */}
+            <div className="bg-white rounded-[20px] shadow-[0_1px_4px_rgba(0,0,0,0.04),0_2px_12px_-2px_rgba(0,0,0,0.06)] overflow-hidden mb-3">
+              <div className="flex items-center gap-3 px-5 py-4">
+
+                {/* Clickable title + summary */}
+                <button
+                  onClick={() => setFleetOpen(o => !o)}
+                  className="flex-1 min-w-0 text-left flex items-center gap-3 group"
+                  aria-expanded={fleetOpen}
+                >
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-[18px] font-bold text-[#0f0f0e]">My Fleet</h2>
+                    {scooters.length > 0 ? (
+                      <p className="text-[12px] text-[#9c9c98] mt-0.5">
+                        {scooters.length} {scooters.length === 1 ? 'scooter' : 'scooters'}
+                        {' · '}
+                        {availableCount} live
+                        {offlineCount > 0 && ` · ${offlineCount} offline`}
+                      </p>
+                    ) : (
+                      <p className="text-[12px] text-[#9c9c98] mt-0.5">No scooters yet</p>
+                    )}
+                  </div>
+                  <ChevronDown
+                    className={cn(
+                      'w-4 h-4 text-[#c8c8c4] flex-shrink-0 transition-transform duration-200',
+                      fleetOpen && 'rotate-180',
+                    )}
+                    strokeWidth={2}
+                  />
+                </button>
+
+                {/* Add Scooter — always accessible */}
+                <Link
+                  href="/partner/scooters/new"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#FF6B35] text-white text-[13px] font-semibold rounded-full hover:bg-[#e85d29] active:scale-[0.97] transition-all shadow-[0_2px_8px_rgba(255,107,53,0.28)] flex-shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Scooter
+                </Link>
+
               </div>
-              <Link
-                href="/partner/scooters/new"
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#FF6B35] text-white text-[13px] font-semibold rounded-full hover:bg-[#e85d29] active:scale-[0.97] transition-all shadow-[0_2px_8px_rgba(255,107,53,0.28)]"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Add Scooter
-              </Link>
             </div>
 
-            {scooters.length === 0 ? (
+            {/* Collapsible fleet list */}
+            {fleetOpen && (scooters.length === 0 ? (
               <div className="bg-white rounded-[24px] shadow-[0_2px_16px_-2px_rgba(0,0,0,0.06)] p-10 text-center">
                 <div className="w-14 h-14 bg-[#f5f4f2] rounded-[18px] flex items-center justify-center mx-auto mb-4">
                   <Bike className="w-7 h-7 text-[#9c9c98]" strokeWidth={1.5} />
@@ -418,7 +445,7 @@ export default function DashboardClient({
                   </div>
                 ))}
               </div>
-            )}
+            ))}
           </div>
         )}
 
