@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, ChevronRight, MapPin, Check, MessageCircle, Zap, SlidersHorizontal, Store } from 'lucide-react'
+import { ArrowRight, ShieldCheck, ChevronRight, MapPin, Check, MessageCircle, Unlock, Zap, SlidersHorizontal, Store } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { LOCATIONS } from '@/constants'
 import { getScooters } from '@/lib/supabase/queries'
