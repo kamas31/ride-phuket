@@ -61,7 +61,7 @@ export async function updateShop(
       .from('shops')
       .update({
         name:             payload.name.trim(),
-        description:      payload.description?.trim() ?? null,
+        description:      payload.description?.trim() || '',
         phone:            payload.phone.trim(),
         whatsapp:         payload.whatsapp?.trim() || null,
         line_id:          payload.lineId?.trim() || null,
