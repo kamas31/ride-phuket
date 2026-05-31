@@ -27,7 +27,7 @@ function NavLink({ href, label, active, isHero, badge }: {
     >
       {label}
       {badge != null && badge > 0 && (
-        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] bg-[#FF6B35] rounded-full px-1 text-[9px] font-bold text-white leading-none tabular-nums">
+        <span className="inline-flex items-center justify-center min-w-[20px] h-[20px] bg-[#FF6B35] rounded-full px-[6px] text-[10px] font-bold text-white leading-none tabular-nums shadow-[0_1px_4px_rgba(255,107,53,0.40)]">
           {badge > 99 ? '99+' : badge}
         </span>
       )}

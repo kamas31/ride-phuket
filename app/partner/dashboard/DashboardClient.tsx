@@ -35,10 +35,11 @@ interface DashboardClientProps {
   analytics: ShopAnalytics | null
   activityFeed: ActivityFeedItem[] // fetched, preserved for future use
   unreadCount: number
+  unreadPreview: { senderName: string | null; messageText: string | null; scooterName: string | null } | null
 }
 
 export default function DashboardClient({
-  profile, shop, scooters: initial, bookingStats: _bookingStats, analytics, unreadCount,
+  profile, shop, scooters: initial, bookingStats: _bookingStats, analytics, unreadCount, unreadPreview,
 }: DashboardClientProps) {
   const [scooters, setScooters]           = useState(initial)
   const [togglingId, setTogglingId]       = useState<string | null>(null)
@@ -181,30 +182,44 @@ export default function DashboardClient({
         {/* ─────────────────────────────────────────────────────────────────
             UNREAD MESSAGES ALERT — highest priority
         ──────────────────────────────────────────────────────────────────── */}
-        {shop && unreadCount > 0 && (
-          <Link
-            href="/partner/messages"
-            className="block bg-[#fff4f0] rounded-[16px] border border-[#fed7b0] hover:bg-[#ffe8d6] active:scale-[0.99] transition-all"
-          >
-            <div className="flex items-center gap-4 px-5 py-4">
-              <div className="w-10 h-10 bg-[#FF6B35] rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(255,107,53,0.35)]">
-                <MessageCircle className="w-5 h-5 text-white" strokeWidth={2} />
+        {shop && unreadCount > 0 && (() => {
+          // Build preview line: "John: Hi, is the scooter available…" or fallback
+          let previewLine = 'New inquiry received'
+          if (unreadPreview) {
+            const { senderName, messageText, scooterName } = unreadPreview
+            if (senderName && messageText) {
+              previewLine = `${senderName}: ${messageText}`
+            } else if (messageText) {
+              previewLine = messageText
+            } else if (scooterName) {
+              previewLine = `New inquiry about ${scooterName}`
+            }
+          }
+          return (
+            <Link
+              href="/partner/messages"
+              className="block bg-[#fff4f0] rounded-[16px] border border-[#fed7b0] hover:bg-[#ffe8d6] active:scale-[0.99] transition-all"
+            >
+              <div className="flex items-center gap-4 px-5 py-4">
+                <div className="w-10 h-10 bg-[#FF6B35] rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(255,107,53,0.35)]">
+                  <MessageCircle className="w-5 h-5 text-white" strokeWidth={2} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[15px] font-bold text-[#0f0f0e] leading-tight">
+                    {unreadCount === 1 ? 'New message' : `${unreadCount} new messages`}
+                  </p>
+                  <p className="text-[12px] text-[#5c5c58] mt-0.5 truncate">
+                    {previewLine}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <span className="text-[13px] font-bold text-[#FF6B35]">Open</span>
+                  <ChevronRight className="w-4 h-4 text-[#FF6B35]" />
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-bold text-[#0f0f0e]">
-                  {unreadCount} unread {unreadCount === 1 ? 'message' : 'messages'}
-                </p>
-                <p className="text-[12px] text-[#5c5c58] mt-0.5 leading-snug">
-                  Reply quickly to increase your chances of converting leads.
-                </p>
-              </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <span className="text-[13px] font-bold text-[#FF6B35]">Open</span>
-                <ChevronRight className="w-4 h-4 text-[#FF6B35]" />
-              </div>
-            </div>
-          </Link>
-        )}
+            </Link>
+          )
+        })()}
 
         {/* ─────────────────────────────────────────────────────────────────
             PERFORMANCE — 4-column metrics card

@@ -22,6 +22,7 @@ export default async function DashboardPage() {
   }
 
   const shop = await getShopForOwner()
+  const admin = createAdminClient()
 
   // Fetch scooters for this shop
   let scooters: {
@@ -34,7 +35,6 @@ export default async function DashboardPage() {
   let bookingStats = { pending: 0, active: 0, total: 0 }
 
   if (shop) {
-    const admin = createAdminClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: sc } = await (admin as any)
       .from('scooters')
@@ -61,24 +61,69 @@ export default async function DashboardPage() {
     shop ? getActivityFeed(shop.id)  : Promise.resolve([]),
   ])
 
-  // Unread messages for the dashboard alert
+  // Unread count + preview for the dashboard alert
   let unreadCount = 0
+  let unreadPreview: { senderName: string | null; messageText: string | null; scooterName: string | null } | null = null
+
   if (user) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: convos } = await (supabase as any)
       .from('conversations')
       .select('id')
       .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
+
     if (convos?.length) {
       const ids = convos.map((c: { id: string }) => c.id)
+
+      // Count and latest unread message in parallel
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { count } = await (supabase as any)
-        .from('messages')
-        .select('id', { count: 'exact', head: true })
-        .in('conversation_id', ids)
-        .neq('sender_id', user.id)
-        .is('read_at', null)
+      const [{ count }, { data: latestMsg }] = await Promise.all([
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase as any)
+          .from('messages')
+          .select('id', { count: 'exact', head: true })
+          .in('conversation_id', ids)
+          .neq('sender_id', user.id)
+          .is('read_at', null),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (admin as any)
+          .from('messages')
+          .select('content, sender_id, conversation_id')
+          .in('conversation_id', ids)
+          .neq('sender_id', user.id)
+          .is('read_at', null)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ])
+
       unreadCount = count ?? 0
+
+      if (latestMsg) {
+        // Sender name + scooter name in parallel
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const [{ data: senderProfile }, { data: convoWithScooter }] = await Promise.all([
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (admin as any)
+            .from('profiles')
+            .select('name')
+            .eq('id', latestMsg.sender_id)
+            .maybeSingle(),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (admin as any)
+            .from('conversations')
+            .select('scooters(name)')
+            .eq('id', latestMsg.conversation_id)
+            .maybeSingle(),
+        ])
+
+        unreadPreview = {
+          senderName:  senderProfile?.name ?? null,
+          messageText: latestMsg.content   ?? null,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          scooterName: (convoWithScooter as any)?.scooters?.name ?? null,
+        }
+      }
     }
   }
 
@@ -91,6 +136,7 @@ export default async function DashboardPage() {
       analytics={analytics}
       activityFeed={activityFeed}
       unreadCount={unreadCount}
+      unreadPreview={unreadPreview}
     />
   )
 }
