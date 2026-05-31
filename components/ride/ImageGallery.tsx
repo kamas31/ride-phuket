@@ -96,7 +96,7 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
               alt={`${name} — photo ${active + 1}`}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 700px"
-              className="object-cover animate-fade-in"
+              className="object-contain animate-fade-in"
               priority
             />
 
