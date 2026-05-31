@@ -65,7 +65,7 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
   if (!images.length) {
     return (
       <div className="space-y-3">
-        <div className="relative md:rounded-[24px] overflow-hidden bg-[#f3f3ef]" style={{ minHeight: 240 }}>
+        <div className="relative aspect-[4/3] md:aspect-[16/10] md:rounded-[24px] overflow-hidden bg-[#f3f3ef]">
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#f0ede8] via-[#ece8e2] to-[#e4e0da]">
             <span className="text-[10px] font-medium text-[#b8b3ac] tracking-wide uppercase">No photos yet</span>
           </div>
@@ -89,21 +89,16 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
           transform: `translateX(${liveOffset}px)`,
           transition: liveOffset === 0 ? `transform 0.45s ${SPRING}` : 'none',
         }}>
-          {/* Single container: rounded corners + overflow-hidden for border-radius only.
-              Image defines height naturally — nothing constrains it. */}
-          <div className="relative md:rounded-[24px] overflow-hidden bg-[#f3f3ef] group">
-            <div className="flex items-center justify-center p-3 md:p-4">
-              <Image
-                key={images[active]}
-                src={images[active]}
-                alt={`${name} — photo ${active + 1}`}
-                width={1600}
-                height={1200}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 700px"
-                className="w-full h-auto object-contain md:max-h-[420px] animate-fade-in"
-                priority
-              />
-            </div>
+          <div className="relative aspect-[4/3] md:aspect-[16/10] md:rounded-[24px] overflow-hidden bg-[#f3f3ef] group">
+            <Image
+              key={images[active]}
+              src={images[active]}
+              alt={`${name} — photo ${active + 1}`}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 700px"
+              className="object-cover animate-fade-in"
+              priority
+            />
 
             {hasMultiple && (
               <>
