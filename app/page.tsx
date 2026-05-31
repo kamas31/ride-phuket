@@ -80,30 +80,27 @@ export default async function HomePage() {
         />
 
         {/* ── MOBILE LAYOUT ── */}
-        <div className="md:hidden relative flex-1 flex flex-col px-5 pt-24 pb-6">
+        <div className="md:hidden relative flex-1 flex flex-col justify-between px-5 pt-24 pb-4">
 
-          {/* Search bar */}
-          <div
-            style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.05s' }}
-          >
-            <HeroSearch />
-          </div>
+          {/* Top block: search → headline → description → CTA (tight) */}
+          <div>
+            <div style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.05s' }}>
+              <HeroSearch />
+            </div>
 
-          {/* Headline + description + CTAs */}
-          <div
-            className="flex flex-col items-center text-center"
-            style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.18s' }}
-          >
-            <h1 className="font-extrabold leading-[0.95] tracking-[-0.03em] text-[44px] mb-3">
-              <span className="text-white block">Explore Phuket</span>
-              <span className="block" style={{ color: '#FF6B35' }}>your way.</span>
-            </h1>
+            <div
+              className="flex flex-col items-center text-center"
+              style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.18s' }}
+            >
+              <h1 className="font-extrabold leading-[0.95] tracking-[-0.03em] text-[44px] mb-2">
+                <span className="text-white block">Explore Phuket</span>
+                <span className="block" style={{ color: '#FF6B35' }}>your way.</span>
+              </h1>
 
-            <p className="text-white/75 text-[14px] leading-[1.55] mb-5" style={{ maxWidth: '280px' }}>
-              Premium scooters from trusted local shops across Phuket. Chat instantly in-app or continue on WhatsApp when needed.
-            </p>
+              <p className="text-white/75 text-[14px] leading-[1.4] mb-4" style={{ maxWidth: '260px' }}>
+                Find your perfect scooter in Phuket.
+              </p>
 
-            <div className="flex flex-col gap-2.5 w-full mb-4">
               <Link
                 href="/explore"
                 className="flex items-center justify-center gap-2 w-full py-[13px] bg-[#FF6B35] text-white text-[14px] font-bold rounded-full
@@ -113,37 +110,39 @@ export default async function HomePage() {
                 Explore Scooters
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link
-                href="/explore"
-                className="flex items-center justify-center w-full py-[13px] rounded-full text-[14px] font-semibold text-white
-                           bg-white/[0.12] backdrop-blur-md border border-white/[0.28]
-                           active:scale-[0.97] transition-all duration-200"
-              >
-                View All Locations
-              </Link>
             </div>
           </div>
 
-          {/* Trust pills — sit below CTAs, scooter visible in remaining space below */}
-          <div
-            className="flex gap-2 overflow-x-auto snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'none', opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.35s' }}
-          >
-            {([
-              { icon: ShieldCheck,   label: 'Verified Shops' },
-              { icon: MapPin,        label: 'All Areas' },
-              { icon: MessageCircle, label: 'Instant Contact' },
-            ] as const).map(item => (
-              <div
-                key={item.label}
-                className="flex-shrink-0 snap-start flex items-center gap-2 px-3 py-2 bg-white/[0.12] backdrop-blur-sm border border-white/[0.2] rounded-full"
-              >
-                <div className="w-5 h-5 rounded-full bg-[#FF6B35] flex items-center justify-center flex-shrink-0">
-                  <item.icon className="w-2.5 h-2.5 text-white" strokeWidth={2} />
-                </div>
-                <span className="text-white text-[11px] font-semibold whitespace-nowrap">{item.label}</span>
+          {/* Bottom: feature cards — mockup style, scooter visible in gap above */}
+          <div style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.35s' }}>
+            <div
+              className="overflow-hidden rounded-[14px]"
+              style={{
+                background: 'rgba(0,0,0,0.62)',
+                backdropFilter: 'blur(18px)',
+                WebkitBackdropFilter: 'blur(18px)',
+                border: '1px solid rgba(255,255,255,0.07)',
+              }}
+            >
+              <div className="grid grid-cols-3">
+                {([
+                  { icon: ShieldCheck,   label: 'Find Your\nDream Bike' },
+                  { icon: MapPin,        label: 'Compare\nShops' },
+                  { icon: MessageCircle, label: 'Instant\nMessaging' },
+                ] as const).map((item, i) => (
+                  <div
+                    key={item.label}
+                    className={cn(
+                      'flex flex-col items-center justify-center gap-1.5 px-2 py-3 text-center',
+                      i < 2 && 'border-r border-white/[0.07]'
+                    )}
+                  >
+                    <item.icon className="w-[18px] h-[18px] text-[#FF6B35]" strokeWidth={1.8} />
+                    <span className="text-white text-[10px] font-semibold leading-tight whitespace-pre-line">{item.label}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
 
         </div>
@@ -194,23 +193,29 @@ export default async function HomePage() {
           className="hidden md:flex relative pb-8 justify-center"
           style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.5s' }}
         >
-          <div className="w-[70%] bg-white/[0.1] backdrop-blur-md border border-white/[0.18] rounded-[20px] overflow-hidden">
+          <div
+            className="w-[70%] overflow-hidden rounded-[20px]"
+            style={{
+              background: 'rgba(0,0,0,0.62)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.07)',
+            }}
+          >
             <div className="grid grid-cols-3">
               {([
-                { icon: ShieldCheck,   title: 'Verified Local Shops', desc: 'Real listings from trusted rental partners across Phuket' },
-                { icon: MapPin,        title: 'All Areas Covered',    desc: 'Patong, Kamala, Kata, Karon, Rawai and more' },
-                { icon: MessageCircle, title: 'Instant Contact',      desc: 'Chat in-app or jump to WhatsApp with one tap' },
+                { icon: ShieldCheck,   title: 'Find Your Dream Bike',       desc: 'Choose the color, accessories and model that fits you.' },
+                { icon: MapPin,        title: 'Compare Shops & Scooters',   desc: 'More choice in one place.' },
+                { icon: MessageCircle, title: 'Instant Messaging',          desc: 'Chat in-app or WhatsApp.' },
               ] as const).map((item, i) => (
                 <div
                   key={item.title}
-                  className={cn('flex items-start gap-4 p-5', i < 2 && 'border-r border-white/[0.18]')}
+                  className={cn('flex items-start gap-4 px-6 py-5', i < 2 && 'border-r border-white/[0.07]')}
                 >
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#FF6B35] flex items-center justify-center">
-                    <item.icon className="w-5 h-5 text-white" strokeWidth={1.8} />
-                  </div>
+                  <item.icon className="w-5 h-5 text-[#FF6B35] flex-shrink-0 mt-0.5" strokeWidth={1.8} />
                   <div>
-                    <p className="text-white font-semibold text-[14px] leading-tight mb-1">{item.title}</p>
-                    <p className="text-white/70 text-[12px] leading-snug">{item.desc}</p>
+                    <p className="text-white font-semibold text-[13px] leading-tight mb-1">{item.title}</p>
+                    <p className="text-white/55 text-[11px] leading-snug">{item.desc}</p>
                   </div>
                 </div>
               ))}
