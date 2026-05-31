@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LogOut, ChevronDown, User, Store } from 'lucide-react'
+import { LogOut, ChevronDown, ChevronRight, MessageCircle, User, Store } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { SITE_NAME } from '@/constants'
@@ -136,8 +136,14 @@ export default function Navbar() {
                     : 'bg-[#f8f8f6] hover:bg-[#f0f0ec] text-[#0f0f0e]'
                 )}
               >
-                <div className="w-7 h-7 bg-[#FF6B35] rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                  {(profile?.name ?? user.email ?? 'U')[0].toUpperCase()}
+                <div className={cn(
+                  'w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0',
+                  isHero ? 'bg-white/15' : 'bg-[#ececea]',
+                )}>
+                  {isShopOwner
+                    ? <Store className={cn('w-3.5 h-3.5', isHero ? 'text-white' : 'text-[#5c5c58]')} />
+                    : <User  className={cn('w-3.5 h-3.5', isHero ? 'text-white' : 'text-[#5c5c58]')} />
+                  }
                 </div>
                 <span className="text-sm font-medium max-w-[100px] truncate">
                   {profile?.name?.split(' ')[0] ?? user.email?.split('@')[0]}
@@ -241,6 +247,23 @@ export default function Navbar() {
                         {isShopOwner ? 'Partner' : 'Rider'}
                       </p>
                     </div>
+                    {/* Unread messages alert — only when there are unread */}
+                    {unread > 0 && (
+                      <div className="px-2.5 pt-2 pb-1">
+                        <Link
+                          href={isShopOwner ? '/partner/messages' : '/messages'}
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2.5 bg-[#fff4f0] border border-[#fed7b0] rounded-[10px] hover:bg-[#ffe8d6] active:bg-[#ffd9c0] transition-colors"
+                        >
+                          <MessageCircle className="w-4 h-4 text-[#FF6B35] flex-shrink-0" strokeWidth={2} />
+                          <span className="flex-1 text-sm font-semibold text-[#FF6B35]">
+                            {unread === 1 ? '1 unread message' : `${unread > 99 ? '99+' : unread} unread messages`}
+                          </span>
+                          <ChevronRight className="w-3.5 h-3.5 text-[#FF6B35] flex-shrink-0" />
+                        </Link>
+                      </div>
+                    )}
+
                     <div className="py-1">
                       {isShopOwner ? (
                         <Link
