@@ -12,26 +12,26 @@ const BENEFITS = [
   {
     icon: SlidersHorizontal,
     title: 'Find the Exact Scooter You Want',
-    description: 'Filter by model, engine size, color, and features. Stop messaging 20 shops to find the one you actually want.',
+    description: 'Search by model, engine size, color, accessories, and features. Stop messaging 20 shops just to find the right scooter.',
     color: 'bg-[#f0fdf4] text-[#16a34a]',
-  },
-  {
-    icon: MessageCircle,
-    title: 'Contact Shops Instantly',
-    description: 'Reach any shop through in-app chat or WhatsApp — both are first-class. No booking forms, no platform fees.',
-    color: 'bg-[#fff4f0] text-[#FF6B35]',
-  },
-  {
-    icon: Zap,
-    title: 'Compare Options Easily',
-    description: 'See prices, photos, and specs side by side across multiple shops. Make a confident decision before you commit.',
-    color: 'bg-[#eff6ff] text-[#2563eb]',
   },
   {
     icon: Store,
     title: 'More Choice Across Phuket',
-    description: 'Multiple verified shops in one place. Browse the whole island instead of walking into whichever shop you pass first.',
+    description: 'Browse scooters from multiple rental shops in one place instead of searching shop by shop.',
     color: 'bg-[#fdf4ff] text-[#9333ea]',
+  },
+  {
+    icon: Zap,
+    title: 'Compare Options Easily',
+    description: 'View prices, photos, and specifications side-by-side before deciding which scooter is right for you.',
+    color: 'bg-[#eff6ff] text-[#2563eb]',
+  },
+  {
+    icon: MessageCircle,
+    title: 'Contact Shops Instantly',
+    description: 'Send a message directly through Koh Ride or continue on WhatsApp — whatever works best for you.',
+    color: 'bg-[#fff4f0] text-[#FF6B35]',
   },
 ]
 
