@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Shield, ShieldCheck, ChevronRight, MapPin, Check, MessageCircle, Unlock, Zap, Eye } from 'lucide-react'
+import { ArrowRight, ChevronRight, MapPin, Check, MessageCircle, Zap, SlidersHorizontal, Store } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { LOCATIONS } from '@/constants'
 import { getScooters } from '@/lib/supabase/queries'
@@ -10,27 +10,27 @@ import { HeroSearch } from '@/components/home/HeroSearch'
 
 const BENEFITS = [
   {
-    icon: Shield,
-    title: 'Local Scooter Listings',
-    description: 'Scooters from local shops and independent owners across Phuket. Real photos, honest pricing.',
+    icon: SlidersHorizontal,
+    title: 'Find the Exact Scooter You Want',
+    description: 'Filter by model, engine size, color, and features. Stop messaging 20 shops to find the one you actually want.',
     color: 'bg-[#f0fdf4] text-[#16a34a]',
   },
   {
     icon: MessageCircle,
-    title: 'Contact Directly',
-    description: 'Message any shop on WhatsApp in seconds. No booking forms, no platform fees — just direct contact.',
+    title: 'Contact Shops Instantly',
+    description: 'Reach any shop through in-app chat or WhatsApp — both are first-class. No booking forms, no platform fees.',
     color: 'bg-[#fff4f0] text-[#FF6B35]',
   },
   {
-    icon: Eye,
-    title: 'Transparent Listings',
-    description: 'Real photos, honest specs, and current pricing — no surprises when you show up to the shop.',
+    icon: Zap,
+    title: 'Compare Options Easily',
+    description: 'See prices, photos, and specs side by side across multiple shops. Make a confident decision before you commit.',
     color: 'bg-[#eff6ff] text-[#2563eb]',
   },
   {
-    icon: Zap,
-    title: 'Fast Responses',
-    description: 'Most shops reply within minutes. Ask about availability, rates, and your rental — all on WhatsApp.',
+    icon: Store,
+    title: 'More Choice Across Phuket',
+    description: 'Multiple verified shops in one place. Browse the whole island instead of walking into whichever shop you pass first.',
     color: 'bg-[#fdf4ff] text-[#9333ea]',
   },
 ]
