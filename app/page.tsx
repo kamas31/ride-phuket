@@ -5,8 +5,7 @@ import { ScooterCard } from '@/components/ride/ScooterCard'
 import { LOCATIONS } from '@/constants'
 import { getScooters } from '@/lib/supabase/queries'
 import { computeLiveAreas } from '@/lib/live-areas'
-import { formatPrice } from '@/lib/utils'
-import { HeroSearch } from '@/components/home/HeroSearch'
+import { cn, formatPrice } from '@/lib/utils'
 
 const BENEFITS = [
   {
@@ -47,94 +46,44 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       {/* ── HERO ── */}
-      <section className="relative min-h-[100svh] flex flex-col overflow-hidden">
+      <section className="relative h-[100svh] min-h-[600px] flex flex-col overflow-hidden">
 
-        {/* ── Layer 1: Absolute black base (prevents any flash) */}
-        <div className="absolute inset-0 bg-[#07090d]" />
-
-        {/* ── Layer 2: Cinematic background — Phuket tropical beach, golden hour */}
-        <div
-          className="absolute inset-0 hero-ken-burns"
-          style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=85&auto=format&fit=crop')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center 45%',
-            opacity: 0.62,
-          }}
+        {/* Background image */}
+        <Image
+          src="/hero.png"
+          alt="Explore Phuket on a scooter"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
         />
 
-        {/* ── Layer 3: Radial vignette — darkens edges, keeps center luminous */}
+        {/* Dark overlay */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse 80% 70% at 50% 40%, transparent 20%, rgba(0,0,0,0.55) 100%)',
-          }}
+          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0.35), rgba(0,0,0,0.55))' }}
         />
 
-        {/* ── Layer 4: Top shadow — nav readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-transparent pointer-events-none" />
-
-        {/* ── Layer 5: Bottom shadow — CTA + stats readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
-
-        {/* ── Layer 6: Warm golden tint at bottom — ties into brand orange */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'linear-gradient(to top, rgba(180,70,10,0.22) 0%, rgba(255,107,53,0.08) 25%, transparent 55%)',
-          }}
-        />
-
-        {/* ── Layer 7: Cool blue-teal atmosphere at top — depth + sky feel */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'linear-gradient(to bottom, rgba(5,18,38,0.35) 0%, transparent 40%)',
-          }}
-        />
-
-        {/* ── CONTENT ── */}
-        <div className="relative flex-1 flex flex-col justify-center items-center text-center px-5 pt-28 pb-16">
-
-          {/* Hero search — entrance 0.15s */}
+        {/* Content — left-aligned, vertically centered */}
+        <div className="relative flex-1 flex flex-col justify-center px-6 md:pl-[100px] md:pr-8">
           <div
-            className="w-full flex flex-col items-center"
-            style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.15s' }}
+            className="max-w-[600px]"
+            style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.1s' }}
           >
-            <HeroSearch />
-          </div>
-
-          {/* Headline — entrance 0.3s */}
-          <div
-            style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.3s' }}
-          >
-            <h1
-              className="text-white font-bold text-[46px] md:text-[70px] lg:text-[80px] leading-[1.04] tracking-[-0.04em] max-w-[16ch] mb-6 hero-text-shadow"
-            >
-              Explore Phuket{' '}
-              <span className="text-gradient">your way.</span>
+            <h1 className="font-extrabold leading-[0.95] tracking-[-0.03em] text-[62px] md:text-[88px] lg:text-[96px] mb-6">
+              <span className="text-white block">Explore Phuket</span>
+              <span className="block" style={{ color: '#FF6B35' }}>your way.</span>
             </h1>
-          </div>
 
-          {/* Subheadline — entrance 0.48s */}
-          <div
-            style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.48s' }}
-          >
-            <p className="text-white/72 text-[17px] md:text-[20px] max-w-[30ch] leading-[1.65] mb-10 font-light hero-sub-shadow">
-              Premium scooters from local shops across Phuket.
-              <br className="hidden sm:block" />
-              Contact directly on WhatsApp. No platform fees.
+            <p className="text-white/75 text-[17px] md:text-[19px] leading-[1.6] mb-10 max-w-[520px]">
+              Premium scooters from local shops across Phuket.<br />
+              Chat instantly in-app or continue on WhatsApp when needed.
             </p>
-          </div>
 
-          {/* CTAs — entrance 0.62s */}
-          <div
-            style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.62s' }}
-          >
-            <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Link
                 href="/explore"
-                className="flex items-center gap-2.5 px-9 py-[15px] bg-[#FF6B35] text-white text-[15px] font-bold rounded-full
+                className="flex items-center justify-center gap-2.5 px-9 py-[15px] bg-[#FF6B35] text-white text-[15px] font-bold rounded-full
                            shadow-[0_4px_28px_rgba(255,107,53,0.5),0_2px_8px_rgba(0,0,0,0.3)]
                            hover:bg-[#e85d29] hover:shadow-[0_8px_40px_rgba(255,107,53,0.6)]
                            hover:scale-[1.03] active:scale-[0.97]
@@ -145,26 +94,47 @@ export default async function HomePage() {
               </Link>
               <Link
                 href="/explore"
-                className="flex items-center gap-2 px-7 py-[15px] rounded-full text-[15px] font-semibold text-white/90
-                           bg-white/[0.1] backdrop-blur-md border border-white/[0.22]
-                           hover:bg-white/[0.18] hover:border-white/30
+                className="flex items-center justify-center gap-2 px-7 py-[15px] rounded-full text-[15px] font-semibold text-white
+                           bg-white/[0.1] backdrop-blur-md border border-white/[0.25]
+                           hover:bg-white/[0.18] hover:border-white/40
                            transition-all duration-200"
               >
                 View All Locations
               </Link>
             </div>
           </div>
-
         </div>
 
-        {/* Scroll indicator — entrance 1.1s */}
+        {/* Bottom feature bar */}
         <div
-          className="relative flex flex-col items-center pb-8 gap-2"
-          style={{ opacity: 0, animation: 'fade-in 0.8s ease forwards 1.1s' }}
+          className="relative pb-8 px-6 md:px-0 flex justify-center"
+          style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.5s' }}
         >
-          <span className="text-[10px] uppercase tracking-[0.22em] font-medium text-white/35">Scroll</span>
-          <div className="w-[22px] h-9 rounded-full border border-white/20 flex justify-center pt-1.5">
-            <div className="w-0.5 h-2.5 bg-white/40 rounded-full animate-bounce" />
+          <div className="w-full md:w-[70%] bg-white/[0.1] backdrop-blur-md border border-white/[0.18] rounded-[20px] overflow-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-3">
+              {([
+                { icon: ShieldCheck,   title: 'Verified Local Shops', desc: 'Real listings from trusted rental partners across Phuket' },
+                { icon: MapPin,        title: 'All Areas Covered',    desc: 'Patong, Kamala, Kata, Karon, Rawai and more' },
+                { icon: MessageCircle, title: 'Instant Contact',      desc: 'Chat in-app or jump to WhatsApp with one tap' },
+              ] as const).map((item, i) => (
+                <div
+                  key={item.title}
+                  className={cn(
+                    'flex items-start gap-4 p-5',
+                    i < 2 && 'sm:border-r sm:border-white/[0.18]',
+                    i > 0 && 'border-t border-white/[0.18] sm:border-t-0'
+                  )}
+                >
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#FF6B35] flex items-center justify-center">
+                    <item.icon className="w-5 h-5 text-white" strokeWidth={1.8} />
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold text-[14px] leading-tight mb-1">{item.title}</p>
+                    <p className="text-white/70 text-[12px] leading-snug">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
