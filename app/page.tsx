@@ -48,13 +48,22 @@ export default async function HomePage() {
       {/* ── HERO ── */}
       <section className="relative h-[78svh] md:h-[100svh] min-h-[520px] md:min-h-[600px] flex flex-col overflow-hidden">
 
-        {/* Background image — right-aligned on mobile so scooter stays visible */}
+        {/* Mobile background image */}
+        <Image
+          src="/heromobile.png"
+          alt="Explore Phuket on a scooter"
+          fill
+          priority
+          className="object-cover object-center md:hidden"
+          sizes="100vw"
+        />
+        {/* Desktop background image */}
         <Image
           src="/hero.png"
           alt="Explore Phuket on a scooter"
           fill
           priority
-          className="object-cover object-right md:object-center"
+          className="object-cover object-center hidden md:block"
           sizes="100vw"
         />
 
