@@ -375,6 +375,13 @@ export default async function HomePage() {
                   </div>
                   <p className="font-bold text-[14px] text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors leading-tight">{area.label}</p>
                   <p className="text-[12px] text-[#9c9c98] mt-1">From {formatPrice(area.priceFrom)}/day</p>
+                  {area.engineRange && (
+                    <p className="text-[11px] text-[#c8c8c4] mt-0.5 leading-none">
+                      {area.engineRange.min === area.engineRange.max
+                        ? `${area.engineRange.min}cc`
+                        : `${area.engineRange.min}cc–${area.engineRange.max}cc`}
+                    </p>
+                  )}
                 </Link>
               ))}
             </div>

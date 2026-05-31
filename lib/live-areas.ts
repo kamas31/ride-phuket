@@ -10,6 +10,7 @@ import type { Scooter } from '@/types'
 
 export interface LiveArea extends AreaMeta {
   priceFrom: number   // real MIN(price_per_day) — never the static constant value
+  engineRange: { min: number; max: number } | null  // null = no valid CC data
   // scooterCount intentionally omitted from the public type — never shown in UI
 }
 
@@ -26,6 +27,11 @@ export const getLiveAreas = cache(async (): Promise<LiveArea[]> => {
   return computeLiveAreas(scooters)
 })
 
+function parseCC(engine: string): number | null {
+  const n = parseInt(engine.replace(/\D/g, ''), 10)
+  return isNaN(n) || n <= 0 ? null : n
+}
+
 /**
  * Derive live areas from a pre-fetched scooter list.
  * Use this when you already have allScooters in scope to avoid a second DB call.
@@ -38,7 +44,11 @@ export function computeLiveAreas(scooters: Scooter[]): LiveArea[] {
       )
       if (zone.length === 0) return null
       const minPrice = Math.min(...zone.map(s => s.pricePerDay))
-      return { ...area, priceFrom: minPrice }
+      const ccValues = zone.map(s => parseCC(s.specs.engine)).filter((n): n is number => n !== null)
+      const engineRange = ccValues.length > 0
+        ? { min: Math.min(...ccValues), max: Math.max(...ccValues) }
+        : null
+      return { ...area, priceFrom: minPrice, engineRange }
     })
     .filter((a): a is LiveArea => a !== null)
 }
