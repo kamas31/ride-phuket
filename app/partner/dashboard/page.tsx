@@ -61,6 +61,27 @@ export default async function DashboardPage() {
     shop ? getActivityFeed(shop.id)  : Promise.resolve([]),
   ])
 
+  // Unread messages for the dashboard alert
+  let unreadCount = 0
+  if (user) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: convos } = await (supabase as any)
+      .from('conversations')
+      .select('id')
+      .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
+    if (convos?.length) {
+      const ids = convos.map((c: { id: string }) => c.id)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { count } = await (supabase as any)
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .in('conversation_id', ids)
+        .neq('sender_id', user.id)
+        .is('read_at', null)
+      unreadCount = count ?? 0
+    }
+  }
+
   return (
     <DashboardClient
       profile={profile}
@@ -69,6 +90,7 @@ export default async function DashboardPage() {
       bookingStats={bookingStats}
       analytics={analytics}
       activityFeed={activityFeed}
+      unreadCount={unreadCount}
     />
   )
 }

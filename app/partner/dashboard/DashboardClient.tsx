@@ -34,10 +34,11 @@ interface DashboardClientProps {
   bookingStats: { pending: number; active: number; total: number }
   analytics: ShopAnalytics | null
   activityFeed: ActivityFeedItem[] // fetched, preserved for future use
+  unreadCount: number
 }
 
 export default function DashboardClient({
-  profile, shop, scooters: initial, bookingStats: _bookingStats, analytics,
+  profile, shop, scooters: initial, bookingStats: _bookingStats, analytics, unreadCount,
 }: DashboardClientProps) {
   const [scooters, setScooters]           = useState(initial)
   const [togglingId, setTogglingId]       = useState<string | null>(null)
@@ -250,6 +251,31 @@ export default function DashboardClient({
         )}
 
         {/* ─────────────────────────────────────────────────────────────────
+            UNREAD MESSAGES ALERT
+        ──────────────────────────────────────────────────────────────────── */}
+        {shop && unreadCount > 0 && (
+          <Link
+            href="/partner/messages"
+            className="block bg-white rounded-[16px] overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_-2px_rgba(0,0,0,0.10)] transition-shadow"
+          >
+            <div className="flex items-center gap-4 px-5 py-4">
+              <div className="w-9 h-9 bg-[#fff4f0] rounded-[10px] flex items-center justify-center flex-shrink-0">
+                <MessageCircle className="w-4 h-4 text-[#FF6B35]" strokeWidth={2} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[14px] font-semibold text-[#0f0f0e]">
+                  {unreadCount} unread {unreadCount === 1 ? 'message' : 'messages'}
+                </p>
+                <p className="text-[12px] text-[#9c9c98] mt-0.5 leading-snug">
+                  Reply quickly to increase your booking chances.
+                </p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-[#c8c8c4] flex-shrink-0" />
+            </div>
+          </Link>
+        )}
+
+        {/* ─────────────────────────────────────────────────────────────────
             FLEET MANAGEMENT — collapsible accordion
         ──────────────────────────────────────────────────────────────────── */}
         {shop && (
@@ -296,6 +322,35 @@ export default function DashboardClient({
                 </Link>
 
               </div>
+
+              {/* Fleet thumbnail preview — visible when collapsed */}
+              {!fleetOpen && sortedScooters.length > 0 && (
+                <div className="px-5 pb-4 flex items-center">
+                  {sortedScooters.slice(0, 5).map((s, i) => (
+                    <div
+                      key={s.id}
+                      className="relative w-11 h-11 rounded-full border-2 border-white overflow-hidden flex-shrink-0 bg-[#f5f4f2]"
+                      style={{ zIndex: 6 - i, marginLeft: i > 0 ? '-10px' : '0' }}
+                    >
+                      <ScooterImage
+                        src={s.images?.[0]}
+                        alt={s.name}
+                        className="w-full h-full object-cover"
+                        sizes="44px"
+                      />
+                    </div>
+                  ))}
+                  {sortedScooters.length > 5 && (
+                    <div
+                      className="relative w-11 h-11 rounded-full bg-[#f0f0ec] border-2 border-white flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-[#5c5c58]"
+                      style={{ zIndex: 0, marginLeft: '-10px' }}
+                    >
+                      +{sortedScooters.length - 5}
+                    </div>
+                  )}
+                </div>
+              )}
+
             </div>
 
             {/* Collapsible fleet list */}

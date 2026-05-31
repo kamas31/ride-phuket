@@ -133,7 +133,11 @@ export default function MobileBottomNav() {
                   strokeWidth={active ? 2.5 : 1.5}
                 />
                 {isMessages && unread > 0 && (
-                  <span className="absolute -top-0.5 -right-1 w-[9px] h-[9px] bg-[#FF6B35] rounded-full border-[1.5px] border-white" />
+                  <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 bg-[#ef4444] rounded-full border border-white flex items-center justify-center px-[3px]">
+                    <span className="text-[9px] font-bold text-white leading-none tabular-nums">
+                      {unread > 99 ? '99+' : unread}
+                    </span>
+                  </span>
                 )}
               </div>
               <span className={cn(
