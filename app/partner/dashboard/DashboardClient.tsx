@@ -179,6 +179,34 @@ export default function DashboardClient({
         )}
 
         {/* ─────────────────────────────────────────────────────────────────
+            UNREAD MESSAGES ALERT — highest priority
+        ──────────────────────────────────────────────────────────────────── */}
+        {shop && unreadCount > 0 && (
+          <Link
+            href="/partner/messages"
+            className="block bg-[#fff4f0] rounded-[16px] border border-[#fed7b0] hover:bg-[#ffe8d6] active:scale-[0.99] transition-all"
+          >
+            <div className="flex items-center gap-4 px-5 py-4">
+              <div className="w-10 h-10 bg-[#FF6B35] rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(255,107,53,0.35)]">
+                <MessageCircle className="w-5 h-5 text-white" strokeWidth={2} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[15px] font-bold text-[#0f0f0e]">
+                  {unreadCount} unread {unreadCount === 1 ? 'message' : 'messages'}
+                </p>
+                <p className="text-[12px] text-[#5c5c58] mt-0.5 leading-snug">
+                  Reply quickly to increase your chances of converting leads.
+                </p>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <span className="text-[13px] font-bold text-[#FF6B35]">Open</span>
+                <ChevronRight className="w-4 h-4 text-[#FF6B35]" />
+              </div>
+            </div>
+          </Link>
+        )}
+
+        {/* ─────────────────────────────────────────────────────────────────
             PERFORMANCE — 4-column metrics card
         ──────────────────────────────────────────────────────────────────── */}
         {shop && analytics !== null && (
@@ -248,31 +276,6 @@ export default function DashboardClient({
 
             </div>
           </div>
-        )}
-
-        {/* ─────────────────────────────────────────────────────────────────
-            UNREAD MESSAGES ALERT
-        ──────────────────────────────────────────────────────────────────── */}
-        {shop && unreadCount > 0 && (
-          <Link
-            href="/partner/messages"
-            className="block bg-white rounded-[16px] overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_-2px_rgba(0,0,0,0.10)] transition-shadow"
-          >
-            <div className="flex items-center gap-4 px-5 py-4">
-              <div className="w-9 h-9 bg-[#fff4f0] rounded-[10px] flex items-center justify-center flex-shrink-0">
-                <MessageCircle className="w-4 h-4 text-[#FF6B35]" strokeWidth={2} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[14px] font-semibold text-[#0f0f0e]">
-                  {unreadCount} unread {unreadCount === 1 ? 'message' : 'messages'}
-                </p>
-                <p className="text-[12px] text-[#9c9c98] mt-0.5 leading-snug">
-                  Reply quickly to increase your booking chances.
-                </p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-[#c8c8c4] flex-shrink-0" />
-            </div>
-          </Link>
         )}
 
         {/* ─────────────────────────────────────────────────────────────────

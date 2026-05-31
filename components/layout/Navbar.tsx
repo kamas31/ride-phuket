@@ -8,15 +8,16 @@ import { cn } from '@/lib/utils'
 import { SITE_NAME } from '@/constants'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
+import { useUnreadCount } from '@/hooks/useUnreadCount'
 
-function NavLink({ href, label, active, isHero }: {
-  href: string; label: string; active: boolean; isHero: boolean
+function NavLink({ href, label, active, isHero, badge }: {
+  href: string; label: string; active: boolean; isHero: boolean; badge?: number
 }) {
   return (
     <Link
       href={href}
       className={cn(
-        'px-4 py-2 rounded-[10px] text-sm font-medium transition-colors duration-300',
+        'relative px-4 py-2 rounded-[10px] text-sm font-medium transition-colors duration-300 flex items-center gap-1.5',
         isHero
           ? 'text-white/85 hover:text-white hover:bg-white/10'
           : active
@@ -25,6 +26,11 @@ function NavLink({ href, label, active, isHero }: {
       )}
     >
       {label}
+      {badge != null && badge > 0 && (
+        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] bg-[#FF6B35] rounded-full px-1 text-[9px] font-bold text-white leading-none tabular-nums">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
     </Link>
   )
 }
@@ -33,6 +39,7 @@ export default function Navbar() {
   const pathname          = usePathname()
   const { user, signOut } = useAuth()
   const { profile }       = useProfile()
+  const unread            = useUnreadCount()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [scrolled, setScrolled]         = useState(false)
 
@@ -111,6 +118,7 @@ export default function Navbar() {
               label={link.label}
               active={pathname === link.href || pathname.startsWith(link.href + '/')}
               isHero={isHero}
+              badge={link.label === 'Messages' ? unread : undefined}
             />
           ))}
         </nav>
@@ -202,7 +210,7 @@ export default function Navbar() {
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className={cn(
-                  'w-9 h-9 rounded-full flex items-center justify-center transition-colors',
+                  'relative w-9 h-9 rounded-full flex items-center justify-center transition-colors',
                   isHero
                     ? 'bg-white/10 text-white'
                     : 'bg-[#f8f8f6] text-[#0f0f0e]',
@@ -212,6 +220,13 @@ export default function Navbar() {
                   ? <Store className="w-[18px] h-[18px]" />
                   : <User  className="w-[18px] h-[18px]" />
                 }
+                {unread > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-[#FF6B35] rounded-full border-[1.5px] border-white flex items-center justify-center px-[3px]">
+                    <span className="text-[8px] font-bold text-white leading-none tabular-nums">
+                      {unread > 99 ? '99+' : unread}
+                    </span>
+                  </span>
+                )}
               </button>
 
               {userMenuOpen && (
