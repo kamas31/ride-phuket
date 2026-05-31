@@ -113,9 +113,15 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
     { label: 'Storage',     value: scooter.specs?.storage },
   ].filter(r => isValidSpec(r.value))
 
-  const weekSavings = scooter.pricePerWeek
-    ? scooter.pricePerDay * 7 - scooter.pricePerWeek
-    : 0
+  // Best Value: option with lowest effective daily cost (only shown when 2+ options exist)
+  const pricingOptions = [
+    { key: 'daily',   cost: scooter.pricePerDay },
+    ...(scooter.pricePerWeek  ? [{ key: 'weekly',   cost: scooter.pricePerWeek  / 7  }] : []),
+    ...(scooter.pricePerMonth ? [{ key: 'monthly',  cost: scooter.pricePerMonth / 30 }] : []),
+  ]
+  const bestValueKey = pricingOptions.length >= 2
+    ? pricingOptions.reduce((best, cur) => cur.cost < best.cost ? cur : best).key
+    : null
 
   const newListing = isNewListing(scooter.createdAt)
   const openStatus = getShopOpenStatus(shop.openingHours)
@@ -209,25 +215,26 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
 
                 {/* Daily */}
                 <div className="bg-[#f8f8f6] px-3 py-2.5 text-center">
-                  <p className="text-[9px] font-semibold text-[#9c9c98] uppercase tracking-widest mb-1.5">Daily</p>
+                  <p className={`text-[9px] font-semibold uppercase tracking-widest mb-1.5 ${bestValueKey === 'daily' ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>Daily</p>
                   <p className="text-[16px] font-bold text-[#0f0f0e] leading-none tabular-nums">
                     {formatPrice(scooter.pricePerDay)}
                   </p>
                   <p className="text-[10px] text-[#b0b0ac] mt-1">/day</p>
+                  {bestValueKey === 'daily' && (
+                    <p className="text-[9px] font-semibold text-[#16a34a] mt-1.5">Best Value</p>
+                  )}
                 </div>
 
                 {/* Weekly */}
                 {scooter.pricePerWeek && (
                   <div className="bg-[#f8f8f6] px-3 py-2.5 text-center">
-                    <p className="text-[9px] font-semibold text-[#9c9c98] uppercase tracking-widest mb-1.5">Weekly</p>
+                    <p className={`text-[9px] font-semibold uppercase tracking-widest mb-1.5 ${bestValueKey === 'weekly' ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>Weekly</p>
                     <p className="text-[16px] font-bold text-[#0f0f0e] leading-none tabular-nums">
                       {formatPrice(scooter.pricePerWeek)}
                     </p>
                     <p className="text-[10px] text-[#b0b0ac] mt-1">/week</p>
-                    {weekSavings > 0 && (
-                      <p className="text-[9px] font-semibold text-[#22c55e] mt-1.5">
-                        Save {formatPrice(weekSavings)}
-                      </p>
+                    {bestValueKey === 'weekly' && (
+                      <p className="text-[9px] font-semibold text-[#16a34a] mt-1.5">Best Value</p>
                     )}
                   </div>
                 )}
@@ -235,11 +242,14 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                 {/* Monthly */}
                 {scooter.pricePerMonth && (
                   <div className="bg-[#f8f8f6] px-3 py-2.5 text-center">
-                    <p className="text-[9px] font-semibold text-[#FF6B35] uppercase tracking-widest mb-1.5">Monthly</p>
+                    <p className={`text-[9px] font-semibold uppercase tracking-widest mb-1.5 ${bestValueKey === 'monthly' ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>Monthly</p>
                     <p className="text-[16px] font-bold text-[#0f0f0e] leading-none tabular-nums">
                       {formatPrice(scooter.pricePerMonth)}
                     </p>
                     <p className="text-[10px] text-[#b0b0ac] mt-1">/month</p>
+                    {bestValueKey === 'monthly' && (
+                      <p className="text-[9px] font-semibold text-[#16a34a] mt-1.5">Best Value</p>
+                    )}
                   </div>
                 )}
               </div>
