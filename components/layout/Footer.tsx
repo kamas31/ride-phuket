@@ -1,30 +1,44 @@
 import Link from 'next/link'
 import { SITE_NAME } from '@/constants'
+import { getLiveAreas } from '@/lib/live-areas'
 
-const FOOTER_LINKS = {
+const LOCATION_PRIORITY = ['patong', 'kamala', 'kata', 'karon', 'rawai']
+
+const STATIC_SECTIONS = {
   Discover: [
     { href: '/explore', label: 'Explore Scooters' },
-    { href: '/saved', label: 'Saved Scooters' },
-    { href: '/auth/login', label: 'Sign In' },
-  ],
-  Locations: [
-    { href: '/phuket/patong', label: 'Patong' },
-    { href: '/phuket/kata', label: 'Kata Beach' },
-    { href: '/phuket/karon', label: 'Karon' },
-    { href: '/phuket/rawai', label: 'Rawai' },
-    { href: '/phuket/bang-tao', label: 'Bang Tao' },
-    { href: '/phuket/phuket-town', label: 'Phuket Town' },
+    { href: '/saved',   label: 'Saved Scooters'   },
+    { href: '/auth/login', label: 'Sign In'        },
   ],
   Partners: [
     { href: '/partner', label: 'List Your Scooters' },
   ],
   Legal: [
-    { href: '/terms', label: 'Terms of Service' },
-    { href: '/privacy', label: 'Privacy Policy' },
+    { href: '/terms',   label: 'Terms of Service' },
+    { href: '/privacy', label: 'Privacy Policy'   },
   ],
 }
 
-export default function Footer() {
+export default async function Footer() {
+  const liveAreas = await getLiveAreas()
+
+  const locationLinks = liveAreas
+    .slice()
+    .sort((a, b) => {
+      const ai = LOCATION_PRIORITY.indexOf(a.slug)
+      const bi = LOCATION_PRIORITY.indexOf(b.slug)
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
+    })
+    .slice(0, 5)
+    .map(area => ({ href: `/phuket/${area.slug}`, label: area.label }))
+
+  const sections: Record<string, { href: string; label: string }[]> = {
+    Discover: STATIC_SECTIONS.Discover,
+    ...(locationLinks.length > 0 ? { Locations: locationLinks } : {}),
+    Partners: STATIC_SECTIONS.Partners,
+    Legal:    STATIC_SECTIONS.Legal,
+  }
+
   return (
     <footer className="bg-[#0f0f0e] text-white">
       <div className="max-w-6xl mx-auto px-4 py-16">
@@ -47,7 +61,7 @@ export default function Footer() {
           </div>
 
           {/* Links */}
-          {Object.entries(FOOTER_LINKS).map(([title, links]) => (
+          {Object.entries(sections).map(([title, links]) => (
             <div key={title}>
               <h4 className="text-xs font-semibold text-[#9c9c98] uppercase tracking-widest mb-4">
                 {title}
