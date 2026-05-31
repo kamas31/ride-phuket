@@ -19,6 +19,14 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
   const [active, setActive] = useState(coverIdx)
   const hasMultiple = images.length > 1
 
+  // Adapts container to the loaded image's natural aspect ratio.
+  // Clamped: min 0.75 (3:4 portrait) to max 1.6 (16:10 landscape).
+  // Stays at previous value between photo switches for smooth transitions.
+  const [imgAspect, setImgAspect] = useState<number | null>(null)
+  const containerAspect = imgAspect
+    ? Math.max(0.75, Math.min(1.6, imgAspect))
+    : 4 / 3
+
   const touchStartX   = useRef<number | null>(null)
   const touchStartY   = useRef<number | null>(null)
   const isScrolling   = useRef<boolean | null>(null)
@@ -89,7 +97,10 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
           transform: `translateX(${liveOffset}px)`,
           transition: liveOffset === 0 ? `transform 0.45s ${SPRING}` : 'none',
         }}>
-          <div className="relative aspect-[4/3] md:aspect-[16/10] md:rounded-[24px] overflow-hidden bg-[#f3f3ef] group">
+          <div
+            className="relative md:rounded-[24px] overflow-hidden bg-[#f3f3ef] group"
+            style={{ aspectRatio: String(containerAspect) }}
+          >
             <Image
               key={images[active]}
               src={images[active]}
@@ -98,6 +109,12 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 700px"
               className="object-contain animate-fade-in"
               priority
+              onLoad={(e) => {
+                const t = e.currentTarget
+                if (t.naturalWidth > 0 && t.naturalHeight > 0) {
+                  setImgAspect(t.naturalWidth / t.naturalHeight)
+                }
+              }}
             />
 
             {hasMultiple && (
