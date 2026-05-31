@@ -68,7 +68,7 @@ export async function updateShop(
         telegram:         payload.telegram?.trim() || null,
         instagram:        payload.instagram?.trim() || null,
         website:          payload.website?.trim() || null,
-        address:          payload.address?.trim() || null,
+        address:          payload.address?.trim() || '',
         lat:              payload.lat ?? null,
         lng:              payload.lng ?? null,
         google_maps_link: payload.googleMapsLink?.trim() || null,

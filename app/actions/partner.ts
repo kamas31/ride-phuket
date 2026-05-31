@@ -116,7 +116,7 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
             slug,
             location:    payload.location,
             phone:       payload.phone.trim(),
-            address:     payload.address?.trim() || null,
+            address:     payload.address?.trim() || '',
             description: payload.description?.trim() || '',
             verified:    true,
             active:      true,
