@@ -6,6 +6,7 @@ import { LOCATIONS } from '@/constants'
 import { getScooters } from '@/lib/supabase/queries'
 import { computeLiveAreas } from '@/lib/live-areas'
 import { cn, formatPrice } from '@/lib/utils'
+import { HeroSearch } from '@/components/home/HeroSearch'
 
 const BENEFITS = [
   {
@@ -46,7 +47,7 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       {/* ── HERO ── */}
-      <section className="relative h-[78svh] md:h-[100svh] min-h-[520px] md:min-h-[600px] flex flex-col overflow-hidden">
+      <section className="relative h-[100svh] min-h-[600px] flex flex-col overflow-hidden">
 
         {/* Mobile background image */}
         <Image
@@ -67,10 +68,10 @@ export default async function HomePage() {
           sizes="100vw"
         />
 
-        {/* Mobile overlay — bottom-heavy so top (scooter) stays bright */}
+        {/* Mobile overlay — dark over text area, fades out over scooter at bottom */}
         <div
           className="absolute inset-0 pointer-events-none md:hidden"
-          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 35%, rgba(0,0,0,0.68) 68%, rgba(0,0,0,0.78) 100%)' }}
+          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.50) 55%, rgba(0,0,0,0.18) 80%, rgba(0,0,0,0.02) 100%)' }}
         />
         {/* Desktop overlay */}
         <div
@@ -79,10 +80,19 @@ export default async function HomePage() {
         />
 
         {/* ── MOBILE LAYOUT ── */}
-        <div className="md:hidden relative flex-1 flex flex-col justify-end px-5 pb-5">
+        <div className="md:hidden relative flex-1 flex flex-col px-5 pt-24 pb-6">
+
+          {/* Search bar */}
+          <div
+            style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.05s' }}
+          >
+            <HeroSearch />
+          </div>
+
+          {/* Headline + description + CTAs */}
           <div
             className="flex flex-col items-center text-center"
-            style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.1s' }}
+            style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.18s' }}
           >
             <h1 className="font-extrabold leading-[0.95] tracking-[-0.03em] text-[44px] mb-3">
               <span className="text-white block">Explore Phuket</span>
@@ -93,7 +103,7 @@ export default async function HomePage() {
               Premium scooters from trusted local shops across Phuket. Chat instantly in-app or continue on WhatsApp when needed.
             </p>
 
-            <div className="flex flex-col gap-2.5 w-full">
+            <div className="flex flex-col gap-2.5 w-full mb-4">
               <Link
                 href="/explore"
                 className="flex items-center justify-center gap-2 w-full py-[13px] bg-[#FF6B35] text-white text-[14px] font-bold rounded-full
@@ -114,10 +124,10 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Mobile trust pills — horizontal scroll */}
+          {/* Trust pills — sit below CTAs, scooter visible in remaining space below */}
           <div
-            className="flex gap-2 overflow-x-auto pt-4 snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'none', opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.4s' }}
+            className="flex gap-2 overflow-x-auto snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'none', opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.35s' }}
           >
             {([
               { icon: ShieldCheck,   label: 'Verified Shops' },
@@ -135,6 +145,7 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
+
         </div>
 
         {/* ── DESKTOP LAYOUT ── */}
