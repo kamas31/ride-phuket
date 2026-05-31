@@ -126,30 +126,6 @@ export default function DashboardClient({
                 </p>
               )}
 
-              {/* Status pills */}
-              {shop && (
-                <div className="flex flex-wrap items-center gap-2 mt-4">
-                  <span className={cn(
-                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold',
-                    availableCount > 0
-                      ? 'bg-[#dcfce7] text-[#15803d]'
-                      : 'bg-[#f1f5f9] text-[#64748b]',
-                  )}>
-                    <span className={cn(
-                      'w-1.5 h-1.5 rounded-full flex-shrink-0',
-                      availableCount > 0 ? 'bg-[#22c55e]' : 'bg-[#94a3b8]',
-                    )} />
-                    {availableCount} Live
-                  </span>
-                  <span className="text-[13px] font-medium text-[#6b6b67]">
-                    {(analytics?.scooterViews ?? 0).toLocaleString()} Views
-                  </span>
-                  <span className="text-[#d0d0cc]">·</span>
-                  <span className="text-[13px] font-medium text-[#6b6b67]">
-                    {analytics?.whatsappClicks ?? 0} Leads
-                  </span>
-                </div>
-              )}
             </div>
 
             {/* Settings */}
