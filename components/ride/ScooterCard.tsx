@@ -50,7 +50,6 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         src={getScooterCover(scooter)}
         alt={scooter.name}
         className="aspect-[4/3]"
-        objectFit="contain"
         hover
         sizes="(max-width: 640px) 50vw, 33vw"
       />
