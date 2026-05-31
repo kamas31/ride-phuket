@@ -98,7 +98,7 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
           transition: liveOffset === 0 ? `transform 0.45s ${SPRING}` : 'none',
         }}>
           <div
-            className="relative md:rounded-[24px] overflow-hidden bg-[#f3f3ef] group"
+            className="relative md:rounded-[24px] overflow-hidden bg-[#f3f3ef] group max-h-[420px] md:max-h-[460px]"
             style={{ aspectRatio: String(containerAspect) }}
           >
             <Image
