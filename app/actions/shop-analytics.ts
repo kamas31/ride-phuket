@@ -22,7 +22,7 @@ export interface ShopAnalytics {
   scooterBreakdown:  ScooterAnalyticsBreakdown[]
 }
 
-export async function getShopAnalytics(shopId: string, days = 30): Promise<ShopAnalytics> {
+export async function getShopAnalytics(shopId: string, days = 0): Promise<ShopAnalytics> {
   const empty: ShopAnalytics = {
     scooterViews: 0, shopViews: 0, whatsappClicks: 0,
     phoneClicks: 0, inAppLeads: 0, topScooterName: null, repeatVisitors: 0, periodDays: days,
@@ -31,14 +31,17 @@ export async function getShopAnalytics(shopId: string, days = 30): Promise<ShopA
 
   try {
     const admin  = createAdminClient()
-    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+    const cutoff = days > 0
+      ? new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+      : null
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: events, error } = await (admin as any)
+    let eventsQuery = (admin as any)
       .from('events')
       .select('event_type, session_id, scooter_id, metadata')
       .eq('shop_id', shopId)
-      .gte('created_at', cutoff)
+    if (cutoff) eventsQuery = eventsQuery.gte('created_at', cutoff)
+    const { data: events, error } = await eventsQuery
 
     if (error || !events?.length) return empty
 
@@ -95,11 +98,12 @@ export async function getShopAnalytics(shopId: string, days = 30): Promise<ShopA
     let inAppLeads = 0
     if (scooterIds.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { count } = await (admin as any)
+      let leadsQuery = (admin as any)
         .from('conversations')
         .select('id', { count: 'exact', head: true })
         .in('scooter_id', scooterIds)
-        .gte('created_at', cutoff)
+      if (cutoff) leadsQuery = leadsQuery.gte('created_at', cutoff)
+      const { count } = await leadsQuery
       inAppLeads = count ?? 0
     }
 
