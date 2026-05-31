@@ -189,11 +189,11 @@ export default async function HomePage() {
       </div>
 
       {/* ── HOW KOH RIDE WORKS ── */}
-      <section className="bg-[#f8f8f6] border-b border-[#e8e8e4] py-20 md:py-28">
+      <section className="bg-[#f8f8f6] border-b border-[#e8e8e4] py-12 md:py-28">
         <div className="max-w-5xl mx-auto px-4">
 
           {/* Header */}
-          <div className="text-center mb-14 md:mb-16">
+          <div className="text-center mb-8 md:mb-16">
             <p className="text-[11px] font-semibold text-[#FF6B35] uppercase tracking-[0.22em] mb-4">How it works</p>
             <h2 className="text-[32px] md:text-[48px] font-bold text-[#0f0f0e] leading-[1.1] tracking-[-0.03em] mb-5">
               How Koh Ride Works
@@ -205,7 +205,7 @@ export default async function HomePage() {
           </div>
 
           {/* Steps — inline cards with SVG illustrations + arrow connectors */}
-          <div className="flex flex-col md:flex-row items-stretch gap-8 md:gap-0 mb-10">
+          <div className="flex flex-col md:flex-row items-stretch gap-4 md:gap-0 mb-10">
 
             {/* ── Card 1: Find ── */}
             <div className="md:flex-1 relative">
@@ -213,11 +213,11 @@ export default async function HomePage() {
                 <span className="text-white font-bold text-sm leading-none">01</span>
               </div>
               <div className="bg-white rounded-[28px] overflow-hidden border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)] h-full flex flex-col">
-                <div className="relative h-52 bg-white flex-shrink-0">
+                <div className="relative h-36 md:h-52 bg-white flex-shrink-0">
                   <Image src="/illustrations/find.png" alt="Find scooters" fill className="object-contain" sizes="(max-width: 768px) 90vw, 30vw" />
                 </div>
-                <div className="px-6 pt-5 pb-7 text-center">
-                  <h3 className="text-[19px] font-bold text-[#0f0f0e] mb-2 tracking-tight">Find</h3>
+                <div className="px-5 pt-4 pb-5 md:px-6 md:pt-5 md:pb-7 text-center">
+                  <h3 className="text-[17px] md:text-[19px] font-bold text-[#0f0f0e] mb-1.5 md:mb-2 tracking-tight">Find</h3>
                   <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">Browse scooters across Phuket and filter by area, model, and price.</p>
                 </div>
               </div>
@@ -236,11 +236,11 @@ export default async function HomePage() {
                 <span className="text-white font-bold text-sm leading-none">02</span>
               </div>
               <div className="bg-white rounded-[28px] overflow-hidden border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)] h-full flex flex-col">
-                <div className="relative h-52 bg-white flex-shrink-0">
+                <div className="relative h-36 md:h-52 bg-white flex-shrink-0">
                   <Image src="/illustrations/contact.png" alt="Contact the shop" fill className="object-contain" sizes="(max-width: 768px) 90vw, 30vw" />
                 </div>
-                <div className="px-6 pt-5 pb-7 text-center">
-                  <h3 className="text-[19px] font-bold text-[#0f0f0e] mb-2 tracking-tight">Contact</h3>
+                <div className="px-5 pt-4 pb-5 md:px-6 md:pt-5 md:pb-7 text-center">
+                  <h3 className="text-[17px] md:text-[19px] font-bold text-[#0f0f0e] mb-1.5 md:mb-2 tracking-tight">Contact</h3>
                   <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">Message rental shops directly on WhatsApp. No forms, no platform — just real conversation.</p>
                 </div>
               </div>
@@ -259,11 +259,11 @@ export default async function HomePage() {
                 <span className="text-white font-bold text-sm leading-none">03</span>
               </div>
               <div className="bg-white rounded-[28px] overflow-hidden border border-[#f0f0ec] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.07),0_1px_4px_-1px_rgba(0,0,0,0.04)] h-full flex flex-col">
-                <div className="relative h-52 bg-white flex-shrink-0">
+                <div className="relative h-36 md:h-52 bg-white flex-shrink-0">
                   <Image src="/illustrations/ride.png" alt="Ride your scooter" fill className="object-contain" sizes="(max-width: 768px) 90vw, 30vw" />
                 </div>
-                <div className="px-6 pt-5 pb-7 text-center">
-                  <h3 className="text-[19px] font-bold text-[#0f0f0e] mb-2 tracking-tight">Ride</h3>
+                <div className="px-5 pt-4 pb-5 md:px-6 md:pt-5 md:pb-7 text-center">
+                  <h3 className="text-[17px] md:text-[19px] font-bold text-[#0f0f0e] mb-1.5 md:mb-2 tracking-tight">Ride</h3>
                   <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">Collect your scooter from the shop and explore Phuket on your own terms.</p>
                 </div>
               </div>
