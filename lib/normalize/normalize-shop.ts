@@ -65,5 +65,6 @@ export function normalizeShop(row: any): Shop {
     gallery: safeArray(row.gallery, id, 'gallery'),
     depositProtectedMember: Boolean(row.deposit_protected_member),
     planType: (row.plan_type as PlanType) ?? 'founding_partner',
+    locationVisibility: (row.location_visibility as 'exact' | 'approximate') ?? 'exact',
   }
 }

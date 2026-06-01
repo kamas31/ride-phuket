@@ -108,6 +108,7 @@ export interface FullShopRow {
   verified: boolean
   active: boolean
   plan_type: string
+  location_visibility: string | null
 }
 
 export async function deleteAccount(): Promise<{ error: string | null }> {

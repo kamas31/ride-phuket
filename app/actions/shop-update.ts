@@ -23,6 +23,7 @@ export interface UpdateShopPayload {
   logoUrl?: string | null
   coverImage?: string | null
   gallery?: string[]
+  locationVisibility?: 'exact' | 'approximate'
 }
 
 export interface UpdateShopResult {
@@ -49,7 +50,7 @@ export async function updateShop(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: shopRow, error: fetchErr } = await (admin as any)
       .from('shops')
-      .select('id, owner_id')
+      .select('id, owner_id, slug')
       .eq('id', shopId)
       .single()
 
@@ -76,8 +77,9 @@ export async function updateShop(
         opening_hours:    payload.openingHours ? JSON.stringify(payload.openingHours) : null,
         logo_url:         payload.logoUrl ?? null,
         cover_image:      payload.coverImage ?? null,
-        gallery:          payload.gallery ?? [],
-        updated_at:       new Date().toISOString(),
+        gallery:              payload.gallery ?? [],
+        location_visibility:  payload.locationVisibility ?? 'exact',
+        updated_at:           new Date().toISOString(),
       })
       .eq('id', shopId)
 

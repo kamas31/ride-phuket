@@ -52,6 +52,8 @@ export interface Shop {
   // Deposit protection (migration 011)
   depositProtectedMember?: boolean
   planType?: PlanType
+  // Location visibility (migration 020)
+  locationVisibility?: 'exact' | 'approximate'
 }
 
 export interface Scooter {

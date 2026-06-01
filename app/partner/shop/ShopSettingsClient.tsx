@@ -278,7 +278,8 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
     lat:           String(shop.lat ?? ''),
     lng:           String(shop.lng ?? ''),
     googleMapsLink: shop.google_maps_link ?? '',
-    deliveryZones: (shop.delivery_zones ?? []) as string[],
+    deliveryZones:      (shop.delivery_zones ?? []) as string[],
+    locationVisibility: ((shop.location_visibility ?? 'exact') as 'exact' | 'approximate'),
     // Branding
     logoUrl:    shop.logo_url ?? '',
     coverImage: shop.cover_image ?? '',
@@ -334,8 +335,9 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
         lat:         form.lat ? Number(form.lat) : null,
         lng:         form.lng ? Number(form.lng) : null,
         googleMapsLink: form.googleMapsLink || undefined,
-        deliveryZones:  form.deliveryZones,
-        openingHours:   form.hours,
+        deliveryZones:      form.deliveryZones,
+        locationVisibility: form.locationVisibility,
+        openingHours:       form.hours,
         logoUrl:        form.logoUrl || null,
         coverImage:     form.coverImage || null,
         gallery:        form.galleryUrls,
@@ -516,6 +518,45 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
             placeholder="https://maps.app.goo.gl/…"
             prefix={<MapPin className="w-3.5 h-3.5" />}
           />
+
+          {/* Location Visibility */}
+          <div>
+            <p className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">
+              Location Visibility
+            </p>
+            <p className="text-[11px] text-[#9c9c98] mb-3 leading-relaxed">
+              Controls what riders see on your shop's public map.
+            </p>
+            <div className="space-y-2">
+              {([
+                { value: 'exact',       label: 'Show exact location',   desc: 'Your precise pin is shown on the map.' },
+                { value: 'approximate', label: 'Show approximate area',  desc: 'A general zone is shown — exact address stays hidden.' },
+              ] as const).map(opt => (
+                <label
+                  key={opt.value}
+                  className={cn(
+                    'flex items-start gap-3 p-3 rounded-[12px] border cursor-pointer transition-all',
+                    form.locationVisibility === opt.value
+                      ? 'border-[#FF6B35] bg-[#fff4f0]'
+                      : 'border-[#e8e8e4] bg-[#f8f8f6] hover:border-[#d0d0cc]',
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="locationVisibility"
+                    value={opt.value}
+                    checked={form.locationVisibility === opt.value}
+                    onChange={() => set('locationVisibility', opt.value)}
+                    className="mt-0.5 accent-[#FF6B35]"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-[#0f0f0e]">{opt.label}</p>
+                    <p className="text-[11px] text-[#9c9c98] mt-0.5">{opt.desc}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
 
           {/* Delivery zones */}
           <div>
