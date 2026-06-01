@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, ShieldCheck, ChevronRight, MapPin, Check, MessageCircle, Zap, SlidersHorizontal, Store } from 'lucide-react'
+import { ArrowRight, ChevronRight, MapPin, Check, MessageCircle, Zap, SlidersHorizontal, Store } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { LOCATIONS } from '@/constants'
 import { getScooters } from '@/lib/supabase/queries'
@@ -114,41 +114,6 @@ export default async function HomePage() {
               >
                 View All Locations
               </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop feature bar */}
-        <div
-          className="hidden md:flex relative pb-8 justify-center"
-          style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.5s' }}
-        >
-          <div
-            className="w-[70%] overflow-hidden rounded-[20px]"
-            style={{
-              background: 'rgba(0,0,0,0.62)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255,255,255,0.07)',
-            }}
-          >
-            <div className="grid grid-cols-3">
-              {([
-                { icon: ShieldCheck,   title: 'Find Your Dream Bike',       desc: 'Choose the color, accessories and model that fits you.' },
-                { icon: MapPin,        title: 'Compare Shops & Scooters',   desc: 'More choice in one place.' },
-                { icon: MessageCircle, title: 'Instant Messaging',          desc: 'Chat in-app or WhatsApp.' },
-              ] as const).map((item, i) => (
-                <div
-                  key={item.title}
-                  className={cn('flex items-start gap-4 px-6 py-5', i < 2 && 'border-r border-white/[0.07]')}
-                >
-                  <item.icon className="w-5 h-5 text-[#FF6B35] flex-shrink-0 mt-0.5" strokeWidth={1.8} />
-                  <div>
-                    <p className="text-white font-semibold text-[13px] leading-tight mb-1">{item.title}</p>
-                    <p className="text-white/55 text-[11px] leading-snug">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </div>
