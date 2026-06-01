@@ -7,12 +7,13 @@ import {
 import { getShopBySlug } from '@/lib/supabase/queries'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ScooterImage } from '@/components/ride/ScooterImage'
-import { TrustBadge, isFastResponder } from '@/components/ride/TrustBadge'
+import { TrustBadge } from '@/components/ride/TrustBadge'
 import { EmptyReviews } from '@/components/ride/EmptyReviews'
-import { QuickContact } from '@/components/ride/QuickContact'
 import { TrackView } from '@/components/analytics/TrackView'
 import { ShopChatButton } from '@/components/shop/ShopChatButton'
+import { ShopQuickQuestions } from '@/components/shop/ShopQuickQuestions'
 import { ShopLocationMapClient as ShopLocationMap } from '@/components/map/ShopLocationMapClient'
+import { getShopChatStats } from '@/lib/shop-chat-stats'
 
 interface ShopPageProps {
   params: Promise<{ slug: string }>
@@ -72,12 +73,10 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
   const { scooters, ...shop } = data
 
-  const fastResponder = isFastResponder(shop.responseTime)
-  const hasDelivery   = scooters.some(s => s.deliveryAvailable)
-  const hasAutomatic  = scooters.some(s => s.category === 'automatic' && s.available)
-  const hasInsurance  = scooters.some(s => s.insuranceIncluded)
-  const hasHelmet     = scooters.some(s => s.helmetIncluded)
-  const hasBadges     = fastResponder || hasDelivery || hasAutomatic
+  const chatStats   = await getShopChatStats(shop.id)
+  const hasDelivery  = scooters.some(s => s.deliveryAvailable)
+  const hasInsurance = scooters.some(s => s.insuranceIncluded)
+  const hasHelmet    = scooters.some(s => s.helmetIncluded)
 
   const waLink = shop.whatsapp
     ? `https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(shop.name)}%2C%20I%20found%20you%20on%20Koh%20Ride%20and%20would%20like%20to%20rent%20a%20scooter.`
@@ -182,7 +181,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-[#0f0f0e] truncate">{shop.name}</p>
-                    {fastResponder && (
+                    {chatStats.isFastResponder && (
                       <div className="mt-1">
                         <TrustBadge variant="fast_response" size="xs" />
                       </div>
@@ -190,11 +189,11 @@ export default async function ShopPage({ params }: ShopPageProps) {
                   </div>
                 </div>
 
-                {/* Response time */}
-                {shop.responseTime && (
+                {/* Response time — only shown when backed by real data */}
+                {chatStats.avgMinutes !== null && (
                   <div className="flex items-center gap-1.5 text-xs text-[#9c9c98] mb-3">
                     <Zap className="w-3 h-3 text-[#22c55e]" />
-                    <span>Usually replies <strong className="text-[#0f0f0e]">{shop.responseTime}</strong></span>
+                    <span>Usually replies in <strong className="text-[#0f0f0e]">{chatStats.avgMinutes} min</strong></span>
                   </div>
                 )}
 
@@ -207,26 +206,21 @@ export default async function ShopPage({ params }: ShopPageProps) {
                     href={waLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-2.5 mt-2.5 rounded-full border border-[#e8e8e4] text-sm text-[#5c5c58] hover:border-[#22c55e]/50 hover:text-[#16a34a] transition-colors"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 mt-2.5 rounded-full border text-sm font-medium transition-colors bg-[#f0fdf4] border-[#22c55e]/20 text-[#16a34a] hover:bg-[#dcfce7]"
                   >
                     <MessageCircle className="w-4 h-4" />
                     Continue on WhatsApp
                   </a>
                 )}
 
-                {/* Quick question chips */}
-                {shop.whatsapp && (
-                  <QuickContact
-                    whatsapp={shop.whatsapp}
-                    phone={shop.phone}
-                    shopId={shop.id}
-                    shopName={shop.name}
-                    context={{ shopName: shop.name, location: shop.location }}
-                    questions={['ask_delivery', 'ask_deposit', 'ask_license', 'ask_availability', 'ask_monthly']}
-                    variant="chips_only"
-                    className="mt-3"
-                  />
-                )}
+                {/* Quick question chips — open Koh Ride Chat with prefill */}
+                <ShopQuickQuestions
+                  shopId={shop.id}
+                  shopSlug={slug}
+                  questions={['ask_delivery', 'ask_deposit', 'ask_license', 'ask_availability', 'ask_monthly']}
+                  waContext={{ shopName: shop.name, location: shop.location }}
+                  className="mt-3"
+                />
 
                 {/* Info rows */}
                 <div className="space-y-2 mt-4 pt-4 border-t border-[#f0f0ec] text-sm">
@@ -300,9 +294,9 @@ export default async function ShopPage({ params }: ShopPageProps) {
                     <p className="text-[22px] font-bold text-[#0f0f0e] leading-none">{shop.rating.toFixed(1)}</p>
                     <p className="text-[10px] text-[#9c9c98] mt-1">{shop.reviewCount} reviews</p>
                   </div>
-                ) : shop.responseTime ? (
+                ) : chatStats.avgMinutes !== null ? (
                   <div className="bg-white rounded-[16px] border border-[#e8e8e4] p-3.5 text-center">
-                    <p className="text-[13px] font-bold text-[#22c55e] leading-tight mt-1">{shop.responseTime}</p>
+                    <p className="text-[13px] font-bold text-[#22c55e] leading-tight mt-1">&lt;{chatStats.avgMinutes} min</p>
                     <p className="text-[10px] text-[#9c9c98] mt-1">Response time</p>
                   </div>
                 ) : null}
@@ -321,19 +315,6 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
           {/* ── LEFT column (col-1/2 on desktop, second on mobile) ── */}
           <div className="lg:col-start-1 lg:col-span-2 lg:row-start-1 space-y-10">
-
-            {/* Trust badges — only high-signal ones */}
-            {hasBadges && (
-              <div className="flex flex-wrap gap-2">
-                {fastResponder && <TrustBadge variant="fast_response" size="sm" />}
-                {hasDelivery    && <TrustBadge variant="delivery"      size="sm" />}
-                {hasAutomatic   && (
-                  <span className="inline-flex items-center gap-1 rounded-full border font-semibold whitespace-nowrap px-2.5 py-1 text-xs bg-[#f8f8f6] text-[#5c5c58] border-[#e8e8e4]">
-                    Automatics available
-                  </span>
-                )}
-              </div>
-            )}
 
             {/* Description */}
             {shop.description && (

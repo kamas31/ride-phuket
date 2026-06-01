@@ -51,10 +51,12 @@ export default function ShopLocationMap({ lat, lng, mode, className }: ShopLocat
       style:            'mapbox://styles/mapbox/light-v11',
       center:           [nudgeLng, nudgeLat],
       zoom:             mode === 'approximate' ? 13 : 15,
-      interactive:      false,
+      interactive:      true,
       attributionControl: false,
       fadeDuration:     0,
     })
+
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
 
     map.on('load', () => {
       if (mode === 'exact') {

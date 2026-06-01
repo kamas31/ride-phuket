@@ -16,6 +16,7 @@ interface MessageThreadProps {
   conversation: ConversationDetail
   initialMessages: Message[]
   currentUserId: string
+  prefill?: string
 }
 
 function formatTime(iso: string): string {
@@ -36,10 +37,11 @@ export default function MessageThread({
   conversation,
   initialMessages,
   currentUserId,
+  prefill,
 }: MessageThreadProps) {
   const router = useRouter()
   const [messages, setMessages] = useState<Message[]>(initialMessages)
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState(prefill ?? '')
   const [isPending, startTransition] = useTransition()
   const [sendError, setSendError] = useState<string | null>(null)
   const [localBlockedByMe, setLocalBlockedByMe] = useState(conversation.blockedByMe)
@@ -83,6 +85,16 @@ export default function MessageThread({
   useEffect(() => {
     const el = scrollAreaRef.current
     if (el) el.scrollTop = el.scrollHeight
+  }, [])
+
+  // Focus + size textarea when prefill is present
+  useEffect(() => {
+    if (!prefill || !textareaRef.current) return
+    const el = textareaRef.current
+    el.style.height = 'auto'
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px'
+    el.focus()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Smart scroll: only when user was already near bottom or sent the message.

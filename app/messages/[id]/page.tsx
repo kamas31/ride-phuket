@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ prefill?: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -17,12 +18,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: `${name} — Koh Ride Messages` }
 }
 
-export default async function ConversationPage({ params }: Props) {
+export default async function ConversationPage({ params, searchParams }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
   const { id } = await params
+  const { prefill } = await searchParams
   const result = await getConversationWithMessages(id)
   if (!result) notFound()
 
@@ -34,6 +36,7 @@ export default async function ConversationPage({ params }: Props) {
       conversation={result.conversation}
       initialMessages={result.messages}
       currentUserId={user.id}
+      prefill={prefill ? decodeURIComponent(prefill) : undefined}
     />
   )
 }
