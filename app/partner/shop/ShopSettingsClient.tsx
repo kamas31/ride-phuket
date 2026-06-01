@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -258,9 +259,10 @@ interface ShopSettingsClientProps {
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
+  const router                    = useRouter()
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [error, setError]         = useState<string | null>(null)
-  const [showMap, setShowMap]     = useState(false)
+  const [showMap, setShowMap]     = useState(true)
 
   const [form, setForm] = useState({
     // Basic
@@ -287,6 +289,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
     galleryUrls: (shop.gallery ?? []) as string[],
     // Hours
     hours: parseHours(shop.opening_hours),
+    showOpeningHours: shop.show_opening_hours ?? true,
   })
 
   const set = useCallback(
@@ -338,6 +341,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
         deliveryZones:      form.deliveryZones,
         locationVisibility: form.locationVisibility,
         openingHours:       form.hours,
+        showOpeningHours:   form.showOpeningHours,
         logoUrl:        form.logoUrl || null,
         coverImage:     form.coverImage || null,
         gallery:        form.galleryUrls,
@@ -347,7 +351,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
 
       if (result.success) {
         setSaveState('saved')
-        setTimeout(() => setSaveState('idle'), 2500)
+        router.push('/partner/dashboard')
       } else {
         setError(result.error ?? 'Failed to save.')
         setSaveState('error')
@@ -593,6 +597,16 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
 
         {/* ── 4. Opening Hours ── */}
         <Section title="Opening Hours">
+          {/* Visibility toggle */}
+          <div className="flex items-center justify-between py-0.5">
+            <div>
+              <p className="text-sm font-semibold text-[#0f0f0e]">Show opening hours</p>
+              <p className="text-[11px] text-[#9c9c98] mt-0.5">Display hours on your public shop page</p>
+            </div>
+            <Toggle on={form.showOpeningHours} onChange={v => set('showOpeningHours', v)} />
+          </div>
+
+          {form.showOpeningHours && (<>
           {/* Apply all shortcut */}
           <div className="flex items-center gap-3 pb-1">
             <p className="text-xs text-[#9c9c98] flex-1">Set hours for all days at once:</p>
@@ -661,6 +675,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
               )
             })}
           </div>
+          </>)}
         </Section>
 
         {/* ── 5. Branding ── */}

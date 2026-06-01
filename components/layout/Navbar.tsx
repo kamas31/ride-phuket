@@ -76,10 +76,10 @@ export default function Navbar() {
 
   const NAV_LINKS = isShopOwner
     ? [
+        { href: '/',                   label: 'Home'      },
         { href: '/partner/dashboard',  label: 'Dashboard' },
         { href: '/partner/messages',   label: 'Messages'  },
         { href: '/explore',            label: 'Explore'   },
-        { href: '/profile',            label: 'Profile'   },
       ]
     : [
         { href: '/explore',   label: 'Explore'  },

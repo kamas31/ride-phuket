@@ -54,6 +54,8 @@ export interface Shop {
   planType?: PlanType
   // Location visibility (migration 020)
   locationVisibility?: 'exact' | 'approximate'
+  // Opening hours visibility (migration 022)
+  showOpeningHours?: boolean
 }
 
 export interface Scooter {

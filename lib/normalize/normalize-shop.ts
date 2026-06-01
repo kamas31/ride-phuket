@@ -66,5 +66,6 @@ export function normalizeShop(row: any): Shop {
     depositProtectedMember: Boolean(row.deposit_protected_member),
     planType: (row.plan_type as PlanType) ?? 'founding_partner',
     locationVisibility: (row.location_visibility as 'exact' | 'approximate') ?? 'exact',
+    showOpeningHours: row.show_opening_hours !== false,
   }
 }

@@ -280,7 +280,7 @@ export default function DashboardClient({
               <div className="px-5 py-5 flex flex-col gap-1.5">
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-[#f59e0b] flex-shrink-0" strokeWidth={2} />
-                  <p className="text-[14px] sm:text-[18px] font-bold text-[#0f0f0e] leading-tight truncate">
+                  <p className="text-[12px] sm:text-[14px] font-bold text-[#0f0f0e] leading-tight line-clamp-2">
                     {analytics.topScooterName ?? '—'}
                   </p>
                 </div>

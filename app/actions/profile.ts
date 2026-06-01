@@ -109,6 +109,7 @@ export interface FullShopRow {
   active: boolean
   plan_type: string
   location_visibility: string | null
+  show_opening_hours: boolean
 }
 
 export async function deleteAccount(): Promise<{ error: string | null }> {
@@ -134,7 +135,7 @@ export async function getFullShopForOwner(): Promise<FullShopRow | null> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from('shops')
-      .select('id,name,slug,description,logo_url,cover_image,gallery,phone,whatsapp,line_id,telegram,instagram,website,location,address,lat,lng,google_maps_link,delivery_zones,opening_hours,verified,active,plan_type')
+      .select('id,name,slug,description,logo_url,cover_image,gallery,phone,whatsapp,line_id,telegram,instagram,website,location,address,lat,lng,google_maps_link,delivery_zones,opening_hours,verified,active,plan_type,location_visibility,show_opening_hours')
       .eq('owner_id', user.id)
       .single()
 

@@ -20,6 +20,7 @@ export interface UpdateShopPayload {
   googleMapsLink?: string
   deliveryZones?: string[]
   openingHours?: OpeningHoursSchedule | null
+  showOpeningHours?: boolean
   logoUrl?: string | null
   coverImage?: string | null
   gallery?: string[]
@@ -74,8 +75,9 @@ export async function updateShop(
         lng:              payload.lng ?? null,
         google_maps_link: payload.googleMapsLink?.trim() || null,
         delivery_zones:   payload.deliveryZones ?? [],
-        opening_hours:    payload.openingHours ? JSON.stringify(payload.openingHours) : null,
-        logo_url:         payload.logoUrl ?? null,
+        opening_hours:        payload.openingHours ? JSON.stringify(payload.openingHours) : null,
+        show_opening_hours:   payload.showOpeningHours ?? true,
+        logo_url:             payload.logoUrl ?? null,
         cover_image:      payload.coverImage ?? null,
         gallery:              payload.gallery ?? [],
         location_visibility:  payload.locationVisibility ?? 'exact',

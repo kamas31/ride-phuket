@@ -37,7 +37,7 @@ const BENEFITS = [
 
 export default async function HomePage() {
   const allScooters = await getScooters({ available: true })
-  const featuredScooters = allScooters.slice(0, 6)
+  const featuredScooters = allScooters.slice(0, 10)
 
   // Derive live zones from already-fetched scooters — zero extra DB call.
   const liveAreas  = computeLiveAreas(allScooters)
@@ -301,7 +301,7 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
           {featuredScooters.map(scooter => (
             <ScooterCard key={scooter.id} scooter={scooter} />
           ))}
