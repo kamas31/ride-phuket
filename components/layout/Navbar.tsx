@@ -68,9 +68,10 @@ export default function Navbar() {
   const isShopOwner = profile?.role === 'shop_owner'
 
   // Header is fully transparent throughout the hero scroll.
-  // At 92% hero scroll the image is already ~90% white + blurred — identical to app background.
-  // Snap instantly (no transition) so the switch is invisible.
-  const headerSolid = !isHomePage || heroProgress >= 0.92
+  // At 92%: brief semi-frosted intermediate (hero already ~76% white, switch barely visible).
+  // At 96%: snap to full solid app background — three-step sequence, no gradual transitions.
+  const headerSolid = !isHomePage || heroProgress >= 0.96
+  const headerMid   = isHomePage && heroProgress >= 0.92 && heroProgress < 0.96
   const isHero      = isHomePage && heroProgress < 0.92
 
   const NAV_LINKS = isShopOwner
@@ -101,10 +102,10 @@ export default function Navbar() {
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:           headerSolid ? 'rgba(255,255,255,0.92)' : 'transparent',
-          backdropFilter:       headerSolid ? 'blur(14px)' : 'none',
-          WebkitBackdropFilter: headerSolid ? 'blur(14px)' : 'none',
-          borderBottom:         headerSolid ? '1px solid rgba(0,0,0,0.07)' : 'none',
+          background:           headerSolid ? 'rgba(255,255,255,0.92)' : headerMid ? 'rgba(255,255,255,0.50)' : 'transparent',
+          backdropFilter:       headerSolid ? 'blur(14px)'             : headerMid ? 'blur(8px)'              : 'none',
+          WebkitBackdropFilter: headerSolid ? 'blur(14px)'             : headerMid ? 'blur(8px)'              : 'none',
+          borderBottom:         headerSolid ? '1px solid rgba(0,0,0,0.07)' : headerMid ? '1px solid rgba(0,0,0,0.03)' : 'none',
           transition:           'none',
         }}
       />
