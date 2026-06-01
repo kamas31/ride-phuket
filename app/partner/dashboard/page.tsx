@@ -61,6 +61,26 @@ export default async function DashboardPage() {
     shop ? getActivityFeed(shop.id)  : Promise.resolve([]),
   ])
 
+  // Unread review count for dashboard alert
+  let unreadReviewCount = 0
+  if (shop) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: shopFull } = await (admin as any)
+      .from('shops')
+      .select('reviews_last_seen_at')
+      .eq('id', shop.id)
+      .single()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { count } = await (admin as any)
+      .from('reviews')
+      .select('id', { count: 'exact', head: true })
+      .eq('shop_id', shop.id)
+      .gt('created_at', shopFull?.reviews_last_seen_at ?? '1970-01-01T00:00:00Z')
+
+    unreadReviewCount = count ?? 0
+  }
+
   // Unread count + preview for the dashboard alert
   let unreadCount = 0
   let unreadPreview: { senderName: string | null; messageText: string | null; scooterName: string | null } | null = null
@@ -137,6 +157,7 @@ export default async function DashboardPage() {
       activityFeed={activityFeed}
       unreadCount={unreadCount}
       unreadPreview={unreadPreview}
+      unreadReviewCount={unreadReviewCount}
     />
   )
 }

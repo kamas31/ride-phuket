@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect, useRef } from 'react'
 import { Star } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { submitReview, updateReview } from '@/app/actions/reviews'
+import { submitReview, updateReview, markReviewsSeen } from '@/app/actions/reviews'
 import { ShopReviewCard } from '@/components/shop/ShopReviewCard'
 import type { ShopReview } from '@/types'
 
@@ -175,6 +175,18 @@ export default function ReviewsSection({
   currentUserId, shopRating, shopReviewCount,
 }: ReviewsSectionProps) {
   const router = useRouter()
+  const seenRef = useRef(false)
+
+  // Mark reviews as read when the shop owner views this section.
+  // Runs once on mount; seenRef prevents repeat calls on re-render.
+  useEffect(() => {
+    if (seenRef.current) return
+    if (!currentUserId || !shopOwnerId || currentUserId !== shopOwnerId) return
+    seenRef.current = true
+    markReviewsSeen(shopId)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // shopId, currentUserId, shopOwnerId are stable server-rendered props
+
   const [reviews, setReviews]           = useState<ShopReview[]>(initialReviews)
   const [userReview, setUserReview]     = useState<ShopReview | null>(initialUserReview)
   const [formOpen, setFormOpen]         = useState(false)

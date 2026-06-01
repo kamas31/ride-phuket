@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
-  ArrowLeft, Star, MapPin, Zap, Check,
+  ArrowLeft, MapPin, Zap, Check,
   Phone, MessageCircle, Store,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
@@ -9,7 +9,6 @@ import { getScooterById } from '@/lib/supabase/queries'
 import { formatPrice, formatPricePerDay, pluralize, getScooterCover } from '@/lib/utils'
 import { ImageGallery } from '@/components/ride/ImageGallery'
 import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
-import { EmptyReviews } from '@/components/ride/EmptyReviews'
 import { QuickContact } from '@/components/ride/QuickContact'
 import { DepositInfo } from '@/components/ride/DepositInfo'
 import { StickyContactBar } from '@/components/ride/StickyContactBar'
@@ -174,21 +173,6 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               </div>
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2">
-                {/* Rating — only shown when real reviews exist */}
-                {scooter.reviewCount > 0 ? (
-                  <button className="flex items-center gap-1 hover:underline">
-                    <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
-                    <span className="font-bold text-sm text-[#0f0f0e]">{scooter.rating.toFixed(1)}</span>
-                    <span className="text-sm text-[#9c9c98] underline">({scooter.reviewCount} reviews)</span>
-                  </button>
-                ) : (
-                  <span className="flex items-center gap-1 text-sm text-[#9c9c98]">
-                    <Star className="w-3.5 h-3.5 text-[#e0e0dc]" />
-                    No reviews yet
-                  </span>
-                )}
-
-                <span className="text-[#e8e8e4]">·</span>
                 <div className="flex items-center gap-1 text-sm text-[#9c9c98]">
                   <MapPin className="w-3.5 h-3.5" />
                   {scooter.location}
@@ -344,21 +328,6 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               depositProtected={shop.depositProtectedMember}
             />
 
-            {/* Reviews — real or empty state, never fake */}
-            <div>
-              <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-4 flex items-center gap-2">
-                {scooter.reviewCount > 0 ? (
-                  <>
-                    <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
-                    {scooter.rating.toFixed(1)} · {scooter.reviewCount} {scooter.reviewCount === 1 ? 'review' : 'reviews'}
-                  </>
-                ) : (
-                  'Reviews'
-                )}
-              </h2>
-              <EmptyReviews scooterName={scooter.reviewCount === 0 ? scooter.name : undefined} />
-            </div>
-
             {/* Rental partner — unified contact card */}
             <div id="contact-rental-shop" className="bg-[#f8f8f6] rounded-[24px] p-6 border border-[#e8e8e4]">
 
@@ -376,12 +345,6 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     {shop.name}
                   </Link>
                   <div className="flex items-center gap-2.5 mt-1 flex-wrap">
-                    {shop.reviewCount > 0 && (
-                      <span className="flex items-center gap-1 text-xs text-[#9c9c98]">
-                        <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
-                        {shop.rating.toFixed(1)} · {shop.reviewCount} {shop.reviewCount === 1 ? 'review' : 'reviews'}
-                      </span>
-                    )}
                     {openStatus && (
                       <span className={`flex items-center gap-1.5 text-xs font-medium ${openStatus.isOpen ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>
                         <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${openStatus.isOpen ? 'bg-[#22c55e]' : 'bg-[#d0d0cc]'}`} />

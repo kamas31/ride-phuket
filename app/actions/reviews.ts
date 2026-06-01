@@ -203,6 +203,61 @@ export async function submitOwnerReply(
   return { success: true }
 }
 
+// ── getUnreadReviewCount ───────────────────────────────────────────────────────
+
+export async function getUnreadReviewCount(shopId: string): Promise<number> {
+  if (!shopId) return 0
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return 0
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const admin = createAdminClient() as any
+
+  const { data: shop } = await admin
+    .from('shops')
+    .select('owner_id, reviews_last_seen_at')
+    .eq('id', shopId)
+    .single()
+
+  if (!shop || shop.owner_id !== user.id) return 0
+
+  const { count } = await admin
+    .from('reviews')
+    .select('id', { count: 'exact', head: true })
+    .eq('shop_id', shopId)
+    .gt('created_at', shop.reviews_last_seen_at ?? '1970-01-01T00:00:00Z')
+
+  return count ?? 0
+}
+
+// ── markReviewsSeen ────────────────────────────────────────────────────────────
+
+export async function markReviewsSeen(shopId: string): Promise<void> {
+  if (!shopId) return
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const admin = createAdminClient() as any
+
+  const { data: shop } = await admin
+    .from('shops')
+    .select('owner_id')
+    .eq('id', shopId)
+    .single()
+
+  if (!shop || shop.owner_id !== user.id) return
+
+  await admin
+    .from('shops')
+    .update({ reviews_last_seen_at: new Date().toISOString() })
+    .eq('id', shopId)
+}
+
 // ── reportReview ───────────────────────────────────────────────────────────────
 
 export async function reportReview(

@@ -74,6 +74,8 @@ CREATE POLICY "Authenticated can report review"
 -- Only service_role reads/updates reports (admin moderation)
 GRANT ALL ON public.review_reports TO service_role;
 GRANT INSERT ON public.review_reports TO authenticated;
+REVOKE SELECT, UPDATE, DELETE ON public.review_reports FROM authenticated;
+REVOKE SELECT, UPDATE, DELETE ON public.review_reports FROM anon;
 
 -- ── 6. Trigger: maintain shops.rating and shops.review_count ─────────────────
 

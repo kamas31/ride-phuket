@@ -9,6 +9,7 @@ import { SITE_NAME } from '@/constants'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
 import { useUnreadCount } from '@/hooks/useUnreadCount'
+import { useUnreadReviewCount } from '@/hooks/useUnreadReviewCount'
 
 function NavLink({ href, label, active, isHero, badge }: {
   href: string; label: string; active: boolean; isHero: boolean; badge?: number
@@ -41,6 +42,8 @@ export default function Navbar() {
   const { user, signOut } = useAuth()
   const { profile }       = useProfile()
   const unread            = useUnreadCount()
+  const unreadReviews     = useUnreadReviewCount()
+  const combined          = unread + unreadReviews
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [searchOpen,   setSearchOpen]   = useState(false)
   const [heroProgress, setHeroProgress] = useState(0)
@@ -139,7 +142,13 @@ export default function Navbar() {
               label={link.label}
               active={pathname === link.href || pathname.startsWith(link.href + '/')}
               isHero={isHero}
-              badge={link.label === 'Messages' ? unread : undefined}
+              badge={
+                link.label === 'Messages'
+                  ? unread
+                  : (link.label === 'Dashboard' && isShopOwner && combined > 0)
+                  ? combined
+                  : undefined
+              }
             />
           ))}
         </nav>

@@ -36,10 +36,11 @@ interface DashboardClientProps {
   activityFeed: ActivityFeedItem[] // fetched, preserved for future use
   unreadCount: number
   unreadPreview: { senderName: string | null; messageText: string | null; scooterName: string | null } | null
+  unreadReviewCount: number
 }
 
 export default function DashboardClient({
-  profile, shop, scooters: initial, bookingStats: _bookingStats, analytics, unreadCount, unreadPreview,
+  profile, shop, scooters: initial, bookingStats: _bookingStats, analytics, unreadCount, unreadPreview, unreadReviewCount,
 }: DashboardClientProps) {
   const [scooters, setScooters]           = useState(initial)
   const [togglingId, setTogglingId]       = useState<string | null>(null)
@@ -220,6 +221,34 @@ export default function DashboardClient({
             </Link>
           )
         })()}
+
+        {/* ─────────────────────────────────────────────────────────────────
+            UNREAD REVIEWS ALERT
+        ──────────────────────────────────────────────────────────────────── */}
+        {shop && unreadReviewCount > 0 && (
+          <Link
+            href={`/shop/${shop.slug}#reviews`}
+            className="block bg-[#fefce8] rounded-[16px] border border-[#fde68a] hover:bg-[#fef9c3] active:scale-[0.99] transition-all"
+          >
+            <div className="flex items-center gap-4 px-5 py-4">
+              <div className="w-10 h-10 bg-[#f59e0b] rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(245,158,11,0.35)]">
+                <Star className="w-5 h-5 text-white" strokeWidth={2} fill="white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[15px] font-bold text-[#0f0f0e] leading-tight">
+                  {unreadReviewCount === 1 ? 'New review' : `${unreadReviewCount} new reviews`}
+                </p>
+                <p className="text-[12px] text-[#5c5c58] mt-0.5">
+                  Tap to read and reply
+                </p>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <span className="text-[13px] font-bold text-[#f59e0b]">View</span>
+                <ChevronRight className="w-4 h-4 text-[#f59e0b]" />
+              </div>
+            </div>
+          </Link>
+        )}
 
         {/* ─────────────────────────────────────────────────────────────────
             PERFORMANCE — 4-column metrics card
