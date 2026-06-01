@@ -43,21 +43,20 @@ export function StickyContactBar({
     return () => observer.disconnect()
   }, [])
 
+  // padding-bottom = nav height (49px content + capped safe-area).
+  // Padding is part of the box — never collapses — so translate-y-full
+  // always includes the full spacer and exits the screen completely.
   return (
-    // Outer: anchored to screen bottom, slides fully off-screen when hidden.
-    // pointer-events-none so the transparent nav-gap area never blocks nav taps.
     <div
       className={cn(
         'fixed bottom-0 left-0 right-0 z-[60] lg:hidden pointer-events-none',
         'transition-transform duration-300 ease-out',
         visible ? 'translate-y-0' : 'translate-y-full',
       )}
+      style={{ paddingBottom: 'calc(49px + min(env(safe-area-inset-bottom, 0px), 15px))' }}
     >
-      {/* Inner bar: margin-bottom lifts content above the nav.
-          env() stays in margin-bottom (universally supported), never in transform. */}
       <div
         className="pointer-events-auto bg-white/95 backdrop-blur-md border-t border-[#e8e8e4] shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.10)]"
-        style={{ marginBottom: 'calc(49px + min(env(safe-area-inset-bottom, 0px), 15px))' }}
       >
         <div className="flex items-center gap-3 px-4 py-3">
           {/* Price */}
