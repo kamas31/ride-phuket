@@ -164,7 +164,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
         <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-10">
 
           {/* ── RIGHT sidebar (col-3 on desktop, second on mobile via order-2) ── */}
-          <div className="order-2 lg:order-none lg:col-start-3 mt-8 lg:mt-0">
+          <div className="order-2 lg:order-none lg:col-start-3 lg:row-start-1 lg:row-span-2 mt-8 lg:mt-0">
             <div className="lg:sticky lg:top-32 space-y-4">
 
               {/* Contact card */}
@@ -313,7 +313,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
             </div>
           </div>
 
-          {/* ── LEFT column (col-1/2 on desktop, first on mobile via order-1) ── */}
+          {/* ── LEFT column Part A — description + fleet (first on mobile) ── */}
           <div className="order-1 lg:order-none lg:col-start-1 lg:col-span-2 lg:row-start-1 space-y-10">
 
             {/* Description */}
@@ -345,6 +345,11 @@ export default async function ShopPage({ params }: ShopPageProps) {
                 </div>
               )}
             </section>
+
+          </div>
+
+          {/* ── LEFT column Part B — services + reviews (third on mobile) ── */}
+          <div className="order-3 lg:order-none lg:col-start-1 lg:col-span-2 lg:row-start-2 space-y-10 mt-10 lg:mt-0">
 
             {/* Services */}
             {(hasInsurance || hasDelivery || hasHelmet) && (
