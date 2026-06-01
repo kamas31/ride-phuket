@@ -43,16 +43,23 @@ export function StickyContactBar({
     return () => observer.disconnect()
   }, [])
 
+  // 3.25rem = mobile bottom nav height (matches layout.tsx pb-[calc(3.25rem+…)])
+  const NAV_H = '3.25rem'
+
   return (
     <div
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-[60] lg:hidden',
+        'fixed left-0 right-0 z-[60] lg:hidden',
         'bg-white/95 backdrop-blur-md border-t border-[#e8e8e4]',
         'shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.10)]',
-        'transition-transform duration-300 ease-out',
-        visible ? 'translate-y-0' : 'translate-y-full',
       )}
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      style={{
+        bottom: `calc(${NAV_H} + env(safe-area-inset-bottom, 0px))`,
+        transform: visible
+          ? 'translateY(0)'
+          : `translateY(calc(100% + ${NAV_H} + env(safe-area-inset-bottom, 0px)))`,
+        transition: 'transform 300ms cubic-bezier(0.22, 1, 0.36, 1)',
+      }}
     >
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Price */}
