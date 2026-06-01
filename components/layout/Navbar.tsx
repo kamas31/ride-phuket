@@ -67,19 +67,11 @@ export default function Navbar() {
   const isHomePage  = pathname === '/'
   const isShopOwner = profile?.role === 'shop_owner'
 
-  // Header stays fully transparent until 82% of hero is scrolled past.
-  // Only then does the background fade in — matching the end of the image blur/fade.
-  // p = 0 at 82% hero scroll, p = 1 at 100% hero scroll
-  const p = isHomePage
-    ? Math.max(0, Math.min(1, (heroProgress - 0.82) / 0.18))
-    : 1
-
-  const blurPx    = p * 14          // 0 → 14 px
-  const bgOpacity = p * 0.92        // 0 → 0.92
-  const borderOp  = p * 0.07        // 0 → 0.07
-
-  // Logo & icon colour: white while hero is dominant, switch just before header bg appears
-  const isHero = isHomePage && heroProgress < 0.80
+  // Header is fully transparent throughout the hero scroll.
+  // At 92% hero scroll the image is already ~90% white + blurred — identical to app background.
+  // Snap instantly (no transition) so the switch is invisible.
+  const headerSolid = !isHomePage || heroProgress >= 0.92
+  const isHero      = isHomePage && heroProgress < 0.92
 
   const NAV_LINKS = isShopOwner
     ? [
@@ -104,16 +96,16 @@ export default function Navbar() {
       className="fixed top-0 left-0 right-0 z-50"
       style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
     >
-      {/* Progressive glass backdrop — only backdrop-filter blurs what's BEHIND the header */}
+      {/* Glass backdrop — transparent while hero is visible, instant snap at 92% scroll */}
       <div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:          `rgba(255,255,255,${bgOpacity.toFixed(3)})`,
-          backdropFilter:      `blur(${blurPx}px)`,
-          WebkitBackdropFilter:`blur(${blurPx}px)`,
-          borderBottom:        `1px solid rgba(0,0,0,${borderOp.toFixed(3)})`,
-          transition:          'background 120ms linear, border-color 120ms linear',
+          background:           headerSolid ? 'rgba(255,255,255,0.92)' : 'transparent',
+          backdropFilter:       headerSolid ? 'blur(14px)' : 'none',
+          WebkitBackdropFilter: headerSolid ? 'blur(14px)' : 'none',
+          borderBottom:         headerSolid ? '1px solid rgba(0,0,0,0.07)' : 'none',
+          transition:           'none',
         }}
       />
 

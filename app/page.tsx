@@ -52,17 +52,6 @@ export default async function HomePage() {
         {/* Hero images — scroll-driven blur + fade via HeroImages client component */}
         <HeroImages />
 
-        {/* Mobile overlay — dark over text area, fades out over scooter at bottom */}
-        <div
-          className="absolute inset-0 pointer-events-none md:hidden"
-          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.50) 55%, rgba(0,0,0,0.18) 80%, rgba(0,0,0,0.02) 100%)' }}
-        />
-        {/* Desktop overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none hidden md:block"
-          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0.35), rgba(0,0,0,0.55))' }}
-        />
-
         {/* ── MOBILE LAYOUT ── */}
         <div className="md:hidden relative flex-1 flex flex-col px-5 pt-24">
           <div

@@ -4,38 +4,47 @@ import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 
 /**
- * Scroll-driven blur + fade on the hero background images.
+ * Scroll-driven hero dissolve — Air France style.
  *
- * 0–50% hero scroll  → sharp, opacity 1, no blur
- * 50–100% hero scroll → progressively blur (0→12px) + fade (1→0.3)
+ * Structure (stacking order, bottom → top):
+ *   containerRef  [images + dark gradient overlays — blurred + faded together]
+ *   whiteRef      [#ffffff overlay — progressively covers container]
+ *   ← page content divs sit above both (later in DOM)
  *
- * Applied directly via DOM ref for smooth 60fps updates with no React re-renders.
- * Scale(1+) expands the image slightly so blurred edges stay outside the clipped section.
+ * Timing:
+ *   0–50% hero scroll  → sharp, opacity 1, white overlay invisible
+ *   50–100% hero scroll → blur 0→12px, container fades to 0.7, white 0→0.90
+ *
+ * At ~92% hero scroll the image is ~90% white + blurred.
+ * The header then instantly snaps to the app background (#ffffff/0.92),
+ * which is visually identical to what's behind it — no perceived transition.
  */
 export function HeroImages() {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef    = useRef<HTMLDivElement>(null)
+  const whiteOverlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
+    const container    = containerRef.current
+    const whiteOverlay = whiteOverlayRef.current
+    if (!container || !whiteOverlay) return
 
     let raf: number
 
     const onScroll = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
-        // progress: 0 at top, 1 when hero is fully scrolled past
+        // progress: 0 at top of page, 1 when hero fully scrolled past
         const progress = Math.min(1, window.scrollY / window.innerHeight)
-        // p: 0 at 50% hero, 1 at 100% hero — transition only in the second half
+        // p: 0 at 50% hero, 1 at 100% hero — transition only in second half
         const p = Math.max(0, (progress - 0.5) / 0.5)
 
-        const blur    = (p * 12).toFixed(1)           // 0 → 12 px
-        const opacity = (1 - p * 0.70).toFixed(3)     // 1 → 0.30
-        const scale   = (1 + p * 0.06).toFixed(4)     // 1 → 1.06 (hides blur edges)
+        // Images + dark overlays: blur + mild fade
+        container.style.filter    = `blur(${(p * 12).toFixed(1)}px)`
+        container.style.opacity   = (1 - p * 0.30).toFixed(3)   // 1 → 0.70
+        container.style.transform = `scale(${(1 + p * 0.06).toFixed(4)})` // hides blur edges
 
-        container.style.filter    = `blur(${blur}px)`
-        container.style.opacity   = opacity
-        container.style.transform = `scale(${scale})`
+        // White dissolve: hero approaches app background (#ffffff)
+        whiteOverlay.style.opacity = (p * 0.90).toFixed(3)      // 0 → 0.90
       })
     }
 
@@ -48,29 +57,50 @@ export function HeroImages() {
   }, [])
 
   return (
-    <div
-      ref={containerRef}
-      className="absolute inset-0"
-      style={{ willChange: 'transform, opacity, filter' }}
-    >
-      {/* Mobile — heromobile.png */}
-      <Image
-        src="/heromobile.png"
-        alt="Explore Phuket on a scooter"
-        fill
-        priority
-        className="object-cover object-center md:hidden"
-        sizes="100vw"
+    <>
+      {/* ── Images + dark gradient overlays (blurred + faded together) ── */}
+      <div
+        ref={containerRef}
+        className="absolute inset-0 pointer-events-none"
+        style={{ willChange: 'transform, opacity, filter' }}
+      >
+        {/* Mobile hero image */}
+        <Image
+          src="/heromobile.png"
+          alt="Explore Phuket on a scooter"
+          fill
+          priority
+          className="object-cover object-center md:hidden"
+          sizes="100vw"
+        />
+        {/* Desktop hero image */}
+        <Image
+          src="/hero.png"
+          alt="Explore Phuket on a scooter"
+          fill
+          priority
+          className="object-cover object-center hidden md:block"
+          sizes="100vw"
+        />
+
+        {/* Mobile dark gradient — text area dark, scooter zone clear */}
+        <div
+          className="absolute inset-0 md:hidden"
+          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.50) 55%, rgba(0,0,0,0.18) 80%, rgba(0,0,0,0.02) 100%)' }}
+        />
+        {/* Desktop dark gradient */}
+        <div
+          className="absolute inset-0 hidden md:block"
+          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0.35), rgba(0,0,0,0.55))' }}
+        />
+      </div>
+
+      {/* ── White dissolve layer — hero melts into app background (#ffffff) ── */}
+      <div
+        ref={whiteOverlayRef}
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: 'var(--color-surface, #ffffff)', opacity: 0 }}
       />
-      {/* Desktop — hero.png */}
-      <Image
-        src="/hero.png"
-        alt="Explore Phuket on a scooter"
-        fill
-        priority
-        className="object-cover object-center hidden md:block"
-        sizes="100vw"
-      />
-    </div>
+    </>
   )
 }
