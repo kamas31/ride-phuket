@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, ShieldCheck, ChevronRight, MapPin, Check, MessageCircle, Unlock, Zap, SlidersHorizontal, Store } from 'lucide-react'
+import { ArrowRight, ShieldCheck, ChevronRight, MapPin, Check, MessageCircle, Zap, SlidersHorizontal, Store } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { LOCATIONS } from '@/constants'
 import { getScooters } from '@/lib/supabase/queries'
@@ -154,24 +154,6 @@ export default async function HomePage() {
         </div>
 
       </section>
-
-      {/* ── TRUST STRIP ── */}
-      <div className="bg-white border-b border-[#e8e8e4]">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-6 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          {([
-            { icon: ShieldCheck,    text: 'Real local listings',             color: 'text-[#22c55e]' },
-            { icon: Check,          text: 'Real photos & honest pricing',     color: 'text-[#5c5c58]' },
-            { icon: Unlock,         text: 'No platform fees ever',            color: 'text-[#9c9c98]' },
-            { icon: MessageCircle,  text: 'Direct WhatsApp contact',          color: 'text-[#22c55e]' },
-            { icon: MapPin,         text: 'Shops across all Phuket areas',    color: 'text-[#FF6B35]' },
-          ] as const).map(item => (
-            <div key={item.text} className="flex items-center gap-2 flex-shrink-0 text-sm text-[#5c5c58]">
-              <item.icon className={`w-4 h-4 flex-shrink-0 ${item.color}`} strokeWidth={1.5} />
-              <span className="font-medium whitespace-nowrap">{item.text}</span>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* ── HOW KOH RIDE WORKS ── */}
       <section className="bg-[#f8f8f6] border-b border-[#e8e8e4] py-12 md:py-28">
