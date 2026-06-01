@@ -6,6 +6,7 @@ import { LOCATIONS } from '@/constants'
 import { getScooters } from '@/lib/supabase/queries'
 import { computeLiveAreas } from '@/lib/live-areas'
 import { cn, formatPrice } from '@/lib/utils'
+import { HeroImages } from '@/components/home/HeroImages'
 
 const BENEFITS = [
   {
@@ -48,24 +49,8 @@ export default async function HomePage() {
       {/* ── HERO ── */}
       <section className="relative h-[100svh] min-h-[600px] flex flex-col overflow-hidden">
 
-        {/* Mobile background image */}
-        <Image
-          src="/heromobile.png"
-          alt="Explore Phuket on a scooter"
-          fill
-          priority
-          className="object-cover object-center md:hidden"
-          sizes="100vw"
-        />
-        {/* Desktop background image */}
-        <Image
-          src="/hero.png"
-          alt="Explore Phuket on a scooter"
-          fill
-          priority
-          className="object-cover object-center hidden md:block"
-          sizes="100vw"
-        />
+        {/* Hero images — scroll-driven blur + fade via HeroImages client component */}
+        <HeroImages />
 
         {/* Mobile overlay — dark over text area, fades out over scooter at bottom */}
         <div

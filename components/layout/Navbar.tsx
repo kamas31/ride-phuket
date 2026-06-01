@@ -67,18 +67,19 @@ export default function Navbar() {
   const isHomePage  = pathname === '/'
   const isShopOwner = profile?.role === 'shop_owner'
 
-  // Progressive backdrop: transparent 0–50%, then linear blur/bg 50–100%
-  // p = 0 at 50% hero scroll, p = 1 at 100% hero scroll
+  // Header stays fully transparent until 82% of hero is scrolled past.
+  // Only then does the background fade in — matching the end of the image blur/fade.
+  // p = 0 at 82% hero scroll, p = 1 at 100% hero scroll
   const p = isHomePage
-    ? Math.max(0, Math.min(1, (heroProgress - 0.5) / 0.5))
+    ? Math.max(0, Math.min(1, (heroProgress - 0.82) / 0.18))
     : 1
 
-  const blurPx   = Math.round(p * 20 * 10) / 10          // 0 → 20 px
-  const bgOpacity = p * 0.92                               // 0 → 0.92
-  const borderOp  = p * 0.07                               // 0 → 0.07
+  const blurPx    = p * 14          // 0 → 14 px
+  const bgOpacity = p * 0.92        // 0 → 0.92
+  const borderOp  = p * 0.07        // 0 → 0.07
 
-  // Logo & icon colour: white until blur becomes visible (~45% hero progress)
-  const isHero = isHomePage && heroProgress < 0.45
+  // Logo & icon colour: white while hero is dominant, switch just before header bg appears
+  const isHero = isHomePage && heroProgress < 0.80
 
   const NAV_LINKS = isShopOwner
     ? [
