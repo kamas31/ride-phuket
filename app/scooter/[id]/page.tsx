@@ -6,13 +6,13 @@ import {
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { getScooterById } from '@/lib/supabase/queries'
-import { formatPrice, formatPricePerDay, pluralize, getScooterCover } from '@/lib/utils'
+import { formatPricePerDay, getScooterCover } from '@/lib/utils'
 import { ImageGallery } from '@/components/ride/ImageGallery'
 import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
 import { QuickContact } from '@/components/ride/QuickContact'
 import { DepositInfo } from '@/components/ride/DepositInfo'
-import { StickyContactBar } from '@/components/ride/StickyContactBar'
 import { MessageOwnerButton } from './MessageOwnerButton'
+import { PricingClient } from './PricingClient'
 import { WhatsAppButton } from './WhatsAppButton'
 import { SaveButton } from '@/components/ride/SaveButton'
 import { getPublicInquiries } from '@/app/actions/inquiry-actions'
@@ -112,16 +112,6 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
     { label: 'Storage',     value: scooter.specs?.storage },
   ].filter(r => isValidSpec(r.value))
 
-  // Best Value: option with lowest effective daily cost (only shown when 2+ options exist)
-  const pricingOptions = [
-    { key: 'daily',   cost: scooter.pricePerDay },
-    ...(scooter.pricePerWeek  ? [{ key: 'weekly',   cost: scooter.pricePerWeek  / 7  }] : []),
-    ...(scooter.pricePerMonth ? [{ key: 'monthly',  cost: scooter.pricePerMonth / 30 }] : []),
-  ]
-  const bestValueKey = pricingOptions.length >= 2
-    ? pricingOptions.reduce((best, cur) => cur.cost < best.cost ? cur : best).key
-    : null
-
   const newListing = isNewListing(scooter.createdAt)
   const openStatus = getShopOpenStatus(shop.openingHours)
 
@@ -190,62 +180,17 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
             </div>
 
             {/* Pricing */}
-            <div className="rounded-[20px] border border-[#e8e8e4] overflow-hidden">
-              <div className={`grid divide-x divide-[#e8e8e4] ${
-                scooter.pricePerWeek && scooter.pricePerMonth ? 'grid-cols-3' :
-                (scooter.pricePerWeek || scooter.pricePerMonth) ? 'grid-cols-2' :
-                'grid-cols-1'
-              }`}>
-
-                {/* Daily */}
-                <div className="bg-[#f8f8f6] px-3 py-2.5 text-center">
-                  <p className={`text-[9px] font-semibold uppercase tracking-widest mb-1.5 ${bestValueKey === 'daily' ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>Daily</p>
-                  <p className="text-[16px] font-bold text-[#0f0f0e] leading-none tabular-nums">
-                    {formatPrice(scooter.pricePerDay)}
-                  </p>
-                  <p className="text-[10px] text-[#b0b0ac] mt-1">/day</p>
-                  {bestValueKey === 'daily' && (
-                    <p className="text-[9px] font-semibold text-[#16a34a] mt-1.5">Best Value</p>
-                  )}
-                </div>
-
-                {/* Weekly */}
-                {scooter.pricePerWeek && (
-                  <div className="bg-[#f8f8f6] px-3 py-2.5 text-center">
-                    <p className={`text-[9px] font-semibold uppercase tracking-widest mb-1.5 ${bestValueKey === 'weekly' ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>Weekly</p>
-                    <p className="text-[16px] font-bold text-[#0f0f0e] leading-none tabular-nums">
-                      {formatPrice(scooter.pricePerWeek)}
-                    </p>
-                    <p className="text-[10px] text-[#b0b0ac] mt-1">/week</p>
-                    {bestValueKey === 'weekly' && (
-                      <p className="text-[9px] font-semibold text-[#16a34a] mt-1.5">Best Value</p>
-                    )}
-                  </div>
-                )}
-
-                {/* Monthly */}
-                {scooter.pricePerMonth && (
-                  <div className="bg-[#f8f8f6] px-3 py-2.5 text-center">
-                    <p className={`text-[9px] font-semibold uppercase tracking-widest mb-1.5 ${bestValueKey === 'monthly' ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>Monthly</p>
-                    <p className="text-[16px] font-bold text-[#0f0f0e] leading-none tabular-nums">
-                      {formatPrice(scooter.pricePerMonth)}
-                    </p>
-                    <p className="text-[10px] text-[#b0b0ac] mt-1">/month</p>
-                    {bestValueKey === 'monthly' && (
-                      <p className="text-[9px] font-semibold text-[#16a34a] mt-1.5">Best Value</p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {scooter.minRentalDays > 1 && (
-                <div className="bg-[#f8f8f6] border-t border-[#e8e8e4] px-4 py-2.5 text-center">
-                  <p className="text-[11px] text-[#9c9c98]">
-                    Minimum rental: <span className="font-medium text-[#5c5c58]">{pluralize(scooter.minRentalDays, 'day')}</span>
-                  </p>
-                </div>
-              )}
-            </div>
+            <PricingClient
+              pricePerDay={scooter.pricePerDay}
+              pricePerWeek={scooter.pricePerWeek ?? null}
+              pricePerMonth={scooter.pricePerMonth ?? null}
+              minRentalDays={scooter.minRentalDays}
+              scooterName={scooter.name}
+              scooterId={scooter.id}
+              available={scooter.available}
+              shopWhatsapp={shop.whatsapp}
+              shopPhone={shop.phone}
+            />
 
             {/* Quick contact — two side-by-side buttons below pricing */}
             <div className="flex gap-3">
@@ -426,15 +371,6 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
         </div>
       </div>
 
-      {/* Mobile sticky contact bar — appears when sentinel scrolls off screen */}
-      <StickyContactBar
-        scooterName={scooter.name}
-        pricePerDay={scooter.pricePerDay}
-        scooterId={scooter.id}
-        available={scooter.available}
-        shopWhatsapp={shop.whatsapp}
-        shopPhone={shop.phone}
-      />
     </div>
   )
 }

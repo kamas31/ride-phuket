@@ -14,17 +14,18 @@ import { MessageOwnerButton } from '@/app/scooter/[id]/MessageOwnerButton'
 
 interface StickyContactBarProps {
   scooterName: string
-  pricePerDay: number
+  price:   number
+  period:  'daily' | 'weekly' | 'monthly'
   scooterId:   string
   available?:  boolean
   shopWhatsapp?: string
   shopPhone?:    string
-  // shopWhatsapp / shopPhone kept in props for future secondary contact fallback
 }
 
 export function StickyContactBar({
   scooterName,
-  pricePerDay,
+  price,
+  period,
   scooterId,
   available = true,
 }: StickyContactBarProps) {
@@ -58,9 +59,11 @@ export function StickyContactBar({
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-1">
             <span className="text-[22px] font-bold text-[#0f0f0e] leading-none">
-              {formatPrice(pricePerDay)}
+              {formatPrice(price)}
             </span>
-            <span className="text-[#9c9c98] text-sm">/day</span>
+            <span className="text-[#9c9c98] text-sm">
+              {period === 'daily' ? '/day' : period === 'weekly' ? '/week' : '/month'}
+            </span>
           </div>
           <p className="text-[10px] text-[#9c9c98] mt-0.5 truncate">{scooterName}</p>
         </div>
