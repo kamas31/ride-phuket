@@ -202,13 +202,15 @@ export interface Database {
       conversations: {
         Row: {
           id: string
-          scooter_id: string
+          scooter_id: string | null
+          shop_id: string | null
           client_id: string
           owner_id: string
           created_at: string
         }
         Insert: {
-          scooter_id: string
+          scooter_id?: string | null
+          shop_id?: string | null
           client_id: string
           owner_id: string
         }

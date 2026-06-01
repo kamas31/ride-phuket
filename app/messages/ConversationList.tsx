@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { MessageCircle } from 'lucide-react'
+import { MessageCircle, Store } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { ConversationPreview } from '@/app/actions/messaging'
@@ -128,32 +128,35 @@ export default function ConversationList({
               hasUnread ? 'bg-[#fffaf7] hover:bg-[#fff6f2]' : 'bg-white hover:bg-[#fafaf8]',
             )}
           >
-            {/* Scooter thumbnail */}
+            {/* Thumbnail: scooter image or shop icon */}
             <div className="relative w-[58px] h-[58px] rounded-[14px] overflow-hidden bg-[#f5f5f2] flex-shrink-0 shadow-sm">
               {conv.scooterImage ? (
                 <Image
                   src={conv.scooterImage}
-                  alt={conv.scooterName}
+                  alt={conv.scooterName ?? ''}
                   fill
                   className="object-cover"
                   sizes="58px"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <MessageCircle className="w-6 h-6 text-[#d0d0cc]" />
+                  {conv.scooterId
+                    ? <MessageCircle className="w-6 h-6 text-[#d0d0cc]" />
+                    : <Store className="w-6 h-6 text-[#d0d0cc]" />
+                  }
                 </div>
               )}
             </div>
 
             {/* Text */}
             <div className="flex-1 min-w-0">
-              {/* Row 1: scooter name + timestamp */}
+              {/* Row 1: title + timestamp */}
               <div className="flex items-baseline justify-between gap-2 mb-[2px]">
                 <p className={cn(
                   'text-[14px] truncate leading-tight',
                   hasUnread ? 'font-bold text-[#0f0f0e]' : 'font-semibold text-[#0f0f0e]',
                 )}>
-                  {conv.scooterName}
+                  {conv.scooterId ? (conv.scooterName ?? conv.shopName) : conv.shopName}
                 </p>
                 {conv.lastMessageAt && (
                   <span className={cn(
@@ -165,10 +168,12 @@ export default function ConversationList({
                 )}
               </div>
 
-              {/* Row 2: shop name */}
-              <p className="text-[12px] text-[#FF6B35] font-medium leading-tight mb-[3px] truncate">
-                {conv.shopName}
-              </p>
+              {/* Row 2: shop name (only shown for scooter convos; shop convos show shop name as title) */}
+              {conv.scooterId && (
+                <p className="text-[12px] text-[#FF6B35] font-medium leading-tight mb-[3px] truncate">
+                  {conv.shopName}
+                </p>
+              )}
 
               {/* Row 3: last message + unread dot */}
               <div className="flex items-center gap-2">

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Send, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Send, ExternalLink, Store } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { sendMessage, markMessagesRead } from '@/app/actions/messaging'
 import { formatPrice } from '@/lib/utils'
@@ -245,7 +245,10 @@ export default function MessageThread({
     else last.msgs.push(msg)
   }
 
-  const listingUrl = `/scooter/${conversation.scooterId}`
+  const isShopConv = !conversation.scooterId
+  const listingUrl = isShopConv
+    ? (conversation.shopSlug ? `/shop/${conversation.shopSlug}` : null)
+    : `/scooter/${conversation.scooterId}`
 
   // position:fixed;inset:0 takes the full viewport independently of the document.
   // The Navbar (z-50) and MobileBottomNav (z-50) sit above this layer.
@@ -269,47 +272,64 @@ export default function MessageThread({
             <ArrowLeft className="w-[18px] h-[18px] text-[#5c5c58]" />
           </button>
 
-          {/* Scooter context */}
-          <Link
-            href={listingUrl}
-            className="flex items-center gap-2.5 flex-1 min-w-0 group"
-          >
-            <div className="relative w-[42px] h-[42px] rounded-[11px] overflow-hidden bg-[#f5f5f2] flex-shrink-0 shadow-sm">
-              {conversation.scooterImage ? (
-                <Image
-                  src={conversation.scooterImage}
-                  alt={conversation.scooterName}
-                  fill
-                  className="object-cover"
-                  sizes="42px"
-                />
-              ) : (
-                <div className="w-full h-full bg-[#f0f0ec]" />
-              )}
+          {/* Context: scooter (normal conv) or shop (shop conv) */}
+          {listingUrl ? (
+            <Link href={listingUrl} className="flex items-center gap-2.5 flex-1 min-w-0 group">
+              <div className="relative w-[42px] h-[42px] rounded-[11px] overflow-hidden bg-[#f5f5f2] flex-shrink-0 shadow-sm">
+                {!isShopConv && conversation.scooterImage ? (
+                  <Image
+                    src={conversation.scooterImage}
+                    alt={conversation.scooterName ?? ''}
+                    fill
+                    className="object-cover"
+                    sizes="42px"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Store className="w-5 h-5 text-[#c0c0bc]" />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight group-hover:text-[#FF6B35] transition-colors">
+                  {isShopConv ? conversation.shopName : (conversation.scooterName ?? conversation.shopName)}
+                </p>
+                {!isShopConv && (
+                  <p className="text-[12px] text-[#FF6B35] font-medium leading-tight truncate">
+                    {conversation.shopName}
+                  </p>
+                )}
+              </div>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+              <div className="w-[42px] h-[42px] rounded-[11px] bg-[#f5f5f2] flex-shrink-0 shadow-sm flex items-center justify-center">
+                <Store className="w-5 h-5 text-[#c0c0bc]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight">
+                  {conversation.shopName}
+                </p>
+              </div>
             </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight group-hover:text-[#FF6B35] transition-colors">
-                {conversation.scooterName}
-              </p>
-              <p className="text-[12px] text-[#FF6B35] font-medium leading-tight truncate">
-                {conversation.shopName}
-              </p>
-            </div>
-          </Link>
+          )}
 
           {/* Price chip + view listing + menu */}
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <span className="text-[12px] font-bold text-[#0f0f0e] bg-[#f5f5f2] px-2.5 py-1 rounded-full">
-              {formatPrice(conversation.scooterPricePerDay)}<span className="text-[#9c9c98] font-normal">/day</span>
-            </span>
-            <Link
-              href={listingUrl}
-              aria-label="View listing"
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f5f5f2] transition-colors"
-            >
-              <ExternalLink className="w-[15px] h-[15px] text-[#9c9c98]" />
-            </Link>
+            {!isShopConv && (
+              <span className="text-[12px] font-bold text-[#0f0f0e] bg-[#f5f5f2] px-2.5 py-1 rounded-full">
+                {formatPrice(conversation.scooterPricePerDay)}<span className="text-[#9c9c98] font-normal">/day</span>
+              </span>
+            )}
+            {listingUrl && (
+              <Link
+                href={listingUrl}
+                aria-label="View listing"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f5f5f2] transition-colors"
+              >
+                <ExternalLink className="w-[15px] h-[15px] text-[#9c9c98]" />
+              </Link>
+            )}
             <ThreadMenu
               conversationId={conversation.id}
               blockedByMe={localBlockedByMe}

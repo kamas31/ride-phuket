@@ -81,7 +81,7 @@ export default async function PartnerMessagesPage() {
                   {conv.scooterImage ? (
                     <Image
                       src={conv.scooterImage}
-                      alt={conv.scooterName}
+                      alt={conv.scooterName ?? ''}
                       fill
                       className="object-cover"
                       sizes="56px"

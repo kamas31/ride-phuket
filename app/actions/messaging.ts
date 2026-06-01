@@ -17,10 +17,11 @@ export interface Message {
 
 export interface ConversationPreview {
   id: string
-  scooterId: string
-  scooterName: string
+  scooterId: string | null
+  scooterName: string | null
   scooterImage: string | null
   scooterPricePerDay: number
+  shopId: string | null
   shopName: string
   shopSlug: string | null
   clientId: string
@@ -33,10 +34,11 @@ export interface ConversationPreview {
 
 export interface ConversationDetail {
   id: string
-  scooterId: string
-  scooterName: string
+  scooterId: string | null
+  scooterName: string | null
   scooterImage: string | null
   scooterPricePerDay: number
+  shopId: string | null
   shopName: string
   shopSlug: string | null
   clientId: string
@@ -60,7 +62,7 @@ export async function getOrCreateConversation(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: scooter } = await (admin as any)
     .from('scooters')
-    .select('id, shops(owner_id)')
+    .select('id, shop_id, shops(owner_id)')
     .eq('id', scooterId)
     .single()
 
@@ -71,13 +73,21 @@ export async function getOrCreateConversation(
   if (!ownerId) return { error: 'Shop owner not found.' }
   if (ownerId === user.id) return { error: 'own_listing' }
 
+  // Find-or-create: check for existing conversation first
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: existing } = await (admin as any)
+    .from('conversations')
+    .select('id')
+    .eq('scooter_id', scooterId)
+    .eq('client_id', user.id)
+    .maybeSingle()
+
+  if (existing) return { conversationId: existing.id as string }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
     .from('conversations')
-    .upsert(
-      { scooter_id: scooterId, client_id: user.id, owner_id: ownerId },
-      { onConflict: 'scooter_id,client_id' },
-    )
+    .insert({ scooter_id: scooterId, shop_id: scooter.shop_id, client_id: user.id, owner_id: ownerId })
     .select('id')
     .single()
 
@@ -108,7 +118,7 @@ export async function sendMessage(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: convo } = await (admin as any)
     .from('conversations')
-    .select('id, client_id, owner_id, scooters(name, shops(name))')
+    .select('id, client_id, owner_id, scooters(name), shops(name)')
     .eq('id', conversationId)
     .single()
 
@@ -148,13 +158,15 @@ export async function sendMessage(
   // Push notification — fire and forget, never blocks message delivery
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const scooterName = (convo.scooters as any)?.name ?? 'Scooter'
+    const scooterName = (convo.scooters as any)?.name ?? null
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const shopName = (convo.scooters as any)?.shops?.name ?? 'Rental shop'
+    const shopName = (convo.shops as any)?.name ?? 'Shop'
     const isOwnerSending = convo.owner_id === user.id
     const body = isOwnerSending
-      ? `${shopName} replied about ${scooterName}`
-      : `New message about ${scooterName}`
+      ? `${shopName} replied`
+      : scooterName
+        ? `New message about ${scooterName}`
+        : `New message from a rider`
     await sendMessagePush(otherUserId, 'Koh Ride', body, { conversationId }, admin)
   } catch {
     // Never surface push errors to the caller
@@ -225,8 +237,9 @@ export async function getAllConversations(): Promise<ConversationPreview[]> {
   const { data: rawConvos, error } = await (admin as any)
     .from('conversations')
     .select(`
-      id, scooter_id, client_id, owner_id, created_at,
-      scooters ( name, cover_image, price_per_day, shops ( name, slug ) ),
+      id, scooter_id, shop_id, client_id, owner_id, created_at,
+      scooters ( name, cover_image, price_per_day ),
+      shops ( name, slug ),
       messages ( id, content, created_at, read_at, sender_id )
     `)
     .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
@@ -252,8 +265,9 @@ export async function getConversations(): Promise<ConversationPreview[]> {
   const { data: rawConvos } = await (admin as any)
     .from('conversations')
     .select(`
-      id, scooter_id, client_id, owner_id, created_at,
-      scooters ( name, cover_image, price_per_day, shops ( name, slug ) ),
+      id, scooter_id, shop_id, client_id, owner_id, created_at,
+      scooters ( name, cover_image, price_per_day ),
+      shops ( name, slug ),
       messages ( id, content, created_at, read_at, sender_id )
     `)
     .eq('client_id', user.id)
@@ -278,8 +292,9 @@ export async function getOwnerConversations(): Promise<ConversationPreview[]> {
   const { data: rawConvos } = await (admin as any)
     .from('conversations')
     .select(`
-      id, scooter_id, client_id, owner_id, created_at,
-      scooters ( name, cover_image, price_per_day, shops ( name, slug ) ),
+      id, scooter_id, shop_id, client_id, owner_id, created_at,
+      scooters ( name, cover_image, price_per_day ),
+      shops ( name, slug ),
       messages ( id, content, created_at, read_at, sender_id )
     `)
     .eq('owner_id', user.id)
@@ -318,8 +333,9 @@ export async function getConversationWithMessages(
   const { data: convo } = await (admin as any)
     .from('conversations')
     .select(`
-      id, scooter_id, client_id, owner_id, created_at,
-      scooters ( name, cover_image, price_per_day, shops ( name, slug ) )
+      id, scooter_id, shop_id, client_id, owner_id, created_at,
+      scooters ( name, cover_image, price_per_day ),
+      shops ( name, slug )
     `)
     .eq('id', conversationId)
     .single()
@@ -360,17 +376,18 @@ export async function getConversationWithMessages(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const s = convo.scooters as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const shop = s?.shops as any
+  const shopRow = convo.shops as any
 
   return {
     conversation: {
       id: convo.id,
-      scooterId: convo.scooter_id,
-      scooterName: s?.name ?? 'Scooter',
+      scooterId: convo.scooter_id ?? null,
+      scooterName: s?.name ?? null,
       scooterImage: s?.cover_image ?? null,
       scooterPricePerDay: s?.price_per_day ?? 0,
-      shopName: shop?.name ?? 'Rental shop',
-      shopSlug: shop?.slug ?? null,
+      shopId: convo.shop_id ?? null,
+      shopName: shopRow?.name ?? 'Shop',
+      shopSlug: shopRow?.slug ?? null,
       clientId: convo.client_id,
       ownerId: convo.owner_id,
       createdAt: convo.created_at,
@@ -457,19 +474,20 @@ function buildPreview(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const s = c.scooters as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const shop = s?.shops as any
+  const shopRow = c.shops as any
 
   const isClient = c.client_id === userId
   const otherUserId = isClient ? c.owner_id : c.client_id
 
   return {
     id: c.id,
-    scooterId: c.scooter_id,
-    scooterName: s?.name ?? 'Scooter',
+    scooterId: c.scooter_id ?? null,
+    scooterName: s?.name ?? null,
     scooterImage: s?.cover_image ?? null,
     scooterPricePerDay: s?.price_per_day ?? 0,
-    shopName: shop?.name ?? 'Rental shop',
-    shopSlug: shop?.slug ?? null,
+    shopId: c.shop_id ?? null,
+    shopName: shopRow?.name ?? 'Shop',
+    shopSlug: shopRow?.slug ?? null,
     clientId: c.client_id,
     ownerId: c.owner_id,
     otherUserName: nameMap?.[otherUserId] ?? 'User',

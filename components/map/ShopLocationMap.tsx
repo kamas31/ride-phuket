@@ -48,7 +48,7 @@ export default function ShopLocationMap({ lat, lng, mode, className }: ShopLocat
 
     const map = new mapboxgl.Map({
       container:        containerRef.current,
-      style:            'mapbox://styles/mapbox/light-v11',
+      style:            'mapbox://styles/mapbox/streets-v12',
       center:           [nudgeLng, nudgeLat],
       zoom:             mode === 'approximate' ? 13 : 15,
       interactive:      true,

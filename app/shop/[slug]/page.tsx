@@ -86,7 +86,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
   const locMode   = shop.locationVisibility ?? 'exact'
 
   return (
-    <div className="bg-white min-h-screen pb-[80px] lg:pb-0">
+    <div className="bg-white min-h-screen">
       <TrackView eventType="shop_view" shopId={shop.id} />
 
       {/* ── Breadcrumb ── */}
@@ -206,7 +206,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
                     href={waLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-2.5 mt-2.5 rounded-full border text-sm font-medium transition-colors bg-[#f0fdf4] border-[#22c55e]/20 text-[#16a34a] hover:bg-[#dcfce7]"
+                    className="flex items-center justify-center gap-2 w-full py-3 mt-2.5 rounded-full bg-[#16a34a] text-white text-sm font-bold hover:bg-[#15803d] transition-colors active:scale-[0.98]"
                   >
                     <MessageCircle className="w-4 h-4" />
                     Continue on WhatsApp
@@ -225,12 +225,12 @@ export default async function ShopPage({ params }: ShopPageProps) {
                 {/* Info rows */}
                 <div className="space-y-2 mt-4 pt-4 border-t border-[#f0f0ec] text-sm">
                   <div className="flex items-start gap-2.5 text-[#5c5c58]">
-                    <MapPin className="w-4 h-4 text-[#9c9c98] flex-shrink-0 mt-0.5" />
+                    <MapPin className="w-4 h-4 text-[#FF6B35] flex-shrink-0 mt-0.5" />
                     <span>{shop.address || shop.location + ', Phuket'}</span>
                   </div>
                   {shop.openingHours?.monday && (
                     <div className="flex items-start gap-2.5 text-[#5c5c58]">
-                      <Clock className="w-4 h-4 text-[#9c9c98] flex-shrink-0 mt-0.5" />
+                      <Clock className="w-4 h-4 text-[#0ea5e9] flex-shrink-0 mt-0.5" />
                       <span>
                         {shop.openingHours.monday.enabled
                           ? `Mon–Fri ${shop.openingHours.monday.open}–${shop.openingHours.monday.close}`
@@ -407,27 +407,6 @@ export default async function ShopPage({ params }: ShopPageProps) {
             </section>
 
           </div>
-        </div>
-      </div>
-
-      {/* ── Mobile sticky CTA ── */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-white/95 backdrop-blur-md border-t border-[#e8e8e4]"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-      >
-        <div className="flex items-center gap-2.5 px-4 py-3">
-          <ShopChatButton shopId={shop.id} shopName={shop.name} shopSlug={slug} className="flex-1" />
-          {waLink && (
-            <a
-              href={waLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="WhatsApp"
-              className="w-11 h-11 rounded-full border border-[#e8e8e4] flex items-center justify-center text-[#22c55e] hover:border-[#22c55e]/40 transition-colors flex-shrink-0"
-            >
-              <MessageCircle className="w-5 h-5" />
-            </a>
-          )}
         </div>
       </div>
 
