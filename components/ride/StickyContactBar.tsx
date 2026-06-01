@@ -43,48 +43,47 @@ export function StickyContactBar({
     return () => observer.disconnect()
   }, [])
 
-  // 3.25rem = mobile bottom nav height (matches layout.tsx pb-[calc(3.25rem+…)])
-  const NAV_H = '3.25rem'
-
   return (
+    // Outer: anchored to screen bottom, slides fully off-screen when hidden.
+    // pointer-events-none so the transparent nav-gap area never blocks nav taps.
     <div
       className={cn(
-        'fixed left-0 right-0 z-[60] lg:hidden',
-        'bg-white/95 backdrop-blur-md border-t border-[#e8e8e4]',
-        'shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.10)]',
+        'fixed bottom-0 left-0 right-0 z-[60] lg:hidden pointer-events-none',
+        'transition-transform duration-300 ease-out',
+        visible ? 'translate-y-0' : 'translate-y-full',
       )}
-      style={{
-        bottom: `calc(${NAV_H} + env(safe-area-inset-bottom, 0px))`,
-        transform: visible
-          ? 'translateY(0)'
-          : `translateY(calc(100% + ${NAV_H} + env(safe-area-inset-bottom, 0px)))`,
-        transition: 'transform 300ms cubic-bezier(0.22, 1, 0.36, 1)',
-      }}
     >
-      <div className="flex items-center gap-3 px-4 py-3">
-        {/* Price */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-1">
-            <span className="text-[22px] font-bold text-[#0f0f0e] leading-none">
-              {formatPrice(price)}
-            </span>
-            <span className="text-[#9c9c98] text-sm">
-              {period === 'daily' ? '/day' : period === 'weekly' ? '/week' : '/month'}
-            </span>
+      {/* Inner bar: margin-bottom lifts content above the nav.
+          env() stays in margin-bottom (universally supported), never in transform. */}
+      <div
+        className="pointer-events-auto bg-white/95 backdrop-blur-md border-t border-[#e8e8e4] shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.10)]"
+        style={{ marginBottom: 'calc(3.25rem + env(safe-area-inset-bottom, 0px))' }}
+      >
+        <div className="flex items-center gap-3 px-4 py-3">
+          {/* Price */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline gap-1">
+              <span className="text-[22px] font-bold text-[#0f0f0e] leading-none">
+                {formatPrice(price)}
+              </span>
+              <span className="text-[#9c9c98] text-sm">
+                {period === 'daily' ? '/day' : period === 'weekly' ? '/week' : '/month'}
+              </span>
+            </div>
+            <p className="text-[10px] text-[#9c9c98] mt-0.5 truncate">{scooterName}</p>
           </div>
-          <p className="text-[10px] text-[#9c9c98] mt-0.5 truncate">{scooterName}</p>
-        </div>
 
-        {/* CTAs */}
-        {available ? (
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <MessageOwnerButton scooterId={scooterId} scooterName={scooterName} variant="sticky" />
-          </div>
-        ) : (
-          <span className="px-5 py-3 bg-[#f0f0ec] text-[#9c9c98] font-semibold text-sm rounded-full flex-shrink-0">
-            Unavailable
-          </span>
-        )}
+          {/* CTAs */}
+          {available ? (
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <MessageOwnerButton scooterId={scooterId} scooterName={scooterName} variant="sticky" />
+            </div>
+          ) : (
+            <span className="px-5 py-3 bg-[#f0f0ec] text-[#9c9c98] font-semibold text-sm rounded-full flex-shrink-0">
+              Unavailable
+            </span>
+          )}
+        </div>
       </div>
     </div>
   )
