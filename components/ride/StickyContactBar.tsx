@@ -4,14 +4,6 @@ import { useEffect, useState } from 'react'
 import { cn, formatPrice } from '@/lib/utils'
 import { MessageOwnerButton } from '@/app/scooter/[id]/MessageOwnerButton'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// StickyContactBar — mobile-only sticky CTA bar
-//
-// Appears when the user scrolls past the #sticky-contact-sentinel div.
-// Shows price + direct contact CTAs. Hidden on desktop (lg+) where the
-// contact card is always visible in the sidebar.
-// ─────────────────────────────────────────────────────────────────────────────
-
 interface StickyContactBarProps {
   scooterName: string
   price:   number
@@ -34,32 +26,35 @@ export function StickyContactBar({
   useEffect(() => {
     const sentinel = document.getElementById('sticky-contact-sentinel')
     if (!sentinel) return
-
     const observer = new IntersectionObserver(
       ([entry]) => setVisible(!entry.isIntersecting),
-      { threshold: 0, rootMargin: '0px 0px -60px 0px' }
+      { threshold: 0, rootMargin: '0px 0px -60px 0px' },
     )
     observer.observe(sentinel)
     return () => observer.disconnect()
   }, [])
 
-  // padding-bottom = nav height (49px content + capped safe-area).
-  // Padding is part of the box — never collapses — so translate-y-full
-  // always includes the full spacer and exits the screen completely.
   return (
+    // Outer: pointer-events-none so the transparent spacer never swallows nav taps.
+    // Animates `bottom` (not transform) — iOS Safari does not reliably include
+    // padding-bottom in the height used for translateY(100%), causing the spacer
+    // to remain on screen. bottom:-200px is always off-screen regardless of bar height.
     <div
-      className={cn(
-        'fixed bottom-0 left-0 right-0 z-[60] lg:hidden pointer-events-none',
-        'transition-transform duration-300 ease-out',
-        visible ? 'translate-y-0' : 'translate-y-full',
-      )}
-      style={{ paddingBottom: 'calc(49px + min(env(safe-area-inset-bottom, 0px), 15px))' }}
+      className="fixed left-0 right-0 z-[60] lg:hidden pointer-events-none"
+      style={{
+        paddingBottom: 'calc(49px + min(env(safe-area-inset-bottom, 0px), 15px))',
+        bottom: visible ? '0px' : '-200px',
+        transition: 'bottom 300ms cubic-bezier(0.22, 1, 0.36, 1)',
+      }}
     >
       <div
-        className="pointer-events-auto bg-white/95 backdrop-blur-md border-t border-[#e8e8e4] shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.10)]"
+        className={cn(
+          'bg-white/95 backdrop-blur-md border-t border-[#e8e8e4]',
+          'shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.10)]',
+          visible ? 'pointer-events-auto' : 'pointer-events-none',
+        )}
       >
         <div className="flex items-center gap-3 px-4 py-3">
-          {/* Price */}
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-1">
               <span className="text-[22px] font-bold text-[#0f0f0e] leading-none">
@@ -72,7 +67,6 @@ export function StickyContactBar({
             <p className="text-[10px] text-[#9c9c98] mt-0.5 truncate">{scooterName}</p>
           </div>
 
-          {/* CTAs */}
           {available ? (
             <div className="flex items-center gap-2 flex-shrink-0">
               <MessageOwnerButton scooterId={scooterId} scooterName={scooterName} variant="sticky" />
