@@ -14,7 +14,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const result = await getConversationWithMessages(id)
-  const name = result?.conversation.scooterName ?? 'Conversation'
+  const name = result?.conversation.scooterName ?? result?.conversation.shopName ?? 'Conversation'
   return { title: `${name} — Koh Ride Messages` }
 }
 

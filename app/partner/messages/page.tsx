@@ -105,9 +105,11 @@ export default async function PartnerMessagesPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-[12px] text-[#FF6B35] font-medium mb-0.5 truncate">
-                    {conv.scooterName}
-                  </p>
+                  {conv.scooterName && (
+                    <p className="text-[12px] text-[#FF6B35] font-medium mb-0.5 truncate">
+                      {conv.scooterName}
+                    </p>
+                  )}
                   <div className="flex items-center gap-2">
                     <p className="text-[13px] text-[#9c9c98] truncate leading-snug flex-1">
                       {conv.lastMessage ?? 'New conversation'}

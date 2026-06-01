@@ -44,12 +44,25 @@ export async function getOrCreateShopConversation(
     .from('conversations')
     .insert({ shop_id: shopId, owner_id: ownerId, client_id: user.id })
     .select('id')
-    .single() as { data: { id: string } | null; error: unknown }
+    .single() as { data: { id: string } | null; error: { code?: string; message?: string } | null }
 
-  if (error || !data) {
-    console.error('[getOrCreateShopConversation]', error)
+  if (error) {
+    // 23505 = unique_violation — race condition, conversation was created by a concurrent request
+    if (error.code === '23505') {
+      const { data: race } = await a
+        .from('conversations')
+        .select('id')
+        .eq('shop_id', shopId)
+        .eq('client_id', user.id)
+        .is('scooter_id', null)
+        .single() as { data: { id: string } | null }
+      if (race) return { conversationId: race.id }
+    }
+    console.error('[getOrCreateShopConversation]', error.message)
     return { error: 'conversation_failed' }
   }
+
+  if (!data) return { error: 'conversation_failed' }
 
   return { conversationId: data.id }
 }

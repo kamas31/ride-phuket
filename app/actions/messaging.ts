@@ -91,10 +91,23 @@ export async function getOrCreateConversation(
     .select('id')
     .single()
 
-  if (error || !data) {
-    console.error('[getOrCreateConversation]', error?.message)
+  if (error) {
+    // 23505 = unique_violation — race condition, conversation was created by a concurrent request
+    if (error.code === '23505') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: race } = await (admin as any)
+        .from('conversations')
+        .select('id')
+        .eq('scooter_id', scooterId)
+        .eq('client_id', user.id)
+        .single()
+      if (race) return { conversationId: race.id as string }
+    }
+    console.error('[getOrCreateConversation]', error.message)
     return { error: 'Could not start conversation. Please try again.' }
   }
+
+  if (!data) return { error: 'Could not start conversation. Please try again.' }
 
   return { conversationId: data.id as string }
 }
