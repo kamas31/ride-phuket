@@ -158,13 +158,13 @@ export default async function ShopPage({ params }: ShopPageProps) {
       {/* ── Main content ── */}
       <div className="max-w-5xl mx-auto px-4 py-6 lg:py-8">
         {/*
-          DOM order: sidebar first (→ mobile: contact card appears above fleet)
-          CSS grid on lg: sidebar placed in col-3, fleet in col-1/2 row-1
+          Mobile: flex-col with order — fleet (order-1) above sidebar (order-2)
+          Desktop: CSS grid with explicit col/row placement, order ignored
         */}
-        <div className="lg:grid lg:grid-cols-3 lg:gap-10">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-10">
 
-          {/* ── RIGHT sidebar (col-3 on desktop, first on mobile) ── */}
-          <div className="lg:col-start-3 mb-6 lg:mb-0">
+          {/* ── RIGHT sidebar (col-3 on desktop, second on mobile via order-2) ── */}
+          <div className="order-2 lg:order-none lg:col-start-3 mt-8 lg:mt-0">
             <div className="lg:sticky lg:top-32 space-y-4">
 
               {/* Contact card */}
@@ -313,8 +313,8 @@ export default async function ShopPage({ params }: ShopPageProps) {
             </div>
           </div>
 
-          {/* ── LEFT column (col-1/2 on desktop, second on mobile) ── */}
-          <div className="lg:col-start-1 lg:col-span-2 lg:row-start-1 space-y-10">
+          {/* ── LEFT column (col-1/2 on desktop, first on mobile via order-1) ── */}
+          <div className="order-1 lg:order-none lg:col-start-1 lg:col-span-2 lg:row-start-1 space-y-10">
 
             {/* Description */}
             {shop.description && (
@@ -330,7 +330,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
                 <span className="ml-2 text-sm font-normal text-[#9c9c98]">({scooters.length})</span>
               </h2>
               {scooters.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {scooters.map(scooter => (
                     <ScooterCard key={scooter.id} scooter={scooter} compact />
                   ))}
