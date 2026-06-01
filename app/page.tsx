@@ -47,7 +47,7 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       {/* ── HERO ── */}
-      <section className="relative h-[100svh] min-h-[600px] flex flex-col overflow-hidden">
+      <section className="relative h-[100dvh] min-h-[600px] flex flex-col overflow-hidden">
 
         {/* Hero images — scroll-driven blur + fade via HeroImages client component */}
         <HeroImages />
