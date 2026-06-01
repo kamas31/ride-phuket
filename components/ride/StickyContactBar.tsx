@@ -57,7 +57,7 @@ export function StickyContactBar({
           env() stays in margin-bottom (universally supported), never in transform. */}
       <div
         className="pointer-events-auto bg-white/95 backdrop-blur-md border-t border-[#e8e8e4] shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.10)]"
-        style={{ marginBottom: 'calc(3.25rem + min(env(safe-area-inset-bottom, 0px), 15px))' }}
+        style={{ marginBottom: 'calc(49px + min(env(safe-area-inset-bottom, 0px), 15px))' }}
       >
         <div className="flex items-center gap-3 px-4 py-3">
           {/* Price */}
