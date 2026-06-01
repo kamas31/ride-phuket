@@ -22,6 +22,17 @@ export function StickyContactBar({
   available = true,
 }: StickyContactBarProps) {
   const [visible, setVisible] = useState(false)
+  const [navH, setNavH] = useState<number | null>(null)
+
+  useEffect(() => {
+    const measure = () => {
+      const nav = document.getElementById('mobile-bottom-nav')
+      if (nav) setNavH(nav.getBoundingClientRect().height)
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [])
 
   useEffect(() => {
     const sentinel = document.getElementById('sticky-contact-sentinel')
@@ -34,26 +45,21 @@ export function StickyContactBar({
     return () => observer.disconnect()
   }, [])
 
+  const bottomPx = visible && navH !== null ? navH : -200
+
   return (
-    // Outer: pointer-events-none so the transparent spacer never swallows nav taps.
-    // Animates `bottom` (not transform) — iOS Safari does not reliably include
-    // padding-bottom in the height used for translateY(100%), causing the spacer
-    // to remain on screen. bottom:-200px is always off-screen regardless of bar height.
     <div
-      className="fixed left-0 right-0 z-[60] lg:hidden pointer-events-none"
+      className="fixed left-0 right-0 z-[60] lg:hidden"
       style={{
-        paddingBottom: 'calc(49px + min(env(safe-area-inset-bottom, 0px), 15px))',
-        bottom: visible ? '0px' : '-200px',
-        transition: 'bottom 300ms cubic-bezier(0.22, 1, 0.36, 1)',
+        bottom: `${bottomPx}px`,
+        transition: navH !== null ? 'bottom 300ms cubic-bezier(0.22, 1, 0.36, 1)' : 'none',
+        pointerEvents: visible ? 'auto' : 'none',
       }}
     >
-      <div
-        className={cn(
-          'bg-white/95 backdrop-blur-md border-t border-[#e8e8e4]',
-          'shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.10)]',
-          visible ? 'pointer-events-auto' : 'pointer-events-none',
-        )}
-      >
+      <div className={cn(
+        'bg-white/95 backdrop-blur-md border-t border-[#e8e8e4]',
+        'shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.10)]',
+      )}>
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-1">

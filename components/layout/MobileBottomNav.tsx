@@ -51,6 +51,7 @@ export default function MobileBottomNav() {
 
   return (
     <nav
+      id="mobile-bottom-nav"
       className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-[#e8e8e4]"
       style={{ paddingBottom: 'min(env(safe-area-inset-bottom, 0px), 15px)' }}
     >
