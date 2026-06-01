@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
 import {
   ArrowLeft, MapPin, Phone, MessageCircle, Clock,
   Globe, Shield, Zap, Check, Star, ExternalLink, Bike, Store,
@@ -13,16 +12,7 @@ import { EmptyReviews } from '@/components/ride/EmptyReviews'
 import { QuickContact } from '@/components/ride/QuickContact'
 import { TrackView } from '@/components/analytics/TrackView'
 import { ShopChatButton } from '@/components/shop/ShopChatButton'
-
-const ShopLocationMap = dynamic(
-  () => import('@/components/map/ShopLocationMap'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="rounded-[16px] bg-[#f8f8f6] border border-[#e8e8e4] animate-pulse" style={{ height: 200 }} />
-    ),
-  },
-)
+import { ShopLocationMapClient as ShopLocationMap } from '@/components/map/ShopLocationMapClient'
 
 interface ShopPageProps {
   params: Promise<{ slug: string }>
