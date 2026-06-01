@@ -128,17 +128,13 @@ export default async function ShopPage({ params }: ShopPageProps) {
         {/* Shop identity over banner */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end px-5 md:px-8 pb-7">
           <div className="max-w-5xl mx-auto w-full">
-            {/* Logo or initial */}
-            {shop.logo ? (
+            {/* Logo — only rendered when present; no fallback, no placeholder */}
+            {shop.logo && (
               <img
                 src={shop.logo}
                 alt={shop.name}
                 className="w-14 h-14 rounded-2xl object-cover border border-white/20 mb-3"
               />
-            ) : (
-              <div className="w-14 h-14 rounded-2xl bg-[#FF6B35]/20 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white font-bold text-2xl mb-3">
-                {shop.name[0]}
-              </div>
             )}
             <h1 className="text-white font-bold text-[26px] md:text-[34px] leading-tight tracking-tight mb-1.5">
               {shop.name}
