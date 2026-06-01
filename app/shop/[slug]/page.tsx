@@ -4,16 +4,18 @@ import {
   ArrowLeft, MapPin, Phone, MessageCircle, Clock,
   Globe, Shield, Zap, Check, Star, ExternalLink, Bike, Store,
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
 import { getShopBySlug } from '@/lib/supabase/queries'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import { TrustBadge } from '@/components/ride/TrustBadge'
-import { EmptyReviews } from '@/components/ride/EmptyReviews'
 import { TrackView } from '@/components/analytics/TrackView'
 import { ShopChatButton } from '@/components/shop/ShopChatButton'
 import { ShopQuickQuestions } from '@/components/shop/ShopQuickQuestions'
 import { ShopLocationMapClient as ShopLocationMap } from '@/components/map/ShopLocationMapClient'
 import { getShopChatStats } from '@/lib/shop-chat-stats'
+import { getShopReviews } from '@/app/actions/reviews'
+import ReviewsSection from './ReviewsSection'
 
 interface ShopPageProps {
   params: Promise<{ slug: string }>
@@ -73,7 +75,13 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
   const { scooters, ...shop } = data
 
-  const chatStats   = await getShopChatStats(shop.id)
+  const [chatStats, { reviews, userReview }, supabase] = await Promise.all([
+    getShopChatStats(shop.id),
+    getShopReviews(shop.id),
+    createClient(),
+  ])
+  const { data: { user } } = await supabase.auth.getUser()
+  const currentUserId = user?.id ?? null
   const hasDelivery  = scooters.some(s => s.deliveryAvailable)
   const hasInsurance = scooters.some(s => s.insuranceIncluded)
   const hasHelmet    = scooters.some(s => s.helmetIncluded)
@@ -406,10 +414,16 @@ export default async function ShopPage({ params }: ShopPageProps) {
             )}
 
             {/* Reviews */}
-            <section>
-              <h2 className="text-[18px] font-bold text-[#0f0f0e] mb-4">Reviews</h2>
-              <EmptyReviews />
-            </section>
+            <ReviewsSection
+              shopId={shop.id}
+              shopName={shop.name}
+              shopOwnerId={shop.ownerId ?? null}
+              initialReviews={reviews}
+              userReview={userReview}
+              currentUserId={currentUserId}
+              shopRating={shop.rating}
+              shopReviewCount={shop.reviewCount}
+            />
 
           </div>
         </div>

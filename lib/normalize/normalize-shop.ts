@@ -40,6 +40,7 @@ export function normalizeShop(row: any): Shop {
 
   return {
     id,
+    ownerId: row.owner_id ?? null,
     name: row.name ?? 'Shop',
     slug: row.slug ?? id,
     description: row.description ?? '',

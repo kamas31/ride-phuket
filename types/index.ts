@@ -24,6 +24,7 @@ export type DepositType = 'cash' | 'card_hold' | 'flexible' | 'none'
 
 export interface Shop {
   id: string
+  ownerId?: string | null
   name: string
   slug: string
   description: string
@@ -141,6 +142,23 @@ export interface Review {
   createdAt: string
   verified: boolean
 }
+
+// Full review with resolved author name — used on the shop page
+export interface ShopReview {
+  id: string
+  userId: string
+  displayName: string           // "Kevin B." — privacy-safe
+  initials: string              // "KB"
+  rating: number
+  comment: string
+  createdAt: string
+  updatedAt: string
+  verified: boolean
+  ownerReply: string | null
+  ownerReplyCreatedAt: string | null
+}
+
+export type ReviewReportReason = 'never_rented' | 'fake_review' | 'harassment' | 'spam' | 'other'
 
 export interface User {
   id: string
