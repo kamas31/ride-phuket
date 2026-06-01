@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { LogOut, ChevronDown, ChevronRight, MessageCircle, User, Store } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { LogOut, ChevronDown, ChevronRight, MessageCircle, User, Store, Search, X } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { SITE_NAME } from '@/constants'
 import { useAuth } from '@/hooks/useAuth'
@@ -37,22 +37,48 @@ function NavLink({ href, label, active, isHero, badge }: {
 
 export default function Navbar() {
   const pathname          = usePathname()
+  const router            = useRouter()
   const { user, signOut } = useAuth()
   const { profile }       = useProfile()
   const unread            = useUnreadCount()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [scrolled, setScrolled]         = useState(false)
+  const [searchOpen,   setSearchOpen]   = useState(false)
+  const [heroProgress, setHeroProgress] = useState(0)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
+  // Track scroll progress through the hero (home page only)
   useEffect(() => {
     if (pathname !== '/') return
-    const onScroll = () => setScrolled(window.scrollY > 60)
+    const onScroll = () => {
+      setHeroProgress(Math.min(1, window.scrollY / window.innerHeight))
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [pathname])
 
-  const isHero      = pathname === '/' && !scrolled
+  // Auto-focus search input when overlay opens
+  useEffect(() => {
+    if (!searchOpen) return
+    const t = setTimeout(() => searchInputRef.current?.focus(), 60)
+    return () => clearTimeout(t)
+  }, [searchOpen])
+
+  const isHomePage  = pathname === '/'
   const isShopOwner = profile?.role === 'shop_owner'
+
+  // Progressive backdrop: transparent 0–50%, then linear blur/bg 50–100%
+  // p = 0 at 50% hero scroll, p = 1 at 100% hero scroll
+  const p = isHomePage
+    ? Math.max(0, Math.min(1, (heroProgress - 0.5) / 0.5))
+    : 1
+
+  const blurPx   = Math.round(p * 20 * 10) / 10          // 0 → 20 px
+  const bgOpacity = p * 0.92                               // 0 → 0.92
+  const borderOp  = p * 0.07                               // 0 → 0.07
+
+  // Logo & icon colour: white until blur becomes visible (~45% hero progress)
+  const isHero = isHomePage && heroProgress < 0.45
 
   const NAV_LINKS = isShopOwner
     ? [
@@ -77,16 +103,17 @@ export default function Navbar() {
       className="fixed top-0 left-0 right-0 z-50"
       style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
     >
-      {/* Glass backdrop — fades in as hero scrolls away */}
+      {/* Progressive glass backdrop — only backdrop-filter blurs what's BEHIND the header */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-white/[0.92] backdrop-blur-[14px] transition-opacity duration-300 ease-in-out pointer-events-none"
-        style={{ opacity: isHero ? 0 : 1 }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute bottom-0 left-0 right-0 h-px bg-black/[0.07] transition-opacity duration-300 ease-in-out pointer-events-none"
-        style={{ opacity: isHero ? 0 : 1 }}
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:          `rgba(255,255,255,${bgOpacity.toFixed(3)})`,
+          backdropFilter:      `blur(${blurPx}px)`,
+          WebkitBackdropFilter:`blur(${blurPx}px)`,
+          borderBottom:        `1px solid rgba(0,0,0,${borderOp.toFixed(3)})`,
+          transition:          'background 120ms linear, border-color 120ms linear',
+        }}
       />
 
       {/* Nav content */}
@@ -209,8 +236,22 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* ── Mobile account control ── */}
-        <div className="md:hidden">
+        {/* ── Mobile right side: Search + Account ── */}
+        <div className="md:hidden flex items-center gap-1">
+
+          {/* Search icon — opens search overlay */}
+          <button
+            onClick={() => setSearchOpen(true)}
+            className={cn(
+              'w-9 h-9 rounded-full flex items-center justify-center transition-colors duration-300',
+              isHero ? 'text-white' : 'text-[#0f0f0e]'
+            )}
+            aria-label="Search"
+          >
+            <Search className="w-[18px] h-[18px]" strokeWidth={2} />
+          </button>
+
+          {/* Account */}
           {user ? (
             <div className="relative">
               <button
@@ -247,7 +288,6 @@ export default function Navbar() {
                         {isShopOwner ? 'Partner' : 'Rider'}
                       </p>
                     </div>
-                    {/* Unread messages alert — only when there are unread */}
                     {unread > 0 && (
                       <div className="px-2.5 pt-2 pb-1">
                         <Link
@@ -263,7 +303,6 @@ export default function Navbar() {
                         </Link>
                       </div>
                     )}
-
                     <div className="py-1">
                       {isShopOwner ? (
                         <Link
@@ -314,6 +353,65 @@ export default function Navbar() {
         </div>
 
       </div>
+
+      {/* ── Mobile search overlay ── */}
+      {searchOpen && (
+        <>
+          {/* Dismiss backdrop */}
+          <div
+            className="fixed inset-0 z-[55] bg-black/40"
+            style={{ backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)' }}
+            onClick={() => setSearchOpen(false)}
+          />
+          {/* Search panel — drops below header */}
+          <div
+            className="absolute left-0 right-0 top-full z-[56] px-4 pb-3 pt-1.5"
+            style={{
+              background:           'rgba(10,10,12,0.94)',
+              backdropFilter:       'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              borderBottom:         '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
+            <div
+              className="flex items-center gap-3 px-4 py-[10px] rounded-[12px]"
+              style={{
+                background:  'rgba(255,255,255,0.10)',
+                border:      '1px solid rgba(255,255,255,0.18)',
+                boxShadow:   '0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.10)',
+              }}
+            >
+              <Search className="w-4 h-4 flex-shrink-0 text-[#FF6B35]" strokeWidth={2.5} />
+              <input
+                ref={searchInputRef}
+                type="text"
+                inputMode="search"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                placeholder="Search TMAX, NMAX, Honda Click…"
+                className="flex-1 bg-transparent text-[15px] font-medium text-white placeholder:text-white/45 placeholder:font-light focus:outline-none min-w-0"
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    const val = e.currentTarget.value.trim()
+                    if (val) router.push(`/explore?q=${encodeURIComponent(val)}`)
+                    setSearchOpen(false)
+                  }
+                  if (e.key === 'Escape') setSearchOpen(false)
+                }}
+              />
+              <button
+                onClick={() => setSearchOpen(false)}
+                className="text-white/40 hover:text-white/70 transition-colors p-0.5 -mr-0.5"
+                aria-label="Close search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
     </header>
   )
 }

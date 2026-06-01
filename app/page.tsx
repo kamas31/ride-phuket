@@ -6,7 +6,6 @@ import { LOCATIONS } from '@/constants'
 import { getScooters } from '@/lib/supabase/queries'
 import { computeLiveAreas } from '@/lib/live-areas'
 import { cn, formatPrice } from '@/lib/utils'
-import { HeroSearch } from '@/components/home/HeroSearch'
 
 const BENEFITS = [
   {
@@ -80,29 +79,18 @@ export default async function HomePage() {
         />
 
         {/* ── MOBILE LAYOUT ── */}
-        <div className="md:hidden relative flex-1 flex flex-col justify-between px-5 pt-24 pb-8">
-
-          {/* Top: search + headline + description */}
-          <div>
-            <div style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.05s' }}>
-              <HeroSearch />
-            </div>
-            <div
-              className="flex flex-col items-center text-center"
-              style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.18s' }}
-            >
-              <h1 className="font-extrabold leading-[0.95] tracking-[-0.03em] text-[44px] mb-2">
-                <span className="text-white block">Explore Phuket</span>
-                <span className="block" style={{ color: '#FF6B35' }}>your way.</span>
-              </h1>
-              <p className="text-white/75 text-[14px] leading-[1.4]" style={{ maxWidth: '260px' }}>
-                Find your perfect scooter in Phuket.
-              </p>
-            </div>
-          </div>
-
-          {/* Bottom: single CTA — image breathes in the gap above */}
-          <div style={{ opacity: 0, animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1) forwards 0.32s' }}>
+        <div className="md:hidden relative flex-1 flex flex-col px-5 pt-24">
+          <div
+            className="flex flex-col items-center text-center"
+            style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.1s' }}
+          >
+            <h1 className="font-extrabold leading-[0.95] tracking-[-0.03em] text-[44px] mb-2">
+              <span className="text-white block">Explore Phuket</span>
+              <span className="block" style={{ color: '#FF6B35' }}>your way.</span>
+            </h1>
+            <p className="text-white/75 text-[14px] leading-[1.4] mb-6" style={{ maxWidth: '260px' }}>
+              Find your perfect scooter in Phuket.
+            </p>
             <Link
               href="/explore"
               className="flex items-center justify-center gap-2 w-full py-[13px] bg-[#FF6B35] text-white text-[14px] font-bold rounded-full
@@ -113,7 +101,6 @@ export default async function HomePage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-
         </div>
 
         {/* ── DESKTOP LAYOUT ── */}
