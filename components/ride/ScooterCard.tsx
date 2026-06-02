@@ -71,18 +71,16 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
           {scooter.name}
         </h3>
         <div className="space-y-0.5">
-          <div className="flex items-baseline gap-0.5">
-            <span className="text-[13px] font-bold text-[#0f0f0e] leading-none tabular-nums">{formatPrice(scooter.pricePerDay)}</span>
-            <span className="text-[10px] text-[#9c9c98]">/day</span>
-          </div>
-          {(scooter.pricePerWeek || scooter.pricePerMonth) && (
-            <p className="text-[10px] text-[#9c9c98] leading-tight tabular-nums">
-              {[
-                scooter.pricePerWeek  && `${formatPrice(scooter.pricePerWeek)}/wk`,
-                scooter.pricePerMonth && `${formatPrice(scooter.pricePerMonth)}/mo`,
-              ].filter(Boolean).join(' · ')}
-            </p>
-          )}
+          {[
+            { label: 'DAY',   price: scooter.pricePerDay   },
+            ...(scooter.pricePerWeek  ? [{ label: 'WEEK',  price: scooter.pricePerWeek  }] : []),
+            ...(scooter.pricePerMonth ? [{ label: 'MONTH', price: scooter.pricePerMonth }] : []),
+          ].map(r => (
+            <div key={r.label} className="flex items-center justify-between gap-2">
+              <span className="text-[7px] font-semibold text-[#9c9c98] uppercase tracking-widest">{r.label}</span>
+              <span className="text-[11px] font-bold text-[#0f0f0e] tabular-nums leading-none">{formatPrice(r.price)}</span>
+            </div>
+          ))}
         </div>
       </div>
     </Link>
@@ -169,22 +167,18 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
           <span className="text-xs text-[#9c9c98]">{scooter.specs?.engine}</span>
         </div>
 
-        {/* Price — daily anchor, wk/mo secondary */}
-        <div className="space-y-0.5">
-          <div className="flex items-baseline gap-0.5">
-            <span className="text-[16px] sm:text-[18px] font-bold text-[#0f0f0e] leading-none tabular-nums">
-              {formatPrice(scooter.pricePerDay)}
-            </span>
-            <span className="text-[10px] sm:text-[11px] text-[#9c9c98]">/day</span>
-          </div>
-          {(scooter.pricePerWeek || scooter.pricePerMonth) && (
-            <p className="text-[11px] sm:text-[12px] text-[#9c9c98] leading-tight tabular-nums">
-              {[
-                scooter.pricePerWeek  && `${formatPrice(scooter.pricePerWeek)}/wk`,
-                scooter.pricePerMonth && `${formatPrice(scooter.pricePerMonth)}/mo`,
-              ].filter(Boolean).join(' · ')}
-            </p>
-          )}
+        {/* Price — equal weight for day / week / month */}
+        <div className="space-y-1">
+          {[
+            { label: 'DAY',   price: scooter.pricePerDay   },
+            ...(scooter.pricePerWeek  ? [{ label: 'WEEK',  price: scooter.pricePerWeek  }] : []),
+            ...(scooter.pricePerMonth ? [{ label: 'MONTH', price: scooter.pricePerMonth }] : []),
+          ].map(r => (
+            <div key={r.label} className="flex items-center justify-between gap-2">
+              <span className="text-[9px] sm:text-[10px] font-semibold text-[#9c9c98] uppercase tracking-widest">{r.label}</span>
+              <span className="text-[13px] sm:text-[14px] font-bold text-[#0f0f0e] tabular-nums leading-none">{formatPrice(r.price)}</span>
+            </div>
+          ))}
         </div>
 
         {/* Trust micro-row */}
