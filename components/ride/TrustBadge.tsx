@@ -128,10 +128,10 @@ export function TrustBadge({ variant, size = 'xs', className }: TrustBadgeProps)
 
 // ── Utility helpers ───────────────────────────────────────────
 
-/** True if the listing was added within the last 30 days */
+/** True if the listing was added within the last 7 days */
 export function isNewListing(createdAt?: string): boolean {
   if (!createdAt) return false
-  return (Date.now() - new Date(createdAt).getTime()) < 30 * 24 * 60 * 60 * 1000
+  return (Date.now() - new Date(createdAt).getTime()) < 7 * 24 * 60 * 60 * 1000
 }
 
 /** True if the shop responds fast (responseTime field includes "< 15" or "5" etc.) */

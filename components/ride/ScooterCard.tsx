@@ -55,14 +55,14 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
       />
       <div className="p-2.5">
         <div className="flex items-center justify-between mb-0.5">
-          {scooter.reviewCount > 0 ? (
+          {isNewListing(scooter.createdAt) ? (
+            <TrustBadge variant="new_listing" size="xs" />
+          ) : scooter.reviewCount > 0 ? (
             <div className="flex items-center gap-0.5">
               <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
-              <span className="text-[10px] font-bold text-[#0f0f0e]">{scooter.rating.toFixed(1)}</span>
+              <span className="text-[10px] font-semibold text-[#0f0f0e]">{scooter.rating.toFixed(1)}</span>
             </div>
-          ) : (
-            <TrustBadge variant="new_listing" size="xs" />
-          )}
+          ) : null}
           {!scooter.available && (
             <span className="text-[9px] text-[#9c9c98]">Unavail.</span>
           )}
@@ -143,14 +143,14 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
             <span className="truncate">{scooter.location}</span>
           </div>
           {/* Only show rating when there are real reviews — never show hardcoded 4.8 */}
-          {scooter.reviewCount > 0 ? (
+          {isNewListing(scooter.createdAt) ? (
+            <TrustBadge variant="new_listing" />
+          ) : scooter.reviewCount > 0 ? (
             <div className="flex items-center gap-0.5 flex-shrink-0 ml-1">
               <Star className="w-3 h-3 text-[#FF6B35] fill-[#FF6B35]" />
               <span className="text-[10px] sm:text-xs font-bold text-[#0f0f0e]">{scooter.rating.toFixed(1)}</span>
               <span className="hidden sm:inline text-xs text-[#9c9c98] ml-0.5">({scooter.reviewCount})</span>
             </div>
-          ) : isNewListing(scooter.createdAt) ? (
-            <TrustBadge variant="new_listing" />
           ) : null}
         </div>
 
