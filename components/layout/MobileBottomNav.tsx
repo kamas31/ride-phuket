@@ -44,7 +44,6 @@ export default function MobileBottomNav() {
   const { profile } = useProfile()
   const unread        = useUnreadCount()
   const unreadReviews = useUnreadReviewCount()
-  const combined      = unread + unreadReviews
 
   const isOwner = profile?.role === 'shop_owner'
   const navItems = isOwner ? OWNER_NAV : RIDER_NAV
@@ -72,7 +71,7 @@ export default function MobileBottomNav() {
             const badge = isMessages
               ? (unread > 0 ? unread : 0)
               : isShopTab
-              ? (combined > 0 ? combined : 0)
+              ? (unreadReviews > 0 ? unreadReviews : 0)
               : 0
             return (
               <Link
@@ -92,7 +91,7 @@ export default function MobileBottomNav() {
                     strokeWidth={active ? 2.5 : 1.5}
                   />
                   {badge > 0 && (
-                    <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 bg-[#ef4444] rounded-full border border-white flex items-center justify-center px-[3px]">
+                    <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 bg-[#FF6B35] rounded-full border border-white flex items-center justify-center px-[3px]">
                       <span className="text-[9px] font-bold text-white leading-none tabular-nums">
                         {badge > 99 ? '99+' : badge}
                       </span>
