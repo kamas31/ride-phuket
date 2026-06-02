@@ -22,17 +22,6 @@ export function StickyContactBar({
   available = true,
 }: StickyContactBarProps) {
   const [visible, setVisible] = useState(false)
-  const [navH, setNavH] = useState<number | null>(null)
-
-  useEffect(() => {
-    const measure = () => {
-      const nav = document.getElementById('mobile-bottom-nav')
-      if (nav) setNavH(nav.getBoundingClientRect().height)
-    }
-    measure()
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
-  }, [])
 
   useEffect(() => {
     const sentinel = document.getElementById('sticky-contact-sentinel')
@@ -45,14 +34,13 @@ export function StickyContactBar({
     return () => observer.disconnect()
   }, [])
 
-  const bottomPx = visible && navH !== null ? navH : -200
-
   return (
     <div
       className="fixed left-0 right-0 z-[60] lg:hidden"
       style={{
-        bottom: `${bottomPx}px`,
-        transition: navH !== null ? 'bottom 300ms cubic-bezier(0.22, 1, 0.36, 1)' : 'none',
+        // MobileBottomNav sets --bottom-nav-h via ResizeObserver; fall back to 65px.
+        bottom: visible ? 'var(--bottom-nav-h, 65px)' : '-200px',
+        transition: 'bottom 300ms cubic-bezier(0.22, 1, 0.36, 1)',
         pointerEvents: visible ? 'auto' : 'none',
       }}
     >

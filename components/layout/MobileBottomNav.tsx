@@ -49,6 +49,23 @@ export default function MobileBottomNav() {
   const isOwner = profile?.role === 'shop_owner'
   const navItems = isOwner ? OWNER_NAV : RIDER_NAV
 
+  // Broadcast actual rendered nav height as a CSS variable so StickyContactBar
+  // can position itself flush above this nav without guessing the height.
+  useEffect(() => {
+    const nav = document.getElementById('mobile-bottom-nav')
+    if (!nav) return
+    const update = () => {
+      document.documentElement.style.setProperty(
+        '--bottom-nav-h',
+        `${Math.round(nav.getBoundingClientRect().height)}px`,
+      )
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(nav)
+    return () => ro.disconnect()
+  }, [])
+
   return (
     <nav
       id="mobile-bottom-nav"
