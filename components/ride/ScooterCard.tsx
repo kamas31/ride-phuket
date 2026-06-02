@@ -67,7 +67,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
             <span className="text-[9px] text-[#9c9c98]">Unavail.</span>
           )}
         </div>
-        <h3 className="font-bold text-[12px] text-[#0f0f0e] leading-tight truncate mb-0.5 group-hover:text-[#FF6B35] transition-colors">
+        <h3 className="font-semibold text-[12px] text-[#0f0f0e] leading-tight truncate mb-0.5 group-hover:text-[#FF6B35] transition-colors">
           {scooter.name}
         </h3>
         <div className="space-y-0.5">
@@ -78,7 +78,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
           ].map(r => (
             <div key={r.label} className="flex items-center justify-between gap-2">
               <span className="text-[7px] font-semibold text-[#9c9c98] uppercase tracking-widest">{r.label}</span>
-              <span className="text-[11px] font-bold text-[#0f0f0e] tabular-nums leading-none">{formatPrice(r.price)}</span>
+              <span className="text-[11px] font-semibold text-[#0f0f0e] tabular-nums leading-none">{formatPrice(r.price)}</span>
             </div>
           ))}
         </div>
@@ -155,7 +155,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         </div>
 
         {/* Name */}
-        <h3 className="font-bold text-[13px] sm:text-[15px] text-[#0f0f0e] leading-tight mb-2 group-hover:text-[#FF6B35] transition-colors line-clamp-1">
+        <h3 className="font-semibold text-[13px] sm:text-[15px] text-[#0f0f0e] leading-tight mb-2 group-hover:text-[#FF6B35] transition-colors line-clamp-1">
           {scooter.name}
         </h3>
 
@@ -176,7 +176,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
           ].map(r => (
             <div key={r.label} className="flex items-center justify-between gap-2">
               <span className="text-[9px] sm:text-[10px] font-semibold text-[#9c9c98] uppercase tracking-widest">{r.label}</span>
-              <span className="text-[13px] sm:text-[14px] font-bold text-[#0f0f0e] tabular-nums leading-none">{formatPrice(r.price)}</span>
+              <span className="text-[13px] sm:text-[14px] font-semibold text-[#0f0f0e] tabular-nums leading-none">{formatPrice(r.price)}</span>
             </div>
           ))}
         </div>
