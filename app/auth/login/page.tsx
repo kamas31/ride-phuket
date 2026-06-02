@@ -193,7 +193,7 @@ function LoginForm() {
                           onClick={() => { setForgotMode(true); setResetEmail(email) }}
                           className="text-[10px] text-[#FF6B35] font-semibold hover:underline"
                         >
-                          Forgot?
+                          Forgot password?
                         </button>
                       </div>
                       <div className="relative">
