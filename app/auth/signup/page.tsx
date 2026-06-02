@@ -48,6 +48,25 @@ function SignupForm() {
   const [success, setSuccess]   = useState(false)
   const [isNative, setIsNative] = useState(false)
 
+  // Pre-fill from login "no account" flow: ?email=...&role=... + sessionStorage password
+  useEffect(() => {
+    const paramEmail = searchParams.get('email')
+    const paramRole  = searchParams.get('role') as UserRole | null
+    if (paramEmail) {
+      setEmail(paramEmail)
+      setStep(2)
+    }
+    if (paramRole && (paramRole === 'rider' || paramRole === 'shop_owner')) {
+      setRole(paramRole)
+    }
+    const storedPw = sessionStorage.getItem('_kr_pw_prefill')
+    if (storedPw) {
+      setPassword(storedPw)
+      sessionStorage.removeItem('_kr_pw_prefill')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Google OAuth is blocked in WKWebView by Google — hide on native iOS.
   useEffect(() => {
     import('@capacitor/core').then(({ Capacitor }) => {

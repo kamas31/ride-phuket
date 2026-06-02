@@ -7,6 +7,7 @@ import { MapPin, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { trackEvent } from '@/lib/analytics'
 import { SITE_NAME } from '@/constants'
+import { emailExists } from '@/app/actions/auth'
 
 function LoginForm() {
   const router      = useRouter()
@@ -28,6 +29,7 @@ function LoginForm() {
   const [resetSending, setResetSending] = useState(false)
   const [resetSent, setResetSent]     = useState(false)
   const [resetError, setResetError]   = useState<string | null>(null)
+  const [noAccountMode, setNoAccountMode] = useState(false)
   const [isNative, setIsNative]       = useState(false)
 
   useEffect(() => {
@@ -47,8 +49,19 @@ function LoginForm() {
     setError(null)
     setSubmitting(true)
     const { error: err } = await signInWithEmail(email, password)
-    if (err) { setError(err); setSubmitting(false) }
-    else { trackEvent({ eventType: 'auth_login' }); router.replace(redirect) }
+    if (err) {
+      const exists = await emailExists(email)
+      if (!exists) {
+        setNoAccountMode(true)
+        setSubmitting(false)
+      } else {
+        setError(err)
+        setSubmitting(false)
+      }
+    } else {
+      trackEvent({ eventType: 'auth_login' })
+      router.replace(redirect)
+    }
   }
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -92,7 +105,50 @@ function LoginForm() {
             style={{ boxShadow: '0 8px 40px -8px rgba(0,0,0,0.10)' }}
           >
             <div className="p-7">
-              {forgotMode ? (
+              {noAccountMode ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => { setNoAccountMode(false); setError(null) }}
+                    className="flex items-center gap-1.5 text-xs text-[#9c9c98] hover:text-[#5c5c58] mb-5 transition-colors"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    Back to sign in
+                  </button>
+                  <h1 className="text-[22px] font-bold text-[#0f0f0e] mb-1">No account found</h1>
+                  <p className="text-sm text-[#9c9c98] mb-2">
+                    There&apos;s no account for{' '}
+                    <span className="font-semibold text-[#5c5c58]">{email}</span>.
+                  </p>
+                  <p className="text-sm text-[#9c9c98] mb-6">Would you like to create one?</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sessionStorage.setItem('_kr_pw_prefill', password)
+                        router.push(`/auth/signup?email=${encodeURIComponent(email)}&role=rider`)
+                      }}
+                      className="flex flex-col items-center gap-2 py-4 px-3 rounded-[16px] border-2 border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] transition-all text-center"
+                    >
+                      <span className="text-2xl">🛵</span>
+                      <span className="text-xs font-bold text-[#0f0f0e]">I&apos;m a Rider</span>
+                      <span className="text-[10px] text-[#9c9c98]">Rent a scooter</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sessionStorage.setItem('_kr_pw_prefill', password)
+                        router.push(`/auth/signup?email=${encodeURIComponent(email)}&role=shop_owner`)
+                      }}
+                      className="flex flex-col items-center gap-2 py-4 px-3 rounded-[16px] border-2 border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] transition-all text-center"
+                    >
+                      <span className="text-2xl">🏪</span>
+                      <span className="text-xs font-bold text-[#0f0f0e]">Shop Owner</span>
+                      <span className="text-[10px] text-[#9c9c98]">List my fleet</span>
+                    </button>
+                  </div>
+                </>
+              ) : forgotMode ? (
                 <>
                   <button
                     type="button"
