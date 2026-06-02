@@ -55,7 +55,7 @@ function LoginForm() {
         setNoAccountMode(true)
         setSubmitting(false)
       } else {
-        setError(err)
+        setError('Invalid email or password')
         setSubmitting(false)
       }
     } else {
