@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { cn, formatPrice } from '@/lib/utils'
 import { MessageOwnerButton } from '@/app/scooter/[id]/MessageOwnerButton'
 
@@ -21,7 +22,13 @@ export function StickyContactBar({
   scooterId,
   available = true,
 }: StickyContactBarProps) {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible]       = useState(false)
+  const [portalEl, setPortalEl]     = useState<Element | null>(null)
+
+  // Find the portal slot rendered inside MobileBottomNav.
+  useEffect(() => {
+    setPortalEl(document.getElementById('sticky-bar-portal'))
+  }, [])
 
   useEffect(() => {
     const sentinel = document.getElementById('sticky-contact-sentinel')
@@ -34,13 +41,17 @@ export function StickyContactBar({
     return () => observer.disconnect()
   }, [])
 
-  return (
+  if (!portalEl) return null
+
+  // Rendered inside the same fixed container as MobileBottomNav (flex-col).
+  // max-height animates 0 ↔ 120px so the bar collapses flush against the nav
+  // with no gap — no pixel calculations required.
+  return createPortal(
     <div
-      className="fixed left-0 right-0 z-[60] lg:hidden"
       style={{
-        // MobileBottomNav sets --bottom-nav-h via ResizeObserver; fall back to 65px.
-        bottom: visible ? 'var(--bottom-nav-h, 65px)' : '-200px',
-        transition: 'bottom 300ms cubic-bezier(0.22, 1, 0.36, 1)',
+        maxHeight: visible ? '120px' : '0px',
+        overflow: 'hidden',
+        transition: 'max-height 300ms cubic-bezier(0.22, 1, 0.36, 1)',
         pointerEvents: visible ? 'auto' : 'none',
       }}
     >
@@ -72,6 +83,7 @@ export function StickyContactBar({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    portalEl,
   )
 }
