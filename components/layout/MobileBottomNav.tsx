@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Map, Bookmark, MessageCircle, User, Radio, Store } from 'lucide-react'
