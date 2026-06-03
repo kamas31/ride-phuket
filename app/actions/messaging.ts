@@ -255,7 +255,7 @@ export async function getAllConversations(): Promise<ConversationPreview[]> {
     .select(`
       id, scooter_id, shop_id, client_id, owner_id, created_at,
       scooters ( name, cover_image, price_per_day ),
-      shops ( name, slug ),
+      shops ( name, slug, logo_url ),
       messages ( id, content, created_at, read_at, sender_id )
     `)
     .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
@@ -299,7 +299,7 @@ export async function getConversations(): Promise<ConversationPreview[]> {
     .select(`
       id, scooter_id, shop_id, client_id, owner_id, created_at,
       scooters ( name, cover_image, price_per_day ),
-      shops ( name, slug ),
+      shops ( name, slug, logo_url ),
       messages ( id, content, created_at, read_at, sender_id )
     `)
     .eq('client_id', user.id)
@@ -340,7 +340,7 @@ export async function getOwnerConversations(): Promise<ConversationPreview[]> {
     .select(`
       id, scooter_id, shop_id, client_id, owner_id, created_at,
       scooters ( name, cover_image, price_per_day ),
-      shops ( name, slug ),
+      shops ( name, slug, logo_url ),
       messages ( id, content, created_at, read_at, sender_id )
     `)
     .eq('owner_id', user.id)
@@ -448,10 +448,20 @@ export async function getConversationWithMessages(
       createdAt: convo.created_at,
       blockedByMe: !!blockedByMeRow,
       blockedByThem: !!blockedByThemRow,
+      // Rider-facing: represent the SHOP, not the individual owner.
+      // Partner-facing: represent the RIDER (profile name + avatar).
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      otherUserName: (otherProfile as any)?.name ?? 'User',
+      otherUserName: convo.client_id === user.id
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? (shopRow?.name ?? (otherProfile as any)?.name ?? 'Shop')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        : ((otherProfile as any)?.name ?? 'User'),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      otherUserAvatarUrl: (otherProfile as any)?.avatar_url ?? null,
+      otherUserAvatarUrl: convo.client_id === user.id
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? (shopRow?.logo_url ?? null)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        : ((otherProfile as any)?.avatar_url ?? null),
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     messages: (rawMsgs ?? []).map((m: any) => ({
@@ -541,6 +551,15 @@ function buildPreview(
   const otherUserId = isClient ? c.owner_id : c.client_id
   const otherProfile = profileMap?.[otherUserId]
 
+  // Rider-facing: represent the SHOP, not the individual owner.
+  // Partner-facing: represent the RIDER (their profile name + avatar).
+  const otherUserName = isClient
+    ? (shopRow?.name ?? otherProfile?.name ?? 'Shop')
+    : (otherProfile?.name ?? 'User')
+  const otherUserAvatarUrl = isClient
+    ? (shopRow?.logo_url ?? null)
+    : (otherProfile?.avatar_url ?? null)
+
   return {
     id: c.id,
     scooterId: c.scooter_id ?? null,
@@ -552,8 +571,8 @@ function buildPreview(
     shopSlug: shopRow?.slug ?? null,
     clientId: c.client_id,
     ownerId: c.owner_id,
-    otherUserName: otherProfile?.name ?? 'User',
-    otherUserAvatarUrl: otherProfile?.avatar_url ?? null,
+    otherUserName,
+    otherUserAvatarUrl,
     lastMessage: last?.content ?? null,
     lastMessageAt: last?.created_at ?? null,
     unreadCount: unread,

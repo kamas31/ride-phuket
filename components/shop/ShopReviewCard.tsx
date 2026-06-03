@@ -187,7 +187,11 @@ export function ShopReviewCard({
       {review.ownerReply && !replyOpen && (
         <div className="bg-[#f8f8f6] rounded-[14px] p-3.5 space-y-1.5">
           <div className="flex items-center gap-2">
-            <Store className="w-3.5 h-3.5 text-[#9c9c98]" />
+            {review.shopLogoUrl ? (
+              <img src={review.shopLogoUrl} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+            ) : (
+              <Store className="w-3.5 h-3.5 text-[#9c9c98] flex-shrink-0" />
+            )}
             <p className="text-[11px] font-semibold text-[#5c5c58]">Response from the shop</p>
             {isOwner && (
               <button

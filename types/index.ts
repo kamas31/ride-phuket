@@ -149,7 +149,8 @@ export interface ShopReview {
   userId: string
   displayName: string           // "Kevin B." — privacy-safe
   initials: string              // "KB"
-  avatarUrl: string | null
+  avatarUrl: string | null      // reviewer's profiles.avatar_url
+  shopLogoUrl: string | null    // shop's shops.logo_url — used in owner reply attribution
   rating: number
   comment: string
   createdAt: string
