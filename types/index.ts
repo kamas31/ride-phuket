@@ -149,6 +149,7 @@ export interface ShopReview {
   userId: string
   displayName: string           // "Kevin B." — privacy-safe
   initials: string              // "KB"
+  avatarUrl: string | null
   rating: number
   comment: string
   createdAt: string

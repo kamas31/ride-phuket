@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { MessageCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getOwnerConversations } from '@/app/actions/messaging'
 import { getServerProfile } from '@/app/actions/profile'
+import { getInitials } from '@/lib/utils'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Inbox — Partner Dashboard' }
@@ -76,19 +76,18 @@ export default async function PartnerMessagesPage() {
                 href={`/messages/${conv.id}`}
                 className="flex items-center gap-3.5 px-4 py-4 hover:bg-[#fafaf8] transition-colors active:bg-[#f5f5f2]"
               >
-                {/* Scooter image */}
-                <div className="relative w-14 h-14 rounded-[12px] overflow-hidden bg-[#f5f5f2] flex-shrink-0">
-                  {conv.scooterImage ? (
-                    <Image
-                      src={conv.scooterImage}
-                      alt={conv.scooterName ?? ''}
-                      fill
-                      className="object-cover"
-                      sizes="56px"
+                {/* Rider avatar */}
+                <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
+                  {conv.otherUserAvatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={conv.otherUserAvatarUrl}
+                      alt={conv.otherUserName}
+                      className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <MessageCircle className="w-6 h-6 text-[#c0c0bc]" />
+                    <div className="w-full h-full bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] flex items-center justify-center text-white text-sm font-bold">
+                      {getInitials(conv.otherUserName)}
                     </div>
                   )}
                 </div>

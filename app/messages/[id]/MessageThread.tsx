@@ -2,13 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Send, ExternalLink, Store } from 'lucide-react'
+import { ArrowLeft, Send, ExternalLink } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { sendMessage, markMessagesRead } from '@/app/actions/messaging'
-import { formatPrice } from '@/lib/utils'
-import { cn } from '@/lib/utils'
+import { formatPrice, getInitials, cn } from '@/lib/utils'
 import ThreadMenu from './ThreadMenu'
 import type { ConversationDetail, Message } from '@/app/actions/messaging'
 
@@ -272,47 +270,35 @@ export default function MessageThread({
             <ArrowLeft className="w-[18px] h-[18px] text-[#5c5c58]" />
           </button>
 
-          {/* Context: scooter (normal conv) or shop (shop conv) */}
-          {listingUrl ? (
-            <Link href={listingUrl} className="flex items-center gap-2.5 flex-1 min-w-0 group">
-              <div className="relative w-[42px] h-[42px] rounded-[11px] overflow-hidden bg-[#f5f5f2] flex-shrink-0 shadow-sm">
-                {!isShopConv && conversation.scooterImage ? (
-                  <Image
-                    src={conversation.scooterImage}
-                    alt={conversation.scooterName ?? ''}
-                    fill
-                    className="object-cover"
-                    sizes="42px"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Store className="w-5 h-5 text-[#c0c0bc]" />
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight group-hover:text-[#FF6B35] transition-colors">
-                  {isShopConv ? conversation.shopName : (conversation.scooterName ?? conversation.shopName)}
-                </p>
-                {!isShopConv && (
-                  <p className="text-[12px] text-[#FF6B35] font-medium leading-tight truncate">
-                    {conversation.shopName}
-                  </p>
-                )}
-              </div>
-            </Link>
-          ) : (
-            <div className="flex items-center gap-2.5 flex-1 min-w-0">
-              <div className="w-[42px] h-[42px] rounded-[11px] bg-[#f5f5f2] flex-shrink-0 shadow-sm flex items-center justify-center">
-                <Store className="w-5 h-5 text-[#c0c0bc]" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight">
-                  {conversation.shopName}
-                </p>
-              </div>
+          {/* Other party identity — avatar + name + scooter context */}
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+            <div className="w-[38px] h-[38px] rounded-full overflow-hidden flex-shrink-0">
+              {conversation.otherUserAvatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={conversation.otherUserAvatarUrl}
+                  alt={conversation.otherUserName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] flex items-center justify-center text-white text-xs font-bold">
+                  {getInitials(conversation.otherUserName)}
+                </div>
+              )}
             </div>
-          )}
+            <div className="min-w-0 flex-1">
+              <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight">
+                {conversation.otherUserName}
+              </p>
+              {(conversation.scooterName || conversation.shopName) && (
+                <p className="text-[11px] text-[#9c9c98] truncate leading-tight">
+                  {conversation.scooterName
+                    ? `Regarding ${conversation.scooterName}`
+                    : conversation.shopName}
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Price chip + view listing + menu */}
           <div className="flex items-center gap-1.5 flex-shrink-0">

@@ -91,9 +91,17 @@ export function ShopReviewCard({
       {/* Author row + actions */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-[#fff4f0] text-[#FF6B35] rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0">
-            {review.initials}
-          </div>
+          {review.avatarUrl ? (
+            <img
+              src={review.avatarUrl}
+              alt={review.displayName}
+              className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="w-7 h-7 bg-[#fff4f0] text-[#FF6B35] rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+              {review.initials}
+            </div>
+          )}
           <div>
             <p className="text-[13px] font-semibold text-[#0f0f0e]">{review.displayName}</p>
             {review.verified && (

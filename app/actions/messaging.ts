@@ -26,7 +26,8 @@ export interface ConversationPreview {
   shopSlug: string | null
   clientId: string
   ownerId: string
-  otherUserName: string    // owner profile name (rider inbox) or rider name (owner inbox)
+  otherUserName: string
+  otherUserAvatarUrl: string | null
   lastMessage: string | null
   lastMessageAt: string | null
   unreadCount: number
@@ -46,6 +47,8 @@ export interface ConversationDetail {
   createdAt: string
   blockedByMe: boolean
   blockedByThem: boolean
+  otherUserName: string
+  otherUserAvatarUrl: string | null
 }
 
 // ── getOrCreateConversation ───────────────────────────────────────────────────
@@ -261,7 +264,23 @@ export async function getAllConversations(): Promise<ConversationPreview[]> {
   if (error) console.error('[getAllConversations]', error.message)
   if (!rawConvos) return []
 
-  return (rawConvos as any[]).map(c => buildPreview(user.id, c)) // eslint-disable-line @typescript-eslint/no-explicit-any
+  // Collect unique other-user IDs and fetch their profiles
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const otherIds = [...new Set((rawConvos as any[]).map(c =>
+    c.client_id === user.id ? c.owner_id : c.client_id
+  ))]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: profiles } = await (admin as any)
+    .from('profiles')
+    .select('id, name, avatar_url')
+    .in('id', otherIds)
+
+  const profileMap: Record<string, ProfileMeta> = {}
+  for (const p of (profiles ?? []) as (ProfileMeta & { id: string })[]) {
+    profileMap[p.id] = { name: p.name, avatar_url: p.avatar_url }
+  }
+
+  return (rawConvos as any[]).map(c => buildPreview(user.id, c, profileMap)) // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 // ── getConversations ──────────────────────────────────────────────────────────
@@ -288,7 +307,21 @@ export async function getConversations(): Promise<ConversationPreview[]> {
 
   if (!rawConvos) return []
 
-  return (rawConvos as any[]).map(c => buildPreview(user.id, c)) // eslint-disable-line @typescript-eslint/no-explicit-any
+  // Fetch owner profiles for display names and avatars
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ownerIds = [...new Set((rawConvos as any[]).map(c => c.owner_id as string))]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: profiles } = await (admin as any)
+    .from('profiles')
+    .select('id, name, avatar_url')
+    .in('id', ownerIds)
+
+  const profileMap: Record<string, ProfileMeta> = {}
+  for (const p of (profiles ?? []) as (ProfileMeta & { id: string })[]) {
+    profileMap[p.id] = { name: p.name, avatar_url: p.avatar_url }
+  }
+
+  return (rawConvos as any[]).map(c => buildPreview(user.id, c, profileMap)) // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 // ── getOwnerConversations ─────────────────────────────────────────────────────
@@ -315,20 +348,22 @@ export async function getOwnerConversations(): Promise<ConversationPreview[]> {
 
   if (!rawConvos) return []
 
-  // Resolve rider display names
+  // Resolve rider display names and avatars
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const clientIds: string[] = [...new Set((rawConvos as any[]).map(c => c.client_id as string))]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profiles } = await (admin as any)
     .from('profiles')
-    .select('id, name')
+    .select('id, name, avatar_url')
     .in('id', clientIds)
 
-  const nameMap: Record<string, string> = {}
-  for (const p of (profiles ?? []) as { id: string; name: string }[]) nameMap[p.id] = p.name
+  const profileMap: Record<string, ProfileMeta> = {}
+  for (const p of (profiles ?? []) as (ProfileMeta & { id: string })[]) {
+    profileMap[p.id] = { name: p.name, avatar_url: p.avatar_url }
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (rawConvos as any[]).map(c => buildPreview(user.id, c, nameMap))
+  return (rawConvos as any[]).map(c => buildPreview(user.id, c, profileMap))
 }
 
 // ── getConversationWithMessages ───────────────────────────────────────────────
@@ -358,11 +393,12 @@ export async function getConversationWithMessages(
 
   const otherUserId = convo.client_id === user.id ? convo.owner_id : convo.client_id
 
-  // Fetch block status and messages in parallel
+  // Fetch block status, messages, and other user's profile in parallel
   const [
     { data: blockedByMeRow },
     { data: blockedByThemRow },
     { data: rawMsgs },
+    { data: otherProfile },
   ] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (admin as any)
@@ -384,6 +420,12 @@ export async function getConversationWithMessages(
       .select('id, conversation_id, sender_id, content, read_at, created_at')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (admin as any)
+      .from('profiles')
+      .select('name, avatar_url')
+      .eq('id', otherUserId)
+      .maybeSingle(),
   ])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -406,6 +448,10 @@ export async function getConversationWithMessages(
       createdAt: convo.created_at,
       blockedByMe: !!blockedByMeRow,
       blockedByThem: !!blockedByThemRow,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      otherUserName: (otherProfile as any)?.name ?? 'User',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      otherUserAvatarUrl: (otherProfile as any)?.avatar_url ?? null,
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     messages: (rawMsgs ?? []).map((m: any) => ({
@@ -470,11 +516,13 @@ export async function getUnreadCount(): Promise<number> {
 
 // ── Internal ──────────────────────────────────────────────────────────────────
 
+type ProfileMeta = { name: string; avatar_url: string | null }
+
 function buildPreview(
   userId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   c: any,
-  nameMap?: Record<string, string>,
+  profileMap?: Record<string, ProfileMeta>,
 ): ConversationPreview {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const msgs: any[] = c.messages ?? []
@@ -491,6 +539,7 @@ function buildPreview(
 
   const isClient = c.client_id === userId
   const otherUserId = isClient ? c.owner_id : c.client_id
+  const otherProfile = profileMap?.[otherUserId]
 
   return {
     id: c.id,
@@ -503,7 +552,8 @@ function buildPreview(
     shopSlug: shopRow?.slug ?? null,
     clientId: c.client_id,
     ownerId: c.owner_id,
-    otherUserName: nameMap?.[otherUserId] ?? 'User',
+    otherUserName: otherProfile?.name ?? 'User',
+    otherUserAvatarUrl: otherProfile?.avatar_url ?? null,
     lastMessage: last?.content ?? null,
     lastMessageAt: last?.created_at ?? null,
     unreadCount: unread,

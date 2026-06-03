@@ -29,6 +29,7 @@ function normalizeReview(r: any): ShopReview {
     userId:               r.user_id,
     displayName:          toDisplayName(name),
     initials:             toInitials(name),
+    avatarUrl:            r.profiles?.avatar_url ?? null,
     rating:               r.rating,
     comment:              r.comment ?? '',
     createdAt:            r.created_at,
@@ -50,7 +51,7 @@ export async function getShopReviews(shopId: string): Promise<{
 
   const { data, error } = await admin
     .from('reviews')
-    .select('id, user_id, rating, comment, created_at, updated_at, verified, owner_reply, owner_reply_created_at, profiles(name)')
+    .select('id, user_id, rating, comment, created_at, updated_at, verified, owner_reply, owner_reply_created_at, profiles(name, avatar_url)')
     .eq('shop_id', shopId)
     .order('created_at', { ascending: false })
 
