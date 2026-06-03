@@ -352,15 +352,41 @@ export default function MessageThread({
                   </div>
 
                   <div className="space-y-2">
-                    {group.msgs.map(msg => {
+                    {group.msgs.map((msg, msgIndex) => {
                       // Alignment is determined solely by sender_id vs current user.
                       // Never inferred from owner/client role — this cannot invert.
                       const isMe = msg.senderId === currentUserId
                       const isOptimistic = msg.id.startsWith('opt-')
                       const showSeen = isMe && msg.id === lastSeenMsgId
+                      // Show avatar only on the last message in each consecutive block from the other party.
+                      // All other incoming messages get a same-width spacer so bubbles stay aligned.
+                      const nextMsg = group.msgs[msgIndex + 1]
+                      const showOtherAvatar = !isMe && (!nextMsg || nextMsg.senderId === currentUserId)
                       return (
-                        <div key={msg.id} className={cn('flex', isMe ? 'justify-end' : 'justify-start')}>
-                          <div className={cn('flex flex-col gap-0.5 max-w-[78%]', isMe ? 'items-end' : 'items-start')}>
+                        <div key={msg.id} className={cn('flex items-end gap-2', isMe ? 'justify-end' : 'justify-start')}>
+                          {/* Avatar / spacer for incoming messages */}
+                          {!isMe && (
+                            <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
+                              {showOtherAvatar && (
+                                conversation.otherUserAvatarUrl ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={conversation.otherUserAvatarUrl}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] flex items-center justify-center text-[9px] font-bold text-white">
+                                    {getInitials(conversation.otherUserName)}
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          )}
+                          <div className={cn(
+                            'flex flex-col gap-0.5',
+                            isMe ? 'items-end max-w-[78%]' : 'items-start max-w-[72%]',
+                          )}>
                             <div
                               className={cn(
                                 'px-4 py-2.5 text-[14px] leading-relaxed',

@@ -383,7 +383,7 @@ export async function getConversationWithMessages(
     .select(`
       id, scooter_id, shop_id, client_id, owner_id, created_at,
       scooters ( name, cover_image, price_per_day ),
-      shops ( name, slug )
+      shops ( name, slug, logo_url )
     `)
     .eq('id', conversationId)
     .single()
