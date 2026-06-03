@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   Shield, Heart, LogOut,
   ChevronRight, Check, Phone, Mail, LayoutDashboard, Star, Trash2,
-  MessageSquare, HeadphonesIcon,
+  MessageSquare, MessageCircle, HeadphonesIcon,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useSaved } from '@/hooks/useSaved'
@@ -47,9 +47,10 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
       ]
     }] : []),
     {
-      title: 'Saved',
+      title: '',
       items: [
-        { icon: Heart, label: 'Saved Scooters', href: '/saved', badge: null },
+        { icon: Heart,         label: 'Saved Scooters', href: '/saved',    badge: null },
+        ...(!isShopOwner ? [{ icon: MessageCircle, label: 'Messages', href: '/messages', badge: null }] : []),
       ]
     },
     {
@@ -252,11 +253,13 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
         )}
 
         {/* Menu sections */}
-        {MENU_SECTIONS.map(section => (
-          <div key={section.title}>
-            <h2 className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-widest mb-3 px-1">
-              {section.title}
-            </h2>
+        {MENU_SECTIONS.map((section, i) => (
+          <div key={section.title || i}>
+            {section.title && (
+              <h2 className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-widest mb-3 px-1">
+                {section.title}
+              </h2>
+            )}
             <div className="bg-white rounded-[20px] border border-[#e8e8e4] overflow-hidden divide-y divide-[#f0f0ec]">
               {section.items.map(item => (
                 <Link
