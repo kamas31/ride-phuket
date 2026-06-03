@@ -289,6 +289,15 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   <Link href={`/shop/${shop.slug}`} className="font-bold text-[15px] text-[#0f0f0e] hover:text-[#FF6B35] transition-colors leading-tight block">
                     {shop.name}
                   </Link>
+                  {shop.reviewCount > 0 && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <svg className="w-3 h-3 flex-shrink-0" viewBox="0 0 12 12" fill="#FF6B35" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 1l1.236 2.505L10 3.91l-2 1.95.472 2.753L6 7.25 3.528 8.613 4 5.86 2 3.91l2.764-.405L6 1z" />
+                      </svg>
+                      <span className="text-xs font-semibold text-[#0f0f0e]">{shop.rating.toFixed(1)}</span>
+                      <span className="text-xs text-[#9c9c98]">({shop.reviewCount} {shop.reviewCount === 1 ? 'review' : 'reviews'})</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2.5 mt-1 flex-wrap">
                     {openStatus && (
                       <span className={`flex items-center gap-1.5 text-xs font-medium ${openStatus.isOpen ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>
