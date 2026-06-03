@@ -42,7 +42,7 @@ export async function updateProfile(updates: {
   name?: string
   phone?: string
   nationality?: string
-  avatar_url?: string
+  avatar_url?: string | null
 }): Promise<{ error: string | null }> {
   try {
     const supabase = await createClient()
