@@ -91,6 +91,20 @@ export default function Navbar() {
         { href: '/profile',   label: 'Profile'  },
       ]
 
+  // Account dropdown menu — desktop and mobile share this list
+  const MENU_LINKS = isShopOwner
+    ? [
+        { href: '/partner/dashboard', label: 'Shop'     },
+        { href: '/partner/messages',  label: 'Messages' },
+        { href: '/explore',           label: 'Explore'  },
+      ]
+    : [
+        { href: '/profile',   label: 'Profile'  },
+        { href: '/messages',  label: 'Messages' },
+        { href: '/explore',   label: 'Explore'  },
+        { href: '/saved',     label: 'Saved'    },
+      ]
+
   const CTA = isShopOwner
     ? { href: '/partner/dashboard', label: 'My Dashboard'     }
     : { href: '/explore',           label: 'Explore Scooters' }
@@ -192,7 +206,7 @@ export default function Navbar() {
                       </p>
                     </div>
                     <div className="py-1.5">
-                      {NAV_LINKS.map(link => (
+                      {MENU_LINKS.map(link => (
                         <Link
                           key={link.href}
                           href={link.href}
@@ -307,25 +321,16 @@ export default function Navbar() {
                       </div>
                     )}
                     <div className="py-1">
-                      {isShopOwner ? (
+                      {MENU_LINKS.map(link => (
                         <Link
-                          href="/partner/dashboard"
+                          key={link.href}
+                          href={link.href}
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#5c5c58] hover:bg-[#f8f8f6] transition-colors"
                         >
-                          <Store className="w-4 h-4" />
-                          Shop
+                          {link.label}
                         </Link>
-                      ) : (
-                        <Link
-                          href="/profile"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-[#5c5c58] hover:bg-[#f8f8f6] transition-colors"
-                        >
-                          <User className="w-4 h-4" />
-                          Profile
-                        </Link>
-                      )}
+                      ))}
                     </div>
                     <div className="border-t border-[#f0f0ec] py-1">
                       <button
