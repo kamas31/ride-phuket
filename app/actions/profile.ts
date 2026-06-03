@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { Profile } from '@/hooks/useProfile'
+import type { UserRole } from '@/lib/supabase/types'
 
 export async function getServerProfile(): Promise<Profile | null> {
   try {
@@ -19,7 +20,14 @@ export async function getServerProfile(): Promise<Profile | null> {
       .single()
 
     if (error) {
-      // Graceful fallback if migration 002 not yet applied
+      // PGRST116 = "The result contains 0 rows" — profile genuinely missing.
+      // This is the expected state for a new OAuth user who has not yet
+      // completed /auth/select-role. Return null so callers can detect and
+      // redirect rather than silently treating them as a rider.
+      if ((error as { code?: string }).code === 'PGRST116') return null
+
+      // Any other error (network, RLS, pre-002 migration) — safe JWT fallback.
+      // Never promote to shop_owner on error.
       return {
         id: user.id,
         name: (user.user_metadata?.name as string) ?? user.email ?? 'Rider',
@@ -155,6 +163,50 @@ export async function deleteAccount(): Promise<{ error: string | null }> {
     const admin = createAdminClient()
     const { error } = await admin.auth.admin.deleteUser(user.id)
     return { error: error?.message ?? null }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Unknown error' }
+  }
+}
+
+// ── completeOAuthProfile ───────────────────────────────────────────────────
+// Called from /auth/select-role after a new Google OAuth user picks their role.
+// Creates the profiles row (skipped by the DB trigger for OAuth users) and
+// syncs the role into JWT metadata so the middleware sees it on the next request.
+
+export async function completeOAuthProfile(
+  role: UserRole,
+): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not authenticated' }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const admin = createAdminClient() as any
+
+    // Idempotency guard — never overwrite an existing profile
+    const { data: existing } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (!existing) {
+      const { error } = await admin.from('profiles').insert({
+        id:   user.id,
+        name: (user.user_metadata?.full_name as string)
+          ?? (user.user_metadata?.name as string)
+          ?? user.email
+          ?? 'User',
+        role,
+      })
+      if (error) return { error: error.message }
+    }
+
+    // Sync role into JWT metadata — middleware reads this on next request
+    await supabase.auth.updateUser({ data: { role } })
+
+    return { error: null }
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
   }

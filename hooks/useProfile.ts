@@ -19,8 +19,9 @@ export interface Profile {
 
 export function useProfile() {
   const { user, loading: authLoading } = useAuth()
-  const [profile, setProfile]          = useState<Profile | null>(null)
-  const [loading, setLoading]          = useState(true)
+  const [profile, setProfile]           = useState<Profile | null>(null)
+  const [loading, setLoading]           = useState(true)
+  const [needsProfile, setNeedsProfile] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
@@ -30,6 +31,8 @@ export function useProfile() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setProfile(null)
       // eslint-disable-next-line react-hooks/set-state-in-effect
+      setNeedsProfile(false)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false)
       return
     }
@@ -37,6 +40,7 @@ export function useProfile() {
     // Clear stale data before the fetch starts so no previous user's
     // profile is ever visible during the transition to the new user.
     setProfile(null)
+    setNeedsProfile(false)
     setLoading(true)
 
     const supabase = createClient()
@@ -60,6 +64,9 @@ export function useProfile() {
               '→ Re-login via Google to heal automatically.'
             )
           }
+        } else if (error?.code === 'PGRST116') {
+          // No profile row — new OAuth user who hasn't completed /auth/select-role
+          setNeedsProfile(true)
         } else {
           // Fallback: safe default — never promote to shop_owner on error
           console.warn('[useProfile] Profile query failed:', error?.message)
@@ -82,5 +89,5 @@ export function useProfile() {
   const isShopOwner = profile?.role === 'shop_owner'
   const isRider     = !isShopOwner
 
-  return { profile, loading, isShopOwner, isRider }
+  return { profile, loading, isShopOwner, isRider, needsProfile }
 }

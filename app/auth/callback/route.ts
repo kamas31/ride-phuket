@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code      = searchParams.get('code')
   const next      = searchParams.get('next') ?? '/'
-  const roleParam = (searchParams.get('role') ?? 'rider') as UserRole
+  const roleHint  = (searchParams.get('role') ?? 'rider') as UserRole
 
   if (!code) {
     return NextResponse.redirect(`${origin}/auth/login?error=auth_failed`)
@@ -26,28 +26,31 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/auth/login?error=auth_failed`)
   }
 
-  // ── Role resolution — profiles.role is the single source of truth ──
-  //
-  // CRITICAL: Never overwrite an existing shop_owner role with 'rider'.
-  // The roleParam from the URL is only relevant for NEW users (first signup).
-  // For existing users, always respect their current profiles.role.
-  //
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existingProfile, error: profileErr } = await (supabase as any)
+  const { data: profileRow, error: profileErr } = await (supabase as any)
     .from('profiles')
     .select('role, name, shop_id')
     .eq('id', user.id)
     .single()
 
+  // ── New OAuth user — no profile row yet ────────────────────────────
+  // Migration 029 changed handle_new_user to skip profile creation for
+  // OAuth users (no explicit role in metadata). Redirect to role selection.
+  // Pass roleHint so the page can pre-select the role the user indicated.
+  if (profileErr?.code === 'PGRST116') {
+    const hint = roleHint !== 'rider' ? `?hint=${roleHint}` : ''
+    return NextResponse.redirect(`${origin}/auth/select-role${hint}`)
+  }
+
+  // ── Existing user — sign in normally ───────────────────────────────
   let effectiveRole: UserRole
 
-  if (existingProfile && !profileErr) {
-    effectiveRole = existingProfile.role as UserRole
+  if (profileRow && !profileErr) {
+    // profiles.role is the single source of truth — never overwrite with hint
+    effectiveRole = profileRow.role as UserRole
   } else {
-    effectiveRole = roleParam
-
-    // Create the profile row (the DB trigger may have already done this,
-    // but this upsert is safe and fills in the correct role)
+    // Unexpected error (network, RLS, pre-002 state) — graceful fallback
+    effectiveRole = roleHint
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase as any).from('profiles').upsert(
       {
@@ -55,23 +58,20 @@ export async function GET(request: NextRequest) {
         name: user.user_metadata?.full_name
           ?? user.user_metadata?.name
           ?? user.email
-          ?? 'Rider',
+          ?? 'User',
         role: effectiveRole,
       },
       { onConflict: 'id' }
     )
   }
 
-  // ── Sync user_metadata to match profiles.role ──────────────────────
-  // This keeps the JWT metadata in sync so the proxy and client code
-  // both see the correct role after a token refresh.
-  // We do this even for existing users so stale JWTs are healed on next login.
+  // ── Sync JWT metadata to match profiles.role ───────────────────────
+  // Heals stale JWTs on every login — proxy and client both see correct role.
   const jwtRole = user.user_metadata?.role as UserRole | undefined
   if (jwtRole !== effectiveRole) {
     await supabase.auth.updateUser({ data: { role: effectiveRole } })
   }
 
-  // ── Route to the correct page ──────────────────────────────────────
   const destination = effectiveRole === 'shop_owner'
     ? '/partner/dashboard'
     : (next === '/' ? '/' : next)

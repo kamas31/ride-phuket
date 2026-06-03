@@ -16,8 +16,7 @@ export default async function DashboardPage() {
 
   const profile = await getServerProfile()
 
-  // Allow access if role is shop_owner OR if migration not yet applied (graceful)
-  if (profile?.role && profile.role !== 'shop_owner') {
+  if (!profile || profile.role !== 'shop_owner') {
     redirect('/')
   }
 

@@ -12,6 +12,7 @@ export default async function ProfilePage() {
   if (!user) redirect('/auth/login?redirect=/profile')
 
   const profile = await getServerProfile()
+  if (!profile) redirect('/auth/select-role')
 
   return <ProfileClient user={{ id: user.id, email: user.email ?? '', created_at: user.created_at }} profile={profile} />
 }

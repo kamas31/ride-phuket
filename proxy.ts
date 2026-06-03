@@ -50,6 +50,22 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
+  // ── No-profile guard ──────────────────────────────────────────────
+  // Authenticated users without a role in JWT metadata are new OAuth users
+  // who haven't completed /auth/select-role yet. Email/password users always
+  // have role in JWT (set by signUpWithEmail). Returning OAuth users have it
+  // set by the callback's updateUser call. New OAuth users have neither.
+  //
+  // We redirect only for routes where a missing profile would cause broken
+  // behaviour — not for public browsing routes.
+  const NEEDS_PROFILE_PREFIXES = ['/profile', '/messages', '/saved', '/checkout']
+  if (
+    !user.user_metadata?.role &&
+    NEEDS_PROFILE_PREFIXES.some(p => pathname.startsWith(p))
+  ) {
+    return NextResponse.redirect(new URL('/auth/select-role', request.url))
+  }
+
   // ── Role resolution: profiles.role is the single source of truth ───
   //
   // We query the DB for routes that need role-based access control.
