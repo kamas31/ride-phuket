@@ -24,8 +24,8 @@ export interface ConversationPreview {
   shopId: string | null
   shopName: string
   shopSlug: string | null
-  clientId: string
-  ownerId: string
+  clientId: string | null
+  ownerId: string | null
   otherUserName: string
   otherUserAvatarUrl: string | null
   lastMessage: string | null
@@ -42,8 +42,8 @@ export interface ConversationDetail {
   shopId: string | null
   shopName: string
   shopSlug: string | null
-  clientId: string
-  ownerId: string
+  clientId: string | null
+  ownerId: string | null
   createdAt: string
   blockedByMe: boolean
   blockedByThem: boolean
@@ -264,11 +264,15 @@ export async function getAllConversations(): Promise<ConversationPreview[]> {
   if (error) console.error('[getAllConversations]', error.message)
   if (!rawConvos) return []
 
-  // Collect unique other-user IDs and fetch their profiles
+  // Collect unique other-user IDs — filter nulls (deleted users) before the DB lookup
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const otherIds = [...new Set((rawConvos as any[]).map(c =>
-    c.client_id === user.id ? c.owner_id : c.client_id
-  ))]
+  const otherIds = [
+    ...new Set(
+      (rawConvos as any[])
+        .map(c => c.client_id === user.id ? c.owner_id : c.client_id)
+        .filter((id): id is string => id !== null),
+    ),
+  ]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profiles } = await (admin as any)
     .from('profiles')
@@ -307,9 +311,15 @@ export async function getConversations(): Promise<ConversationPreview[]> {
 
   if (!rawConvos) return []
 
-  // Fetch owner profiles for display names and avatars
+  // Fetch owner profiles — filter nulls (deleted owners) before the DB lookup
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ownerIds = [...new Set((rawConvos as any[]).map(c => c.owner_id as string))]
+  const ownerIds = [
+    ...new Set(
+      (rawConvos as any[])
+        .map(c => c.owner_id as string | null)
+        .filter((id): id is string => id !== null),
+    ),
+  ]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profiles } = await (admin as any)
     .from('profiles')
@@ -348,9 +358,15 @@ export async function getOwnerConversations(): Promise<ConversationPreview[]> {
 
   if (!rawConvos) return []
 
-  // Resolve rider display names and avatars
+  // Resolve rider display names — filter nulls (deleted riders) before the DB lookup
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const clientIds: string[] = [...new Set((rawConvos as any[]).map(c => c.client_id as string))]
+  const clientIds: string[] = [
+    ...new Set(
+      (rawConvos as any[])
+        .map(c => c.client_id as string | null)
+        .filter((id): id is string => id !== null),
+    ),
+  ]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profiles } = await (admin as any)
     .from('profiles')
@@ -455,7 +471,7 @@ export async function getConversationWithMessages(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? (shopRow?.name ?? (otherProfile as any)?.name ?? 'Shop')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        : ((otherProfile as any)?.name ?? 'User'),
+        : ((otherProfile as any)?.name ?? 'Deleted User'),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       otherUserAvatarUrl: convo.client_id === user.id
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -485,12 +501,15 @@ export async function markMessagesRead(conversationId: string): Promise<void> {
   const admin = createAdminClient()
   const now = new Date().toISOString()
 
+  // .or() is required here because SQL != does not match NULL — after migration 030,
+  // messages from deleted users have sender_id = NULL and must be explicitly included
+  // so the unread badge clears correctly when the shop owner opens the thread.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (admin as any)
     .from('messages')
     .update({ read_at: now })
     .eq('conversation_id', conversationId)
-    .neq('sender_id', user.id)
+    .or(`sender_id.neq.${user.id},sender_id.is.null`)
     .is('read_at', null)
 }
 
@@ -555,7 +574,7 @@ function buildPreview(
   // Partner-facing: represent the RIDER (their profile name + avatar).
   const otherUserName = isClient
     ? (shopRow?.name ?? otherProfile?.name ?? 'Shop')
-    : (otherProfile?.name ?? 'User')
+    : (otherProfile?.name ?? 'Deleted User')
   const otherUserAvatarUrl = isClient
     ? (shopRow?.logo_url ?? null)
     : (otherProfile?.avatar_url ?? null)
