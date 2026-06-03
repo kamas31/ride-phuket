@@ -51,7 +51,7 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
       title: 'Support',
       items: [
         { icon: MessageSquare,   label: 'Feedback',   href: '/feedback',                                                             badge: null },
-        { icon: HeadphonesIcon,  label: 'Contact Us', href: 'mailto:hello@kohride.com?subject=Koh%20Ride%20Support', badge: null },
+        { icon: HeadphonesIcon,  label: 'Contact Us', href: '/contact-us', badge: null },
       ]
     },
   ]
