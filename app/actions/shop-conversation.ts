@@ -28,18 +28,17 @@ export async function getOrCreateShopConversation(
   const ownerId = shopRow.owner_id
   if (ownerId === user.id) return { error: 'own_listing' }
 
-  // Find existing shop-level conversation for this user + shop
+  // One conversation per rider↔shop pair — find by (client_id, owner_id)
   const { data: existing } = await a
     .from('conversations')
     .select('id')
-    .eq('shop_id', shopId)
     .eq('client_id', user.id)
-    .is('scooter_id', null)
+    .eq('owner_id', ownerId)
     .maybeSingle() as { data: { id: string } | null }
 
   if (existing) return { conversationId: existing.id }
 
-  // Create new shop conversation
+  // Create new shop conversation (no scooter context)
   const { data, error } = await a
     .from('conversations')
     .insert({ shop_id: shopId, owner_id: ownerId, client_id: user.id })
@@ -47,14 +46,13 @@ export async function getOrCreateShopConversation(
     .single() as { data: { id: string } | null; error: { code?: string; message?: string } | null }
 
   if (error) {
-    // 23505 = unique_violation — race condition, conversation was created by a concurrent request
+    // 23505 = unique_violation — race condition, retry with (client_id, owner_id)
     if (error.code === '23505') {
       const { data: race } = await a
         .from('conversations')
         .select('id')
-        .eq('shop_id', shopId)
         .eq('client_id', user.id)
-        .is('scooter_id', null)
+        .eq('owner_id', ownerId)
         .single() as { data: { id: string } | null }
       if (race) return { conversationId: race.id }
     }

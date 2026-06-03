@@ -40,7 +40,10 @@ export function MessageOwnerButton({
         return
       }
 
-      router.push(`/messages/${result.conversationId}`)
+      const url = result.prefill
+        ? `/messages/${result.conversationId}?prefill=${encodeURIComponent(result.prefill)}`
+        : `/messages/${result.conversationId}`
+      router.push(url)
     })
   }
 

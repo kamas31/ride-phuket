@@ -55,7 +55,7 @@ export interface ConversationDetail {
 
 export async function getOrCreateConversation(
   scooterId: string,
-): Promise<{ conversationId: string } | { error: string }> {
+): Promise<{ conversationId: string; prefill?: string } | { error: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'sign_in_required' }
@@ -65,7 +65,7 @@ export async function getOrCreateConversation(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: scooter } = await (admin as any)
     .from('scooters')
-    .select('id, shop_id, shops(owner_id)')
+    .select('id, name, shop_id, shops(owner_id)')
     .eq('id', scooterId)
     .single()
 
@@ -76,16 +76,22 @@ export async function getOrCreateConversation(
   if (!ownerId) return { error: 'Shop owner not found.' }
   if (ownerId === user.id) return { error: 'own_listing' }
 
-  // Find-or-create: check for existing conversation first
+  // One conversation per rider↔shop pair — find by (client_id, owner_id)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: existing } = await (admin as any)
     .from('conversations')
     .select('id')
-    .eq('scooter_id', scooterId)
     .eq('client_id', user.id)
+    .eq('owner_id', ownerId)
     .maybeSingle()
 
-  if (existing) return { conversationId: existing.id as string }
+  if (existing) {
+    return {
+      conversationId: existing.id as string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      prefill: `Hi, I'm interested in the ${(scooter as any).name}`,
+    }
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (admin as any)
@@ -95,14 +101,14 @@ export async function getOrCreateConversation(
     .single()
 
   if (error) {
-    // 23505 = unique_violation — race condition, conversation was created by a concurrent request
+    // 23505 = unique_violation — race condition, retry with (client_id, owner_id)
     if (error.code === '23505') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: race } = await (admin as any)
         .from('conversations')
         .select('id')
-        .eq('scooter_id', scooterId)
         .eq('client_id', user.id)
+        .eq('owner_id', ownerId)
         .single()
       if (race) return { conversationId: race.id as string }
     }
