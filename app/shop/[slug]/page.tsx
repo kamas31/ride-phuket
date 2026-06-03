@@ -12,6 +12,7 @@ import { TrustBadge } from '@/components/ride/TrustBadge'
 import { TrackView } from '@/components/analytics/TrackView'
 import { ShopChatButton } from '@/components/shop/ShopChatButton'
 import { ShopQuickQuestions } from '@/components/shop/ShopQuickQuestions'
+import { ShopAboutSection } from '@/components/shop/ShopAboutSection'
 import { ShopLocationMapClient as ShopLocationMap } from '@/components/map/ShopLocationMapClient'
 import { getShopChatStats } from '@/lib/shop-chat-stats'
 import { getShopReviews } from '@/app/actions/reviews'
@@ -317,15 +318,8 @@ export default async function ShopPage({ params }: ShopPageProps) {
             </div>
           </div>
 
-          {/* ── LEFT column Part A — description + fleet (first on mobile) ── */}
+          {/* ── LEFT column Part A — fleet (first on mobile) ── */}
           <div className="order-1 lg:order-none lg:col-start-1 lg:col-span-2 lg:row-start-1 space-y-10">
-
-            {/* Description */}
-            {shop.description && (
-              <p className="text-[#5c5c58] text-[15px] leading-relaxed -mt-4">
-                {shop.description}
-              </p>
-            )}
 
             {/* Fleet — the main product */}
             <section>
@@ -352,8 +346,13 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
           </div>
 
-          {/* ── LEFT column Part B — services + reviews (third on mobile) ── */}
+          {/* ── LEFT column Part B — about + services + reviews (third on mobile) ── */}
           <div className="order-3 lg:order-none lg:col-start-1 lg:col-span-2 lg:row-start-2 space-y-10 mt-10 lg:mt-0">
+
+            {/* About */}
+            {shop.description && shop.description.trim().length >= 30 && (
+              <ShopAboutSection description={shop.description.trim()} />
+            )}
 
             {/* Services */}
             {(hasInsurance || hasDelivery || hasHelmet) && (
