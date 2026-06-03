@@ -192,9 +192,13 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
 
                 {/* Camera badge — persistent affordance, bottom-right */}
                 {!avatarUploading && (
-                  <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-[#FF6B35] rounded-full border-2 border-white flex items-center justify-center pointer-events-none">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-[#FF6B35] rounded-full border-2 border-white flex items-center justify-center focus:outline-none"
+                  >
                     <Camera className="w-3 h-3 text-white" />
-                  </div>
+                  </button>
                 )}
 
                 {/* Remove badge — top-right, only when photo exists */}
