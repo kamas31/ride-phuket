@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   Shield, Heart, Star, LogOut,
-  ChevronRight, Check, Phone, Mail, LayoutDashboard, Trash2
+  ChevronRight, Check, Phone, Mail, LayoutDashboard, Trash2,
+  MessageSquare, HeadphonesIcon,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { updateProfile, deleteAccount } from '@/app/actions/profile'
@@ -44,6 +45,13 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
       title: 'Saved',
       items: [
         { icon: Heart, label: 'Saved Scooters', href: '/saved', badge: null },
+      ]
+    },
+    {
+      title: 'Support',
+      items: [
+        { icon: MessageSquare,   label: 'Feedback',   href: '/feedback',                                                             badge: null },
+        { icon: HeadphonesIcon,  label: 'Contact Us', href: 'mailto:hello@kohride.com?subject=Koh%20Ride%20Support', badge: null },
       ]
     },
   ]

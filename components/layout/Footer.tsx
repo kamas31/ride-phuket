@@ -14,8 +14,10 @@ const STATIC_SECTIONS = {
     { href: '/partner', label: 'List Your Scooters' },
   ],
   Legal: [
-    { href: '/terms',   label: 'Terms of Service' },
-    { href: '/privacy', label: 'Privacy Policy'   },
+    { href: '/terms',                                                      label: 'Terms of Service' },
+    { href: '/privacy',                                                    label: 'Privacy Policy'   },
+    { href: 'mailto:hello@kohride.com?subject=Koh%20Ride%20Support',      label: 'Contact Us'       },
+    { href: '/feedback',                                                   label: 'Feedback'         },
   ],
 }
 
