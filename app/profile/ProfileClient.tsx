@@ -299,53 +299,72 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
 
             {/* Delete Account */}
             <div className="px-5 py-3.5">
-              {deleteStep === 'idle' && (
-                <button
-                  onClick={() => setDeleteStep('confirm')}
-                  className="flex items-center gap-3.5 w-full"
-                >
-                  <div className="w-8 h-8 bg-[#fff5f5] rounded-[10px] flex items-center justify-center flex-shrink-0">
-                    <Trash2 className="w-4 h-4 text-[#ef4444]" />
+              {isShopOwner ? (
+                <div className="flex items-start gap-3.5">
+                  <div className="w-8 h-8 bg-[#f0f0ec] rounded-[10px] flex items-center justify-center flex-shrink-0">
+                    <Trash2 className="w-4 h-4 text-[#9c9c98]" />
                   </div>
-                  <span className="text-sm font-medium text-[#ef4444]">Delete Account</span>
-                </button>
-              )}
-
-              {(deleteStep === 'confirm' || deleteStep === 'deleting') && (
-                <div className="space-y-3">
-                  <p className="text-sm font-semibold text-[#0f0f0e]">Delete your account?</p>
-                  <p className="text-xs text-[#5c5c58] leading-relaxed">
-                    This permanently deletes your account and all associated data. This action cannot be undone.
-                  </p>
                   <div>
-                    <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">
-                      Type DELETE to confirm
-                    </label>
-                    <input
-                      type="text"
-                      value={deleteConfirmText}
-                      onChange={e => setDeleteConfirmText(e.target.value)}
-                      placeholder="DELETE"
-                      className="w-full px-3 py-2.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[10px] text-sm focus:outline-none focus:border-[#ef4444] transition-colors"
-                    />
-                  </div>
-                  {deleteError && <p className="text-xs text-[#ef4444]">{deleteError}</p>}
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => { setDeleteStep('idle'); setDeleteConfirmText(''); setDeleteError(null) }}
-                      className="flex-1 py-2.5 text-sm text-[#5c5c58] border border-[#e8e8e4] rounded-full hover:bg-[#f8f8f6] transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleDeleteAccount}
-                      disabled={deleteConfirmText !== 'DELETE' || deleteStep === 'deleting'}
-                      className="flex-1 py-2.5 text-sm font-bold text-white bg-[#ef4444] rounded-full hover:bg-[#dc2626] transition-colors disabled:opacity-40"
-                    >
-                      {deleteStep === 'deleting' ? 'Deleting…' : 'Delete Forever'}
-                    </button>
+                    <p className="text-sm font-medium text-[#9c9c98]">Delete Account</p>
+                    <p className="text-xs text-[#9c9c98] mt-0.5 leading-relaxed">
+                      To delete your shop account, please{' '}
+                      <Link href="/contact-us" className="text-[#FF6B35] hover:underline font-medium">
+                        contact support
+                      </Link>.
+                    </p>
                   </div>
                 </div>
+              ) : (
+                <>
+                  {deleteStep === 'idle' && (
+                    <button
+                      onClick={() => setDeleteStep('confirm')}
+                      className="flex items-center gap-3.5 w-full"
+                    >
+                      <div className="w-8 h-8 bg-[#fff5f5] rounded-[10px] flex items-center justify-center flex-shrink-0">
+                        <Trash2 className="w-4 h-4 text-[#ef4444]" />
+                      </div>
+                      <span className="text-sm font-medium text-[#ef4444]">Delete Account</span>
+                    </button>
+                  )}
+
+                  {(deleteStep === 'confirm' || deleteStep === 'deleting') && (
+                    <div className="space-y-3">
+                      <p className="text-sm font-semibold text-[#0f0f0e]">Delete your account?</p>
+                      <p className="text-xs text-[#5c5c58] leading-relaxed">
+                        This permanently deletes your account and all associated data. This action cannot be undone.
+                      </p>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">
+                          Type DELETE to confirm
+                        </label>
+                        <input
+                          type="text"
+                          value={deleteConfirmText}
+                          onChange={e => setDeleteConfirmText(e.target.value)}
+                          placeholder="DELETE"
+                          className="w-full px-3 py-2.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[10px] text-sm focus:outline-none focus:border-[#ef4444] transition-colors"
+                        />
+                      </div>
+                      {deleteError && <p className="text-xs text-[#ef4444]">{deleteError}</p>}
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => { setDeleteStep('idle'); setDeleteConfirmText(''); setDeleteError(null) }}
+                          className="flex-1 py-2.5 text-sm text-[#5c5c58] border border-[#e8e8e4] rounded-full hover:bg-[#f8f8f6] transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleDeleteAccount}
+                          disabled={deleteConfirmText !== 'DELETE' || deleteStep === 'deleting'}
+                          className="flex-1 py-2.5 text-sm font-bold text-white bg-[#ef4444] rounded-full hover:bg-[#dc2626] transition-colors disabled:opacity-40"
+                        >
+                          {deleteStep === 'deleting' ? 'Deleting…' : 'Delete Forever'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

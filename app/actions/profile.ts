@@ -160,6 +160,17 @@ export async function deleteAccount(): Promise<{ error: string | null }> {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Not authenticated' }
 
+    // Shop owners must contact support — self-serve deletion not available
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: profile } = await (supabase as any)
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle()
+    if (profile?.role === 'shop_owner') {
+      return { error: 'Shop owners must contact support to delete their account.' }
+    }
+
     const admin = createAdminClient()
     const { error } = await admin.auth.admin.deleteUser(user.id)
     return { error: error?.message ?? null }
