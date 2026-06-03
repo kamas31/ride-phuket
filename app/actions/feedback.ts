@@ -53,7 +53,7 @@ export async function submitFeedback(
 
       await resend.emails.send({
         from:    'Koh Ride Feedback <noreply@kohride.com>',
-        to:      'hello@kohride.com',
+        to:      'feedback@kohride.com',
         subject,
         html:    `<div style="font-family:sans-serif;font-size:14px;line-height:1.6;color:#0f0f0e;">${body}</div>`,
       })

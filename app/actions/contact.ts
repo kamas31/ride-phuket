@@ -48,7 +48,7 @@ export async function submitContactMessage(
 
       await resend.emails.send({
         from:    'Koh Ride Contact <noreply@kohride.com>',
-        to:      'support@kohride.com',
+        to:      'contact@kohride.com',
         subject: `[Koh Ride] ${trimSubject}`,
         html:    `<div style="font-family:sans-serif;font-size:14px;line-height:1.6;color:#0f0f0e;">${body}</div>`,
       })
