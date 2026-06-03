@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { Profile } from '@/hooks/useProfile'
@@ -64,6 +65,7 @@ export async function updateProfile(updates: {
 export async function getShopForOwner(): Promise<{
   id: string; name: string; slug: string; location: string;
   verified: boolean; active: boolean; plan_type: string;
+  logo_url: string | null;
 } | null> {
   try {
     const supabase = await createClient()
@@ -73,7 +75,7 @@ export async function getShopForOwner(): Promise<{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from('shops')
-      .select('id,name,slug,location,verified,active,plan_type')
+      .select('id,name,slug,location,verified,active,plan_type,logo_url')
       .eq('owner_id', user.id)
       .single()
 
@@ -81,6 +83,38 @@ export async function getShopForOwner(): Promise<{
     return data
   } catch {
     return null
+  }
+}
+
+export async function updateShopLogo(
+  shopId: string,
+  logoUrl: string | null,
+): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not authenticated' }
+
+    const admin = createAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: shopRow } = await (admin as any)
+      .from('shops')
+      .select('owner_id')
+      .eq('id', shopId)
+      .single()
+    if (!shopRow || shopRow.owner_id !== user.id) return { error: 'Unauthorized' }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin as any)
+      .from('shops')
+      .update({ logo_url: logoUrl, updated_at: new Date().toISOString() })
+      .eq('id', shopId)
+
+    if (error) return { error: error.message }
+    revalidatePath('/partner/dashboard')
+    return { error: null }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Unknown error' }
   }
 }
 

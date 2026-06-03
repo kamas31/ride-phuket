@@ -12,19 +12,22 @@ import {
 import { cn, formatPrice } from '@/lib/utils'
 import { deleteScooter } from '@/app/actions/scooter-delete'
 import { toggleScooterAvailability } from '@/app/actions/scooter-availability'
+import { updateShopLogo } from '@/app/actions/profile'
+import { createClient } from '@/lib/supabase/client'
 import {
   canAccessAdvancedAnalytics, canAccessHotScooters, canAccessLeadInsights,
 } from '@/lib/plans'
 import { computeConversionRate, getConversionInsight } from '@/lib/lead-analytics'
 import { rankScootersByHotScore, getHotStatusLabel } from '@/lib/hot-scooters'
 import { TrackView } from '@/components/analytics/TrackView'
+import { AvatarUploader } from '@/components/shared/AvatarUploader'
 import type { Profile } from '@/hooks/useProfile'
 import type { ShopAnalytics } from '@/app/actions/shop-analytics'
 import type { ActivityFeedItem } from '@/app/actions/activity-feed'
 
 interface DashboardClientProps {
   profile: Profile | null
-  shop: { id: string; name: string; slug: string; location: string; verified: boolean; active: boolean; plan_type: string } | null
+  shop: { id: string; name: string; slug: string; location: string; verified: boolean; active: boolean; plan_type: string; logo_url: string | null } | null
   scooters: {
     id: string; name: string; brand: string; model: string;
     price_per_day: number; location: string; available: boolean;
@@ -120,7 +123,48 @@ export default function DashboardClient({
       ──────────────────────────────────────────────────────────────────────── */}
       <div className="bg-white border-b border-[#e8e8e4]">
         <div className="max-w-4xl mx-auto px-5 sm:px-8 pt-20 pb-7 sm:pb-8">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+
+            {/* Shop logo / avatar */}
+            {shop && (
+              <AvatarUploader
+                currentUrl={shop.logo_url}
+                name={shop.name}
+                size={72}
+                addText="Add shop logo"
+                changeText="Change shop logo"
+                onUpload={async (blob) => {
+                  try {
+                    const supabase = createClient()
+                    const path = `shops/${shop.id}/logo/avatar.jpg`
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const { error } = await (supabase as any).storage
+                      .from('scooter-images')
+                      .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
+                    if (error) throw error
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const { data: { publicUrl } } = (supabase as any).storage
+                      .from('scooter-images')
+                      .getPublicUrl(path)
+                    const url = `${publicUrl}?t=${Date.now()}`
+                    await updateShopLogo(shop.id, url)
+                    return url
+                  } catch (err) {
+                    console.error('[DashboardClient] logo upload failed:', err)
+                    toast.error('Failed to upload logo')
+                    return null
+                  }
+                }}
+                onRemove={async () => {
+                  await updateShopLogo(shop.id, null)
+                  const supabase = createClient()
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  await (supabase as any).storage
+                    .from('scooter-images')
+                    .remove([`shops/${shop.id}/logo/avatar.jpg`])
+                }}
+              />
+            )}
 
             <div className="min-w-0 flex-1">
               {/* Brand label */}
