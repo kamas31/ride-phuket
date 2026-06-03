@@ -156,7 +156,7 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
           <div className="flex items-start gap-5">
 
             {/* Avatar — tap to upload */}
-            <div className="relative flex-shrink-0">
+            <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -164,42 +164,61 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
                 className="hidden"
                 onChange={handleAvatarChange}
               />
-              <button
-                type="button"
-                onClick={() => !avatarUploading && fileInputRef.current?.click()}
-                className="w-20 h-20 rounded-full overflow-hidden relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2"
-              >
-                {localAvatarUrl ? (
-                  <img
-                    src={localAvatarUrl}
-                    alt="Profile photo"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] flex items-center justify-center text-white text-2xl font-bold">
-                    {getInitials(profile?.name ?? user.email)}
-                  </div>
-                )}
 
-                {avatarUploading ? (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : (
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Camera className="w-5 h-5 text-white" />
-                  </div>
-                )}
-              </button>
-
-              {/* Remove badge — only when photo exists */}
-              {localAvatarUrl && !avatarUploading && (
+              {/* Circle + floating badges */}
+              <div className="relative">
                 <button
                   type="button"
-                  onClick={handleRemoveAvatar}
-                  className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-white rounded-full border border-[#e8e8e4] flex items-center justify-center shadow-sm hover:bg-[#fee2e2] hover:border-[#fca5a5] transition-colors group/x"
+                  onClick={() => !avatarUploading && fileInputRef.current?.click()}
+                  className="w-20 h-20 rounded-full overflow-hidden relative focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2"
                 >
-                  <X className="w-2.5 h-2.5 text-[#9c9c98] group-hover/x:text-[#ef4444] transition-colors" />
+                  {localAvatarUrl ? (
+                    <img
+                      src={localAvatarUrl}
+                      alt="Profile photo"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] flex items-center justify-center text-white text-2xl font-bold">
+                      {getInitials(profile?.name ?? user.email)}
+                    </div>
+                  )}
+                  {avatarUploading && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </button>
+
+                {/* Camera badge — persistent affordance, bottom-right */}
+                {!avatarUploading && (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-[#FF6B35] rounded-full border-2 border-white flex items-center justify-center pointer-events-none">
+                    <Camera className="w-3 h-3 text-white" />
+                  </div>
+                )}
+
+                {/* Remove badge — top-right, only when photo exists */}
+                {localAvatarUrl && !avatarUploading && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveAvatar}
+                    className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-white rounded-full border border-[#e8e8e4] flex items-center justify-center shadow-sm hover:bg-[#fee2e2] hover:border-[#fca5a5] transition-colors group/x"
+                  >
+                    <X className="w-2.5 h-2.5 text-[#9c9c98] group-hover/x:text-[#ef4444] transition-colors" />
+                  </button>
+                )}
+              </div>
+
+              {/* Helper text */}
+              {avatarUploading ? (
+                <span className="text-xs text-[#9c9c98]">Uploading…</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-xs font-medium text-[#FF6B35] hover:underline focus:outline-none"
+                >
+                  {localAvatarUrl ? 'Change profile photo' : 'Add profile photo'}
                 </button>
               )}
             </div>
