@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Send, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Send, ExternalLink, Phone, MapPin } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { sendMessage, markMessagesRead } from '@/app/actions/messaging'
 import { formatPrice, getInitials, cn } from '@/lib/utils'
@@ -256,6 +256,12 @@ export default function MessageThread({
     ? (conversation.shopSlug ? `/shop/${conversation.shopSlug}` : null)
     : `/scooter/${conversation.scooterId}`
 
+  // Rider = the client in the conversation. Shop owner = ownerId.
+  const isRider = conversation.clientId === currentUserId
+  const shopProfileUrl = isRider && conversation.shopSlug
+    ? `/shop/${conversation.shopSlug}`
+    : null
+
   // position:fixed;inset:0 takes the full viewport independently of the document.
   // The Navbar (z-50) and MobileBottomNav (z-50) sit above this layer.
   // paddingTop:64px clears the fixed Navbar.
@@ -279,41 +285,98 @@ export default function MessageThread({
           </button>
 
           {/* Other party identity — avatar + name + scooter context */}
-          <div className="flex items-center gap-2.5 flex-1 min-w-0">
-            <div className="w-[38px] h-[38px] rounded-full overflow-hidden flex-shrink-0">
-              {conversation.otherUserAvatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={conversation.otherUserAvatarUrl}
-                  alt={conversation.otherUserName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] flex items-center justify-center text-white text-xs font-bold">
-                  {getInitials(conversation.otherUserName)}
-                </div>
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight">
-                {conversation.otherUserName}
-              </p>
-              {(conversation.scooterName || conversation.shopName) && (
-                <p className="text-[11px] text-[#9c9c98] truncate leading-tight">
-                  {conversation.scooterName
-                    ? `Regarding ${conversation.scooterName}`
-                    : conversation.shopName}
+          {/* Riders: entire block is a link to the shop profile */}
+          {shopProfileUrl ? (
+            <Link
+              href={shopProfileUrl}
+              className="flex items-center gap-2.5 flex-1 min-w-0 group"
+            >
+              <div className="w-[38px] h-[38px] rounded-full overflow-hidden flex-shrink-0 transition-opacity group-hover:opacity-80">
+                {conversation.otherUserAvatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={conversation.otherUserAvatarUrl}
+                    alt={conversation.otherUserName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] flex items-center justify-center text-white text-xs font-bold">
+                    {getInitials(conversation.otherUserName)}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight group-hover:text-[#FF6B35] transition-colors">
+                  {conversation.otherUserName}
                 </p>
-              )}
+                {(conversation.scooterName || conversation.shopName) && (
+                  <p className="text-[11px] text-[#9c9c98] truncate leading-tight">
+                    {conversation.scooterName
+                      ? `Regarding ${conversation.scooterName}`
+                      : conversation.shopName}
+                  </p>
+                )}
+              </div>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+              <div className="w-[38px] h-[38px] rounded-full overflow-hidden flex-shrink-0">
+                {conversation.otherUserAvatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={conversation.otherUserAvatarUrl}
+                    alt={conversation.otherUserName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] flex items-center justify-center text-white text-xs font-bold">
+                    {getInitials(conversation.otherUserName)}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight">
+                  {conversation.otherUserName}
+                </p>
+                {(conversation.scooterName || conversation.shopName) && (
+                  <p className="text-[11px] text-[#9c9c98] truncate leading-tight">
+                    {conversation.scooterName
+                      ? `Regarding ${conversation.scooterName}`
+                      : conversation.shopName}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Price chip + view listing + menu */}
+          {/* Price chip + rider quick actions + view listing + menu */}
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {!isShopConv && (
               <span className="text-[12px] font-bold text-[#0f0f0e] bg-[#f5f5f2] px-2.5 py-1 rounded-full">
                 {formatPrice(conversation.scooterPricePerDay)}<span className="text-[#9c9c98] font-normal">/day</span>
               </span>
+            )}
+            {/* Call — riders only, when shop has a phone number */}
+            {isRider && conversation.shopPhone && (
+              <a
+                href={`tel:${conversation.shopPhone}`}
+                aria-label="Call shop"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f5f5f2] transition-colors"
+              >
+                <Phone className="w-[15px] h-[15px] text-[#9c9c98]" />
+              </a>
+            )}
+            {/* Location — riders only, when shop has a Google Maps link */}
+            {isRider && conversation.shopGoogleMapsLink && (
+              <a
+                href={conversation.shopGoogleMapsLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="View shop location"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f5f5f2] transition-colors"
+              >
+                <MapPin className="w-[15px] h-[15px] text-[#9c9c98]" />
+              </a>
             )}
             {listingUrl && (
               <Link

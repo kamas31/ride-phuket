@@ -44,6 +44,8 @@ export interface ConversationDetail {
   shopId: string | null
   shopName: string
   shopSlug: string | null
+  shopPhone: string | null
+  shopGoogleMapsLink: string | null
   clientId: string | null
   ownerId: string | null
   createdAt: string
@@ -410,7 +412,7 @@ export async function getConversationWithMessages(
     .select(`
       id, scooter_id, shop_id, client_id, owner_id, created_at,
       scooters ( name, cover_image, price_per_day ),
-      shops ( name, slug, logo_url )
+      shops ( name, slug, logo_url, phone, google_maps_link )
     `)
     .eq('id', conversationId)
     .single()
@@ -470,6 +472,8 @@ export async function getConversationWithMessages(
       shopId: convo.shop_id ?? null,
       shopName: shopRow?.name ?? 'Shop',
       shopSlug: shopRow?.slug ?? null,
+      shopPhone: shopRow?.phone ?? null,
+      shopGoogleMapsLink: shopRow?.google_maps_link ?? null,
       clientId: convo.client_id,
       ownerId: convo.owner_id,
       createdAt: convo.created_at,
