@@ -9,15 +9,23 @@ export const CURRENCY_SYMBOL = '฿'
 export const PHUKET_CENTER = { lat: 7.9519, lng: 98.3381 }
 
 export const LOCATIONS = [
-  { id: 'all', label: 'All Phuket' },
-  { id: 'patong', label: 'Patong' },
-  { id: 'kata', label: 'Kata' },
-  { id: 'karon', label: 'Karon' },
-  { id: 'rawai', label: 'Rawai' },
-  { id: 'phuket-town', label: 'Phuket Town' },
-  { id: 'bang-tao', label: 'Bang Tao' },
-  { id: 'kamala', label: 'Kamala' },
-  { id: 'surin', label: 'Surin' },
+  { id: 'all',          label: 'All Phuket'    },
+  { id: 'patong',       label: 'Patong'        },
+  { id: 'kata',         label: 'Kata'          },
+  { id: 'karon',        label: 'Karon'         },
+  { id: 'rawai',        label: 'Rawai'         },
+  { id: 'phuket-town',  label: 'Phuket Town'   },
+  { id: 'bang-tao',     label: 'Bang Tao'      },
+  { id: 'kamala',       label: 'Kamala'        },
+  { id: 'surin',        label: 'Surin'         },
+  { id: 'chalong',      label: 'Chalong'       },
+  { id: 'nai-harn',     label: 'Nai Harn'      },
+  { id: 'cherng-talay', label: 'Cherng Talay'  },
+  { id: 'kata-noi',     label: 'Kata Noi'      },
+  { id: 'mai-khao',     label: 'Mai Khao'      },
+  { id: 'thalang',      label: 'Thalang'       },
+  { id: 'cape-panwa',   label: 'Cape Panwa'    },
+  { id: 'ko-sirey',     label: 'Ko Sirey'      },
 ] as const
 
 export const PRICE_RANGE = { min: 150, max: 2000 }

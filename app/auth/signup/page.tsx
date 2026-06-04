@@ -47,6 +47,8 @@ function SignupForm() {
   const [error, setError]       = useState<string | null>(null)
   const [success, setSuccess]   = useState(false)
   const [isNative, setIsNative] = useState(false)
+  const [resending, setResending]   = useState(false)
+  const [resendSent, setResendSent] = useState(false)
 
   // Pre-fill from login "no account" flow: ?email=...&role=... + sessionStorage password
   useEffect(() => {
@@ -91,6 +93,15 @@ function SignupForm() {
     }
   }
 
+  const handleResend = async () => {
+    setResending(true)
+    const { createClient } = await import('@/lib/supabase/client')
+    const supabase = createClient()
+    await supabase.auth.resend({ type: 'signup', email })
+    setResending(false)
+    setResendSent(true)
+  }
+
   if (success) {
     return (
       <div className="min-h-screen bg-[#f8f8f6] flex items-center justify-center px-4">
@@ -108,10 +119,21 @@ function SignupForm() {
           </p>
           <Link
             href="/auth/login"
-            className="flex items-center justify-center w-full py-3 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-sm"
+            className="flex items-center justify-center w-full py-3 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-sm mb-3"
           >
             Back to Sign In
           </Link>
+          {resendSent ? (
+            <p className="text-xs text-[#22c55e] font-medium">Email resent!</p>
+          ) : (
+            <button
+              onClick={handleResend}
+              disabled={resending}
+              className="text-xs text-[#9c9c98] hover:text-[#5c5c58] transition-colors disabled:opacity-50"
+            >
+              {resending ? 'Sending…' : 'Didn\'t receive it? Resend email'}
+            </button>
+          )}
         </div>
       </div>
     )

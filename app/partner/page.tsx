@@ -1,13 +1,31 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowRight, Bike, TrendingUp, Star, MapPin } from 'lucide-react'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { getServerProfile, getShopForOwner } from '@/app/actions/profile'
+import { SITE_URL, SITE_NAME } from '@/constants'
 import CreateShopForm from './CreateShopForm'
 
-export const metadata = {
-  title: 'List Your Scooters on Koh Ride — Partner With Us',
-  description: 'Join Koh Ride and reach international tourists looking to rent scooters in Phuket. List your fleet, collect reviews, and get direct inquiries — no middlemen.',
+const TITLE = 'List Your Scooters on Koh Ride — Partner With Us'
+const DESC  = 'Join Koh Ride and reach international tourists looking to rent scooters in Phuket. List your fleet, collect reviews, and get direct inquiries — no middlemen.'
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESC,
+  alternates: { canonical: `${SITE_URL}/partner` },
+  openGraph: {
+    title: TITLE,
+    description: DESC,
+    url: `${SITE_URL}/partner`,
+    type: 'website',
+    siteName: SITE_NAME,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESC,
+  },
 }
 
 const PERKS = [

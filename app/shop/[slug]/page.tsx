@@ -162,12 +162,17 @@ export default async function ShopPage({ params }: ShopPageProps) {
     } : {}),
   }
 
+  // Breadcrumb: Home → Area page (if resolved) → Shop, for accurate URL hierarchy + PageRank flow
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [
+    itemListElement: shopArea ? [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Explore', item: `${SITE_URL}/explore` },
+      { '@type': 'ListItem', position: 2, name: `Scooter Rental ${shopArea.label}`, item: `${SITE_URL}/phuket/${shopArea.slug}` },
+      { '@type': 'ListItem', position: 3, name: shop.name, item: `${SITE_URL}/shop/${slug}` },
+    ] : [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Rental Shops', item: `${SITE_URL}/explore` },
       { '@type': 'ListItem', position: 3, name: shop.name, item: `${SITE_URL}/shop/${slug}` },
     ],
   }

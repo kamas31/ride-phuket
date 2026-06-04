@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useSaved } from '@/hooks/useSaved'
-import { updateProfile, deleteAccount } from '@/app/actions/profile'
+import { updateProfile, deleteAccount, requestShopAccountDeletion } from '@/app/actions/profile'
 import { createClient } from '@/lib/supabase/client'
 import { AvatarUploader } from '@/components/shared/AvatarUploader'
 import type { Profile } from '@/hooks/useProfile'
@@ -34,6 +34,9 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
   const [deleteStep, setDeleteStep]             = useState<'idle' | 'confirm' | 'deleting'>('idle')
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [deleteError, setDeleteError]           = useState<string | null>(null)
+
+  const [shopDeleteStep, setShopDeleteStep]       = useState<'idle' | 'confirm' | 'submitting' | 'done'>('idle')
+  const [shopDeleteError, setShopDeleteError]     = useState<string | null>(null)
 
   const isShopOwner = profile?.role === 'shop_owner'
   const memberSince = new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
@@ -83,6 +86,18 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
     }
     await signOut()
     router.replace('/')
+  }
+
+  const handleRequestShopDeletion = async () => {
+    setShopDeleteError(null)
+    setShopDeleteStep('submitting')
+    const { error } = await requestShopAccountDeletion()
+    if (error) {
+      setShopDeleteError(error)
+      setShopDeleteStep('confirm')
+      return
+    }
+    setShopDeleteStep('done')
   }
 
   return (
@@ -300,20 +315,55 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
             {/* Delete Account */}
             <div className="px-5 py-3.5">
               {isShopOwner ? (
-                <div className="flex items-start gap-3.5">
-                  <div className="w-8 h-8 bg-[#f0f0ec] rounded-[10px] flex items-center justify-center flex-shrink-0">
-                    <Trash2 className="w-4 h-4 text-[#9c9c98]" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-[#9c9c98]">Delete Account</p>
-                    <p className="text-xs text-[#9c9c98] mt-0.5 leading-relaxed">
-                      To delete your shop account, please{' '}
-                      <Link href="/contact-us" className="text-[#FF6B35] hover:underline font-medium">
-                        contact support
-                      </Link>.
-                    </p>
-                  </div>
-                </div>
+                <>
+                  {shopDeleteStep === 'done' ? (
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-8 h-8 bg-[#f0fdf4] rounded-[10px] flex items-center justify-center flex-shrink-0">
+                        <Check className="w-4 h-4 text-[#22c55e]" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-[#0f0f0e]">Deletion requested</p>
+                        <p className="text-xs text-[#9c9c98] mt-0.5 leading-relaxed">
+                          Your account and scooter listings have been deactivated. We&apos;ll complete the deletion within 30 days and send confirmation to your email.
+                        </p>
+                      </div>
+                    </div>
+                  ) : shopDeleteStep === 'idle' ? (
+                    <button
+                      onClick={() => setShopDeleteStep('confirm')}
+                      className="flex items-center gap-3.5 w-full"
+                    >
+                      <div className="w-8 h-8 bg-[#fff5f5] rounded-[10px] flex items-center justify-center flex-shrink-0">
+                        <Trash2 className="w-4 h-4 text-[#ef4444]" />
+                      </div>
+                      <span className="text-sm font-medium text-[#ef4444]">Delete Account</span>
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-sm font-semibold text-[#0f0f0e]">Request account deletion?</p>
+                      <p className="text-xs text-[#5c5c58] leading-relaxed">
+                        Your scooter listings will be deactivated immediately. Your account and all data will be permanently deleted within 30 days. This cannot be undone.
+                      </p>
+                      {shopDeleteError && <p className="text-xs text-[#ef4444]">{shopDeleteError}</p>}
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => { setShopDeleteStep('idle'); setShopDeleteError(null) }}
+                          disabled={shopDeleteStep === 'submitting'}
+                          className="flex-1 py-2.5 text-sm text-[#5c5c58] border border-[#e8e8e4] rounded-full hover:bg-[#f8f8f6] transition-colors disabled:opacity-40"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleRequestShopDeletion}
+                          disabled={shopDeleteStep === 'submitting'}
+                          className="flex-1 py-2.5 text-sm font-bold text-white bg-[#ef4444] rounded-full hover:bg-[#dc2626] transition-colors disabled:opacity-40"
+                        >
+                          {shopDeleteStep === 'submitting' ? 'Submitting…' : 'Request Deletion'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               ) : (
                 <>
                   {deleteStep === 'idle' && (

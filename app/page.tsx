@@ -140,7 +140,7 @@ export default async function HomePage() {
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
-                href="/explore"
+                href="/locations"
                 className="flex items-center justify-center gap-2 px-7 py-[15px] rounded-full text-[15px] font-semibold text-white
                            bg-white/[0.1] backdrop-blur-md border border-white/[0.25]
                            hover:bg-white/[0.18] hover:border-white/40

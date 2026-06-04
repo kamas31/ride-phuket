@@ -28,8 +28,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const liveAreas  = await getLiveAreas()
   const liveArea   = liveAreas.find(a => a.slug === slug)
   const priceLabel = liveArea ? ` — From ${formatPrice(liveArea.priceFrom)}/day` : ''
-  const title      = `Scooter Rental ${area.label}, Phuket${priceLabel}`
-  const description = area.description
+  const title = `Scooter Rental ${area.label}, Phuket${priceLabel}`
+
+  // Use longDescription (richer content) truncated to ~130 chars, then append live price
+  const priceStr  = liveArea ? formatPrice(liveArea.priceFrom) : formatPrice(area.priceFrom)
+  const truncated = area.longDescription.length > 120
+    ? area.longDescription.slice(0, area.longDescription.lastIndexOf(' ', 120))
+    : area.longDescription
+  const description = `${truncated} — from ${priceStr}/day.`
 
   return {
     title,
@@ -40,6 +46,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       url: `${SITE_URL}/phuket/${slug}`,
       type: 'website',
+      siteName: SITE_NAME,
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+      title,
+      description,
     },
     keywords: [
       `scooter rental ${area.name} phuket`,
@@ -89,6 +101,14 @@ export default async function AreaPage({ params }: PageProps) {
       name: 'Phuket',
       addressCountry: 'TH',
     },
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        opens: '08:00',
+        closes: '20:00',
+      },
+    ],
     ...(realMinPrice !== null && { priceRange: `฿${realMinPrice}–฿2000` }),
     ...(areaScooters.length > 0 && {
       hasOfferCatalog: {
@@ -108,8 +128,8 @@ export default async function AreaPage({ params }: PageProps) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Explore Phuket', item: `${SITE_URL}/explore` },
+      { '@type': 'ListItem', position: 1, name: 'Home',      item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Locations', item: `${SITE_URL}/locations` },
       { '@type': 'ListItem', position: 3, name: `Scooter Rental ${area.label}`, item: `${SITE_URL}/phuket/${slug}` },
     ],
   }
@@ -131,10 +151,10 @@ export default async function AreaPage({ params }: PageProps) {
         <section className="relative bg-[#0f0f0e] text-white overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B35]/20 via-transparent to-transparent" />
           <div className="relative max-w-5xl mx-auto px-4 pt-28 pb-14">
-            <nav className="flex items-center gap-2 text-xs text-white/50 mb-8">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-white/50 mb-8">
               <Link href="/" className="hover:text-white transition-colors">Home</Link>
               <span>/</span>
-              <Link href="/explore" className="hover:text-white transition-colors">Explore</Link>
+              <Link href="/locations" className="hover:text-white transition-colors">Locations</Link>
               <span>/</span>
               <span className="text-white">{area.label}</span>
             </nav>

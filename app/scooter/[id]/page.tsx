@@ -143,6 +143,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
   const productJsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
+    sku: scooter.id,
     name: scooter.name,
     description: scooter.description ||
       `Rent the ${scooter.name} in ${locationLabel}, Phuket. Contact the shop directly.`,
@@ -151,6 +152,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
     brand: { '@type': 'Brand', name: scooter.name.split(' ')[0] },
     offers: {
       '@type': 'Offer',
+      url: `${SITE_URL}/scooter/${scooter.id}`,
       priceCurrency: 'THB',
       price: scooter.pricePerDay,
       availability: scooter.available
@@ -164,15 +166,21 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
     },
   }
 
-  // BreadcrumbList structured data
+  // BreadcrumbList: Home → Locations → Area (if resolved) → Scooter
+  const breadcrumbItems: Array<{ '@type': string; position: number; name: string; item: string }> = [
+    { '@type': 'ListItem', position: 1, name: 'Home',      item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Locations', item: `${SITE_URL}/locations` },
+  ]
+  if (scooterArea) {
+    breadcrumbItems.push({ '@type': 'ListItem', position: 3, name: `Scooter Rental ${scooterArea.label}`, item: `${SITE_URL}/phuket/${scooterArea.slug}` })
+    breadcrumbItems.push({ '@type': 'ListItem', position: 4, name: scooter.name, item: `${SITE_URL}/scooter/${scooter.id}` })
+  } else {
+    breadcrumbItems.push({ '@type': 'ListItem', position: 3, name: scooter.name, item: `${SITE_URL}/scooter/${scooter.id}` })
+  }
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Explore Phuket', item: `${SITE_URL}/explore` },
-      { '@type': 'ListItem', position: 3, name: scooter.name, item: `${SITE_URL}/scooter/${scooter.id}` },
-    ],
+    itemListElement: breadcrumbItems,
   }
 
   // FAQ structured data from real answered inquiries

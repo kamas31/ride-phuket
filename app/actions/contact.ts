@@ -19,9 +19,23 @@ export async function submitContactMessage(
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // 1. Save to DB
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const admin = createAdminClient() as any
+
+  // 1. Rate limit authenticated users: max 5 messages per hour
+  if (user?.id) {
+    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const { count } = await admin
+      .from('contact_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('created_at', since)
+    if ((count ?? 0) >= 5) {
+      return { success: false, error: 'Too many messages. Please wait before sending another.' }
+    }
+  }
+
+  // 2. Save to DB
   const { error: dbError } = await admin
     .from('contact_messages')
     .insert({ user_id: user?.id ?? null, subject: trimSubject, message: trimMessage })

@@ -4,15 +4,25 @@ import { ChevronRight, MapPin } from 'lucide-react'
 import { SITE_URL, SITE_NAME } from '@/constants'
 import { AREAS } from '@/constants/areas'
 
+const FAQ_TITLE = 'Scooter Rental Phuket FAQ — Licenses, Prices & Safety'
+const FAQ_DESC  = 'Answers to the most common questions about renting a scooter in Phuket. Driving license requirements, deposits, prices, safety tips, and insurance explained.'
+
 export const metadata: Metadata = {
-  title: 'Scooter Rental Phuket FAQ — Licenses, Prices & Safety',
-  description: 'Answers to the most common questions about renting a scooter in Phuket. Driving license requirements, deposits, prices, safety tips, and insurance explained.',
+  title: FAQ_TITLE,
+  description: FAQ_DESC,
+  keywords: ['scooter rental phuket faq', 'phuket motorbike license', 'scooter rental deposit phuket', 'driving license phuket', 'scooter safety phuket'],
   alternates: { canonical: `${SITE_URL}/faq` },
   openGraph: {
-    title: 'Scooter Rental Phuket FAQ — Licenses, Prices & Safety',
-    description: 'Everything you need to know before renting a scooter in Phuket — license, deposit, prices, safety.',
+    title: FAQ_TITLE,
+    description: FAQ_DESC,
     url: `${SITE_URL}/faq`,
     type: 'website',
+    siteName: SITE_NAME,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: FAQ_TITLE,
+    description: FAQ_DESC,
   },
 }
 

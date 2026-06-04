@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { Profile } from '@/hooks/useProfile'
@@ -216,6 +217,72 @@ export async function completeOAuthProfile(
 
     // Sync role into JWT metadata — middleware reads this on next request
     await supabase.auth.updateUser({ data: { role } })
+
+    return { error: null }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Unknown error' }
+  }
+}
+
+export async function requestShopAccountDeletion(): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not authenticated' }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const admin = createAdminClient() as any
+
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('role,shop_id')
+      .eq('id', user.id)
+      .maybeSingle()
+    if (profile?.role !== 'shop_owner') return { error: 'Not a shop owner account' }
+
+    // Idempotency: block duplicate pending requests
+    const { data: existing } = await admin
+      .from('account_deletion_requests')
+      .select('id')
+      .eq('user_id', user.id)
+      .is('processed_at', null)
+      .maybeSingle()
+    if (existing) return { error: null } // already submitted — treat as success
+
+    // Immediately deactivate all scooters so no new bookings come in
+    if (profile.shop_id) {
+      await admin
+        .from('scooters')
+        .update({ available: false })
+        .eq('shop_id', profile.shop_id)
+    }
+
+    // Create deletion request record
+    const { error } = await admin
+      .from('account_deletion_requests')
+      .insert({ user_id: user.id, shop_id: profile.shop_id ?? null })
+    if (error) return { error: error.message }
+
+    // Notify admin — best-effort, must not fail the user-facing request
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY)
+        await resend.emails.send({
+          from:    'Koh Ride <noreply@kohride.com>',
+          to:      'contact@kohride.com',
+          subject: '[Koh Ride] Shop Account Deletion Request',
+          html: [
+            `<strong>User ID:</strong> ${user.id}`,
+            `<strong>Email:</strong> ${user.email ?? 'unknown'}`,
+            `<strong>Shop ID:</strong> ${profile.shop_id ?? 'none'}`,
+            `<strong>Requested:</strong> ${new Date().toUTCString()}`,
+            '',
+            '<hr />',
+            'Scooter listings have been deactivated. Please complete account deletion within 30 days.',
+          ].join('<br />'),
+        })
+      } catch { /* silent — notification failure must not block the request */ }
+    }
 
     return { error: null }
   } catch (e) {

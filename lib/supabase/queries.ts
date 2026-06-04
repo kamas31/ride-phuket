@@ -32,7 +32,7 @@ export async function getScooters(filters?: {
     .order('created_at', { ascending: false })
 
   if (filters?.location && filters.location !== 'all') {
-    query = query.ilike('location', `%${filters.location}%`)
+    query = query.ilike('location', `%${filters.location.replace(/-/g, ' ')}%`)
   }
   if (filters?.category && filters.category !== 'all') {
     query = query.eq('category', filters.category)

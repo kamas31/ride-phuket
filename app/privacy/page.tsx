@@ -6,7 +6,7 @@ export const metadata = {
   description: 'Privacy Policy for Koh Ride. How we collect, use, and protect your information.',
 }
 
-const LAST_UPDATED = 'May 2025'
+const LAST_UPDATED = 'June 2026'
 
 export default function PrivacyPage() {
   return (

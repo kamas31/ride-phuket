@@ -12,7 +12,7 @@ import { emailExists } from '@/app/actions/auth'
 function LoginForm() {
   const router      = useRouter()
   const searchParams = useSearchParams()
-  const redirect    = searchParams.get('redirect') ?? '/'
+  const redirect    = searchParams.get('next') ?? searchParams.get('redirect') ?? '/'
   const authError   = searchParams.get('error')
 
   const { user, loading, signInWithEmail, signInWithGoogle, resetPassword } = useAuth()

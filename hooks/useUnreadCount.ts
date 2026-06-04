@@ -28,7 +28,7 @@ export function useUnreadCount(): number {
         .from('messages')
         .select('id', { count: 'exact', head: true })
         .in('conversation_id', ids)
-        .neq('sender_id', uid)
+        .or(`sender_id.neq.${uid},sender_id.is.null`)
         .is('read_at', null)
 
       setUnread(count ?? 0)

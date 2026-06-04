@@ -141,7 +141,7 @@ export default function ExploreClient({
       if (s.pricePerDay > filters.priceMax) return false
       if (filters.deliveryNow && !s.deliveryAvailable) return false
       if (filters.helmetIncluded && !s.helmetIncluded) return false
-      if (filters.location !== 'all' && !s.location.toLowerCase().includes(filters.location)) return false
+      if (filters.location !== 'all' && !s.location.toLowerCase().includes(filters.location.replace(/-/g, ' '))) return false
       if (filters.depositProtected && !s.shop?.depositProtectedMember) return false
       if (filters.noPassport && s.passportRequired) return false
       // Map bounds filter (when "Search this area" is clicked)

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { getScooters } from '@/lib/supabase/queries'
-import { SITE_URL } from '@/constants'
+import { SITE_URL, SITE_NAME } from '@/constants'
 import ExploreClient from './ExploreClient'
 
 export const revalidate = 60
@@ -25,6 +25,7 @@ export const metadata: Metadata = {
     description: 'Browse all scooters available for rent across Phuket. Compare models, prices, and rental shops — from ฿180/day.',
     url: `${SITE_URL}/explore`,
     type: 'website',
+    siteName: SITE_NAME,
   },
   twitter: {
     card: 'summary_large_image',

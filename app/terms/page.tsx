@@ -6,7 +6,7 @@ export const metadata = {
   description: 'Terms of Service for Koh Ride, a scooter rental discovery marketplace in Phuket, Thailand.',
 }
 
-const LAST_UPDATED = 'May 2025'
+const LAST_UPDATED = 'June 2026'
 
 export default function TermsPage() {
   return (

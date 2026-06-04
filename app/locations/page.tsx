@@ -8,12 +8,19 @@ import { formatPrice } from '@/lib/utils'
 export const metadata: Metadata = {
   title: `Scooter Rental Locations in Phuket | ${SITE_NAME}`,
   description: 'Browse all Phuket areas covered by Koh Ride. From Patong and Kata to Chalong, Nai Harn, and beyond — find scooter rentals across every major Phuket location.',
+  keywords: 'scooter rental Phuket locations, Phuket areas, motorbike hire Phuket, Patong scooter rental, Kata scooter rental, Karon Rawai Bang Tao Phuket Town Chalong Nai Harn',
   alternates: { canonical: `${SITE_URL}/locations` },
   openGraph: {
     title: `Scooter Rental Locations in Phuket | ${SITE_NAME}`,
     description: 'All major Phuket areas covered. Find local scooter rental shops near your hotel.',
     url: `${SITE_URL}/locations`,
+    siteName: SITE_NAME,
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `Scooter Rental Locations in Phuket | ${SITE_NAME}`,
+    description: 'Browse all Phuket areas covered by Koh Ride — Patong, Kata, Chalong, Nai Harn, and more.',
   },
 }
 
@@ -49,7 +56,7 @@ export default function LocationsPage() {
         {/* Hero */}
         <section className="bg-[#0f0f0e] text-white">
           <div className="max-w-5xl mx-auto px-4 pt-28 pb-14">
-            <nav className="flex items-center gap-2 text-xs text-white/50 mb-8">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-white/50 mb-8">
               <Link href="/" className="hover:text-white transition-colors">Home</Link>
               <span>/</span>
               <span className="text-white">Locations</span>
@@ -73,6 +80,9 @@ export default function LocationsPage() {
 
         {/* Grid of all 16 areas */}
         <section className="max-w-5xl mx-auto px-4 py-14">
+          <h2 className="text-[22px] font-bold text-[#0f0f0e] tracking-tight mb-6">
+            All Phuket Areas
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {AREAS.map(area => (
               <Link

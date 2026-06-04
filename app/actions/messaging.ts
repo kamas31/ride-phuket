@@ -253,7 +253,7 @@ async function sendMessagePush(
 
 // ── getAllConversations ───────────────────────────────────────────────────────
 // Universal inbox: all conversations where the user is client OR owner.
-// Used by /messages — works for both riders and shop owners.
+// Uses the get_inbox_conversations RPC (lateral joins) — no unbounded message load.
 
 export async function getAllConversations(): Promise<ConversationPreview[]> {
   const supabase = await createClient()
@@ -263,27 +263,19 @@ export async function getAllConversations(): Promise<ConversationPreview[]> {
   const admin = createAdminClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rawConvos, error } = await (admin as any)
-    .from('conversations')
-    .select(`
-      id, scooter_id, shop_id, client_id, owner_id, created_at,
-      scooters ( name, cover_image, price_per_day ),
-      shops ( name, slug, logo_url ),
-      messages ( id, content, created_at, read_at, sender_id, type )
-    `)
-    .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
-    .order('created_at', { ascending: false })
+  const { data: rows, error } = await (admin as any)
+    .rpc('get_inbox_conversations', { p_user_id: user.id })
 
   if (error) console.error('[getAllConversations]', error.message)
-  if (!rawConvos) return []
+  if (!rows?.length) return []
 
-  // Collect unique other-user IDs — filter nulls (deleted users) before the DB lookup
+  // Collect other-party user IDs (for name/avatar lookup)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const otherIds = [
     ...new Set(
-      (rawConvos as any[])
-        .map(c => c.client_id === user.id ? c.owner_id : c.client_id)
-        .filter((id): id is string => id !== null),
+      (rows as any[])
+        .map((c: any) => c.client_id === user.id ? c.owner_id : c.client_id)  // eslint-disable-line @typescript-eslint/no-explicit-any
+        .filter((id: string | null): id is string => id !== null),
     ),
   ]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -297,102 +289,52 @@ export async function getAllConversations(): Promise<ConversationPreview[]> {
     profileMap[p.id] = { name: p.name, avatar_url: p.avatar_url }
   }
 
-  return (rawConvos as any[]).map(c => buildPreview(user.id, c, profileMap)) // eslint-disable-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (rows as any[]).map((c: any) => {  // eslint-disable-line @typescript-eslint/no-explicit-any
+    const isClient = c.client_id === user.id
+    const otherUserId = isClient ? c.owner_id : c.client_id
+    const otherProfile = otherUserId ? profileMap[otherUserId] : undefined
+    const otherUserName = isClient
+      ? (c.shop_name ?? otherProfile?.name ?? 'Shop')
+      : (otherProfile?.name ?? 'Deleted User')
+    const otherUserAvatarUrl = isClient
+      ? (c.shop_logo ?? null)
+      : (otherProfile?.avatar_url ?? null)
+
+    return {
+      id:                 c.id,
+      scooterId:          c.scooter_id ?? null,
+      scooterName:        c.scooter_name ?? null,
+      scooterImage:       c.scooter_image ?? null,
+      scooterPricePerDay: c.scooter_price ?? 0,
+      shopId:             c.shop_id ?? null,
+      shopName:           c.shop_name ?? 'Shop',
+      shopSlug:           c.shop_slug ?? null,
+      clientId:           c.client_id,
+      ownerId:            c.owner_id,
+      otherUserName,
+      otherUserAvatarUrl,
+      lastMessage:        c.last_message ?? null,
+      lastMessageAt:      c.last_message_at ?? null,
+      unreadCount:        Number(c.unread_count ?? 0),
+    } satisfies ConversationPreview
+  })
 }
 
 // ── getConversations ──────────────────────────────────────────────────────────
 // Rider inbox: conversations where current user is the client.
+// Delegates to getAllConversations (shared RPC) — the RPC already filters correctly.
 
 export async function getConversations(): Promise<ConversationPreview[]> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
-
-  const admin = createAdminClient()
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rawConvos } = await (admin as any)
-    .from('conversations')
-    .select(`
-      id, scooter_id, shop_id, client_id, owner_id, created_at,
-      scooters ( name, cover_image, price_per_day ),
-      shops ( name, slug, logo_url ),
-      messages ( id, content, created_at, read_at, sender_id, type )
-    `)
-    .eq('client_id', user.id)
-    .order('created_at', { ascending: false })
-
-  if (!rawConvos) return []
-
-  // Fetch owner profiles — filter nulls (deleted owners) before the DB lookup
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ownerIds = [
-    ...new Set(
-      (rawConvos as any[])
-        .map(c => c.owner_id as string | null)
-        .filter((id): id is string => id !== null),
-    ),
-  ]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profiles } = await (admin as any)
-    .from('profiles')
-    .select('id, name, avatar_url')
-    .in('id', ownerIds)
-
-  const profileMap: Record<string, ProfileMeta> = {}
-  for (const p of (profiles ?? []) as (ProfileMeta & { id: string })[]) {
-    profileMap[p.id] = { name: p.name, avatar_url: p.avatar_url }
-  }
-
-  return (rawConvos as any[]).map(c => buildPreview(user.id, c, profileMap)) // eslint-disable-line @typescript-eslint/no-explicit-any
+  return getAllConversations()
 }
 
 // ── getOwnerConversations ─────────────────────────────────────────────────────
 // Owner inbox: conversations where current user is the shop owner.
+// Delegates to getAllConversations (shared RPC).
 
 export async function getOwnerConversations(): Promise<ConversationPreview[]> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
-
-  const admin = createAdminClient()
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rawConvos } = await (admin as any)
-    .from('conversations')
-    .select(`
-      id, scooter_id, shop_id, client_id, owner_id, created_at,
-      scooters ( name, cover_image, price_per_day ),
-      shops ( name, slug, logo_url ),
-      messages ( id, content, created_at, read_at, sender_id, type )
-    `)
-    .eq('owner_id', user.id)
-    .order('created_at', { ascending: false })
-
-  if (!rawConvos) return []
-
-  // Resolve rider display names — filter nulls (deleted riders) before the DB lookup
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const clientIds: string[] = [
-    ...new Set(
-      (rawConvos as any[])
-        .map(c => c.client_id as string | null)
-        .filter((id): id is string => id !== null),
-    ),
-  ]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profiles } = await (admin as any)
-    .from('profiles')
-    .select('id, name, avatar_url')
-    .in('id', clientIds)
-
-  const profileMap: Record<string, ProfileMeta> = {}
-  for (const p of (profiles ?? []) as (ProfileMeta & { id: string })[]) {
-    profileMap[p.id] = { name: p.name, avatar_url: p.avatar_url }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (rawConvos as any[]).map(c => buildPreview(user.id, c, profileMap))
+  return getAllConversations()
 }
 
 // ── getConversationWithMessages ───────────────────────────────────────────────
@@ -557,7 +499,7 @@ export async function getUnreadCount(): Promise<number> {
     .select('id', { count: 'exact', head: true })
     .in('conversation_id', ids)
     .eq('type', 'message')
-    .neq('sender_id', user.id)
+    .or(`sender_id.neq.${user.id},sender_id.is.null`)
     .is('read_at', null)
 
   return count ?? 0
