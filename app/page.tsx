@@ -8,6 +8,8 @@ import { cn, formatPrice } from '@/lib/utils'
 import { HeroImages } from '@/components/home/HeroImages'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/constants'
 
+export const revalidate = 60
+
 const BENEFITS = [
   {
     icon: SlidersHorizontal,
