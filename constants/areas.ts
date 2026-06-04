@@ -90,13 +90,114 @@ export const AREAS: AreaMeta[] = [
     nearbyAttractions: ['Kamala Beach', 'Bang Tao Beach', 'Cherngtalay Market', 'Catch Beach Club', 'Laguna Golf Course'],
     priceFrom: 250,
   },
+  {
+    slug: 'chalong',
+    name: 'Chalong',
+    label: 'Chalong',
+    description: 'Rent a scooter in Chalong, Phuket. Gateway to temples, islands, and south Phuket from ฿200/day.',
+    longDescription: 'Chalong is the spiritual and maritime hub of south Phuket — home to the famous Wat Chalong temple and the main pier for day trips to Racha and Coral islands. A scooter here connects you to Rawai, Phuket Town, and all major south island attractions with ease.',
+    highlights: ['Near Wat Chalong temple', 'Island day-trip pier', 'Central south Phuket location'],
+    nearbyAttractions: ['Wat Chalong', 'Chalong Pier', 'Chalong Bay Rum Distillery', 'Rawai (5 min)', 'Big Buddha (10 min)'],
+    priceFrom: 200,
+  },
+  {
+    slug: 'nai-harn',
+    name: 'Nai Harn',
+    label: 'Nai Harn',
+    description: 'Rent a scooter in Nai Harn, Phuket. One of Phuket\'s most beautiful beaches from ฿200/day.',
+    longDescription: 'Nai Harn is consistently rated one of Phuket\'s most beautiful beaches — crystal clear water, a peaceful lake behind the beach, and proximity to the spectacular Promthep Cape viewpoint. Base yourself here and explore the entire southern tip of Phuket by scooter.',
+    highlights: ['Stunning beach and lake', 'Near Promthep Cape viewpoint', 'Quiet and uncrowded'],
+    nearbyAttractions: ['Nai Harn Lake', 'Promthep Cape', 'Ao Sane Beach', 'Rawai Seafood Market', 'Kata (10 min)'],
+    priceFrom: 200,
+  },
+  {
+    slug: 'cherng-talay',
+    name: 'Cherng Talay',
+    label: 'Cherng Talay',
+    description: 'Rent a scooter in Cherng Talay, Phuket. North Phuket\'s expat hub from ฿250/day.',
+    longDescription: 'Cherng Talay is the beating heart of north Phuket\'s expat and long-stay community — walkable village streets, Boat Avenue Market, quality restaurants, and proximity to the island\'s finest beaches. A scooter lets you reach Bang Tao, Surin, and Kamala in minutes.',
+    highlights: ['Expat-friendly hub', 'Near Boat Avenue Market', 'Between Bang Tao & Surin'],
+    nearbyAttractions: ['Boat Avenue Market', 'Bang Tao Beach', 'Surin Beach', 'Canal Village', 'Catch Beach Club'],
+    priceFrom: 250,
+  },
+  {
+    slug: 'kata-noi',
+    name: 'Kata Noi',
+    label: 'Kata Noi',
+    description: 'Rent a scooter at Kata Noi, Phuket. Secluded cove beach from ฿250/day.',
+    longDescription: 'Kata Noi is a small, secluded cove just south of Kata Beach — quieter, less developed, and frequently cited as one of Phuket\'s most photogenic spots. A scooter gives you quick access to Kata, Karon Viewpoint, and the entire southern coastline.',
+    highlights: ['Secluded cove setting', 'Quiet and scenic', 'Steps from Kata Beach'],
+    nearbyAttractions: ['Kata Beach', 'Karon Viewpoint', 'Tiger Park', 'Karon Beach (10 min)', 'Promthep Cape (25 min)'],
+    priceFrom: 250,
+  },
+  {
+    slug: 'mai-khao',
+    name: 'Mai Khao',
+    label: 'Mai Khao & Airport',
+    description: 'Rent a scooter near Phuket Airport in Mai Khao. Northern Phuket\'s quiet beach from ฿250/day.',
+    longDescription: 'Mai Khao is Phuket\'s northernmost district — home to the island\'s longest beach, Sirinat National Park, and Phuket International Airport. Perfect for visitors arriving at the airport who want wheels immediately, or long-stay visitors seeking the quietest corner of Phuket.',
+    highlights: ['Closest to Phuket Airport', 'Long uncrowded beach', 'Sirinat National Park'],
+    nearbyAttractions: ['Phuket International Airport', 'Nai Yang Beach', 'Sirinat National Park', 'Turtle nesting beach', 'Thalang (15 min)'],
+    priceFrom: 250,
+  },
+  {
+    slug: 'thalang',
+    name: 'Thalang',
+    label: 'Thalang',
+    description: 'Rent a scooter in Thalang, central Phuket. Historical heart of the island from ฿230/day.',
+    longDescription: 'Thalang is Phuket\'s historical district — site of the Heroines Monument, Thalang National Museum, and the ancient Wat Phra Thong temple. Centrally located, it\'s an ideal base for exploring both coasts and the island\'s interior on two wheels.',
+    highlights: ['Historical and cultural district', 'Central island location', 'Near Khao Phra Thaeo rainforest'],
+    nearbyAttractions: ['Heroines Monument', 'Thalang National Museum', 'Wat Phra Thong', 'Khao Phra Thaeo wildlife sanctuary', 'Bang Tao (15 min)'],
+    priceFrom: 230,
+  },
+  {
+    slug: 'cape-panwa',
+    name: 'Cape Panwa',
+    label: 'Cape Panwa',
+    description: 'Rent a scooter at Cape Panwa, Phuket. Southeast peninsula with sea views from ฿250/day.',
+    longDescription: 'Cape Panwa is a quiet, upscale peninsula on Phuket\'s southeast coast — dramatic sea views, the Phuket Aquarium, and a relaxed atmosphere far from the crowds. A scooter gives you easy access to Phuket Town, Ao Yon Beach, and ferry routes to nearby islands.',
+    highlights: ['Upscale southeast peninsula', 'Sea views over islands', 'Near Phuket Aquarium'],
+    nearbyAttractions: ['Phuket Aquarium', 'Ao Yon Beach', 'Phuket Town (15 min)', 'Ko Lon island views', 'Chalong (20 min)'],
+    priceFrom: 250,
+  },
+  {
+    slug: 'ko-sirey',
+    name: 'Ko Sirey',
+    label: 'Ko Sirey',
+    description: 'Rent a scooter on Ko Sirey island, Phuket. Sea gypsy village and local life from ฿230/day.',
+    longDescription: 'Ko Sirey is a small island connected to Phuket Town by a short bridge — famous for its Chao Leh (sea gypsy) community and authentic local atmosphere. Just minutes from Phuket Town, a scooter lets you explore the island\'s temples, seafood spots, and scenic coastal roads.',
+    highlights: ['Authentic sea gypsy community', 'Connected to Phuket Town', 'Local and uncrowded'],
+    nearbyAttractions: ['Sea Gypsy Village', 'Ko Sirey Temple', 'Phuket Town (10 min)', 'Ao Yon Beach (20 min)', 'Rawai (25 min)'],
+    priceFrom: 230,
+  },
 ]
 
 export function getArea(slug: string): AreaMeta | undefined {
   return AREAS.find(a => a.slug === slug)
 }
 
+const LOCATION_ALIASES: Record<string, string> = {
+  'cherngtalay': 'cherng-talay',
+  'cherng talay': 'cherng-talay',
+  'nai yang': 'mai-khao',
+  'nai yang beach': 'mai-khao',
+  'airport': 'mai-khao',
+  'phuket airport': 'mai-khao',
+  'koh sirey': 'ko-sirey',
+  'koh siray': 'ko-sirey',
+  'ko siray': 'ko-sirey',
+  'kata noi': 'kata-noi',
+  'nai harn': 'nai-harn',
+  'naiharn': 'nai-harn',
+  'bang tao': 'bang-tao',
+  'bangtao': 'bang-tao',
+  'cape panwa': 'cape-panwa',
+  'panwa': 'cape-panwa',
+}
+
 export function getAreaForLocation(location: string): AreaMeta | undefined {
   const loc = location.toLowerCase().trim()
+  const aliasSlug = LOCATION_ALIASES[loc]
+  if (aliasSlug) return AREAS.find(a => a.slug === aliasSlug)
   return AREAS.find(a => loc.includes(a.name.toLowerCase()))
 }
