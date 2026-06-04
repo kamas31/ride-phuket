@@ -95,3 +95,8 @@ export const AREAS: AreaMeta[] = [
 export function getArea(slug: string): AreaMeta | undefined {
   return AREAS.find(a => a.slug === slug)
 }
+
+export function getAreaForLocation(location: string): AreaMeta | undefined {
+  const loc = location.toLowerCase().trim()
+  return AREAS.find(a => loc.includes(a.name.toLowerCase()))
+}

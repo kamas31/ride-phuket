@@ -7,6 +7,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { getShopBySlug, getShopSlugs } from '@/lib/supabase/queries'
 import { SITE_URL, SITE_NAME } from '@/constants'
+import { getAreaForLocation } from '@/constants/areas'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import { TrustBadge } from '@/components/ride/TrustBadge'
@@ -94,6 +95,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
   if (!data) notFound()
 
   const { scooters, ...shop } = data
+  const shopArea = shop.location ? getAreaForLocation(shop.location) : null
 
   const [chatStats, { reviews, userReview }, supabase] = await Promise.all([
     getShopChatStats(shop.id),
@@ -391,7 +393,16 @@ export default async function ShopPage({ params }: ShopPageProps) {
                 ) : null}
               </div>
 
-              {/* Explore area CTA */}
+              {/* Explore area CTAs */}
+              {shopArea && (
+                <Link
+                  href={`/phuket/${shopArea.slug}`}
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-[#f8f8f6] border border-[#e8e8e4] text-[#5c5c58] font-semibold text-sm rounded-full hover:bg-[#f0f0ec] hover:text-[#0f0f0e] transition-colors"
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  Scooter rental in {shopArea.label}
+                </Link>
+              )}
               <Link
                 href={`/explore?location=${shop.location.toLowerCase()}`}
                 className="flex items-center justify-center gap-2 w-full py-3 bg-[#f8f8f6] border border-[#e8e8e4] text-[#5c5c58] font-semibold text-sm rounded-full hover:bg-[#f0f0ec] hover:text-[#0f0f0e] transition-colors"

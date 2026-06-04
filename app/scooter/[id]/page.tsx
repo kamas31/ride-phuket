@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/Badge'
 import { getScooterById } from '@/lib/supabase/queries'
 import { formatPricePerDay, getScooterCover } from '@/lib/utils'
 import { SITE_URL, SITE_NAME } from '@/constants'
+import { getAreaForLocation } from '@/constants/areas'
 import { ImageGallery } from '@/components/ride/ImageGallery'
 import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
 import { QuickContact } from '@/components/ride/QuickContact'
@@ -136,6 +137,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
   const locationLabel = scooter.location
     ? scooter.location.charAt(0).toUpperCase() + scooter.location.slice(1)
     : 'Phuket'
+  const scooterArea = scooter.location ? getAreaForLocation(scooter.location) : null
 
   // Product structured data — only real fields
   const productJsonLd: Record<string, unknown> = {
@@ -246,10 +248,20 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               </div>
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2">
-                <div className="flex items-center gap-1 text-sm text-[#9c9c98]">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {scooter.location}
-                </div>
+                {scooterArea ? (
+                  <Link
+                    href={`/phuket/${scooterArea.slug}`}
+                    className="flex items-center gap-1 text-sm text-[#9c9c98] hover:text-[#FF6B35] transition-colors"
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                    {scooter.location}
+                  </Link>
+                ) : (
+                  <div className="flex items-center gap-1 text-sm text-[#9c9c98]">
+                    <MapPin className="w-3.5 h-3.5" />
+                    {scooter.location}
+                  </div>
+                )}
                 {scooter.deliveryAvailable && (
                   <>
                     <span className="text-[#e8e8e4]">·</span>
