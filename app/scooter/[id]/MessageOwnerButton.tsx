@@ -40,8 +40,10 @@ export function MessageOwnerButton({
         return
       }
 
-      const url = result.prefill
-        ? `/messages/${result.conversationId}?prefill=${encodeURIComponent(result.prefill)}`
+      const url = result.contextScooterId
+        ? `/messages/${result.conversationId}` +
+          `?contextScooterId=${encodeURIComponent(result.contextScooterId)}` +
+          `&contextScooterName=${encodeURIComponent(result.contextScooterName ?? '')}`
         : `/messages/${result.conversationId}`
       router.push(url)
     })

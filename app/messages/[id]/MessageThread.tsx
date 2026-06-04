@@ -131,8 +131,10 @@ export default function MessageThread({
           const m = payload.new as {
             id: string
             conversation_id: string
-            sender_id: string
-            content: string
+            sender_id: string | null
+            content: string | null
+            type?: string
+            metadata?: { scooter_id: string; scooter_name: string } | null
             read_at: string | null
             created_at: string
           }
@@ -147,14 +149,18 @@ export default function MessageThread({
                 conversationId: m.conversation_id,
                 senderId: m.sender_id,
                 content: m.content,
+                type: (m.type ?? 'message') as 'message' | 'context_switch',
+                metadata: m.metadata
+                  ? { scooterId: m.metadata.scooter_id, scooterName: m.metadata.scooter_name }
+                  : null,
                 readAt: m.read_at,
                 createdAt: m.created_at,
               },
             ]
           })
-          // If the incoming message is from the other user, mark it read immediately
-          // so the sender sees "Seen" on their device without waiting for a page reload.
-          if (m.sender_id !== currentUserId) {
+          // Mark other party's real messages as read immediately.
+          // context_switch events are pre-marked at insert time — skip them.
+          if (m.sender_id !== currentUserId && (m.type ?? 'message') === 'message') {
             markMessagesRead(conversation.id).catch(() => {})
           }
         },
@@ -207,6 +213,8 @@ export default function MessageThread({
       conversationId: conversation.id,
       senderId: currentUserId,
       content: text,
+      type: 'message',
+      metadata: null,
       readAt: null,
       createdAt: new Date().toISOString(),
     }
@@ -353,6 +361,22 @@ export default function MessageThread({
 
                   <div className="space-y-2">
                     {group.msgs.map((msg, msgIndex) => {
+                      // ── Context-switch separator ───────────────────────────
+                      if (msg.type === 'context_switch') {
+                        return (
+                          <div key={msg.id} className="flex items-center gap-3 py-2">
+                            <div className="flex-1 h-px bg-[#e8e8e4]" />
+                            <div className="flex items-center bg-[#fff5f1] border border-[#ffd4c2] rounded-full px-3 py-1">
+                              <span className="text-[11px] text-[#FF6B35] font-semibold">
+                                Regarding {msg.metadata?.scooterName}
+                              </span>
+                            </div>
+                            <div className="flex-1 h-px bg-[#e8e8e4]" />
+                          </div>
+                        )
+                      }
+
+                      // ── Regular chat bubble ────────────────────────────────
                       // Alignment is determined solely by sender_id vs current user.
                       // Never inferred from owner/client role — this cannot invert.
                       const isMe = msg.senderId === currentUserId

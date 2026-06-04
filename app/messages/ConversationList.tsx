@@ -50,10 +50,14 @@ export default function ConversationList({
         (payload) => {
           const m = payload.new as {
             conversation_id: string
-            sender_id: string
-            content: string
+            sender_id: string | null
+            content: string | null
+            type?: string
             created_at: string
           }
+          // System events must not update the preview text or unread count
+          if ((m.type ?? 'message') === 'context_switch') return
+
           setConversations(prev => {
             const idx = prev.findIndex(c => c.id === m.conversation_id)
             if (idx === -1) return prev   // not one of our conversations

@@ -9,8 +9,10 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export interface Message {
   id: string
   conversationId: string
-  senderId: string
-  content: string
+  senderId: string | null
+  content: string | null
+  type: 'message' | 'context_switch'
+  metadata: { scooterId: string; scooterName: string } | null
   readAt: string | null
   createdAt: string
 }
@@ -55,7 +57,7 @@ export interface ConversationDetail {
 
 export async function getOrCreateConversation(
   scooterId: string,
-): Promise<{ conversationId: string; prefill?: string } | { error: string }> {
+): Promise<{ conversationId: string; contextScooterId?: string; contextScooterName?: string } | { error: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'sign_in_required' }
@@ -88,8 +90,9 @@ export async function getOrCreateConversation(
   if (existing) {
     return {
       conversationId: existing.id as string,
+      contextScooterId: scooterId,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      prefill: `Hi, I'm interested in the ${(scooter as any).name}`,
+      contextScooterName: (scooter as any).name as string,
     }
   }
 
@@ -200,6 +203,8 @@ export async function sendMessage(
       conversationId: data.conversation_id,
       senderId: data.sender_id,
       content: data.content,
+      type: 'message' as const,
+      metadata: null,
       readAt: data.read_at,
       createdAt: data.created_at,
     },
@@ -439,7 +444,7 @@ export async function getConversationWithMessages(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (admin as any)
       .from('messages')
-      .select('id, conversation_id, sender_id, content, read_at, created_at')
+      .select('id, conversation_id, sender_id, content, type, metadata, read_at, created_at')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -491,6 +496,10 @@ export async function getConversationWithMessages(
       conversationId: m.conversation_id,
       senderId: m.sender_id,
       content: m.content,
+      type: (m.type ?? 'message') as 'message' | 'context_switch',
+      metadata: m.metadata
+        ? { scooterId: m.metadata.scooter_id, scooterName: m.metadata.scooter_name }
+        : null,
       readAt: m.read_at,
       createdAt: m.created_at,
     })),
@@ -543,10 +552,55 @@ export async function getUnreadCount(): Promise<number> {
     .from('messages')
     .select('id', { count: 'exact', head: true })
     .in('conversation_id', ids)
+    .eq('type', 'message')
     .neq('sender_id', user.id)
     .is('read_at', null)
 
   return count ?? 0
+}
+
+// ── insertContextSwitch ───────────────────────────────────────────────────────
+// Inserts a system event into the conversation timeline when a rider re-enters
+// an existing thread from a different scooter.
+// Idempotent: if the most recent context_switch already references the same
+// scooter, this is a no-op.
+
+export async function insertContextSwitch(
+  conversationId: string,
+  scooterId: string,
+  scooterName: string,
+): Promise<void> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const admin = createAdminClient()
+
+  // Idempotency check — skip if last context_switch is already for this scooter
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: last } = await (admin as any)
+    .from('messages')
+    .select('metadata')
+    .eq('conversation_id', conversationId)
+    .eq('type', 'context_switch')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((last as any)?.metadata?.scooter_id === scooterId) return
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin as any)
+    .from('messages')
+    .insert({
+      conversation_id: conversationId,
+      sender_id: null,
+      content: null,
+      type: 'context_switch',
+      metadata: { scooter_id: scooterId, scooter_name: scooterName },
+      read_at: new Date().toISOString(),
+    })
 }
 
 // ── Internal ──────────────────────────────────────────────────────────────────
@@ -564,8 +618,11 @@ function buildPreview(
   const sorted = [...msgs].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )
-  const last = sorted[0]
-  const unread = msgs.filter(m => m.sender_id !== userId && !m.read_at).length
+  // System events must not become the preview text or affect unread counts
+  const last = sorted.find(m => (m.type ?? 'message') === 'message')
+  const unread = msgs.filter(
+    m => (m.type ?? 'message') === 'message' && m.sender_id !== userId && !m.read_at,
+  ).length
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const s = c.scooters as any
