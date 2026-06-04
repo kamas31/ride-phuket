@@ -170,7 +170,7 @@ export default async function HomePage() {
                 </div>
                 <div className="px-5 pt-4 pb-5 md:px-6 md:pt-5 md:pb-7 text-center">
                   <h3 className="text-[17px] md:text-[19px] font-bold text-[#0f0f0e] mb-1.5 md:mb-2 tracking-tight">Contact</h3>
-                  <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">Message rental shops directly on WhatsApp. No forms, no platform — just real conversation.</p>
+                  <p className="text-[#9c9c98] text-[13.5px] leading-relaxed max-w-[22ch] mx-auto">Message rental shops directly in the app. Ask questions, compare scooters, and get answers instantly.</p>
                 </div>
               </div>
             </div>
