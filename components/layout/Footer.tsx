@@ -7,6 +7,7 @@ const LOCATION_PRIORITY = ['patong', 'kamala', 'kata', 'karon', 'rawai', 'bang-t
 const STATIC_SECTIONS = {
   Discover: [
     { href: '/explore', label: 'Explore Scooters' },
+    { href: '/faq',     label: 'Rental FAQ'        },
     { href: '/saved',   label: 'Saved Scooters'   },
     { href: '/auth/login', label: 'Sign In'        },
   ],

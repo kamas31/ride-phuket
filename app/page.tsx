@@ -369,10 +369,10 @@ export default async function HomePage() {
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
-                href="/explore"
+                href="/faq"
                 className="text-sm font-medium text-white/50 hover:text-white/80 transition-colors"
               >
-                No fees · Contact shops directly
+                Have questions? Read the rental FAQ
               </Link>
             </div>
           </div>
