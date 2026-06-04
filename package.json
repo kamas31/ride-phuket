@@ -13,13 +13,17 @@
     "test:mobile": "playwright test --project=mobile-safari",
     "test:report": "playwright show-report",
     "cap:sync": "npx cap sync ios",
+    "cap:add:ios": "npx cap add ios",
     "ios:open": "npx cap open ios",
-    "ios:build": "npm run cap:sync && npx cap open ios"
+    "ios:build": "npm run cap:sync && npx cap open ios",
+    "assets:generate": "npx capacitor-assets generate --assetPath resources"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.0",
     "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",
     "@capacitor/ios": "^8.3.4",
+    "@capacitor/network": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.2",
     "@radix-ui/react-avatar": "^1.1.11",
@@ -52,6 +56,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

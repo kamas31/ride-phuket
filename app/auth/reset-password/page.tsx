@@ -2,13 +2,14 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { MapPin, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { isSupabaseConfigured, createClient } from '@/lib/supabase/client'
 import { SITE_NAME } from '@/constants'
 
 function ResetPasswordForm() {
-  const router = useRouter()
+  const router       = useRouter()
+  const searchParams = useSearchParams()
 
   const [ready, setReady]         = useState(false)
   const [expired, setExpired]     = useState(false)
@@ -19,15 +20,25 @@ function ResetPasswordForm() {
   const [error, setError]         = useState<string | null>(null)
 
   useEffect(() => {
+    // ── Native deep-link path ─────────────────────────────────────────────
+    // CapacitorProvider pre-exchanges the recovery token and navigates here
+    // with ?ready=true (success) or ?error=expired (token already consumed).
+    // In this case we skip the onAuthStateChange listener entirely.
+    const readyFlag = searchParams.get('ready')
+    const errorFlag = searchParams.get('error')
+
+    if (readyFlag === 'true') { setReady(true); return }
+    if (errorFlag === 'expired') { setExpired(true); return }
+
+    // ── Standard web path ────────────────────────────────────────────────
+    // createBrowserClient detects the ?token_hash= param on page load and
+    // fires PASSWORD_RECOVERY once the exchange succeeds.
     if (!isSupabaseConfigured()) return
 
     const supabase = createClient()
 
-    // createBrowserClient auto-exchanges the ?code= param from the URL.
-    // PASSWORD_RECOVERY fires once the code exchange succeeds.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setReady(true)
-      // If no PASSWORD_RECOVERY within 10s, the link has expired
     })
 
     const timeout = setTimeout(() => {
@@ -38,7 +49,7 @@ function ResetPasswordForm() {
       subscription.unsubscribe()
       clearTimeout(timeout)
     }
-  }, [])
+  }, [searchParams])
 
   // Once ready fires, cancel the expiry timer
   useEffect(() => {

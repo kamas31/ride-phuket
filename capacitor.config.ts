@@ -14,6 +14,13 @@ const config: CapacitorConfig = {
     // No static export required — all SSR routes remain on Vercel.
     url: 'https://kohride.com',
     cleartext: false,
+    // Allow WKWebView to navigate to these external origins when needed
+    // (Supabase auth endpoints, Mapbox tile servers, etc.).
+    // Explicit allowlist is more secure than allowing all external navigation.
+    allowNavigation: [
+      '*.supabase.co',
+      'supabase.co',
+    ],
   },
 
   ios: {
@@ -24,8 +31,18 @@ const config: CapacitorConfig = {
     preferredContentMode: 'mobile',
     backgroundColor: '#ffffff',
     allowsLinkPreview: false,
-    // Append to User-Agent so server analytics can segment native traffic
+    // Append to User-Agent so server analytics can segment native traffic.
+    // Supabase and Vercel will see this in request headers.
     appendUserAgent: 'KohRide-iOS',
+    // ── Mac TODO: add Associated Domains capability in Xcode ──────────────
+    // After running `npx cap add ios` on the Mac:
+    //   Xcode → Signing & Capabilities → + Associated Domains
+    //   Add: applinks:kohride.com
+    //   Add: webcredentials:kohride.com (enables iCloud Keychain AutoFill)
+    // This activates the apple-app-site-association file at
+    // https://kohride.com/.well-known/apple-app-site-association
+    // and enables Universal Links for password reset and scooter deep links.
+    // ──────────────────────────────────────────────────────────────────────
   },
 
   plugins: {

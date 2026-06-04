@@ -70,6 +70,9 @@
 /* Base reset */
 *, *::before, *::after {
   box-sizing: border-box;
+  /* Remove the blue tap-highlight rectangle iOS draws on every touch target.
+     Native apps never show this; it's the single most obvious "website" tell. */
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -86,12 +89,44 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  /* Prevent over-scroll bounce from exposing the white page background.
+     The app background colour fills the bounce area instead. */
+  overscroll-behavior: none;
 }
 
 /* Prevent iOS Safari from zooming on input focus — requires font-size >= 16px.
    Visual size is controlled per-component via Tailwind; this only sets the baseline. */
 input, select, textarea {
   font-size: 16px;
+}
+
+/* ── iOS native-app feel ─────────────────────────────────────────────────── */
+
+/* Suppress the long-press context menu on interactive elements.
+   In a Capacitor WKWebView "Open in Safari / Copy Link" makes no sense. */
+a, button, img {
+  -webkit-touch-callout: none;
+}
+
+/* Prevent accidental text selection on chrome elements. */
+button, nav, [role="button"], label {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Momentum scrolling — still benefits iOS 12 devices and some edge cases. */
+.overflow-y-auto,
+.overflow-y-scroll,
+.overflow-auto,
+.overflow-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Remove the 300 ms tap delay on interactive elements (modern iOS/Android
+   eliminates this automatically when the viewport has no scaling, but being
+   explicit ensures snappy response on all device/OS combinations). */
+a, button, [role="button"] {
+  touch-action: manipulation;
 }
 
 /* Typography scale */

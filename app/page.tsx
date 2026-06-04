@@ -13,26 +13,26 @@ export const revalidate = 60
 const BENEFITS = [
   {
     icon: SlidersHorizontal,
-    title: 'Find the Exact Scooter You Want',
-    description: 'Search by model, engine size, color, accessories, and features. Stop messaging 20 shops just to find the right scooter.',
+    title: 'Find the exact scooter',
+    description: 'Filter by model, engine size and features.',
     color: 'bg-[#f0fdf4] text-[#16a34a]',
   },
   {
     icon: Store,
-    title: 'More Choice Across Phuket',
-    description: 'Browse scooters from multiple rental shops in one place instead of searching shop by shop.',
+    title: 'More choice across Phuket',
+    description: 'Compare scooters from multiple rental shops.',
     color: 'bg-[#fdf4ff] text-[#9333ea]',
   },
   {
     icon: Zap,
-    title: 'Compare Options Easily',
-    description: 'View prices, photos, and specifications side-by-side before deciding which scooter is right for you.',
+    title: 'Compare before you contact',
+    description: 'See prices, photos and specs instantly.',
     color: 'bg-[#eff6ff] text-[#2563eb]',
   },
   {
     icon: MessageCircle,
-    title: 'Contact Shops Instantly',
-    description: 'Send a message directly through Koh Ride or continue on WhatsApp — whatever works best for you.',
+    title: 'Chat with shops directly',
+    description: 'Get answers before you rent.',
     color: 'bg-[#fff4f0] text-[#FF6B35]',
   },
 ]

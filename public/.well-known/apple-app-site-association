@@ -1,0 +1,19 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["??TEAMID??.com.kohride.app"],
+        "components": [
+          { "/": "/auth/reset-password*", "comment": "Password reset deep link" },
+          { "/": "/auth/callback*",        "comment": "Email verification callback" },
+          { "/": "/scooter/*",             "comment": "Scooter detail pages" },
+          { "/": "/shop/*",                "comment": "Shop profile pages" },
+          { "/": "/messages/*",            "comment": "Message thread deep link" }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["??TEAMID??.com.kohride.app"]
+  }
+}
