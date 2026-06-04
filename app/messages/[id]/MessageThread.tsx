@@ -385,7 +385,11 @@ export default function MessageThread({
                       // Show avatar only on the last message in each consecutive block from the other party.
                       // All other incoming messages get a same-width spacer so bubbles stay aligned.
                       const nextMsg = group.msgs[msgIndex + 1]
-                      const showOtherAvatar = !isMe && (!nextMsg || nextMsg.senderId === currentUserId)
+                      const showOtherAvatar = !isMe && (
+                        !nextMsg ||
+                        nextMsg.senderId === currentUserId ||
+                        nextMsg.type === 'context_switch'
+                      )
                       return (
                         <div key={msg.id} className={cn('flex items-end gap-2', isMe ? 'justify-end' : 'justify-start')}>
                           {/* Avatar / spacer for incoming messages */}

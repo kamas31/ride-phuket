@@ -267,7 +267,7 @@ export async function getAllConversations(): Promise<ConversationPreview[]> {
       id, scooter_id, shop_id, client_id, owner_id, created_at,
       scooters ( name, cover_image, price_per_day ),
       shops ( name, slug, logo_url ),
-      messages ( id, content, created_at, read_at, sender_id )
+      messages ( id, content, created_at, read_at, sender_id, type )
     `)
     .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
     .order('created_at', { ascending: false })
@@ -315,7 +315,7 @@ export async function getConversations(): Promise<ConversationPreview[]> {
       id, scooter_id, shop_id, client_id, owner_id, created_at,
       scooters ( name, cover_image, price_per_day ),
       shops ( name, slug, logo_url ),
-      messages ( id, content, created_at, read_at, sender_id )
+      messages ( id, content, created_at, read_at, sender_id, type )
     `)
     .eq('client_id', user.id)
     .order('created_at', { ascending: false })
@@ -362,7 +362,7 @@ export async function getOwnerConversations(): Promise<ConversationPreview[]> {
       id, scooter_id, shop_id, client_id, owner_id, created_at,
       scooters ( name, cover_image, price_per_day ),
       shops ( name, slug, logo_url ),
-      messages ( id, content, created_at, read_at, sender_id )
+      messages ( id, content, created_at, read_at, sender_id, type )
     `)
     .eq('owner_id', user.id)
     .order('created_at', { ascending: false })
