@@ -78,7 +78,11 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
-  overflow-x: hidden;
+  /* clip, unlike hidden, does NOT create a BFC or scroll container, so it
+     cannot trigger the overflow-y: visible → auto conversion that makes the
+     browser think the body is the document scroll container and leaves the
+     page unscrollable. */
+  overflow-x: clip;
 }
 
 body {
@@ -88,7 +92,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Prevent over-scroll bounce from exposing the white background — native only.

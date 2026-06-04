@@ -48,7 +48,12 @@ export async function getShopReviews(shopId: string): Promise<{
   userReview: ShopReview | null
 }> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any
+  let admin: any
+  try {
+    admin = createAdminClient()
+  } catch {
+    return { reviews: [], userReview: null }
+  }
 
   const { data, error } = await admin
     .from('reviews')

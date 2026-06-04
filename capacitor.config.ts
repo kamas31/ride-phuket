@@ -18,6 +18,7 @@ const config: CapacitorConfig = {
     // (Supabase auth endpoints, Mapbox tile servers, etc.).
     // Explicit allowlist is more secure than allowing all external navigation.
     allowNavigation: [
+      'www.kohride.com',
       '*.supabase.co',
       'supabase.co',
     ],

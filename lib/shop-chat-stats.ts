@@ -8,10 +8,14 @@ export interface ShopChatStats {
 // Computes average first-response time for a shop owner across their last 30 conversations.
 // "Fast responder" = average < 15 minutes AND at least 3 data points.
 export async function getShopChatStats(shopId: string): Promise<ShopChatStats> {
-  const admin = createAdminClient()
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const a = admin as any
+  let a: any
+  try {
+    a = createAdminClient()
+  } catch {
+    return { isFastResponder: false, avgMinutes: null }
+  }
+
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: shopRow } = await a
