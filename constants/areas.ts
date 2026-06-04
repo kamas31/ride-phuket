@@ -70,6 +70,26 @@ export const AREAS: AreaMeta[] = [
     nearbyAttractions: ['Old Town & Thalang Road', 'Sunday Walking Street', 'Rang Hill Viewpoint', 'Khao Rang', 'Central Festival Mall'],
     priceFrom: 250,
   },
+  {
+    slug: 'kamala',
+    name: 'Kamala',
+    label: 'Kamala Beach',
+    description: 'Rent a scooter in Kamala Beach, Phuket. Peaceful village location from ฿250/day.',
+    longDescription: 'Kamala is a peaceful mid-coast village between Patong and Surin — ideal for visitors wanting a quieter beach holiday without sacrificing access. From here, Patong, Surin, and Bang Tao are all under 15 minutes by scooter.',
+    highlights: ['Quiet village atmosphere', 'Between Patong and Surin', 'Family-friendly area'],
+    nearbyAttractions: ['Surin Beach', 'Patong (10 min)', 'Kamala Elephant Sanctuary', 'Fantasea Show', 'Bang Tao (20 min)'],
+    priceFrom: 250,
+  },
+  {
+    slug: 'surin',
+    name: 'Surin',
+    label: 'Surin Beach',
+    description: 'Rent a scooter in Surin Beach, Phuket. Premium beach location from ฿250/day.',
+    longDescription: 'Surin is one of Phuket\'s most upscale beach areas — calm, clear water, and perfectly positioned between the luxury north and the lively Patong area. A scooter connects you to Bang Tao, Kamala, and Cherngtalay in minutes.',
+    highlights: ['Upscale beach area', 'Near Bang Tao & Kamala', 'Crystal clear water'],
+    nearbyAttractions: ['Kamala Beach', 'Bang Tao Beach', 'Cherngtalay Market', 'Catch Beach Club', 'Laguna Golf Course'],
+    priceFrom: 250,
+  },
 ]
 
 export function getArea(slug: string): AreaMeta | undefined {
