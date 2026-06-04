@@ -117,10 +117,10 @@ export default async function HomePage() {
             className="max-w-[600px]"
             style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.1s' }}
           >
-            <h1 className="font-extrabold leading-[0.95] tracking-[-0.03em] text-[88px] lg:text-[96px] mb-6">
+            <p className="font-extrabold leading-[0.95] tracking-[-0.03em] text-[88px] lg:text-[96px] mb-6 m-0">
               <span className="text-white block">Explore Phuket</span>
               <span className="block" style={{ color: '#FF6B35' }}>your way.</span>
-            </h1>
+            </p>
 
             <p className="text-white/75 text-[19px] leading-[1.6] mb-10 max-w-[520px]">
               Premium scooters from local shops across Phuket.<br />
