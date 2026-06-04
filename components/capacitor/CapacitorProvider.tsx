@@ -28,6 +28,9 @@ export function CapacitorProvider({ children }: { children: React.ReactNode }) {
       const { Capacitor } = await import('@capacitor/core')
       if (!mounted || !Capacitor.isNativePlatform()) return
 
+      // Mark <html> so CSS can scope native-only rules to .native
+      document.documentElement.classList.add('native')
+
       const { App } = await import('@capacitor/app')
 
       // ── 1. Deep link handler ──────────────────────────────────────────────

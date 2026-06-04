@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { MapPin, Mail, Lock, Eye, EyeOff, ArrowLeft, User, Check } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { trackEvent } from '@/lib/analytics'
+import { isNative } from '@/lib/platform'
 import { SITE_NAME } from '@/constants'
 import type { UserRole } from '@/lib/supabase/types'
 
@@ -46,7 +47,6 @@ function SignupForm() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]       = useState<string | null>(null)
   const [success, setSuccess]   = useState(false)
-  const [isNative, setIsNative] = useState(false)
   const [resending, setResending]   = useState(false)
   const [resendSent, setResendSent] = useState(false)
 
@@ -67,13 +67,6 @@ function SignupForm() {
       sessionStorage.removeItem('_kr_pw_prefill')
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Google OAuth is blocked in WKWebView by Google — hide on native iOS.
-  useEffect(() => {
-    import('@capacitor/core').then(({ Capacitor }) => {
-      setIsNative(Capacitor.isNativePlatform())
-    })
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -219,7 +212,7 @@ function SignupForm() {
               </div>
 
               {/* Google OAuth shortcut — hidden on native iOS (WKWebView blocked by Google) */}
-              {!isNative && (
+              {!isNative() && (
                 <>
                   <button
                     type="button"

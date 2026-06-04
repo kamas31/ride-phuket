@@ -89,8 +89,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  /* Prevent over-scroll bounce from exposing the white page background.
-     The app background colour fills the bounce area instead. */
+}
+
+/* Prevent over-scroll bounce from exposing the white background — native only.
+   Web browsers should keep their default elastic scroll (better UX on desktop). */
+.native body {
   overscroll-behavior: none;
 }
 
@@ -102,9 +105,10 @@ input, select, textarea {
 
 /* ── iOS native-app feel ─────────────────────────────────────────────────── */
 
-/* Suppress the long-press context menu on interactive elements.
-   In a Capacitor WKWebView "Open in Safari / Copy Link" makes no sense. */
-a, button, img {
+/* Suppress the long-press context menu on interactive elements — native only.
+   WKWebView "Open in Safari / Copy Link" makes no sense inside the app.
+   On web this would prevent legitimate right-click/long-press link actions. */
+.native a, .native button, .native img {
   -webkit-touch-callout: none;
 }
 

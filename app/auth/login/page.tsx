@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { MapPin, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { trackEvent } from '@/lib/analytics'
+import { isNative } from '@/lib/platform'
 import { SITE_NAME } from '@/constants'
 import { emailExists } from '@/app/actions/auth'
 
@@ -30,19 +31,9 @@ function LoginForm() {
   const [resetSent, setResetSent]     = useState(false)
   const [resetError, setResetError]   = useState<string | null>(null)
   const [noAccountMode, setNoAccountMode] = useState(false)
-  const [isNative, setIsNative]       = useState(false)
-
   useEffect(() => {
     if (!loading && user) router.replace(redirect)
   }, [user, loading, router, redirect])
-
-  // Detect Capacitor native platform (iOS app).
-  // Google OAuth is blocked in WKWebView by Google since 2021 — hide the button.
-  useEffect(() => {
-    import('@capacitor/core').then(({ Capacitor }) => {
-      setIsNative(Capacitor.isNativePlatform())
-    })
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -201,7 +192,7 @@ function LoginForm() {
                   <p className="text-sm text-[#9c9c98] mb-6">Sign in to your Koh Ride account.</p>
 
                   {/* Google OAuth — hidden on native iOS (WKWebView blocked by Google) */}
-                  {!isNative && (
+                  {!isNative() && (
                     <>
                       <button
                         type="button"
