@@ -67,6 +67,12 @@ export default async function AreaPage({ params }: PageProps) {
     name: `${SITE_NAME} — ${area.label}`,
     description: area.description,
     url: `${SITE_URL}/phuket/${slug}`,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: area.name,
+      addressRegion: 'Phuket',
+      addressCountry: 'TH',
+    },
     areaServed: {
       '@type': 'City',
       name: 'Phuket',
@@ -87,12 +93,26 @@ export default async function AreaPage({ params }: PageProps) {
     }),
   }
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Explore Phuket', item: `${SITE_URL}/explore` },
+      { '@type': 'ListItem', position: 3, name: `Scooter Rental ${area.label}`, item: `${SITE_URL}/phuket/${slug}` },
+    ],
+  }
+
   return (
     <>
       {/* JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <div className="min-h-screen bg-white">

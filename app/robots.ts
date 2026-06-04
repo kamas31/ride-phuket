@@ -17,7 +17,6 @@ export default function robots(): MetadataRoute.Robots {
           '/bookings',
           '/checkout',
           '/feedback',
-          '/contact-us',
           '/partner/dashboard',
           '/partner/scooters',
           '/partner/shop',

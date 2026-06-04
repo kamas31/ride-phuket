@@ -5,7 +5,10 @@ import { createClient } from '@/lib/supabase/server'
 import { getServerProfile, getShopForOwner } from '@/app/actions/profile'
 import CreateShopForm from './CreateShopForm'
 
-export const metadata = { title: 'Partner — Koh Ride' }
+export const metadata = {
+  title: 'List Your Scooters on Koh Ride — Partner With Us',
+  description: 'Join Koh Ride and reach international tourists looking to rent scooters in Phuket. List your fleet, collect reviews, and get direct inquiries — no middlemen.',
+}
 
 const PERKS = [
   { icon: Bike,        text: 'Your scooters live on the map instantly' },

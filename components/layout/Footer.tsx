@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { SITE_NAME } from '@/constants'
-import { getLiveAreas } from '@/lib/live-areas'
+import { AREAS } from '@/constants/areas'
 
-const LOCATION_PRIORITY = ['patong', 'kamala', 'kata', 'karon', 'rawai']
+const LOCATION_PRIORITY = ['patong', 'kamala', 'kata', 'karon', 'rawai', 'bang-tao', 'phuket-town']
 
 const STATIC_SECTIONS = {
   Discover: [
@@ -14,31 +14,29 @@ const STATIC_SECTIONS = {
     { href: '/partner', label: 'List Your Scooters' },
   ],
   Legal: [
-    { href: '/terms',                                                      label: 'Terms of Service' },
-    { href: '/privacy',                                                    label: 'Privacy Policy'   },
-    { href: '/contact-us',                                                label: 'Contact Us'       },
-    { href: '/feedback',                                                   label: 'Feedback'         },
+    { href: '/terms',      label: 'Terms of Service' },
+    { href: '/privacy',    label: 'Privacy Policy'   },
+    { href: '/contact-us', label: 'Contact Us'       },
+    { href: '/feedback',   label: 'Feedback'         },
   ],
 }
 
-export default async function Footer() {
-  const liveAreas = await getLiveAreas()
-
-  const locationLinks = liveAreas
+export default function Footer() {
+  // Always show all area links — independent of live inventory for consistent internal linking
+  const locationLinks = AREAS
     .slice()
     .sort((a, b) => {
       const ai = LOCATION_PRIORITY.indexOf(a.slug)
       const bi = LOCATION_PRIORITY.indexOf(b.slug)
       return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
     })
-    .slice(0, 5)
     .map(area => ({ href: `/phuket/${area.slug}`, label: area.label }))
 
   const sections: Record<string, { href: string; label: string }[]> = {
-    Discover: STATIC_SECTIONS.Discover,
-    ...(locationLinks.length > 0 ? { Locations: locationLinks } : {}),
-    Partners: STATIC_SECTIONS.Partners,
-    Legal:    STATIC_SECTIONS.Legal,
+    Discover:  STATIC_SECTIONS.Discover,
+    Locations: locationLinks,
+    Partners:  STATIC_SECTIONS.Partners,
+    Legal:     STATIC_SECTIONS.Legal,
   }
 
   return (

@@ -5,7 +5,7 @@ import {
   Globe, Shield, Zap, Check, Star, ExternalLink, Bike, Store,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { getShopBySlug } from '@/lib/supabase/queries'
+import { getShopBySlug, getShopSlugs } from '@/lib/supabase/queries'
 import { SITE_URL, SITE_NAME } from '@/constants'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ScooterImage } from '@/components/ride/ScooterImage'
@@ -24,6 +24,15 @@ interface ShopPageProps {
 }
 
 export const revalidate = 60
+
+export async function generateStaticParams() {
+  try {
+    const slugs = await getShopSlugs()
+    return slugs.map(slug => ({ slug }))
+  } catch {
+    return []
+  }
+}
 
 export async function generateMetadata({ params }: ShopPageProps) {
   const { slug } = await params
@@ -151,11 +160,25 @@ export default async function ShopPage({ params }: ShopPageProps) {
     } : {}),
   }
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Explore', item: `${SITE_URL}/explore` },
+      { '@type': 'ListItem', position: 3, name: shop.name, item: `${SITE_URL}/shop/${slug}` },
+    ],
+  }
+
   return (
     <div className="bg-white min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <TrackView eventType="shop_view" shopId={shop.id} />
 
