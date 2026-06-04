@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: `${SITE_NAME} — Scooter Rental Phuket`,
-    template: `%s | ${SITE_NAME} — Scooter Rental Phuket`,
+    template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   keywords: ['scooter rental phuket', 'motorbike rental phuket', 'scooter hire phuket', 'rent scooter phuket', 'honda pcx phuket', 'yamaha nmax phuket', 'motorbike hire phuket'],

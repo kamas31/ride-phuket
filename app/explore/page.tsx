@@ -40,5 +40,10 @@ export default async function ExplorePage({
 }) {
   const { q } = await searchParams
   const scooters = await getScooters({ available: true })
-  return <ExploreClient initialScooters={scooters} initialSearch={q ?? ''} />
+  return (
+    <>
+      <h1 className="sr-only">Scooter Rentals in Phuket — Browse All Available Scooters</h1>
+      <ExploreClient initialScooters={scooters} initialSearch={q ?? ''} />
+    </>
+  )
 }
