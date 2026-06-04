@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getShopBySlug } from '@/lib/supabase/queries'
+import { SITE_URL, SITE_NAME } from '@/constants'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import { TrustBadge } from '@/components/ride/TrustBadge'
@@ -29,19 +30,28 @@ export async function generateMetadata({ params }: ShopPageProps) {
   const data = await getShopBySlug(slug)
   if (!data) return {}
 
-  const title = `Scooter Rental in ${data.location} | ${data.name} — Koh Ride`
+  const title = `${data.name} — Scooter Rental ${data.location}, Phuket`
   const description = data.description ||
-    `Rent scooters from ${data.name} in ${data.location}, Phuket. ${data.scooters.length} scooters available.`
+    `Rent scooters from ${data.name} in ${data.location}, Phuket. ${data.scooters.length > 0 ? `${data.scooters.length} scooters available.` : 'Contact the shop directly.'}`
 
   return {
     title,
     description,
+    alternates: { canonical: `${SITE_URL}/shop/${slug}` },
     openGraph: {
       title,
       description,
-      ...(data.coverImage ? { images: [{ url: data.coverImage, width: 1600, height: 900 }] } : {}),
+      url: `${SITE_URL}/shop/${slug}`,
+      type: 'website' as const,
+      siteName: SITE_NAME,
+      ...(data.coverImage ? { images: [{ url: data.coverImage, width: 1600, height: 900, alt: data.name }] } : {}),
     },
-    twitter: { card: 'summary_large_image' },
+    twitter: {
+      card: 'summary_large_image' as const,
+      title,
+      description,
+      ...(data.coverImage ? { images: [data.coverImage] } : {}),
+    },
   }
 }
 
@@ -94,8 +104,59 @@ export default async function ShopPage({ params }: ShopPageProps) {
   const hasCoords = Boolean(shop.lat && shop.lng)
   const locMode   = shop.locationVisibility ?? 'exact'
 
+  // LocalBusiness structured data — only real fields, no invented data
+  const jsonLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: shop.name,
+    url: `${SITE_URL}/shop/${slug}`,
+    image: shop.coverImage || shop.logo || undefined,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: shop.location,
+      addressRegion: 'Phuket',
+      addressCountry: 'TH',
+    },
+    ...(shop.description ? { description: shop.description } : {}),
+    ...(shop.phone ? { telephone: shop.phone } : {}),
+    ...(shop.website ? { sameAs: [shop.website] } : {}),
+    ...(hasCoords ? {
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: shop.lat,
+        longitude: shop.lng,
+      },
+    } : {}),
+    ...(shop.reviewCount > 0 ? {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: shop.rating.toFixed(1),
+        reviewCount: shop.reviewCount,
+        bestRating: '5',
+        worstRating: '1',
+      },
+    } : {}),
+    ...(scooters.length > 0 ? {
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: 'Scooter Rentals',
+        itemListElement: scooters.slice(0, 5).map(s => ({
+          '@type': 'Offer',
+          name: s.name,
+          price: s.pricePerDay,
+          priceCurrency: 'THB',
+          availability: 'https://schema.org/InStock',
+        })),
+      },
+    } : {}),
+  }
+
   return (
     <div className="bg-white min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <TrackView eventType="shop_view" shopId={shop.id} />
 
       {/* ── Breadcrumb ── */}

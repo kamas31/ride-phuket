@@ -59,7 +59,6 @@ export default async function AreaPage({ params }: PageProps) {
     getLiveAreas(),
   ])
   const realMinPrice = getAreaMinPrice(areaScooters, area.name)
-  const otherAreas = liveAreas.filter(a => a.slug !== slug)
 
   // Schema.org LocalBusiness structured data (no mock data — omit offers if inventory is empty)
   const jsonLd: Record<string, unknown> = {
@@ -148,7 +147,7 @@ export default async function AreaPage({ params }: PageProps) {
               { icon: Shield, text: 'Local scooter shops' },
               { icon: MapPin, text: 'Direct shop contact' },
               { icon: Check, text: 'Flexible rental terms' },
-              { icon: Zap, text: 'WhatsApp-first' },
+              { icon: Zap, text: 'Message shops instantly' },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-1.5 text-sm text-[#5c5c58]">
                 <Icon className="w-3.5 h-3.5 text-[#FF6B35]" />
@@ -238,12 +237,14 @@ export default async function AreaPage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* Other areas — only live zones with real inventory */}
-        {otherAreas.length > 0 && (
-          <section className="max-w-5xl mx-auto px-4 py-12">
-            <h2 className="text-[20px] font-bold text-[#0f0f0e] mb-6">Other areas in Phuket</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {otherAreas.map(other => (
+        {/* Other areas — always show all Phuket areas for internal linking */}
+        <section className="max-w-5xl mx-auto px-4 py-12">
+          <h2 className="text-[20px] font-bold text-[#0f0f0e] mb-6">Other areas in Phuket</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {AREAS.filter(a => a.slug !== slug).map(other => {
+              const liveOther = liveAreas.find(l => l.slug === other.slug)
+              const displayPrice = liveOther ? liveOther.priceFrom : other.priceFrom
+              return (
                 <Link
                   key={other.slug}
                   href={`/phuket/${other.slug}`}
@@ -251,14 +252,14 @@ export default async function AreaPage({ params }: PageProps) {
                 >
                   <div>
                     <p className="font-semibold text-sm text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors">{other.label}</p>
-                    <p className="text-xs text-[#9c9c98]">From {formatPrice(other.priceFrom)}/day</p>
+                    <p className="text-xs text-[#9c9c98]">From {formatPrice(displayPrice)}/day</p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-[#9c9c98] group-hover:text-[#FF6B35] transition-colors" />
                 </Link>
-              ))}
-            </div>
-          </section>
-        )}
+              )
+            })}
+          </div>
+        </section>
 
         {/* CTA */}
         <section className="max-w-5xl mx-auto px-4 pb-16">

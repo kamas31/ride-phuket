@@ -6,6 +6,7 @@ import { getScooters } from '@/lib/supabase/queries'
 import { computeLiveAreas } from '@/lib/live-areas'
 import { cn, formatPrice } from '@/lib/utils'
 import { HeroImages } from '@/components/home/HeroImages'
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/constants'
 
 const BENEFITS = [
   {
@@ -41,7 +42,41 @@ export default async function HomePage() {
   // Derive live zones from already-fetched scooters — zero extra DB call.
   const liveAreas  = computeLiveAreas(allScooters)
 
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
+    logo: `${SITE_URL}/icons/icon-512.png`,
+  }
+
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_URL}/explore?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  }
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
     <div className="flex flex-col">
       {/* ── HERO ── */}
       <section className="relative h-[100dvh] min-h-[600px] flex flex-col overflow-hidden">
@@ -342,5 +377,6 @@ export default async function HomePage() {
         </div>
       </section>
     </div>
+    </>
   )
 }

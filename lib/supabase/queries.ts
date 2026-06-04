@@ -212,6 +212,24 @@ export async function createBooking(payload: {
 
 // createShopApplication removed — use app/actions/partner.ts:submitPartnerApplication
 
+// ── SHOP SLUGS (for sitemap generation) ─────────────────────
+export async function getShopSlugs(): Promise<string[]> {
+  if (!isConfigured()) return []
+
+  const { createClient } = await import('./server')
+  const supabase = await createClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('shops')
+    .select('slug')
+    .eq('active', true)
+    .eq('verified', true)
+
+  if (error || !data) return []
+  return (data as { slug: string }[]).map(r => r.slug).filter(Boolean)
+}
+
 
 // ── SCOOTERS BY IDS (wishlist / saved page) ─────────────────
 export async function getScootersByIds(ids: string[]): Promise<Scooter[]> {

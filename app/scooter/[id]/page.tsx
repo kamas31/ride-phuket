@@ -7,6 +7,7 @@ import {
 import { Badge } from '@/components/ui/Badge'
 import { getScooterById } from '@/lib/supabase/queries'
 import { formatPricePerDay, getScooterCover } from '@/lib/utils'
+import { SITE_URL, SITE_NAME } from '@/constants'
 import { ImageGallery } from '@/components/ride/ImageGallery'
 import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
 import { QuickContact } from '@/components/ride/QuickContact'
@@ -64,17 +65,30 @@ export async function generateMetadata({ params }: ScooterPageProps) {
     if (!scooter) return {}
     const coverUrl = getScooterCover(scooter)
     const price = scooter.pricePerDay > 0 ? formatPricePerDay(scooter.pricePerDay) : null
-    const title = price ? `${scooter.name} — ${price}` : scooter.name
+    const locationLabel = scooter.location
+      ? scooter.location.charAt(0).toUpperCase() + scooter.location.slice(1)
+      : 'Phuket'
+    const title = price
+      ? `${scooter.name} Rental ${locationLabel}, Phuket — ${price}`
+      : `${scooter.name} Rental ${locationLabel}, Phuket`
+    const description = scooter.description ||
+      `Rent the ${scooter.name} in ${locationLabel}, Phuket. ${price ? `From ${price}.` : ''} Contact the shop directly — no booking fees.`
     return {
       title,
-      description: scooter.description || undefined,
+      description,
+      alternates: { canonical: `${SITE_URL}/scooter/${id}` },
       openGraph: {
         title,
-        description: scooter.description || undefined,
+        description,
+        url: `${SITE_URL}/scooter/${id}`,
+        type: 'website' as const,
+        siteName: SITE_NAME,
         ...(coverUrl ? { images: [{ url: coverUrl, width: 1600, height: 900, alt: scooter.name }] } : {}),
       },
       twitter: {
-        card: 'summary_large_image',
+        card: 'summary_large_image' as const,
+        title,
+        description,
         ...(coverUrl ? { images: [coverUrl] } : {}),
       },
     }
@@ -118,8 +132,77 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
   // Public FAQ from answered inquiries (useful SEO content)
   const faqItems = await getPublicInquiries(scooter.id)
 
+  const coverUrl = getScooterCover(scooter)
+  const locationLabel = scooter.location
+    ? scooter.location.charAt(0).toUpperCase() + scooter.location.slice(1)
+    : 'Phuket'
+
+  // Product structured data — only real fields
+  const productJsonLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: scooter.name,
+    description: scooter.description ||
+      `Rent the ${scooter.name} in ${locationLabel}, Phuket. Contact the shop directly.`,
+    category: `${scooter.category ? scooter.category.charAt(0).toUpperCase() + scooter.category.slice(1) : 'Scooter'} Rental`,
+    ...(coverUrl ? { image: coverUrl } : {}),
+    brand: { '@type': 'Brand', name: scooter.name.split(' ')[0] },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'THB',
+      price: scooter.pricePerDay,
+      availability: scooter.available
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'LocalBusiness',
+        name: shop.name,
+        url: `${SITE_URL}/shop/${shop.slug}`,
+      },
+    },
+  }
+
+  // BreadcrumbList structured data
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Explore Phuket', item: `${SITE_URL}/explore` },
+      { '@type': 'ListItem', position: 3, name: scooter.name, item: `${SITE_URL}/scooter/${scooter.id}` },
+    ],
+  }
+
+  // FAQ structured data from real answered inquiries
+  const faqJsonLd = faqItems.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map(item => ({
+      '@type': 'Question',
+      name: item.questionLabel,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  } : null
+
   return (
     <div className="bg-white min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
       <TrackView eventType="scooter_view" shopId={shop.id} scooterId={scooter.id} metadata={{ scooterName: scooter.name }} />
 
       {/* Breadcrumb nav */}

@@ -12,25 +12,27 @@ const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — Premium Scooter Rentals in Phuket`,
-    template: `%s | ${SITE_NAME}`,
+    default: `${SITE_NAME} — Scooter Rental Phuket`,
+    template: `%s | ${SITE_NAME} — Scooter Rental Phuket`,
   },
   description: SITE_DESCRIPTION,
-  keywords: ['scooter rental phuket', 'motorbike rental phuket', 'scooter hire phuket', 'honda pcx phuket', 'yamaha nmax phuket'],
+  keywords: ['scooter rental phuket', 'motorbike rental phuket', 'scooter hire phuket', 'rent scooter phuket', 'honda pcx phuket', 'yamaha nmax phuket', 'motorbike hire phuket'],
   authors: [{ name: SITE_NAME }],
+  alternates: { canonical: SITE_URL },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — Premium Scooter Rentals in Phuket`,
+    title: `${SITE_NAME} — Scooter Rental Phuket`,
     description: SITE_DESCRIPTION,
-    images: [{ url: `${SITE_URL}/og.png`, width: 1200, height: 630, alt: SITE_NAME }],
+    images: [{ url: `${SITE_URL}/og.png`, width: 1200, height: 630, alt: `${SITE_NAME} — Scooter Rental Phuket` }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_NAME} — Premium Scooter Rentals in Phuket`,
+    title: `${SITE_NAME} — Scooter Rental Phuket`,
     description: SITE_DESCRIPTION,
     images: [`${SITE_URL}/og.png`],
   },
