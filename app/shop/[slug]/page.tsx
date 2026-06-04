@@ -264,6 +264,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
                 {/* Shop identity row */}
                 <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#f0f0ec]">
                   {shop.logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={shop.logo} alt={shop.name} className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
                   ) : (
                     <div className="w-11 h-11 bg-[#f0ede8] rounded-full flex items-center justify-center flex-shrink-0">

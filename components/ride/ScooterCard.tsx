@@ -111,7 +111,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         className={compact ? 'h-40 sm:h-44' : 'h-40 sm:h-52'}
         overlay
         hover
-        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
       >
         {/* Top-left: badges — horizontal row, max 2 */}
         {visibleBadges.length > 0 && (

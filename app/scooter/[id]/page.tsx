@@ -374,6 +374,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               {/* Shop identity */}
               <div className="flex items-center gap-3.5 mb-5">
                 {shop.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={shop.logo} alt={shop.name ?? ''} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
                 ) : (
                   <div className="w-12 h-12 bg-[#f0ede8] rounded-full flex items-center justify-center flex-shrink-0">
