@@ -60,6 +60,15 @@ export default async function AreaPage({ params }: PageProps) {
   ])
   const realMinPrice = getAreaMinPrice(areaScooters, area.name)
 
+  // Derive unique shops from already-fetched scooters — no extra DB call
+  const areaShops = Array.from(
+    new Map(
+      areaScooters
+        .filter(s => s.shop?.slug)
+        .map(s => [s.shop!.id, s.shop!])
+    ).values()
+  )
+
   // Schema.org LocalBusiness structured data (no mock data — omit offers if inventory is empty)
   const jsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
@@ -217,6 +226,39 @@ export default async function AreaPage({ params }: PageProps) {
             </div>
           )}
         </section>
+
+        {/* Rental shops in this area */}
+        {areaShops.length > 0 && (
+          <section className="max-w-5xl mx-auto px-4 pb-4">
+            <h2 className="text-[20px] font-bold text-[#0f0f0e] mb-5">
+              Rental shops in {area.label}
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {areaShops.map(shop => (
+                <Link
+                  key={shop.id}
+                  href={`/shop/${shop.slug}`}
+                  className="flex items-center gap-3 p-3.5 bg-white border border-[#e8e8e4] rounded-[14px] hover:border-[#FF6B35] hover:bg-[#fff4f0] group transition-all"
+                >
+                  {shop.logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={shop.logo} alt={shop.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-[#f0ede8] flex items-center justify-center flex-shrink-0 text-xs font-bold text-[#a09890]">
+                      {shop.name.charAt(0)}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors truncate">{shop.name}</p>
+                    {shop.reviewCount > 0 && (
+                      <p className="text-[11px] text-[#9c9c98]">★ {shop.rating.toFixed(1)} ({shop.reviewCount})</p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Area highlights */}
         <section className="bg-[#f8f8f6] py-12">
