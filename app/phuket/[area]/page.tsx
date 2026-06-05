@@ -327,7 +327,6 @@ export default async function AreaPage({ params }: PageProps) {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {AREAS.filter(a => a.slug !== slug).map(other => {
               const liveOther = liveAreas.find(l => l.slug === other.slug)
-              const displayPrice = liveOther ? liveOther.priceFrom : other.priceFrom
               return (
                 <Link
                   key={other.slug}
@@ -336,7 +335,9 @@ export default async function AreaPage({ params }: PageProps) {
                 >
                   <div>
                     <p className="font-semibold text-sm text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors">{other.label}</p>
-                    <p className="text-xs text-[#9c9c98]">From {formatPrice(displayPrice)}/day</p>
+                    <p className="text-xs text-[#9c9c98]">
+                      {liveOther ? `From ${formatPrice(liveOther.priceFrom)}/day` : 'No scooters available'}
+                    </p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-[#9c9c98] group-hover:text-[#FF6B35] transition-colors" />
                 </Link>

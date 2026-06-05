@@ -4,6 +4,9 @@ import type { Metadata } from 'next'
 import { AREAS } from '@/constants/areas'
 import { SITE_URL, SITE_NAME } from '@/constants'
 import { formatPrice } from '@/lib/utils'
+import { getLiveAreas } from '@/lib/live-areas'
+
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: `Scooter Rental Locations in Phuket | ${SITE_NAME}`,
@@ -24,7 +27,8 @@ export const metadata: Metadata = {
   },
 }
 
-export default function LocationsPage() {
+export default async function LocationsPage() {
+  const liveAreas = await getLiveAreas()
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -84,31 +88,34 @@ export default function LocationsPage() {
             All Phuket Areas
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {AREAS.map(area => (
-              <Link
-                key={area.slug}
-                href={`/phuket/${area.slug}`}
-                className="group flex flex-col p-5 bg-white rounded-[18px] border border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] transition-all"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-[#FF6B35] flex-shrink-0" />
-                    <span className="font-bold text-[15px] text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors leading-tight">
-                      {area.label}
+            {AREAS.map(area => {
+              const liveArea = liveAreas.find(l => l.slug === area.slug)
+              return (
+                <Link
+                  key={area.slug}
+                  href={`/phuket/${area.slug}`}
+                  className="group flex flex-col p-5 bg-white rounded-[18px] border border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] transition-all"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-[#FF6B35] flex-shrink-0" />
+                      <span className="font-bold text-[15px] text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors leading-tight">
+                        {area.label}
+                      </span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:text-[#FF6B35] transition-colors flex-shrink-0 mt-0.5" />
+                  </div>
+                  <p className="text-[13px] text-[#5c5c58] leading-relaxed line-clamp-2 mb-3">
+                    {area.description}
+                  </p>
+                  <div className="mt-auto">
+                    <span className="text-xs font-semibold text-[#FF6B35]">
+                      {liveArea ? `From ${formatPrice(liveArea.priceFrom)}/day` : 'No scooters available'}
                     </span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:text-[#FF6B35] transition-colors flex-shrink-0 mt-0.5" />
-                </div>
-                <p className="text-[13px] text-[#5c5c58] leading-relaxed line-clamp-2 mb-3">
-                  {area.description}
-                </p>
-                <div className="mt-auto">
-                  <span className="text-xs font-semibold text-[#FF6B35]">
-                    From {formatPrice(area.priceFrom)}/day
-                  </span>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              )
+            })}
           </div>
         </section>
 
