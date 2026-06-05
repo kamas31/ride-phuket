@@ -8,7 +8,6 @@ import Link from 'next/link'
 import { X, ArrowRight, Store } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
 import { PHUKET_ZONES, getZoneForLocation } from '@/lib/zones'
-import { isNative } from '@/lib/platform'
 import type { Scooter } from '@/types'
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
@@ -245,12 +244,6 @@ export default function ScooterMap({
     containerRef.current.style.transform = 'translateZ(0)'
     containerRef.current.style.willChange = 'transform'
 
-    // cooperativeGestures: require Ctrl+scroll to zoom on desktop web so the
-    // mouse wheel scrolls the page normally when the map is in view.
-    // Disabled on touch-primary devices (phones/tablets) and on native iOS
-    // where finger pinch-zoom is the natural gesture.
-    const isTouchPrimary = window.matchMedia('(hover: none)').matches
-
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
@@ -259,7 +252,6 @@ export default function ScooterMap({
       attributionControl: false,
       fadeDuration: 0,
       preserveDrawingBuffer: false,
-      cooperativeGestures: !isTouchPrimary && !isNative(),
     })
 
     const canvas = map.getCanvas()

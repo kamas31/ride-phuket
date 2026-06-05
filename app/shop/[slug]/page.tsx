@@ -5,7 +5,7 @@ import {
   Globe, Shield, Zap, Check, Star, ExternalLink, Bike, Store,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { getShopBySlug, getShopSlugs } from '@/lib/supabase/queries'
+import { getShopBySlug } from '@/lib/supabase/queries'
 import { SITE_URL, SITE_NAME } from '@/constants'
 import { getAreaForLocation } from '@/constants/areas'
 import { ScooterCard } from '@/components/ride/ScooterCard'
@@ -25,15 +25,6 @@ interface ShopPageProps {
 }
 
 export const revalidate = 60
-
-export async function generateStaticParams() {
-  try {
-    const slugs = await getShopSlugs()
-    return slugs.map(slug => ({ slug }))
-  } catch {
-    return []
-  }
-}
 
 export async function generateMetadata({ params }: ShopPageProps) {
   const { slug } = await params

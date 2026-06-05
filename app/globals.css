@@ -133,7 +133,7 @@ button, nav, [role="button"], label {
 /* Remove the 300 ms tap delay on interactive elements (modern iOS/Android
    eliminates this automatically when the viewport has no scaling, but being
    explicit ensures snappy response on all device/OS combinations). */
-a, button, [role="button"] {
+.native a, .native button, .native [role="button"] {
   touch-action: manipulation;
 }
 
