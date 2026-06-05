@@ -269,6 +269,46 @@ export default function ScooterMap({
       // Natural landcover (green vegetation/habitat polygons) — parks/roads kept
       if (map.getLayer('landcover')) map.setLayoutProperty('landcover', 'visibility', 'none')
 
+      // ── Replace Mapbox neighbourhood labels with our own ──────────────────
+      // streets-v12 collision detection suppresses settlement-subdivision-label
+      // at zoom ~10.8 whenever they compete with higher-priority labels.
+      // We hide that layer and render all 16 Phuket zones ourselves.
+      if (map.getLayer('settlement-subdivision-label')) {
+        map.setLayoutProperty('settlement-subdivision-label', 'visibility', 'none')
+      }
+
+      map.addSource('phuket-zones', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection' as const,
+          features: PHUKET_ZONES.map(zone => ({
+            type: 'Feature' as const,
+            geometry: { type: 'Point' as const, coordinates: [zone.lng, zone.lat] },
+            properties: { name: zone.name },
+          })),
+        },
+      })
+
+      map.addLayer({
+        id: 'phuket-zone-labels',
+        type: 'symbol',
+        source: 'phuket-zones',
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['DIN Pro Regular', 'Arial Unicode MS Regular'],
+          'text-size': 11,
+          'text-anchor': 'top',
+          'text-offset': [0, 0.25],
+          'text-allow-overlap': false,
+          'symbol-sort-key': 10,
+        },
+        paint: {
+          'text-color': '#5c5c58',
+          'text-halo-color': 'rgba(255,255,255,0.88)',
+          'text-halo-width': 1.5,
+        },
+      })
+
       setReady(true)
     })
 

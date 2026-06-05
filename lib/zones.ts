@@ -28,10 +28,10 @@ export const PHUKET_ZONES: PhuketZone[] = [
   { key: 'kata',         name: 'Kata',         lat: 7.8207, lng: 98.3008, radiusKm: 2.0 }, // Kata Beach Rd / main village (was in sand)
   { key: 'karon',        name: 'Karon',        lat: 7.8449, lng: 98.3011, radiusKm: 1.8 }, // Patak Rd inland strip (was at beach edge)
   { key: 'rawai',        name: 'Rawai',        lat: 7.7781, lng: 98.3281, radiusKm: 2.2 }, // Rawai seafront / Viset Rd (bay, not Andaman)
-  { key: 'bang tao',     name: 'Bang Tao',     lat: 7.9906, lng: 98.2921, radiusKm: 3.0 }, // Laguna / Bangtao Beach Rd (was at beach edge)
+  { key: 'bang tao',     name: 'Bang Tao',     lat: 7.9889, lng: 98.3040, radiusKm: 3.0 }, // Boat Avenue / Cherng Talay Rd inland (was inside Laguna lagoon)
   { key: 'phuket town',  name: 'Phuket Town',  lat: 7.8834, lng: 98.3920, radiusKm: 2.0 }, // Old Town / Thalang Rd area (was 500m too far west)
   { key: 'kamala',       name: 'Kamala',       lat: 7.9476, lng: 98.2734, radiusKm: 1.5 }, // Kamala village / main road
-  { key: 'surin',        name: 'Surin',        lat: 7.9712, lng: 98.2843, radiusKm: 1.5 }, // Surin commercial area inland (was on beach)
+  { key: 'surin',        name: 'Surin',        lat: 7.9712, lng: 98.2900, radiusKm: 1.5 }, // Surin commercial strip — Srisoonthorn Rd (clear of beach)
   // ── Extended zones (AREAS coverage) ──────────────────────────────────────
   { key: 'chalong',      name: 'Chalong',      lat: 7.8414, lng: 98.3533, radiusKm: 3.0 }, // Chalong roundabout area
   { key: 'nai harn',     name: 'Nai Harn',     lat: 7.7840, lng: 98.3020, radiusKm: 1.5 }, // Nai Harn lake / beach area
