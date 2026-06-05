@@ -29,12 +29,48 @@ function CalibrationMarker({
   onZoneChange: (zone: string) => void
   onDelete: () => void
 }) {
+  // Stop ALL pointer events from reaching Mapbox's gesture handlers.
+  // Without this, mousedown bubbles to the map and Mapbox starts its
+  // drag detection, which swallows subsequent events and breaks the
+  // native <select> open cycle.
+  const stop = (e: React.SyntheticEvent) => e.stopPropagation()
+
   return (
-    <div onClick={e => e.stopPropagation()} style={{ userSelect: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      {/* Orange dot — sits exactly at the clicked coordinate (anchor:top + offset:-6) */}
-      <div style={{ width: 12, height: 12, background: '#FF6B35', borderRadius: '50%', border: '2.5px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.45)', flexShrink: 0 }} />
-      {/* Card */}
-      <div style={{ marginTop: 6, background: 'white', borderRadius: 12, boxShadow: '0 4px 18px rgba(0,0,0,0.18)', padding: '10px 12px', minWidth: 190, maxWidth: 210 }}>
+    // Container is exactly the dot size (12×12). The marker uses anchor:'center'
+    // so the dot centre lands precisely on the clicked coordinate.
+    // The card overflows to the RIGHT via absolute positioning so it never
+    // covers the native Mapbox area label that sits below the coordinate.
+    <div
+      style={{ position: 'relative', width: 12, height: 12, userSelect: 'none' }}
+      onClick={stop}
+      onMouseDown={stop}
+      onPointerDown={stop}
+      onTouchStart={stop}
+    >
+      {/* Orange dot */}
+      <div style={{
+        width: 12, height: 12,
+        background: '#FF6B35',
+        borderRadius: '50%',
+        border: '2.5px solid white',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.45)',
+        boxSizing: 'border-box',
+      }} />
+
+      {/* Card — right side, vertically centred on the dot */}
+      <div style={{
+        position: 'absolute',
+        left: 18,
+        top: '50%',
+        transform: 'translateY(-50%)',
+        background: 'white',
+        borderRadius: 12,
+        boxShadow: '0 4px 18px rgba(0,0,0,0.2)',
+        padding: '10px 12px',
+        minWidth: 190,
+        maxWidth: 210,
+        zIndex: 200,
+      }}>
         <p style={{ fontFamily: 'monospace', fontSize: 10, color: '#5c5c58', lineHeight: 1.6, marginBottom: 8 }}>
           lat: {pin.lat.toFixed(6)}<br />lng: {pin.lng.toFixed(6)}
         </p>
@@ -357,8 +393,8 @@ export default function ScooterMap({
     calibPins.forEach(pin => {
       if (!calibMarkersRef.current.has(pin.id)) {
         const container = document.createElement('div')
-        // anchor:'top' + offset [0,-6] centres the 12px dot exactly on the coord
-        const marker = new mapboxgl.Marker({ element: container, anchor: 'top', offset: [0, -6] })
+        // anchor:'center' on a 12×12 container — dot centre lands on the coordinate
+        const marker = new mapboxgl.Marker({ element: container, anchor: 'center' })
           .setLngLat([pin.lng, pin.lat])
           .addTo(mapRef.current!)
         const root = createRoot(container)
