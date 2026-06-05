@@ -29,17 +29,18 @@ function CalibrationMarker({
   onZoneChange: (zone: string) => void
   onDelete: () => void
 }) {
-  // Stop ALL pointer events from reaching Mapbox's gesture handlers.
-  // Without this, mousedown bubbles to the map and Mapbox starts its
-  // drag detection, which swallows subsequent events and breaks the
-  // native <select> open cycle.
+  const [open, setOpen] = useState(false)
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
+  const currentZone = PHUKET_ZONES.find(z => z.key === pin.zone)
+
+  // Root cause of dropdown bug: the map wrapper has overflow:hidden. Chrome's
+  // Blink-rendered <select> popup is clipped by that boundary — it opens but
+  // is immediately hidden. Fix: custom inline zone list that expands within
+  // the card itself, never needs to overflow the map container.
 
   return (
-    // Container is exactly the dot size (12×12). The marker uses anchor:'center'
-    // so the dot centre lands precisely on the clicked coordinate.
-    // The card overflows to the RIGHT via absolute positioning so it never
-    // covers the native Mapbox area label that sits below the coordinate.
+    // 12×12 container with anchor:'center' — dot centre = coordinate exactly.
+    // Card floats RIGHT via absolute positioning, never covers Mapbox label.
     <div
       style={{ position: 'relative', width: 12, height: 12, userSelect: 'none' }}
       onClick={stop}
@@ -57,7 +58,7 @@ function CalibrationMarker({
         boxSizing: 'border-box',
       }} />
 
-      {/* Card — right side, vertically centred on the dot */}
+      {/* Card — right of dot, vertically centred */}
       <div style={{
         position: 'absolute',
         left: 18,
@@ -74,15 +75,45 @@ function CalibrationMarker({
         <p style={{ fontFamily: 'monospace', fontSize: 10, color: '#5c5c58', lineHeight: 1.6, marginBottom: 8 }}>
           lat: {pin.lat.toFixed(6)}<br />lng: {pin.lng.toFixed(6)}
         </p>
-        <select
-          value={pin.zone}
-          onChange={e => onZoneChange(e.target.value)}
-          style={{ width: '100%', fontSize: 11, padding: '5px 6px', borderRadius: 7, border: '1.5px solid #e8e8e4', marginBottom: 7, background: 'white', cursor: 'pointer', outline: 'none' }}
-        >
-          {PHUKET_ZONES.map(z => (
-            <option key={z.key} value={z.key}>{z.name}</option>
-          ))}
-        </select>
+
+        {/* Inline zone picker — avoids overflow:hidden clipping */}
+        {open ? (
+          <div style={{ border: '1.5px solid #e8e8e4', borderRadius: 7, marginBottom: 7, overflow: 'hidden' }}>
+            <div style={{ maxHeight: 152, overflowY: 'auto' }}>
+              {PHUKET_ZONES.map(z => (
+                <button
+                  key={z.key}
+                  onClick={() => { onZoneChange(z.key); setOpen(false) }}
+                  style={{
+                    display: 'block', width: '100%', textAlign: 'left',
+                    padding: '5px 9px', fontSize: 11, border: 'none',
+                    background: z.key === pin.zone ? '#fff5f0' : 'white',
+                    color: z.key === pin.zone ? '#FF6B35' : '#0f0f0e',
+                    fontWeight: z.key === pin.zone ? 700 : 400,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {z.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setOpen(true)}
+            style={{
+              width: '100%', textAlign: 'left', fontSize: 11,
+              padding: '5px 9px', borderRadius: 7,
+              border: '1.5px solid #e8e8e4', marginBottom: 7,
+              background: 'white', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}
+          >
+            <span>{currentZone?.name ?? pin.zone}</span>
+            <span style={{ fontSize: 9, color: '#9c9c98', marginLeft: 6 }}>▾</span>
+          </button>
+        )}
+
         <button
           onClick={onDelete}
           style={{ width: '100%', fontSize: 10, color: '#9c9c98', background: 'none', border: 'none', cursor: 'pointer', padding: '1px 0' }}
