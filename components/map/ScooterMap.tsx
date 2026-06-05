@@ -181,9 +181,9 @@ function buildShopAggregates(scooters: Scooter[]): ShopAggregate[] {
 
 // ── Shop Pin — Airbnb-inspired price pill ─────────────────────
 function ShopPin({
-  minPrice, active, onClick, onEnter, onLeave,
+  minPrice, count, active, onClick, onEnter, onLeave,
 }: {
-  minPrice: number; active: boolean
+  minPrice: number; count: number; active: boolean
   onClick: () => void; onEnter: () => void; onLeave: () => void
 }) {
   const [hovered, setHovered] = useState(false)
@@ -219,7 +219,7 @@ function ShopPin({
             : '0 1px 3px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.12)',
         }}
       >
-        {formatPrice(minPrice)}+
+        {formatPrice(minPrice)}{count > 1 ? '+' : ''}
       </div>
       {/* Caret — 45% larger than original (4/4/5px → 6/6/7px).
           Color always matches pill background so they read as one shape. */}
@@ -569,6 +569,7 @@ export default function ScooterMap({
       root.render(
         <ShopPin
           minPrice={agg.minPrice}
+          count={agg.count}
           active={active}
           onClick={() => onSelectRef.current(agg.shopId === selectedId ? null : agg.shopId)}
           onEnter={() => onHoverRef.current?.(agg.shopId)}
@@ -602,6 +603,7 @@ export default function ScooterMap({
       entry.root.render(
         <ShopPin
           minPrice={agg.minPrice}
+          count={agg.count}
           active={active}
           onClick={() => onSelectRef.current(id === selectedId ? null : id)}
           onEnter={() => onHoverRef.current?.(id)}
