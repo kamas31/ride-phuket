@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/Badge'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import { SaveButton } from '@/components/ride/SaveButton'
 import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
-import { cn, formatPrice, getScooterCover } from '@/lib/utils'
+import { cn, formatPrice, formatEngine, getScooterCover } from '@/lib/utils'
 import type { Scooter } from '@/types'
 
 interface ScooterCardProps {
@@ -152,7 +152,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
           <Badge variant={scooter.category === 'automatic' ? 'brand' : 'default'}>
             {scooter.category ? scooter.category.charAt(0).toUpperCase() + scooter.category.slice(1) : 'Scooter'}
           </Badge>
-          <span className="text-xs text-[#9c9c98]">{scooter.specs?.engine}</span>
+          <span className="text-xs text-[#9c9c98]">{formatEngine(scooter.specs?.engine)}</span>
         </div>
 
         {/* Price — equal weight for day / week / month */}

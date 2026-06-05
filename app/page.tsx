@@ -285,31 +285,51 @@ export default async function HomePage() {
                 Where are you staying?
               </h2>
             </div>
+            {liveAreas.length > 6 && (
+              <Link
+                href="/locations"
+                className="hidden md:flex items-center gap-1 text-sm font-semibold text-[#FF6B35] hover:gap-2 transition-all"
+              >
+                View all {liveAreas.length} locations <ChevronRight className="w-4 h-4" />
+              </Link>
+            )}
           </div>
           {liveAreas.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {liveAreas.map(area => (
-                <Link
-                  key={area.slug}
-                  href={`/phuket/${area.slug}`}
-                  className="group flex flex-col p-4 bg-white rounded-[16px] border border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] transition-all"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <MapPin className="w-4 h-4 text-[#FF6B35] mt-0.5" />
-                    <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:text-[#FF6B35] transition-colors" />
-                  </div>
-                  <p className="font-bold text-[14px] text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors leading-tight">{area.label}</p>
-                  <p className="text-[12px] text-[#9c9c98] mt-1">From {formatPrice(area.priceFrom)}/day</p>
-                  {area.engineRange && (
-                    <p className="text-[11px] text-[#c8c8c4] mt-0.5 leading-none">
-                      {area.engineRange.min === area.engineRange.max
-                        ? `${area.engineRange.min}cc`
-                        : `${area.engineRange.min}cc–${area.engineRange.max}cc`}
-                    </p>
-                  )}
-                </Link>
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {liveAreas.slice(0, 6).map(area => (
+                  <Link
+                    key={area.slug}
+                    href={`/phuket/${area.slug}`}
+                    className="group flex flex-col p-4 bg-white rounded-[16px] border border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] transition-all"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <MapPin className="w-4 h-4 text-[#FF6B35] mt-0.5" />
+                      <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:text-[#FF6B35] transition-colors" />
+                    </div>
+                    <p className="font-bold text-[14px] text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors leading-tight">{area.label}</p>
+                    <p className="text-[12px] text-[#9c9c98] mt-1">From {formatPrice(area.priceFrom)}/day</p>
+                    {area.engineRange && (
+                      <p className="text-[11px] text-[#c8c8c4] mt-0.5 leading-none">
+                        {area.engineRange.min === area.engineRange.max
+                          ? `${area.engineRange.min}cc`
+                          : `${area.engineRange.min}cc–${area.engineRange.max}cc`}
+                      </p>
+                    )}
+                  </Link>
+                ))}
+              </div>
+              {liveAreas.length > 6 && (
+                <div className="mt-5 text-center">
+                  <Link
+                    href="/locations"
+                    className="inline-flex items-center gap-2 px-6 py-3 border border-[#e8e8e4] rounded-full text-sm font-semibold text-[#0f0f0e] hover:bg-white hover:border-[#FF6B35] hover:text-[#FF6B35] transition-all"
+                  >
+                    View all {liveAreas.length} Phuket locations <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-12 bg-white rounded-[20px] border border-[#e8e8e4]">
               <p className="text-[#5c5c58] font-medium mb-1">New scooter listings are being added.</p>

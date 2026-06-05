@@ -129,3 +129,18 @@ export function getScooterCover(scooter: {
 }): string {
   return scooter.coverImage || scooter.images?.[0] || ''
 }
+
+/**
+ * Normalises an engine displacement string for display.
+ * "125" → "125cc" | "125cc" → "125cc" | "N/A" → "N/A" | "Electric" → "Electric"
+ */
+export function formatEngine(value: string | undefined | null): string {
+  if (!value) return ''
+  const t = value.trim()
+  if (!t || /^n\/?a$/i.test(t)) return t
+  // Already has a cc suffix (case-insensitive)
+  if (/cc$/i.test(t)) return t
+  // Bare number → append cc
+  if (/^\d+(\.\d+)?$/.test(t)) return `${t}cc`
+  return t
+}

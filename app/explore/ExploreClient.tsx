@@ -183,27 +183,6 @@ export default function ExploreClient({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered.length === 0, debouncedSearch, filters.category, filters.location])
 
-  // Shared card wrapper — rings compare by shopId so the whole shop highlights together
-  const CardWrapper = useCallback(({ scooter, className }: { scooter: Scooter; className?: string }) => (
-    <div
-      ref={setCardRef(scooter.id)}
-      onClick={() => setSelectedId(prev => prev === scooter.shopId ? null : scooter.shopId)}
-      onMouseEnter={() => {
-        if (scooter.shopId) handleHoverEnter(scooter.shopId)
-        prefetchScooter(scooter.id)
-      }}
-      onMouseLeave={handleHoverLeave}
-      onTouchStart={() => prefetchScooter(scooter.id)}
-      className={cn(
-        'transition-all duration-150',
-        selectedId === scooter.shopId ? 'ring-2 ring-[#FF6B35] rounded-[20px]' : '',
-        hoveredId === scooter.shopId && selectedId !== scooter.shopId ? 'ring-1 ring-[#FF6B35]/40 rounded-[20px]' : '',
-        className
-      )}
-    >
-      <ScooterCard scooter={scooter} compact />
-    </div>
-  ), [setCardRef, handleHoverEnter, handleHoverLeave, prefetchScooter, selectedId, hoveredId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen bg-white">
@@ -287,7 +266,24 @@ export default function ExploreClient({
             {filtered.length === 0 ? <EmptyState /> : (
               <div className={`grid gap-3 ${showMap ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
                 {filtered.map(scooter => (
-                  <CardWrapper key={scooter.id} scooter={scooter} />
+                  <div
+                    key={scooter.id}
+                    ref={setCardRef(scooter.id)}
+                    onClick={() => setSelectedId(prev => prev === scooter.shopId ? null : scooter.shopId)}
+                    onMouseEnter={() => {
+                      if (scooter.shopId) handleHoverEnter(scooter.shopId)
+                      prefetchScooter(scooter.id)
+                    }}
+                    onMouseLeave={handleHoverLeave}
+                    onTouchStart={() => prefetchScooter(scooter.id)}
+                    className={cn(
+                      'transition-all duration-150',
+                      selectedId === scooter.shopId ? 'ring-2 ring-[#FF6B35] rounded-[20px]' : '',
+                      hoveredId === scooter.shopId && selectedId !== scooter.shopId ? 'ring-1 ring-[#FF6B35]/40 rounded-[20px]' : '',
+                    )}
+                  >
+                    <ScooterCard scooter={scooter} compact />
+                  </div>
                 ))}
               </div>
             )}

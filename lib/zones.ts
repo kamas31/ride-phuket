@@ -20,14 +20,25 @@ export interface PhuketZone {
 }
 
 export const PHUKET_ZONES: PhuketZone[] = [
+  // ── Primary rental zones (form dropdown options) ──────────────────────────
   { key: 'patong',       name: 'Patong',       lat: 7.8956, lng: 98.2966, radiusKm: 2.5 },
+  // kata noi MUST appear before kata — 'kata noi'.includes('kata') is true
+  { key: 'kata noi',     name: 'Kata Noi',     lat: 7.8073, lng: 98.3004, radiusKm: 1.0 },
   { key: 'kata',         name: 'Kata',         lat: 7.8203, lng: 98.2986, radiusKm: 2.0 },
-  { key: 'karon',        name: 'Karon',        lat: 7.8347, lng: 98.2987, radiusKm: 1.8 },
+  { key: 'karon',        name: 'Karon',        lat: 7.8450, lng: 98.2987, radiusKm: 1.8 },
   { key: 'rawai',        name: 'Rawai',        lat: 7.7781, lng: 98.3281, radiusKm: 2.2 },
-  { key: 'bang tao',     name: 'Bang Tao',     lat: 8.0000, lng: 98.2900, radiusKm: 3.0 },
+  { key: 'bang tao',     name: 'Bang Tao',     lat: 7.9900, lng: 98.2880, radiusKm: 3.0 },
   { key: 'phuket town',  name: 'Phuket Town',  lat: 7.8804, lng: 98.3881, radiusKm: 2.0 },
   { key: 'kamala',       name: 'Kamala',       lat: 7.9476, lng: 98.2734, radiusKm: 1.5 },
   { key: 'surin',        name: 'Surin',        lat: 7.9714, lng: 98.2800, radiusKm: 1.5 },
+  // ── Extended zones (AREAS coverage) ──────────────────────────────────────
+  { key: 'chalong',      name: 'Chalong',      lat: 7.8414, lng: 98.3533, radiusKm: 3.0 },
+  { key: 'nai harn',     name: 'Nai Harn',     lat: 7.7840, lng: 98.3020, radiusKm: 1.5 },
+  { key: 'cherng talay', name: 'Cherng Talay', lat: 7.9963, lng: 98.2993, radiusKm: 2.0 },
+  { key: 'mai khao',     name: 'Mai Khao',     lat: 8.1600, lng: 98.3028, radiusKm: 3.5 },
+  { key: 'thalang',      name: 'Thalang',      lat: 8.0212, lng: 98.3478, radiusKm: 2.5 },
+  { key: 'cape panwa',   name: 'Cape Panwa',   lat: 7.8100, lng: 98.4060, radiusKm: 2.0 },
+  { key: 'ko sirey',     name: 'Ko Sirey',     lat: 7.8862, lng: 98.4144, radiusKm: 1.5 },
 ]
 
 /** Find the zone for a scooter location string */

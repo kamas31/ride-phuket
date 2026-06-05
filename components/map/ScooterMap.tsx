@@ -261,6 +261,14 @@ export default function ScooterMap({
     map.on('load', () => {
       map.resize()
 
+      // ── Layer cleanup: remove maritime noise + vegetation clutter ──────────
+      // Ferry route lines and their outlines (blue dashed sea routes)
+      for (const id of ['ferry', 'ferry-case']) {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
+      }
+      // Natural landcover (green vegetation/habitat polygons) — parks/roads kept
+      if (map.getLayer('landcover')) map.setLayoutProperty('landcover', 'visibility', 'none')
+
       setReady(true)
     })
 
