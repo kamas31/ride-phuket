@@ -32,6 +32,9 @@ const DEFAULT_FILTERS: FilterState = {
   sortBy: 'recommended',
   depositProtected: false,
   noPassport: false,
+  requiredFeatures: [],
+  requiredAccessories: [],
+  depositTypeFilter: '',
 }
 
 type MobileView = 'list' | 'map'
@@ -144,6 +147,14 @@ export default function ExploreClient({
       if (filters.location !== 'all' && !s.location.toLowerCase().includes(filters.location.replace(/-/g, ' '))) return false
       if (filters.depositProtected && !s.shop?.depositProtectedMember) return false
       if (filters.noPassport && s.passportRequired) return false
+      if (filters.requiredFeatures.length > 0 && !filters.requiredFeatures.every(f => s.features.includes(f))) return false
+      if (filters.requiredAccessories.length > 0 && !filters.requiredAccessories.every(a => s.features.includes(a))) return false
+      if (filters.depositTypeFilter) {
+        const dt = s.depositType
+        if (filters.depositTypeFilter === 'cash'     && dt !== 'cash'     && dt !== 'both') return false
+        if (filters.depositTypeFilter === 'passport' && dt !== 'passport' && dt !== 'both') return false
+        if (filters.depositTypeFilter === 'both'     && dt !== 'both') return false
+      }
       // Map bounds filter (when "Search this area" is clicked)
       if (mapBounds) {
         const { lat, lng } = { lat: s.lat, lng: s.lng }

@@ -20,7 +20,7 @@ export interface OpeningHoursSchedule {
 export type BookingStatus = 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled'
 export type DeliveryMethod = 'delivery' | 'pickup'
 export type MileageRange = '0-10000' | '10000-20000' | '20000-30000' | '30000-50000' | '50000+'
-export type DepositType = 'cash' | 'card_hold' | 'flexible' | 'none'
+export type DepositType = 'cash' | 'card_hold' | 'flexible' | 'none' | 'passport' | 'both'
 
 export interface Shop {
   id: string
@@ -101,11 +101,11 @@ export interface Scooter {
 
 export interface ScooterSpecs {
   engine: string
-  power: string
-  fuelCapacity: string
-  consumption: string
-  weight: string
-  storage: string
+  power?: string
+  fuelCapacity?: string
+  consumption?: string
+  weight?: string
+  storage?: string
 }
 
 export interface Booking {
@@ -185,6 +185,9 @@ export interface FilterState {
   sortBy: 'recommended' | 'price_asc' | 'price_desc' | 'rating' | 'distance'
   depositProtected: boolean  // Koh Ride Deposit Protection enrolled shops
   noPassport: boolean        // no passport required (standard scooters only)
+  requiredFeatures: string[]
+  requiredAccessories: string[]
+  depositTypeFilter: '' | 'cash' | 'passport' | 'both'
 }
 
 export interface MapMarker {

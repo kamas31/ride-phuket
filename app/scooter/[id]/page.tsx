@@ -350,20 +350,22 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
             </div>
 
             {/* Specs */}
-            <div>
-              <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-3">Technical specs</h2>
-              <div className="bg-[#f8f8f6] rounded-[16px] overflow-hidden">
-                {SPEC_ROWS.map((row, i) => (
-                  <div
-                    key={row.label}
-                    className={`flex items-center justify-between px-4 py-3 text-sm ${i < SPEC_ROWS.length - 1 ? 'border-b border-[#efefed]' : ''}`}
-                  >
-                    <span className="text-[#9c9c98]">{row.label}</span>
-                    <span className="font-semibold text-[#0f0f0e]">{row.value}</span>
-                  </div>
-                ))}
+            {SPEC_ROWS.length > 0 && (
+              <div>
+                <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-3">Technical specs</h2>
+                <div className="bg-[#f8f8f6] rounded-[16px] overflow-hidden">
+                  {SPEC_ROWS.map((row, i) => (
+                    <div
+                      key={row.label}
+                      className={`flex items-center justify-between px-4 py-3 text-sm ${i < SPEC_ROWS.length - 1 ? 'border-b border-[#efefed]' : ''}`}
+                    >
+                      <span className="text-[#9c9c98]">{row.label}</span>
+                      <span className="font-semibold text-[#0f0f0e]">{row.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Deposit & security */}
             <DepositInfo

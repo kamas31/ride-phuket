@@ -20,12 +20,16 @@ const DEPOSIT_TYPE_LABELS: Record<DepositType, string> = {
   card_hold: 'Credit card hold',
   flexible:  'Cash or card hold',
   none:      'No deposit required',
+  passport:  'Passport deposit',
+  both:      'Cash or passport deposit',
 }
 
 const ACCEPTED_ICONS: Record<string, string> = {
   cash:       '💵',
   card_hold:  '💳',
   flexible:   '💵 / 💳',
+  passport:   '🛂',
+  both:       '💵 / 🛂',
 }
 
 interface DepositInfoProps {

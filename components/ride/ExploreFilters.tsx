@@ -25,6 +25,9 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
     filters.priceMax < 2000,
     filters.depositProtected,
     filters.noPassport,
+    filters.requiredFeatures.length > 0,
+    filters.requiredAccessories.length > 0,
+    filters.depositTypeFilter !== '',
   ].filter(Boolean).length
 
   return (
@@ -50,8 +53,8 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
           )}
         </button>
 
-        {/* Category chips — Recommended, Automatic, Manual only (Electric lives in full filter modal) */}
-        {SCOOTER_CATEGORIES.filter(cat => cat.value !== 'electric').map(cat => (
+        {/* Category chips — Automatic, Manual only (All/Electric live in full filter modal) */}
+        {SCOOTER_CATEGORIES.filter(cat => cat.value !== 'electric' && cat.value !== 'all').map(cat => (
           <button
             key={cat.value}
             onClick={() => update({ category: cat.value as FilterState['category'] })}
@@ -62,7 +65,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
                 : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
             )}
           >
-            {cat.value === 'all' ? 'Recommended' : cat.label}
+            {cat.label}
           </button>
         ))}
 
@@ -172,7 +175,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
 
               {/* Toggles */}
               <div>
-                <p className="text-sm font-semibold text-[#0f0f0e] mb-3">Features</p>
+                <p className="text-sm font-semibold text-[#0f0f0e] mb-3">Services</p>
                 <div className="space-y-2">
                   {([
                     { key: 'deliveryNow',      label: 'Delivery available',         icon: Truck   },
@@ -202,12 +205,85 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
                   ))}
                 </div>
               </div>
+
+              {/* Scooter features */}
+              <div>
+                <p className="text-sm font-semibold text-[#0f0f0e] mb-3">Scooter Features</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['Smart key / keyless', 'LED lights', 'Traction control', 'ABS brakes', 'USB charging'] as const).map(f => (
+                    <button
+                      key={f}
+                      onClick={() => {
+                        const next = filters.requiredFeatures.includes(f)
+                          ? filters.requiredFeatures.filter(x => x !== f)
+                          : [...filters.requiredFeatures, f]
+                        update({ requiredFeatures: next })
+                      }}
+                      className={cn(
+                        'px-3 py-2 rounded-[10px] text-sm font-medium border transition-colors text-left',
+                        filters.requiredFeatures.includes(f)
+                          ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
+                          : 'bg-[#f8f8f6] text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
+                      )}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Accessories */}
+              <div>
+                <p className="text-sm font-semibold text-[#0f0f0e] mb-3">Accessories</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['Back rest', 'Top case', 'Crash bar', 'Windshield / Wind visor', 'Electric windshield', 'Phone charger', 'Phone holder'] as const).map(a => (
+                    <button
+                      key={a}
+                      onClick={() => {
+                        const next = filters.requiredAccessories.includes(a)
+                          ? filters.requiredAccessories.filter(x => x !== a)
+                          : [...filters.requiredAccessories, a]
+                        update({ requiredAccessories: next })
+                      }}
+                      className={cn(
+                        'px-3 py-2 rounded-[10px] text-sm font-medium border transition-colors text-left',
+                        filters.requiredAccessories.includes(a)
+                          ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
+                          : 'bg-[#f8f8f6] text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
+                      )}
+                    >
+                      {a}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Deposit type */}
+              <div>
+                <p className="text-sm font-semibold text-[#0f0f0e] mb-3">Deposit Type</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {([['cash', 'Cash'], ['passport', 'Passport'], ['both', 'Cash + Passport']] as const).map(([val, label]) => (
+                    <button
+                      key={val}
+                      onClick={() => update({ depositTypeFilter: filters.depositTypeFilter === val ? '' : val })}
+                      className={cn(
+                        'py-2 rounded-[10px] text-sm font-medium border transition-colors text-center',
+                        filters.depositTypeFilter === val
+                          ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
+                          : 'bg-[#f8f8f6] text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Footer actions */}
             <div className="sticky bottom-0 bg-white border-t border-[#f0f0ec] px-6 py-4 flex gap-3">
               <button
-                onClick={() => onChange({ priceMin: 150, priceMax: 2000, category: 'all', deliveryNow: false, helmetIncluded: false, location: 'all', sortBy: 'recommended', depositProtected: false, noPassport: false })}
+                onClick={() => onChange({ priceMin: 150, priceMax: 2000, category: 'all', deliveryNow: false, helmetIncluded: false, location: 'all', sortBy: 'recommended', depositProtected: false, noPassport: false, requiredFeatures: [], requiredAccessories: [], depositTypeFilter: '' })}
                 className="flex-1 py-3 rounded-full border border-[#e8e8e4] text-sm font-semibold text-[#5c5c58] hover:bg-[#f8f8f6] transition-colors"
               >
                 Reset

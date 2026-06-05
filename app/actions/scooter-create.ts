@@ -24,10 +24,9 @@ export interface CreateScooterPayload {
   insuranceIncluded: boolean
   minRentalDays: number
   features: string[]
-  specs: {
-    engine: string; power: string; fuelCapacity: string
-    consumption: string; weight: string; storage: string
-  }
+  specs: { engine: string }
+  depositType?: string
+  depositAmount?: number
   description: string
 }
 
@@ -133,7 +132,9 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
       insurance_included: Boolean(payload.insuranceIncluded),
       min_rental_days:    Number(payload.minRentalDays) || 1,
       features:           Array.isArray(payload.features) ? payload.features : [],
-      specs:              payload.specs ?? {},
+      specs:              { engine: payload.specs?.engine || 'N/A' },
+      deposit_type:       payload.depositType ?? null,
+      deposit_amount:     payload.depositAmount ?? null,
       description:        (payload.description || '').trim(),
       available:          true,
     }

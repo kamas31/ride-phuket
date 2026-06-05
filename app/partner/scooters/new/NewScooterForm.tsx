@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import {
   ArrowLeft, Check, Plus, ChevronRight,
-  DollarSign, Truck, Shield, Clock, Info
+  DollarSign, Truck, Shield, Clock,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { createScooter } from '@/app/actions/scooter-create'
@@ -13,16 +12,28 @@ import { cn, formatPrice } from '@/lib/utils'
 
 const BRANDS    = ['Honda', 'Yamaha', 'Vespa', 'Kawasaki', 'Suzuki', 'Other']
 const LOCATIONS = ['Patong', 'Kata', 'Karon', 'Rawai', 'Bang Tao', 'Phuket Town', 'Kamala', 'Surin']
-const ALL_FEATURES = [
-  'Helmet included', 'USB charging', 'ABS brakes', 'Smart key / keyless',
-  'Phone mount', 'Top box / luggage', 'LED lights', 'Traction control',
-  'Under-seat storage', 'Front glove box', 'Rear rack', 'Travel rack',
+
+const SCOOTER_FEATURES = [
+  'Smart key / keyless',
+  'LED lights',
+  'Traction control',
+  'ABS brakes',
+  'USB charging',
+]
+
+const ACCESSORIES = [
+  'Back rest',
+  'Top case',
+  'Crash bar',
+  'Windshield / Wind visor',
+  'Electric windshield',
+  'Phone charger',
+  'Phone holder',
 ]
 
 const CURRENT_YEAR = new Date().getFullYear()
 const YEARS = Array.from({ length: 10 }, (_, i) => CURRENT_YEAR - i)
 
-// Minimum photos required to submit
 const MIN_PHOTOS = 1
 
 interface NewScooterFormProps {
@@ -34,21 +45,20 @@ interface NewScooterFormProps {
 type Step = 1 | 2 | 3
 
 export default function NewScooterForm({ shopId, shopName, shopLocation }: NewScooterFormProps) {
-  const [step, setStep]         = useState<Step>(1)
+  const [step, setStep]             = useState<Step>(1)
   const [submitting, setSubmitting] = useState(false)
   const [uploadingImages, setUploadingImages] = useState(false)
-  const [error, setError]       = useState<string | null>(null)
+  const [error, setError]           = useState<string | null>(null)
 
-  // ── Processed images (WebP, 16:9, ≤800KB) ─────────────────
   const [images, setImages] = useState<ProcessedImage[]>([])
 
-  // ── Form state ─────────────────────────────────────────────
   const [form, setForm] = useState({
     name:              '',
     brand:             'Honda',
     model:             '',
     year:              CURRENT_YEAR,
     category:          'automatic' as 'automatic' | 'manual' | 'electric',
+    engine:            '',
     pricePerDay:       '',
     pricePerWeek:      '',
     pricePerMonth:     '',
@@ -58,13 +68,10 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
     helmetIncluded:    true,
     insuranceIncluded: true,
     minRentalDays:     1,
+    depositType:       '' as '' | 'cash' | 'passport' | 'both',
+    depositCashAmount: '',
     features:          [] as string[],
-    engine:            '',
-    power:             '',
-    fuelCapacity:      '',
-    consumption:       '',
-    weight:            '',
-    storage:           '',
+    seatStorage:       '' as '' | 'Small' | 'Medium' | 'Big',
     description:       '',
   })
 
@@ -78,7 +85,6 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
         : [...prev.features, f],
     }))
 
-  // ── Upload processed images to Supabase Storage ────────────
   const uploadImages = async (): Promise<string[]> => {
     if (!images.length) return []
     setUploadingImages(true)
@@ -94,7 +100,7 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
 
       if (upErr) {
         console.error('[upload]', upErr.message)
-        urls.push('') // keep index alignment for cover detection
+        urls.push('')
         continue
       }
 
@@ -110,7 +116,6 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
     return urls
   }
 
-  // ── Submit ─────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name.trim())               { setError('Scooter name is required.'); return }
@@ -126,10 +131,12 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
 
     try {
       const urls = await uploadImages()
-      // Determine cover: use the designated cover image URL; fallback to first
-      const coverIdx  = images.findIndex(img => img.isCover)
+      const coverIdx   = images.findIndex(img => img.isCover)
       const coverImage = (coverIdx >= 0 && urls[coverIdx]) ? urls[coverIdx] : (urls[0] ?? null)
-      const validUrls = urls.filter(Boolean)
+      const validUrls  = urls.filter(Boolean)
+
+      const allFeatures = [...form.features]
+      if (form.seatStorage) allFeatures.push(`Seat storage: ${form.seatStorage}`)
 
       const result = await createScooter({
         shopId,
@@ -149,16 +156,11 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
         helmetIncluded:    form.helmetIncluded,
         insuranceIncluded: form.insuranceIncluded,
         minRentalDays:     form.minRentalDays,
-        features:          form.features,
-        specs: {
-          engine:       form.engine || 'N/A',
-          power:        form.power || 'N/A',
-          fuelCapacity: form.fuelCapacity || 'N/A',
-          consumption:  form.consumption || 'N/A',
-          weight:       form.weight || 'N/A',
-          storage:      form.storage || 'N/A',
-        },
-        description: form.description,
+        features:          allFeatures,
+        specs:             { engine: form.engine || 'N/A' },
+        depositType:       form.depositType || undefined,
+        depositAmount:     form.depositCashAmount ? Number(form.depositCashAmount) : undefined,
+        description:       form.description,
       })
 
       clearTimeout(timeoutId)
@@ -212,11 +214,8 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
         {step === 1 && (
           <div style={{ opacity: 0, animation: 'fade-up 0.4s ease forwards' }} className="space-y-5">
 
-            {/* ── Photos — full ImageUploader ── */}
             <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-5">
-              <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-4">
-                Photos
-              </p>
+              <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-4">Photos</p>
               <ImageUploader
                 images={images}
                 onChange={setImages}
@@ -225,7 +224,6 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
               />
             </div>
 
-            {/* ── Basic info ── */}
             <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-5 space-y-4">
               <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider">Basic Info</p>
 
@@ -277,11 +275,17 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
                 </div>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Location</label>
-                <select value={form.location} onChange={e => set('location', e.target.value)} className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]">
-                  {LOCATIONS.map(l => <option key={l}>{l}</option>)}
-                </select>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Location</label>
+                  <select value={form.location} onChange={e => set('location', e.target.value)} className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]">
+                    {LOCATIONS.map(l => <option key={l}>{l}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Engine</label>
+                  <input type="text" value={form.engine} onChange={e => set('engine', e.target.value)} placeholder="125cc" className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35]" />
+                </div>
               </div>
             </div>
 
@@ -298,7 +302,7 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
           </div>
         )}
 
-        {/* ── STEP 2: Pricing + Services ── */}
+        {/* ── STEP 2: Pricing + Services + Deposit ── */}
         {step === 2 && (
           <div style={{ opacity: 0, animation: 'fade-up 0.4s ease forwards' }} className="space-y-5">
 
@@ -389,6 +393,34 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
               </div>
             </div>
 
+            <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-5 space-y-3">
+              <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider">Deposit</p>
+              <div className="grid grid-cols-3 gap-2">
+                {(['cash', 'passport', 'both'] as const).map(dt => (
+                  <button key={dt} type="button"
+                    onClick={() => set('depositType', form.depositType === dt ? '' : dt)}
+                    className={cn('py-2.5 rounded-[10px] text-sm font-semibold border transition-all',
+                      form.depositType === dt
+                        ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]'
+                        : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58]')}>
+                    {dt === 'both' ? 'Cash + Passport' : dt.charAt(0).toUpperCase() + dt.slice(1)}
+                  </button>
+                ))}
+              </div>
+              {(form.depositType === 'cash' || form.depositType === 'both') && (
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Cash Amount (฿)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#9c9c98] font-medium">฿</span>
+                    <input type="number" value={form.depositCashAmount}
+                      onChange={e => set('depositCashAmount', e.target.value)}
+                      placeholder="3000" min="0"
+                      className="w-full pl-7 pr-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]" />
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="flex gap-3">
               <button type="button" onClick={() => setStep(1)} className="px-6 py-4 rounded-full border border-[#e8e8e4] text-sm font-semibold text-[#5c5c58] hover:bg-[#f8f8f6]">← Back</button>
               <button type="button" disabled={!canProceed2} onClick={() => setStep(3)}
@@ -399,14 +431,14 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
           </div>
         )}
 
-        {/* ── STEP 3: Features + Specs + Description ── */}
+        {/* ── STEP 3: Scooter Features + Accessories + Description ── */}
         {step === 3 && (
           <div style={{ opacity: 0, animation: 'fade-up 0.4s ease forwards' }} className="space-y-5">
 
             <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-5">
-              <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-3">Features</p>
-              <div className="grid grid-cols-2 gap-2">
-                {ALL_FEATURES.map(f => (
+              <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-3">Scooter Features</p>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {SCOOTER_FEATURES.map(f => (
                   <button key={f} type="button" onClick={() => toggleFeature(f)}
                     className={cn('flex items-center gap-2 px-3 py-2.5 rounded-[10px] border text-left text-sm transition-all',
                       form.features.includes(f) ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]' : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58] hover:border-[#d0d0cc]')}>
@@ -417,28 +449,35 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
                   </button>
                 ))}
               </div>
+              <div>
+                <p className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-2">Seat Storage</p>
+                <div className="flex gap-2">
+                  {(['Small', 'Medium', 'Big'] as const).map(size => (
+                    <button key={size} type="button"
+                      onClick={() => set('seatStorage', form.seatStorage === size ? '' : size)}
+                      className={cn('flex-1 py-2 rounded-[10px] text-sm font-semibold border transition-all',
+                        form.seatStorage === size
+                          ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]'
+                          : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58]')}>
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-5">
-              <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <Info className="w-3.5 h-3.5" /> Technical Specs <span className="font-normal normal-case text-[#9c9c98]">(optional)</span>
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { key: 'engine',      label: 'Engine',      placeholder: '125cc' },
-                  { key: 'power',       label: 'Power',       placeholder: '9 hp' },
-                  { key: 'fuelCapacity',label: 'Fuel Tank',   placeholder: '5.5L' },
-                  { key: 'consumption', label: 'Consumption', placeholder: '45 km/L' },
-                  { key: 'weight',      label: 'Weight',      placeholder: '98 kg' },
-                  { key: 'storage',     label: 'Storage',     placeholder: '18L' },
-                ].map(field => (
-                  <div key={field.key}>
-                    <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1">{field.label}</label>
-                    <input type="text" value={form[field.key as keyof typeof form] as string}
-                      onChange={e => set(field.key as keyof typeof form, e.target.value)}
-                      placeholder={field.placeholder}
-                      className="w-full px-3 py-2.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[10px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35]" />
-                  </div>
+              <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-3">Accessories</p>
+              <div className="grid grid-cols-2 gap-2">
+                {ACCESSORIES.map(a => (
+                  <button key={a} type="button" onClick={() => toggleFeature(a)}
+                    className={cn('flex items-center gap-2 px-3 py-2.5 rounded-[10px] border text-left text-sm transition-all',
+                      form.features.includes(a) ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]' : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58] hover:border-[#d0d0cc]')}>
+                    {form.features.includes(a)
+                      ? <Check className="w-3.5 h-3.5 flex-shrink-0" />
+                      : <Plus className="w-3.5 h-3.5 flex-shrink-0 opacity-40" />}
+                    {a}
+                  </button>
                 ))}
               </div>
             </div>

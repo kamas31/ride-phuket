@@ -15,11 +15,8 @@ import type { Scooter, MileageRange } from '@/types'
 
 const BRANDS    = ['Honda', 'Yamaha', 'Vespa', 'Kawasaki', 'Suzuki', 'Other']
 const LOCATIONS = ['Patong', 'Kata', 'Karon', 'Rawai', 'Bang Tao', 'Phuket Town', 'Kamala', 'Surin']
-const ALL_FEATURES = [
-  'Helmet included', 'USB charging', 'ABS brakes', 'Smart key / keyless',
-  'Phone mount', 'Top box / luggage', 'LED lights', 'Traction control',
-  'Under-seat storage', 'Front glove box', 'Rear rack', 'Travel rack',
-]
+const SCOOTER_FEATURES = ['Smart key / keyless', 'LED lights', 'Traction control', 'ABS brakes', 'USB charging']
+const ACCESSORIES = ['Back rest', 'Top case', 'Crash bar', 'Windshield / Wind visor', 'Electric windshield', 'Phone charger', 'Phone holder']
 const CURRENT_YEAR = new Date().getFullYear()
 const YEARS = Array.from({ length: 10 }, (_, i) => CURRENT_YEAR - i)
 
@@ -48,6 +45,13 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
   // New images added by the uploader
   const [newImages, setNewImages]           = useState<ProcessedImage[]>([])
 
+  // Extract seat storage from features so it can be edited independently
+  const seatStorageEntry = scooter.features.find(f => f.startsWith('Seat storage: '))
+  const initialSeatStorage = seatStorageEntry
+    ? seatStorageEntry.replace('Seat storage: ', '') as 'Small' | 'Medium' | 'Big'
+    : '' as ''
+  const initialFeatures = scooter.features.filter(f => !f.startsWith('Seat storage: '))
+
   const [form, setForm] = useState({
     name:              scooter.name,
     brand:             scooter.brand,
@@ -63,13 +67,14 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
     helmetIncluded:    scooter.helmetIncluded,
     insuranceIncluded: scooter.insuranceIncluded,
     minRentalDays:     scooter.minRentalDays,
-    features:          [...scooter.features],
+    features:          initialFeatures,
+    seatStorage:       initialSeatStorage,
     engine:            scooter.specs.engine !== 'N/A' ? scooter.specs.engine : '',
-    power:             scooter.specs.power !== 'N/A' ? scooter.specs.power : '',
-    fuelCapacity:      scooter.specs.fuelCapacity !== 'N/A' ? scooter.specs.fuelCapacity : '',
-    consumption:       scooter.specs.consumption !== 'N/A' ? scooter.specs.consumption : '',
-    weight:            scooter.specs.weight !== 'N/A' ? scooter.specs.weight : '',
-    storage:           scooter.specs.storage !== 'N/A' ? scooter.specs.storage : '',
+    power:             (scooter.specs.power && scooter.specs.power !== 'N/A') ? scooter.specs.power : '',
+    fuelCapacity:      (scooter.specs.fuelCapacity && scooter.specs.fuelCapacity !== 'N/A') ? scooter.specs.fuelCapacity : '',
+    consumption:       (scooter.specs.consumption && scooter.specs.consumption !== 'N/A') ? scooter.specs.consumption : '',
+    weight:            (scooter.specs.weight && scooter.specs.weight !== 'N/A') ? scooter.specs.weight : '',
+    storage:           (scooter.specs.storage && scooter.specs.storage !== 'N/A') ? scooter.specs.storage : '',
     description:       scooter.description,
     available:          scooter.available,
     mileageRange:       scooter.mileageRange ?? ('' as MileageRange | ''),
@@ -146,6 +151,9 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
         ? coverUrl
         : allImages[0] ?? null
 
+      const allFeatures = [...form.features]
+      if (form.seatStorage) allFeatures.push(`Seat storage: ${form.seatStorage}`)
+
       const result = await updateScooter(scooter.id, {
         name:              form.name,
         brand:             form.brand,
@@ -163,7 +171,7 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
         helmetIncluded:    form.helmetIncluded,
         insuranceIncluded: form.insuranceIncluded,
         minRentalDays:     form.minRentalDays,
-        features:          form.features,
+        features:          allFeatures,
         specs: {
           engine:       form.engine || 'N/A',
           power:        form.power || 'N/A',
@@ -460,17 +468,49 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
         </div>
 
         {/* ── Features ── */}
-        <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-5">
-          <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-3">Features</p>
-          <div className="grid grid-cols-2 gap-2">
-            {ALL_FEATURES.map(f => (
-              <button key={f} type="button" onClick={() => toggleFeature(f)}
-                className={cn('flex items-center gap-2 px-3 py-2.5 rounded-[10px] border text-left text-sm transition-all',
-                  form.features.includes(f) ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]' : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58] hover:border-[#d0d0cc]')}>
-                {form.features.includes(f) ? <Check className="w-3.5 h-3.5 flex-shrink-0" /> : <Plus className="w-3.5 h-3.5 flex-shrink-0 opacity-40" />}
-                {f}
-              </button>
-            ))}
+        <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-5 space-y-4">
+          <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider">Features</p>
+
+          <div>
+            <p className="text-xs font-semibold text-[#5c5c58] mb-2">Scooter Features</p>
+            <div className="grid grid-cols-2 gap-2">
+              {SCOOTER_FEATURES.map(f => (
+                <button key={f} type="button" onClick={() => toggleFeature(f)}
+                  className={cn('flex items-center gap-2 px-3 py-2.5 rounded-[10px] border text-left text-sm transition-all',
+                    form.features.includes(f) ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]' : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58] hover:border-[#d0d0cc]')}>
+                  {form.features.includes(f) ? <Check className="w-3.5 h-3.5 flex-shrink-0" /> : <Plus className="w-3.5 h-3.5 flex-shrink-0 opacity-40" />}
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-[#5c5c58] mb-2">Seat Storage</p>
+            <div className="flex gap-2">
+              {(['Small', 'Medium', 'Big'] as const).map(size => (
+                <button key={size} type="button"
+                  onClick={() => setForm(f => ({ ...f, seatStorage: f.seatStorage === size ? '' : size }))}
+                  className={cn('flex-1 py-2.5 rounded-[10px] text-sm font-semibold border transition-all',
+                    form.seatStorage === size ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]' : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58]')}>
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-[#5c5c58] mb-2">Accessories</p>
+            <div className="grid grid-cols-2 gap-2">
+              {ACCESSORIES.map(a => (
+                <button key={a} type="button" onClick={() => toggleFeature(a)}
+                  className={cn('flex items-center gap-2 px-3 py-2.5 rounded-[10px] border text-left text-sm transition-all',
+                    form.features.includes(a) ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]' : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58] hover:border-[#d0d0cc]')}>
+                  {form.features.includes(a) ? <Check className="w-3.5 h-3.5 flex-shrink-0" /> : <Plus className="w-3.5 h-3.5 flex-shrink-0 opacity-40" />}
+                  {a}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -517,9 +557,23 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
             </div>
           </button>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-2">Deposit Type</label>
+            <div className="grid grid-cols-3 gap-2">
+              {([['cash', 'Cash'], ['passport', 'Passport'], ['both', 'Cash + Passport']] as const).map(([val, label]) => (
+                <button key={val} type="button"
+                  onClick={() => set('depositType', form.depositType === val ? '' : val)}
+                  className={cn('py-2.5 rounded-[10px] text-sm font-semibold border transition-all text-center',
+                    form.depositType === val ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]' : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58]')}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {(form.depositType === 'cash' || form.depositType === 'both') && (
             <div>
-              <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Deposit Amount (฿)</label>
+              <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Cash Deposit Amount (฿)</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#9c9c98]">฿</span>
                 <input type="number" value={form.depositAmount} onChange={e => set('depositAmount', e.target.value)}
@@ -527,18 +581,7 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
                   className="w-full pl-7 pr-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]" />
               </div>
             </div>
-            <div>
-              <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Deposit Type</label>
-              <select value={form.depositType} onChange={e => set('depositType', e.target.value)}
-                className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]">
-                <option value="">Not specified</option>
-                <option value="cash">Cash</option>
-                <option value="card_hold">Card hold</option>
-                <option value="flexible">Cash or card</option>
-                <option value="none">No deposit</option>
-              </select>
-            </div>
-          </div>
+          )}
 
           {/* Passport options */}
           {[
