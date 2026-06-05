@@ -12,6 +12,52 @@ import type { Scooter } from '@/types'
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
+// ── Calibration tool ───────────────────────────────────────────
+interface CalibrationPin {
+  id: string
+  lat: number
+  lng: number
+  zone: string
+}
+
+function CalibrationMarker({
+  pin,
+  onZoneChange,
+  onDelete,
+}: {
+  pin: CalibrationPin
+  onZoneChange: (zone: string) => void
+  onDelete: () => void
+}) {
+  return (
+    <div onClick={e => e.stopPropagation()} style={{ userSelect: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {/* Orange dot — sits exactly at the clicked coordinate (anchor:top + offset:-6) */}
+      <div style={{ width: 12, height: 12, background: '#FF6B35', borderRadius: '50%', border: '2.5px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.45)', flexShrink: 0 }} />
+      {/* Card */}
+      <div style={{ marginTop: 6, background: 'white', borderRadius: 12, boxShadow: '0 4px 18px rgba(0,0,0,0.18)', padding: '10px 12px', minWidth: 190, maxWidth: 210 }}>
+        <p style={{ fontFamily: 'monospace', fontSize: 10, color: '#5c5c58', lineHeight: 1.6, marginBottom: 8 }}>
+          lat: {pin.lat.toFixed(6)}<br />lng: {pin.lng.toFixed(6)}
+        </p>
+        <select
+          value={pin.zone}
+          onChange={e => onZoneChange(e.target.value)}
+          style={{ width: '100%', fontSize: 11, padding: '5px 6px', borderRadius: 7, border: '1.5px solid #e8e8e4', marginBottom: 7, background: 'white', cursor: 'pointer', outline: 'none' }}
+        >
+          {PHUKET_ZONES.map(z => (
+            <option key={z.key} value={z.key}>{z.name}</option>
+          ))}
+        </select>
+        <button
+          onClick={onDelete}
+          style={{ width: '100%', fontSize: 10, color: '#9c9c98', background: 'none', border: 'none', cursor: 'pointer', padding: '1px 0' }}
+        >
+          Remove
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Shop aggregate ─────────────────────────────────────────────
 interface ShopAggregate {
   shopId: string
@@ -185,6 +231,7 @@ interface ScooterMapProps {
   onZoneClick?: (zoneKey: string | null) => void
   activeZone?: string | null
   className?: string
+  debugMode?: boolean
 }
 
 export default function ScooterMap({
@@ -197,12 +244,17 @@ export default function ScooterMap({
   onZoneClick,
   activeZone,
   className,
+  debugMode = false,
 }: ScooterMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<mapboxgl.Map | null>(null)
   const [ready, setReady]             = useState(false)
   const [showSearchHere, setShowSearchHere] = useState(false)
   const [showZoneCenters, setShowZoneCenters] = useState(false)
+
+  // Calibration tool state (debug mode only)
+  const [calibPins, setCalibPins] = useState<CalibrationPin[]>([])
+  const [copied, setCopied] = useState(false)
 
   // Group filtered scooters into one aggregate per shop
   const aggregates = useMemo(() => buildShopAggregates(scooters), [scooters])
@@ -228,6 +280,21 @@ export default function ScooterMap({
 
   // Debug zone-center markers (dev only)
   const dbgMarkersRef = useRef<mapboxgl.Marker[]>([])
+
+  // Calibration tool refs
+  const calibMarkersRef = useRef<Map<string, { marker: mapboxgl.Marker; root: Root; container: HTMLDivElement }>>(new Map())
+  const zoneOverlayRef  = useRef<mapboxgl.Marker[]>([])
+  const addCalibPinRef  = useRef<((lat: number, lng: number) => void) | null>(null)
+  const debugModeRef    = useRef(debugMode)
+  useEffect(() => { debugModeRef.current = debugMode }, [debugMode])
+  useEffect(() => {
+    addCalibPinRef.current = debugMode
+      ? (lat, lng) => setCalibPins(prev => [...prev, {
+          id: `c_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          lat, lng, zone: PHUKET_ZONES[0].key,
+        }])
+      : null
+  }, [debugMode])
 
   // Scooter count per zone from current filtered list
   const zoneCounts = useMemo(() => {
@@ -258,6 +325,55 @@ export default function ScooterMap({
       dbgMarkersRef.current.push(m)
     })
   }, [showZoneCenters, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Calibration: existing zone overlay (blue dots) ───────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return
+    zoneOverlayRef.current.forEach(m => m.remove())
+    zoneOverlayRef.current = []
+    if (!debugMode) return
+    PHUKET_ZONES.forEach(zone => {
+      const el = document.createElement('div')
+      el.style.cssText = 'width:8px;height:8px;border-radius:50%;background:rgba(59,130,246,0.55);border:2px solid rgba(59,130,246,0.9);pointer-events:none;box-sizing:border-box;'
+      const m = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([zone.lng, zone.lat])
+        .addTo(mapRef.current!)
+      zoneOverlayRef.current.push(m)
+    })
+  }, [debugMode, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Calibration: manage placed pin markers ────────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return
+    // Remove stale markers
+    const currentIds = new Set(calibPins.map(p => p.id))
+    calibMarkersRef.current.forEach((entry, id) => {
+      if (!currentIds.has(id)) {
+        entry.root.unmount(); entry.marker.remove()
+        calibMarkersRef.current.delete(id)
+      }
+    })
+    // Create or update
+    calibPins.forEach(pin => {
+      if (!calibMarkersRef.current.has(pin.id)) {
+        const container = document.createElement('div')
+        // anchor:'top' + offset [0,-6] centres the 12px dot exactly on the coord
+        const marker = new mapboxgl.Marker({ element: container, anchor: 'top', offset: [0, -6] })
+          .setLngLat([pin.lng, pin.lat])
+          .addTo(mapRef.current!)
+        const root = createRoot(container)
+        calibMarkersRef.current.set(pin.id, { marker, root, container })
+      }
+      const { root } = calibMarkersRef.current.get(pin.id)!
+      root.render(
+        <CalibrationMarker
+          pin={pin}
+          onZoneChange={zone => setCalibPins(prev => prev.map(p => p.id === pin.id ? { ...p, zone } : p))}
+          onDelete={() => setCalibPins(prev => prev.filter(p => p.id !== pin.id))}
+        />
+      )
+    })
+  }, [calibPins, ready]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Init map (once) ───────────────────────────────────────────
   useEffect(() => {
@@ -299,7 +415,13 @@ export default function ScooterMap({
     requestAnimationFrame(() => { map.resize() })
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
-    map.on('click', () => onSelectRef.current(null))
+    map.on('click', (e) => {
+      if (addCalibPinRef.current) {
+        addCalibPinRef.current(e.lngLat.lat, e.lngLat.lng)
+      } else {
+        onSelectRef.current(null)
+      }
+    })
     map.on('moveend', () => { if (onBoundsChangeRef.current) setShowSearchHere(true) })
 
     mapRef.current = map
@@ -310,6 +432,10 @@ export default function ScooterMap({
       zoneMarkersRef.current.clear()
       dbgMarkersRef.current.forEach(m => m.remove())
       dbgMarkersRef.current = []
+      calibMarkersRef.current.forEach(({ marker, root }) => { root.unmount(); marker.remove() })
+      calibMarkersRef.current.clear()
+      zoneOverlayRef.current.forEach(m => m.remove())
+      zoneOverlayRef.current = []
       popupRef.current?.root.unmount()
       popupRef.current?.popup.remove()
       popupRef.current = null
@@ -454,6 +580,24 @@ export default function ScooterMap({
   const activeZoneName  = activeZone ? PHUKET_ZONES.find(z => z.key === activeZone)?.name : null
   const activeZoneCount = activeZone ? (zoneCounts[activeZone] ?? 0) : 0
 
+  const handleExportCoords = () => {
+    const calibMap = new Map(calibPins.map(p => [p.zone, p]))
+    const lines = PHUKET_ZONES.map(z => {
+      const c = calibMap.get(z.key)
+      const lat = c ? c.lat.toFixed(4) : z.lat.toFixed(4)
+      const lng = c ? c.lng.toFixed(4) : z.lng.toFixed(4)
+      const tag = c ? ' // ✓ calibrated' : ''
+      const k = `'${z.key}'`.padEnd(16)
+      const n = `'${z.name}'`.padEnd(16)
+      return `  { key: ${k}, name: ${n}, lat: ${lat}, lng: ${lng}, radiusKm: ${z.radiusKm} },${tag}`
+    })
+    const ts = `export const PHUKET_ZONES: PhuketZone[] = [\n${lines.join('\n')}\n]`
+    navigator.clipboard.writeText(ts).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    }).catch(() => { window.prompt('Copy this into lib/zones.ts:', ts) })
+  }
+
   return (
     <div className={cn('relative rounded-[20px] overflow-hidden bg-[#dfe7df]', className)}>
       {!ready && <MapSkeleton className="absolute inset-0 z-10" />}
@@ -475,8 +619,76 @@ export default function ScooterMap({
         </div>
       )}
 
+      {/* ── Debug calibration panel (debugPins=1) ─────────────────── */}
+      {debugMode && (
+        <div
+          className="absolute top-4 left-4 z-30 bg-white/97 rounded-2xl shadow-[0_6px_28px_rgba(0,0,0,0.22)] overflow-hidden"
+          style={{ width: 252, backdropFilter: 'blur(8px)' }}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="px-4 pt-3.5 pb-2.5 border-b border-[#f0f0ec]">
+            <p className="text-[11px] font-bold text-[#0f0f0e] tracking-wide uppercase">Zone Calibration</p>
+            <div className="flex items-center gap-3 mt-1.5">
+              <span className="flex items-center gap-1 text-[9px] text-[#5c5c58]">
+                <span style={{ display:'inline-block', width:8, height:8, borderRadius:'50%', background:'rgba(59,130,246,0.55)', border:'1.5px solid rgba(59,130,246,0.9)' }} />
+                current
+              </span>
+              <span className="flex items-center gap-1 text-[9px] text-[#5c5c58]">
+                <span style={{ display:'inline-block', width:8, height:8, borderRadius:'50%', background:'#FF6B35', border:'1.5px solid white' }} />
+                new pin
+              </span>
+            </div>
+          </div>
+
+          {/* Instructions / pin list */}
+          {calibPins.length === 0 ? (
+            <div className="px-4 py-3">
+              <p className="text-[10px] text-[#9c9c98] leading-relaxed">
+                Click the map to place a pin.<br />
+                Assign a zone using the dropdown.<br />
+                Blue dots = current PHUKET_ZONES.
+              </p>
+            </div>
+          ) : (
+            <div className="px-4 py-2.5 max-h-44 overflow-y-auto space-y-1.5">
+              {calibPins.map(p => {
+                const zone = PHUKET_ZONES.find(z => z.key === p.zone)
+                return (
+                  <div key={p.id} className="flex items-baseline justify-between gap-2">
+                    <span className="text-[10px] font-semibold text-[#0f0f0e] truncate flex-shrink-0" style={{ maxWidth: 90 }}>{zone?.name ?? p.zone}</span>
+                    <span className="text-[9px] font-mono text-[#9c9c98] text-right leading-tight">
+                      {p.lat.toFixed(4)}<br />{p.lng.toFixed(4)}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Footer */}
+          {calibPins.length > 0 && (
+            <div className="px-4 pb-3.5 pt-2 border-t border-[#f0f0ec] space-y-2">
+              <button
+                onClick={handleExportCoords}
+                className="w-full py-2 text-[10px] font-bold rounded-full transition-colors text-white"
+                style={{ background: copied ? '#22c55e' : '#FF6B35' }}
+              >
+                {copied ? '✓ Copied to clipboard' : `Export coordinates (${calibPins.length}/${PHUKET_ZONES.length})`}
+              </button>
+              <button
+                onClick={() => setCalibPins([])}
+                className="w-full py-1.5 text-[9px] text-[#9c9c98] hover:text-red-400 transition-colors"
+              >
+                Clear all pins
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Dev: zone centre toggle — stripped from production builds */}
-      {process.env.NODE_ENV !== 'production' && (
+      {process.env.NODE_ENV !== 'production' && !debugMode && (
         <button
           onClick={() => setShowZoneCenters(v => !v)}
           className="absolute bottom-5 left-5 z-30 px-3 py-1.5 rounded-full text-[10px] font-mono text-white shadow-md transition-colors"

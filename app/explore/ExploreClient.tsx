@@ -49,6 +49,12 @@ export default function ExploreClient({
 }) {
   const router = useRouter()
 
+  // Read ?debugPins=1 once on mount — works on deployed app, no localhost required
+  const [debugMode] = useState(() =>
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('debugPins') === '1'
+  )
+
   const [filters, setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
   const [search, setSearch]           = useState(initialSearch)
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch)
@@ -306,6 +312,7 @@ export default function ExploreClient({
                   onZoneClick={handleZoneClick}
                   activeZone={filters.location === 'all' ? null : filters.location}
                   className="h-[calc(100vh-10rem)] min-h-[480px]"
+                  debugMode={debugMode}
                 />
               </div>
             </div>
@@ -342,6 +349,7 @@ export default function ExploreClient({
               onZoneClick={handleZoneClick}
               activeZone={filters.location === 'all' ? null : filters.location}
               className="h-[calc(100svh-13rem)] min-h-[420px]"
+              debugMode={debugMode}
             />
           )}
         </div>
