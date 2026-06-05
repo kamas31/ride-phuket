@@ -127,6 +127,20 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
     { label: 'Storage',     value: scooter.specs?.storage },
   ].filter(r => isValidSpec(r.value))
 
+  const SCOOTER_FEATURE_LABELS = ['Smart key / keyless', 'LED lights', 'Traction control', 'ABS brakes', 'USB charging']
+  const ACCESSORY_LABELS = ['Back rest', 'Top case', 'Crash bar', 'Windshield / Wind visor', 'Electric windshield', 'Phone charger', 'Phone holder']
+
+  const scooterFeatureItems = scooter.features.filter(f =>
+    SCOOTER_FEATURE_LABELS.includes(f) || f.startsWith('Seat storage: ')
+  )
+  const unknownFeatures = scooter.features.filter(f =>
+    !SCOOTER_FEATURE_LABELS.includes(f) &&
+    !ACCESSORY_LABELS.includes(f) &&
+    !f.startsWith('Seat storage: ')
+  )
+  const allScooterFeatures = [...scooterFeatureItems, ...unknownFeatures]
+  const accessoryItems = scooter.features.filter(f => ACCESSORY_LABELS.includes(f))
+
   const newListing = isNewListing(scooter.createdAt)
   const openStatus = getShopOpenStatus(shop.openingHours)
 
@@ -328,26 +342,39 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               </p>
             )}
 
-            {/* What's included */}
-            <div>
-              <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-3">What&rsquo;s included</h2>
-              <div className="grid grid-cols-2 gap-y-2.5 gap-x-4">
-                {scooter.features.map(feature => (
-                  <div key={feature} className="flex items-center gap-2 text-sm text-[#5c5c58]">
-                    <div className="w-5 h-5 rounded-full bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-[#22c55e]" />
+            {/* Scooter Features */}
+            {allScooterFeatures.length > 0 && (
+              <div>
+                <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-3">Scooter Features</h2>
+                <div className="grid grid-cols-2 gap-y-2.5 gap-x-4">
+                  {allScooterFeatures.map(feature => (
+                    <div key={feature} className="flex items-center gap-2 text-sm text-[#5c5c58]">
+                      <div className="w-5 h-5 rounded-full bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
+                        <Check className="w-3 h-3 text-[#22c55e]" />
+                      </div>
+                      {feature}
                     </div>
-                    {feature}
-                  </div>
-                ))}
-                <div className="flex items-center gap-2 text-sm text-[#5c5c58]">
-                  <div className="w-5 h-5 rounded-full bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
-                    <Check className="w-3 h-3 text-[#22c55e]" />
-                  </div>
-                  Flexible rental terms
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Accessories */}
+            {accessoryItems.length > 0 && (
+              <div>
+                <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-3">Accessories</h2>
+                <div className="grid grid-cols-2 gap-y-2.5 gap-x-4">
+                  {accessoryItems.map(item => (
+                    <div key={item} className="flex items-center gap-2 text-sm text-[#5c5c58]">
+                      <div className="w-5 h-5 rounded-full bg-[#fff4f0] flex items-center justify-center flex-shrink-0">
+                        <Check className="w-3 h-3 text-[#FF6B35]" />
+                      </div>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Specs */}
             {SPEC_ROWS.length > 0 && (

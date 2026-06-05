@@ -472,7 +472,7 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
           <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider">Features</p>
 
           <div>
-            <p className="text-xs font-semibold text-[#5c5c58] mb-2">Scooter Features</p>
+            <p className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-2">Scooter Features</p>
             <div className="grid grid-cols-2 gap-2">
               {SCOOTER_FEATURES.map(f => (
                 <button key={f} type="button" onClick={() => toggleFeature(f)}
@@ -486,12 +486,12 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
           </div>
 
           <div>
-            <p className="text-xs font-semibold text-[#5c5c58] mb-2">Seat Storage</p>
+            <p className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-2">Seat Storage</p>
             <div className="flex gap-2">
               {(['Small', 'Medium', 'Big'] as const).map(size => (
                 <button key={size} type="button"
                   onClick={() => setForm(f => ({ ...f, seatStorage: f.seatStorage === size ? '' : size }))}
-                  className={cn('flex-1 py-2.5 rounded-[10px] text-sm font-semibold border transition-all',
+                  className={cn('flex-1 py-2 rounded-[10px] text-sm font-semibold border transition-all',
                     form.seatStorage === size ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]' : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58]')}>
                   {size}
                 </button>
@@ -500,7 +500,7 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
           </div>
 
           <div>
-            <p className="text-xs font-semibold text-[#5c5c58] mb-2">Accessories</p>
+            <p className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-2">Accessories</p>
             <div className="grid grid-cols-2 gap-2">
               {ACCESSORIES.map(a => (
                 <button key={a} type="button" onClick={() => toggleFeature(a)}
@@ -563,7 +563,7 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
               {([['cash', 'Cash'], ['passport', 'Passport'], ['both', 'Cash + Passport']] as const).map(([val, label]) => (
                 <button key={val} type="button"
                   onClick={() => set('depositType', form.depositType === val ? '' : val)}
-                  className={cn('py-2.5 rounded-[10px] text-sm font-semibold border transition-all text-center',
+                  className={cn('py-2.5 rounded-[10px] text-sm font-semibold border transition-all',
                     form.depositType === val ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]' : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58]')}>
                   {label}
                 </button>
@@ -573,9 +573,9 @@ export default function EditScooterForm({ scooter, shopId }: EditScooterFormProp
 
           {(form.depositType === 'cash' || form.depositType === 'both') && (
             <div>
-              <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Cash Deposit Amount (฿)</label>
+              <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Cash Amount (฿)</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#9c9c98]">฿</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#9c9c98] font-medium">฿</span>
                 <input type="number" value={form.depositAmount} onChange={e => set('depositAmount', e.target.value)}
                   placeholder="3000"
                   className="w-full pl-7 pr-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]" />
