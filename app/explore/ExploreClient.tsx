@@ -197,7 +197,7 @@ export default function ExploreClient({
 
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pt-16">
       {/* ── Sticky top bar ── */}
       <div className="sticky top-16 z-30 bg-white border-b border-[#e8e8e4]">
         <div className="max-w-6xl mx-auto px-4 py-3">
@@ -261,14 +261,7 @@ export default function ExploreClient({
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 pt-6 pb-5">
-        {/* Result count */}
-        <div className="mb-4">
-          <p className="text-sm text-[#5c5c58]">
-            <span className="font-bold text-[#0f0f0e]">{filtered.length}</span> scooters available
-          </p>
-        </div>
-
+      <div className="max-w-6xl mx-auto px-4 pt-4 pb-5">
         {/* ── DESKTOP LAYOUT ── */}
         <div className="hidden lg:flex gap-5">
           <div
