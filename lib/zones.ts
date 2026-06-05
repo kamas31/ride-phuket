@@ -21,25 +21,25 @@ export interface PhuketZone {
 
 export const PHUKET_ZONES: PhuketZone[] = [
   // ── Primary rental zones (form dropdown options) ──────────────────────────
-  // Coordinates are verified road/commercial area centres — not beach shorelines.
-  { key: 'patong',       name: 'Patong',       lat: 7.8956, lng: 98.2966, radiusKm: 2.5 }, // Bangla Rd / Jungceylon area
+  // Coordinates manually calibrated for visual alignment above native Mapbox labels.
+  { key: 'patong',       name: 'Patong',       lat: 7.8976, lng: 98.2991, radiusKm: 2.5 },
   // kata noi MUST appear before kata — 'kata noi'.includes('kata') is true
-  { key: 'kata noi',     name: 'Kata Noi',     lat: 7.8083, lng: 98.3038, radiusKm: 1.0 }, // hillside road above cove (was at beach edge)
-  { key: 'kata',         name: 'Kata',         lat: 7.8207, lng: 98.3008, radiusKm: 2.0 }, // Kata Beach Rd / main village (was in sand)
-  { key: 'karon',        name: 'Karon',        lat: 7.8449, lng: 98.3011, radiusKm: 1.8 }, // Patak Rd inland strip (was at beach edge)
-  { key: 'rawai',        name: 'Rawai',        lat: 7.7781, lng: 98.3281, radiusKm: 2.2 }, // Rawai seafront / Viset Rd (bay, not Andaman)
-  { key: 'bang tao',     name: 'Bang Tao',     lat: 7.9889, lng: 98.3500, radiusKm: 3.0 }, // Ban Bang Tao village / Srisoonthorn Rd — east of Laguna resort complex
-  { key: 'phuket town',  name: 'Phuket Town',  lat: 7.8834, lng: 98.3920, radiusKm: 2.0 }, // Old Town / Thalang Rd area (was 500m too far west)
-  { key: 'kamala',       name: 'Kamala',       lat: 7.9476, lng: 98.2734, radiusKm: 1.5 }, // Kamala village / main road
-  { key: 'surin',        name: 'Surin',        lat: 7.9712, lng: 98.2900, radiusKm: 1.5 }, // Surin commercial strip — Srisoonthorn Rd (clear of beach)
+  { key: 'kata noi',     name: 'Kata Noi',     lat: 7.8106, lng: 98.3004, radiusKm: 1.0 },
+  { key: 'kata',         name: 'Kata',         lat: 7.8232, lng: 98.2982, radiusKm: 2.0 },
+  { key: 'karon',        name: 'Karon',        lat: 7.8505, lng: 98.2982, radiusKm: 1.8 },
+  { key: 'rawai',        name: 'Rawai',        lat: 7.7777, lng: 98.3280, radiusKm: 2.2 },
+  { key: 'bang tao',     name: 'Bang Tao',     lat: 7.9818, lng: 98.2947, radiusKm: 3.0 },
+  { key: 'phuket town',  name: 'Phuket Town',  lat: 7.8883, lng: 98.3886, radiusKm: 2.0 },
+  { key: 'kamala',       name: 'Kamala',       lat: 7.9518, lng: 98.2829, radiusKm: 1.5 },
+  { key: 'surin',        name: 'Surin',        lat: 7.9778, lng: 98.2801, radiusKm: 1.5 },
   // ── Extended zones (AREAS coverage) ──────────────────────────────────────
-  { key: 'chalong',      name: 'Chalong',      lat: 7.8414, lng: 98.3533, radiusKm: 3.0 }, // Chalong roundabout area
-  { key: 'nai harn',     name: 'Nai Harn',     lat: 7.7840, lng: 98.3020, radiusKm: 1.5 }, // Nai Harn lake / beach area
-  { key: 'cherng talay', name: 'Cherng Talay', lat: 7.9963, lng: 98.2993, radiusKm: 2.0 }, // Srisoonthorn Rd area
-  { key: 'mai khao',     name: 'Mai Khao',     lat: 8.1551, lng: 98.3110, radiusKm: 3.5 }, // Thepkrasattri Rd / main road (was at beach)
-  { key: 'thalang',      name: 'Thalang',      lat: 8.0212, lng: 98.3478, radiusKm: 2.5 }, // Thalang town / Heroines Monument area
-  { key: 'cape panwa',   name: 'Cape Panwa',   lat: 7.8100, lng: 98.4060, radiusKm: 2.0 }, // Cape Panwa peninsula road
-  { key: 'ko sirey',     name: 'Ko Sirey',     lat: 7.8862, lng: 98.4144, radiusKm: 1.5 }, // Ko Sirey island main area
+  { key: 'chalong',      name: 'Chalong',      lat: 7.8503, lng: 98.3344, radiusKm: 3.0 },
+  { key: 'nai harn',     name: 'Nai Harn',     lat: 7.7787, lng: 98.3056, radiusKm: 1.5 },
+  { key: 'cherng talay', name: 'Cherng Talay', lat: 7.9922, lng: 98.3066, radiusKm: 2.0 },
+  { key: 'mai khao',     name: 'Mai Khao',     lat: 8.1283, lng: 98.3080, radiusKm: 3.5 },
+  { key: 'thalang',      name: 'Thalang',      lat: 8.0316, lng: 98.3335, radiusKm: 2.5 },
+  { key: 'cape panwa',   name: 'Cape Panwa',   lat: 7.8070, lng: 98.4052, radiusKm: 2.0 },
+  { key: 'ko sirey',     name: 'Ko Sirey',     lat: 7.8870, lng: 98.4270, radiusKm: 1.5 },
 ]
 
 /** Find the zone for a scooter location string */
