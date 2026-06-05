@@ -3,7 +3,7 @@
 
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
 
-export type UserRole = 'rider' | 'shop_owner'
+export type UserRole = 'rider' | 'shop_owner' | 'admin'
 export type BookingStatus = 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled'
 export type PaymentStatus = 'pending' | 'paid' | 'refunded'
 export type DeliveryMethod = 'delivery' | 'pickup'

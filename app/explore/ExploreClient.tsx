@@ -12,6 +12,7 @@ import { sortByRecommended } from '@/lib/ridescore'
 import { trackEvent } from '@/lib/analytics'
 import { createExploreFuse } from '@/lib/fuzzy-search'
 import { getZoneForLocation } from '@/lib/zones'
+import { useProfile } from '@/hooks/useProfile'
 import type { Scooter, FilterState } from '@/types'
 
 const ScooterMap = dynamic(() => import('@/components/map/ScooterMap'), {
@@ -48,12 +49,13 @@ export default function ExploreClient({
   initialSearch?: string
 }) {
   const router = useRouter()
+  const { isAdmin, loading: profileLoading } = useProfile()
 
-  // Read ?debugPins=1 once on mount — works on deployed app, no localhost required
-  const [debugMode] = useState(() =>
-    typeof window !== 'undefined' &&
+  // Calibration tool: only available when ?debugPins=1 AND the current user is an admin.
+  // Both conditions must be true — URL param alone is not enough.
+  const hasDebugParam = typeof window !== 'undefined' &&
     new URLSearchParams(window.location.search).get('debugPins') === '1'
-  )
+  const debugMode = !profileLoading && hasDebugParam && isAdmin
 
   const [filters, setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
   const [search, setSearch]           = useState(initialSearch)

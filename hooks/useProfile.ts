@@ -86,8 +86,9 @@ export function useProfile() {
       })
   }, [user?.id, authLoading])  // key on user.id — fires exactly when the identity changes
 
+  const isAdmin     = profile?.role === 'admin'
   const isShopOwner = profile?.role === 'shop_owner'
-  const isRider     = !isShopOwner
+  const isRider     = !isShopOwner && !isAdmin
 
-  return { profile, loading, isShopOwner, isRider, needsProfile }
+  return { profile, loading, isAdmin, isShopOwner, isRider, needsProfile }
 }
