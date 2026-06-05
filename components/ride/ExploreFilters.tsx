@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { SlidersHorizontal, X, Truck, HardHat, Shield, IdCard } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { SCOOTER_CATEGORIES, LOCATIONS, SORT_OPTIONS } from '@/constants'
+import { LOCATIONS, SORT_OPTIONS } from '@/constants'
 import type { FilterState } from '@/types'
 
 interface ExploreFiltersProps {
@@ -52,22 +52,6 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
             </span>
           )}
         </button>
-
-        {/* Category chips — Automatic, Manual only (All/Electric live in full filter modal) */}
-        {SCOOTER_CATEGORIES.filter(cat => cat.value !== 'electric' && cat.value !== 'all').map(cat => (
-          <button
-            key={cat.value}
-            onClick={() => update({ category: cat.value as FilterState['category'] })}
-            className={cn(
-              'flex-shrink-0 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap active:scale-[0.96]',
-              filters.category === cat.value
-                ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
-                : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
-            )}
-          >
-            {cat.label}
-          </button>
-        ))}
 
         {/* Delivery */}
         <button

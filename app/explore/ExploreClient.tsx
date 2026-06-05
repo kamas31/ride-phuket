@@ -261,7 +261,7 @@ export default function ExploreClient({
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-5">
+      <div className="max-w-6xl mx-auto px-4 pt-6 pb-5">
         {/* Result count */}
         <div className="mb-4">
           <p className="text-sm text-[#5c5c58]">
@@ -276,7 +276,7 @@ export default function ExploreClient({
             style={{ width: showMap ? '42%' : '100%' }}
           >
             {filtered.length === 0 ? <EmptyState /> : (
-              <div className={`grid gap-3 ${showMap ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
+              <div className={`grid gap-3 ${showMap ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
                 {filtered.map(scooter => (
                   <div
                     key={scooter.id}
@@ -345,7 +345,6 @@ export default function ExploreClient({
               hoveredId={hoveredId ?? undefined}
               onSelect={(id) => {
                 setSelectedId(id)
-                if (id) setMobileView('list')
               }}
               onHover={setHoveredId}
               onZoneClick={handleZoneClick}
