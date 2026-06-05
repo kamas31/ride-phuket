@@ -66,7 +66,7 @@ export function HeroImages() {
       >
         {/* Mobile hero image */}
         <Image
-          src="/heromobile.png"
+          src="/heromobilemodif.png"
           alt="Explore Phuket on a scooter"
           fill
           priority
@@ -75,7 +75,7 @@ export function HeroImages() {
         />
         {/* Desktop hero image */}
         <Image
-          src="/hero.png"
+          src="/heromodif.png"
           alt="Explore Phuket on a scooter"
           fill
           priority
