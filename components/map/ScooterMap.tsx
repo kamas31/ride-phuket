@@ -472,8 +472,6 @@ export default function ScooterMap({
     mapboxgl.accessToken = TOKEN
 
     containerRef.current.style.background = '#dfe7df'
-    containerRef.current.style.transform = 'translateZ(0)'
-    containerRef.current.style.willChange = 'transform'
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
@@ -487,7 +485,6 @@ export default function ScooterMap({
 
     const canvas = map.getCanvas()
     canvas.style.background = '#dfe7df'
-    canvas.style.transform = 'translateZ(0)'
 
     map.on('load', () => {
       map.resize()
@@ -502,8 +499,6 @@ export default function ScooterMap({
 
       setReady(true)
     })
-
-    requestAnimationFrame(() => { map.resize() })
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
     map.on('click', (e) => {
