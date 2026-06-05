@@ -179,34 +179,58 @@ function buildShopAggregates(scooters: Scooter[]): ShopAggregate[] {
   return Array.from(map.values())
 }
 
-// ── Shop Pin — clean minimal price marker ─────────────────────
+// ── Shop Pin — Airbnb-inspired price pill ─────────────────────
 function ShopPin({
   minPrice, active, onClick, onEnter, onLeave,
 }: {
   minPrice: number; active: boolean
   onClick: () => void; onEnter: () => void; onLeave: () => void
 }) {
+  const [hovered, setHovered] = useState(false)
+
   return (
+    // Scale applied to whole marker (pill + caret together).
+    // anchor:'bottom' on the Mapbox Marker pins the bottom of this div —
+    // i.e. the caret tip — to the exact coordinate. scale() is a visual
+    // transform only and does not affect layout, so the anchor is preserved.
     <div
-      className="flex flex-col items-center cursor-pointer select-none group"
+      className={cn(
+        'flex flex-col items-center cursor-pointer select-none',
+        'transition-transform duration-150 ease-out',
+        active || hovered ? 'scale-[1.08]' : 'scale-100',
+      )}
       onClick={onClick}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
+      onMouseEnter={() => { setHovered(true); onEnter() }}
+      onMouseLeave={() => { setHovered(false); onLeave() }}
     >
       <div
         className={cn(
-          'px-2.5 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all duration-200',
+          'px-3 h-8 flex items-center rounded-full text-[13px] font-bold whitespace-nowrap',
+          'border transition duration-150',
           active
-            ? 'bg-[#FF6B35] text-white shadow-[0_4px_14px_rgba(255,107,53,0.45)] scale-110'
-            : 'bg-white text-[#0f0f0e] shadow-[0_2px_8px_rgba(0,0,0,0.15)] group-hover:shadow-[0_4px_14px_rgba(0,0,0,0.22)] group-hover:scale-105',
+            ? 'bg-[#E05A1A] text-white border-[#E05A1A]/25'
+            : 'bg-white text-[#1a1a18] border-black/[0.08]',
         )}
+        style={{
+          boxShadow: active
+            ? '0 4px 12px rgba(224,90,26,0.25), 0 10px 24px rgba(224,90,26,0.20)'
+            : hovered
+            ? '0 2px 6px rgba(0,0,0,0.16), 0 12px 28px rgba(0,0,0,0.18)'
+            : '0 1px 3px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.12)',
+        }}
       >
         {formatPrice(minPrice)}+
       </div>
-      <div className={cn(
-        'w-0 h-0 -mt-px border-l-[4px] border-r-[4px] border-l-transparent border-r-transparent',
-        active ? 'border-t-[5px] border-t-[#FF6B35]' : 'border-t-[5px] border-t-white',
-      )} />
+      {/* Caret — 45% larger than original (4/4/5px → 6/6/7px).
+          Color always matches pill background so they read as one shape. */}
+      <div
+        className="w-0 h-0 -mt-px transition-[border-top-color] duration-150"
+        style={{
+          borderLeft:  '6px solid transparent',
+          borderRight: '6px solid transparent',
+          borderTop:   `7px solid ${active ? '#E05A1A' : 'white'}`,
+        }}
+      />
     </div>
   )
 }
