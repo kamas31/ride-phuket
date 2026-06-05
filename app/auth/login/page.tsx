@@ -116,7 +116,6 @@ function LoginForm() {
                     <button
                       type="button"
                       onClick={() => {
-                        sessionStorage.setItem('_kr_pw_prefill', password)
                         router.push(`/auth/signup?email=${encodeURIComponent(email)}&role=rider`)
                       }}
                       className="flex flex-col items-center gap-2 py-4 px-3 rounded-[16px] border-2 border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] transition-all text-center"
@@ -128,7 +127,6 @@ function LoginForm() {
                     <button
                       type="button"
                       onClick={() => {
-                        sessionStorage.setItem('_kr_pw_prefill', password)
                         router.push(`/auth/signup?email=${encodeURIComponent(email)}&role=shop_owner`)
                       }}
                       className="flex flex-col items-center gap-2 py-4 px-3 rounded-[16px] border-2 border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] transition-all text-center"

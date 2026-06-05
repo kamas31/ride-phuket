@@ -50,7 +50,7 @@ function SignupForm() {
   const [resending, setResending]   = useState(false)
   const [resendSent, setResendSent] = useState(false)
 
-  // Pre-fill from login "no account" flow: ?email=...&role=... + sessionStorage password
+  // Pre-fill from login "no account" flow: ?email=...&role=...
   useEffect(() => {
     const paramEmail = searchParams.get('email')
     const paramRole  = searchParams.get('role') as UserRole | null
@@ -60,11 +60,6 @@ function SignupForm() {
     }
     if (paramRole && (paramRole === 'rider' || paramRole === 'shop_owner')) {
       setRole(paramRole)
-    }
-    const storedPw = sessionStorage.getItem('_kr_pw_prefill')
-    if (storedPw) {
-      setPassword(storedPw)
-      sessionStorage.removeItem('_kr_pw_prefill')
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
