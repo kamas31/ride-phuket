@@ -644,6 +644,12 @@ export default function ScooterMap({
       .setDOMContent(container)
       .addTo(map)
 
+    // Markers use z-index 10 (inactive) and 20 (active/hovered).
+    // Mapbox popup has z-index:auto by default, which paints below any
+    // element with a positive z-index in the same stacking context.
+    // Setting 25 ensures the popup is always above every marker.
+    popup.getElement()?.style.setProperty('z-index', '25')
+
     const root = createRoot(container)
     root.render(<ShopPopupCard agg={agg} onClose={() => onSelectRef.current(null)} />)
     popupRef.current = { popup, root, container }
