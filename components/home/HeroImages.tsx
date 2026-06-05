@@ -79,7 +79,7 @@ export function HeroImages() {
           alt="Explore Phuket on a scooter"
           fill
           priority
-          className="object-cover object-center hidden md:block"
+          className="object-cover object-top hidden md:block"
           sizes="100vw"
         />
 
