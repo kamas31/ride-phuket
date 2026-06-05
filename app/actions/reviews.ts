@@ -23,13 +23,17 @@ function toInitials(name: string): string {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeReview(r: any): ShopReview {
-  const name: string = r.profiles?.name ?? ''
+  // Prefer the name snapshotted at review creation time (reviewer_name).
+  // Fall back to the live profiles.name only for rows that predate the
+  // snapshot column and could not be backfilled (deleted user, etc.).
+  // avatar_url is intentionally NOT snapshotted — it stays live.
+  const name: string = r.reviewer_name ?? r.profiles?.name ?? ''
   return {
     id:                   r.id,
     userId:               r.user_id,
     displayName:          toDisplayName(name),
     initials:             toInitials(name),
-    avatarUrl:            r.profiles?.avatar_url ?? null,
+    avatarUrl:            r.profiles?.avatar_url ?? null,  // live — intentional
     shopLogoUrl:          r.shops?.logo_url ?? null,
     rating:               r.rating,
     comment:              r.comment ?? '',
@@ -52,7 +56,7 @@ export async function getShopReviews(shopId: string): Promise<{
 
   const { data, error } = await admin
     .from('reviews')
-    .select('id, user_id, rating, comment, created_at, updated_at, verified, owner_reply, owner_reply_created_at, profiles(name, avatar_url), shops(logo_url)')
+    .select('id, user_id, reviewer_name, rating, comment, created_at, updated_at, verified, owner_reply, owner_reply_created_at, profiles(name, avatar_url), shops(logo_url)')
     .eq('shop_id', shopId)
     .order('created_at', { ascending: false })
 
@@ -93,17 +97,27 @@ export async function submitReview(
   const { data: shopRow } = await admin.from('shops').select('owner_id').eq('id', shopId).single()
   if (shopRow?.owner_id === user.id) return { success: false, error: 'You cannot review your own shop.' }
 
+  // Snapshot the reviewer's display name at submission time.
+  // This name is frozen permanently — profile renames will not affect it.
+  const { data: profileRow } = await admin
+    .from('profiles')
+    .select('name')
+    .eq('id', user.id)
+    .single()
+  const reviewerName: string | null = profileRow?.name ?? null
+
   const clean = sanitize(trimmed)
 
   const { data, error } = await admin
     .from('reviews')
     .insert({
-      shop_id:   shopId,
-      user_id:   user.id,
+      shop_id:       shopId,
+      user_id:       user.id,
+      reviewer_name: reviewerName,
       rating,
-      comment:   clean,
-      verified:  false,
-      updated_at: new Date().toISOString(),
+      comment:       clean,
+      verified:      false,
+      updated_at:    new Date().toISOString(),
     })
     .select('id')
     .single()
