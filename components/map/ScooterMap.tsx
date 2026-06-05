@@ -202,6 +202,7 @@ export default function ScooterMap({
   const mapRef       = useRef<mapboxgl.Map | null>(null)
   const [ready, setReady]             = useState(false)
   const [showSearchHere, setShowSearchHere] = useState(false)
+  const [showZoneCenters, setShowZoneCenters] = useState(false)
 
   // Group filtered scooters into one aggregate per shop
   const aggregates = useMemo(() => buildShopAggregates(scooters), [scooters])
@@ -225,6 +226,9 @@ export default function ScooterMap({
   // Zone marker refs (kept for cleanup safety, no longer rendered)
   const zoneMarkersRef = useRef<Map<string, { marker: mapboxgl.Marker; root: Root }>>(new Map())
 
+  // Debug zone-center markers (dev only)
+  const dbgMarkersRef = useRef<mapboxgl.Marker[]>([])
+
   // Scooter count per zone from current filtered list
   const zoneCounts = useMemo(() => {
     const counts: Record<string, number> = {}
@@ -234,6 +238,26 @@ export default function ScooterMap({
     }
     return counts
   }, [scooters])
+
+  // ── Debug: zone centre markers (dev only) ────────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return
+    dbgMarkersRef.current.forEach(m => m.remove())
+    dbgMarkersRef.current = []
+    if (!showZoneCenters) return
+    PHUKET_ZONES.forEach(zone => {
+      const el = document.createElement('div')
+      el.style.cssText = 'position:relative;width:10px;height:10px;pointer-events:none;'
+      el.innerHTML = `
+        <div style="width:10px;height:10px;background:#ef4444;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.55);box-sizing:border-box;"></div>
+        <div style="position:absolute;top:13px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.82);color:#fff;padding:2px 6px;border-radius:3px;font-size:9px;font-family:monospace;white-space:nowrap;line-height:1.5;">${zone.name}<br>${zone.lat.toFixed(4)}, ${zone.lng.toFixed(4)}</div>
+      `
+      const m = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([zone.lng, zone.lat])
+        .addTo(mapRef.current!)
+      dbgMarkersRef.current.push(m)
+    })
+  }, [showZoneCenters, ready]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Init map (once) ───────────────────────────────────────────
   useEffect(() => {
@@ -269,46 +293,6 @@ export default function ScooterMap({
       // Natural landcover (green vegetation/habitat polygons) — parks/roads kept
       if (map.getLayer('landcover')) map.setLayoutProperty('landcover', 'visibility', 'none')
 
-      // ── Replace Mapbox neighbourhood labels with our own ──────────────────
-      // streets-v12 collision detection suppresses settlement-subdivision-label
-      // at zoom ~10.8 whenever they compete with higher-priority labels.
-      // We hide that layer and render all 16 Phuket zones ourselves.
-      if (map.getLayer('settlement-subdivision-label')) {
-        map.setLayoutProperty('settlement-subdivision-label', 'visibility', 'none')
-      }
-
-      map.addSource('phuket-zones', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection' as const,
-          features: PHUKET_ZONES.map(zone => ({
-            type: 'Feature' as const,
-            geometry: { type: 'Point' as const, coordinates: [zone.lng, zone.lat] },
-            properties: { name: zone.name },
-          })),
-        },
-      })
-
-      map.addLayer({
-        id: 'phuket-zone-labels',
-        type: 'symbol',
-        source: 'phuket-zones',
-        layout: {
-          'text-field': ['get', 'name'],
-          'text-font': ['DIN Pro Regular', 'Arial Unicode MS Regular'],
-          'text-size': 11,
-          'text-anchor': 'top',
-          'text-offset': [0, 0.25],
-          'text-allow-overlap': false,
-          'symbol-sort-key': 10,
-        },
-        paint: {
-          'text-color': '#5c5c58',
-          'text-halo-color': 'rgba(255,255,255,0.88)',
-          'text-halo-width': 1.5,
-        },
-      })
-
       setReady(true)
     })
 
@@ -324,6 +308,8 @@ export default function ScooterMap({
       markersRef.current.clear()
       zoneMarkersRef.current.forEach(({ marker, root }) => { root.unmount(); marker.remove() })
       zoneMarkersRef.current.clear()
+      dbgMarkersRef.current.forEach(m => m.remove())
+      dbgMarkersRef.current = []
       popupRef.current?.root.unmount()
       popupRef.current?.popup.remove()
       popupRef.current = null
@@ -487,6 +473,17 @@ export default function ScooterMap({
             Search this area
           </button>
         </div>
+      )}
+
+      {/* Dev: zone centre toggle — stripped from production builds */}
+      {process.env.NODE_ENV !== 'production' && (
+        <button
+          onClick={() => setShowZoneCenters(v => !v)}
+          className="absolute bottom-5 left-5 z-30 px-3 py-1.5 rounded-full text-[10px] font-mono text-white shadow-md transition-colors"
+          style={{ background: showZoneCenters ? '#ef4444' : 'rgba(0,0,0,0.65)' }}
+        >
+          {showZoneCenters ? '◉ zones on' : '◎ zones'}
+        </button>
       )}
 
       {/* Active zone count card — bottom right */}
