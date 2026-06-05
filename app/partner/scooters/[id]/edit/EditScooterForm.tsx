@@ -517,46 +517,6 @@ export default function EditScooterForm({ scooter, shopId, shopName }: EditScoot
               )}
             </div>
 
-            {/* Deposit Security — edit-only */}
-            <div className="bg-white rounded-[20px] border border-[#e8e8e4] p-5 space-y-4">
-              <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider">🛡 Deposit Security</p>
-
-              <button type="button" onClick={() => set('isPremiumBike', !form.isPremiumBike)}
-                className="w-full flex items-center justify-between p-4 rounded-[14px] border border-[#e8e8e4] hover:border-[#d0d0cc]">
-                <div>
-                  <span className="text-sm font-medium text-[#0f0f0e]">Premium / high-value bike (500cc+)</span>
-                  <p className="text-[10px] text-[#9c9c98] mt-0.5">Enables passport requirement for Tmax, X-ADV, Forza 750, etc.</p>
-                </div>
-                <div className={cn('w-11 h-6 rounded-full transition-colors relative flex-shrink-0', form.isPremiumBike ? 'bg-[#2563eb]' : 'bg-[#e8e8e4]')}>
-                  <div className={cn('absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform', form.isPremiumBike ? 'translate-x-5' : 'translate-x-0.5')} />
-                </div>
-              </button>
-
-              {[
-                { key: 'passportRequired',    label: form.isPremiumBike ? '🛂 Passport required (premium bike)' : '🛂 Passport required', disabled: !form.isPremiumBike, color: 'bg-[#2563eb]' },
-                { key: 'passportCopyAllowed', label: '📋 Passport copy accepted (not original required)', disabled: false, color: 'bg-[#22c55e]' },
-              ].map(item => (
-                <button key={item.key} type="button"
-                  disabled={item.disabled}
-                  onClick={() => !item.disabled && set(item.key as keyof typeof form, !form[item.key as keyof typeof form])}
-                  className={cn('w-full flex items-center justify-between p-4 rounded-[14px] border border-[#e8e8e4] hover:border-[#d0d0cc]', item.disabled && 'opacity-40 cursor-not-allowed')}>
-                  <span className="text-sm font-medium text-[#0f0f0e]">{item.label}</span>
-                  <div className={cn('w-11 h-6 rounded-full transition-colors relative flex-shrink-0',
-                    form[item.key as keyof typeof form] ? item.color : 'bg-[#e8e8e4]')}>
-                    <div className={cn('absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform',
-                      form[item.key as keyof typeof form] ? 'translate-x-5' : 'translate-x-0.5')} />
-                  </div>
-                </button>
-              ))}
-
-              <div>
-                <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Deposit Notes (optional)</label>
-                <input type="text" value={form.depositNotes} onChange={e => set('depositNotes', e.target.value)}
-                  placeholder="e.g. Cash deposit returned on drop-off"
-                  className="w-full px-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]" />
-              </div>
-            </div>
-
             <div className="flex gap-3">
               <button type="button" onClick={() => setStep(1)} className="px-6 py-4 rounded-full border border-[#e8e8e4] text-sm font-semibold text-[#5c5c58] hover:bg-[#f8f8f6]">← Back</button>
               <button type="button" disabled={!canProceed2} onClick={() => setStep(3)}
