@@ -1,6 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getScooterById } from '@/lib/supabase/queries'
+import { getShopForOwner } from '@/app/actions/profile'
 import EditScooterForm from './EditScooterForm'
 
 interface EditScooterPageProps {
@@ -23,8 +24,12 @@ export default async function EditScooterPage({ params }: EditScooterPageProps) 
 
   if (!profile?.shop_id) redirect('/partner')
 
-  const scooter = await getScooterById(id)
+  const [scooter, shop] = await Promise.all([
+    getScooterById(id),
+    getShopForOwner(),
+  ])
+
   if (!scooter || scooter.shopId !== profile.shop_id) notFound()
 
-  return <EditScooterForm scooter={scooter} shopId={profile.shop_id} />
+  return <EditScooterForm scooter={scooter} shopId={profile.shop_id} shopName={shop?.name ?? ''} />
 }
