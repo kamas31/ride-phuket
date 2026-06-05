@@ -15,7 +15,7 @@ import { updateShop } from '@/app/actions/shop-update'
 import { cn } from '@/lib/utils'
 import type { FullShopRow } from '@/app/actions/profile'
 import type { OpeningHoursSchedule, OpeningHoursDay } from '@/types'
-import { PHUKET_ZONES } from '@/lib/zones'
+import { PHUKET_ZONES, getZoneForLocation } from '@/lib/zones'
 
 const PinPickerMap = dynamic(() => import('@/components/map/PinPickerMap'), {
   ssr: false,
@@ -27,6 +27,12 @@ const PinPickerMap = dynamic(() => import('@/components/map/PinPickerMap'), {
 })
 
 // ── Constants ──────────────────────────────────────────────────
+
+const SHOP_LOCATIONS = [
+  'Patong', 'Kata', 'Karon', 'Rawai', 'Phuket Town', 'Bang Tao',
+  'Kamala', 'Surin', 'Chalong', 'Nai Harn', 'Cherng Talay',
+  'Kata Noi', 'Mai Khao', 'Thalang', 'Cape Panwa', 'Ko Sirey',
+]
 
 const DAYS: { key: keyof OpeningHoursSchedule; label: string }[] = [
   { key: 'monday',    label: 'Monday' },
@@ -276,6 +282,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
     instagram: shop.instagram ?? '',
     website:   shop.website ?? '',
     // Location
+    location:      shop.location ?? 'Patong',
     address:       shop.address ?? '',
     lat:           String(shop.lat ?? ''),
     lng:           String(shop.lng ?? ''),
@@ -329,6 +336,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
         name:        form.name,
         description: form.description,
         phone:       form.phone,
+        location:    form.location || undefined,
         whatsapp:    form.whatsapp || undefined,
         lineId:      form.lineId || undefined,
         telegram:    form.telegram || undefined,
@@ -464,6 +472,30 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
 
         {/* ── 3. Location ── */}
         <Section title="Address & Location">
+          <div>
+            <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">
+              Main Area <span className="text-[#ef4444]">*</span>
+            </label>
+            <select
+              value={form.location}
+              onChange={e => {
+                const newLoc = e.target.value
+                const zone = getZoneForLocation(newLoc)
+                setForm(f => ({
+                  ...f,
+                  location: newLoc,
+                  lat: zone ? String(zone.lat) : f.lat,
+                  lng: zone ? String(zone.lng) : f.lng,
+                }))
+              }}
+              className="w-full px-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35] transition-colors"
+            >
+              {SHOP_LOCATIONS.map(loc => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
+          </div>
+
           <Field
             label="Full Address" value={form.address}
             onChange={v => set('address', v)}

@@ -11,7 +11,11 @@ import { ImageUploader, type ProcessedImage } from '@/components/ride/ImageUploa
 import { cn, formatPrice } from '@/lib/utils'
 
 const BRANDS    = ['Honda', 'Yamaha', 'Vespa', 'Kawasaki', 'Suzuki', 'Other']
-const LOCATIONS = ['Patong', 'Kata', 'Karon', 'Rawai', 'Bang Tao', 'Phuket Town', 'Kamala', 'Surin']
+const LOCATIONS = [
+  'Patong', 'Kata', 'Karon', 'Rawai', 'Phuket Town', 'Bang Tao',
+  'Kamala', 'Surin', 'Chalong', 'Nai Harn', 'Cherng Talay',
+  'Kata Noi', 'Mai Khao', 'Thalang', 'Cape Panwa', 'Ko Sirey',
+]
 
 const SCOOTER_FEATURES = [
   'Smart key / keyless',

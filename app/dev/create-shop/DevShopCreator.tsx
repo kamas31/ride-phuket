@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { createDevShop, type DevShopResult } from './actions'
 
 const LOCATIONS = [
-  'Patong', 'Kata', 'Karon', 'Rawai', 'Bang Tao', 'Phuket Town',
+  'Patong', 'Kata', 'Karon', 'Rawai', 'Phuket Town', 'Bang Tao',
   'Kamala', 'Surin', 'Chalong', 'Nai Harn', 'Cherng Talay',
+  'Kata Noi', 'Mai Khao', 'Thalang', 'Cape Panwa', 'Ko Sirey',
 ]
 
 interface Created extends DevShopResult {

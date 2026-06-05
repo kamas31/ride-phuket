@@ -9,6 +9,7 @@ export interface UpdateShopPayload {
   name: string
   description: string
   phone: string
+  location?: string
   whatsapp?: string
   lineId?: string
   telegram?: string
@@ -65,6 +66,7 @@ export async function updateShop(
         name:             payload.name.trim(),
         description:      payload.description?.trim() || '',
         phone:            payload.phone.trim(),
+        ...(payload.location ? { location: payload.location } : {}),
         whatsapp:         payload.whatsapp?.trim() || null,
         line_id:          payload.lineId?.trim() || null,
         telegram:         payload.telegram?.trim() || null,

@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { sortByRecommended } from '@/lib/ridescore'
 import { trackEvent } from '@/lib/analytics'
 import { createExploreFuse } from '@/lib/fuzzy-search'
+import { getZoneForLocation } from '@/lib/zones'
 import type { Scooter, FilterState } from '@/types'
 
 const ScooterMap = dynamic(() => import('@/components/map/ScooterMap'), {
@@ -144,7 +145,10 @@ export default function ExploreClient({
       if (s.pricePerDay > filters.priceMax) return false
       if (filters.deliveryNow && !s.deliveryAvailable) return false
       if (filters.helmetIncluded && !s.helmetIncluded) return false
-      if (filters.location !== 'all' && !s.location.toLowerCase().includes(filters.location.replace(/-/g, ' '))) return false
+      if (filters.location !== 'all') {
+        const zone = getZoneForLocation(s.location)
+        if (!zone || zone.key !== filters.location.replace(/-/g, ' ')) return false
+      }
       if (filters.depositProtected && !s.shop?.depositProtectedMember) return false
       if (filters.noPassport && s.passportRequired) return false
       if (filters.requiredFeatures.length > 0 && !filters.requiredFeatures.every(f => s.features.includes(f))) return false

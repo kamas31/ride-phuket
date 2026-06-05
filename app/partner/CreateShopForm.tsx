@@ -4,7 +4,11 @@ import { useState } from 'react'
 import { Building2, MapPin, Phone, FileText, ArrowRight, Check, AlertCircle } from 'lucide-react'
 import { createShop } from '@/app/actions/partner'
 
-const LOCATIONS = ['Patong', 'Kata', 'Karon', 'Rawai', 'Bang Tao', 'Phuket Town', 'Kamala', 'Surin']
+const LOCATIONS = [
+  'Patong', 'Kata', 'Karon', 'Rawai', 'Phuket Town', 'Bang Tao',
+  'Kamala', 'Surin', 'Chalong', 'Nai Harn', 'Cherng Talay',
+  'Kata Noi', 'Mai Khao', 'Thalang', 'Cape Panwa', 'Ko Sirey',
+]
 
 // Client-side timeout: if the Server Action takes > 15s → abort
 const CLIENT_TIMEOUT_MS = 15_000

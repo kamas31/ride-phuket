@@ -13,7 +13,11 @@ import { cn, formatPrice } from '@/lib/utils'
 import type { Scooter, MileageRange } from '@/types'
 
 const BRANDS    = ['Honda', 'Yamaha', 'Vespa', 'Kawasaki', 'Suzuki', 'Other']
-const LOCATIONS = ['Patong', 'Kata', 'Karon', 'Rawai', 'Bang Tao', 'Phuket Town', 'Kamala', 'Surin']
+const LOCATIONS = [
+  'Patong', 'Kata', 'Karon', 'Rawai', 'Phuket Town', 'Bang Tao',
+  'Kamala', 'Surin', 'Chalong', 'Nai Harn', 'Cherng Talay',
+  'Kata Noi', 'Mai Khao', 'Thalang', 'Cape Panwa', 'Ko Sirey',
+]
 const SCOOTER_FEATURES = ['Smart key / keyless', 'LED lights', 'Traction control', 'ABS brakes', 'USB charging']
 const ACCESSORIES = ['Back rest', 'Top case', 'Crash bar', 'Windshield / Wind visor', 'Electric windshield', 'Phone charger', 'Phone holder']
 const CURRENT_YEAR = new Date().getFullYear()

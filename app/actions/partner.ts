@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { getZoneForLocation } from '@/lib/zones'
 
 export interface CreateShopPayload {
   shopName: string
@@ -115,6 +116,8 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
             name:        payload.shopName.trim(),
             slug,
             location:    payload.location,
+            lat:         getZoneForLocation(payload.location || '')?.lat ?? null,
+            lng:         getZoneForLocation(payload.location || '')?.lng ?? null,
             phone:       payload.phone.trim(),
             address:     payload.address?.trim() || '',
             description: payload.description?.trim() || '',

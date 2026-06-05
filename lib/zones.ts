@@ -21,24 +21,25 @@ export interface PhuketZone {
 
 export const PHUKET_ZONES: PhuketZone[] = [
   // ── Primary rental zones (form dropdown options) ──────────────────────────
-  { key: 'patong',       name: 'Patong',       lat: 7.8956, lng: 98.2966, radiusKm: 2.5 },
+  // Coordinates are verified road/commercial area centres — not beach shorelines.
+  { key: 'patong',       name: 'Patong',       lat: 7.8956, lng: 98.2966, radiusKm: 2.5 }, // Bangla Rd / Jungceylon area
   // kata noi MUST appear before kata — 'kata noi'.includes('kata') is true
-  { key: 'kata noi',     name: 'Kata Noi',     lat: 7.8073, lng: 98.3004, radiusKm: 1.0 },
-  { key: 'kata',         name: 'Kata',         lat: 7.8203, lng: 98.2986, radiusKm: 2.0 },
-  { key: 'karon',        name: 'Karon',        lat: 7.8450, lng: 98.2987, radiusKm: 1.8 },
-  { key: 'rawai',        name: 'Rawai',        lat: 7.7781, lng: 98.3281, radiusKm: 2.2 },
-  { key: 'bang tao',     name: 'Bang Tao',     lat: 7.9900, lng: 98.2880, radiusKm: 3.0 },
-  { key: 'phuket town',  name: 'Phuket Town',  lat: 7.8804, lng: 98.3881, radiusKm: 2.0 },
-  { key: 'kamala',       name: 'Kamala',       lat: 7.9476, lng: 98.2734, radiusKm: 1.5 },
-  { key: 'surin',        name: 'Surin',        lat: 7.9714, lng: 98.2800, radiusKm: 1.5 },
+  { key: 'kata noi',     name: 'Kata Noi',     lat: 7.8083, lng: 98.3038, radiusKm: 1.0 }, // hillside road above cove (was at beach edge)
+  { key: 'kata',         name: 'Kata',         lat: 7.8207, lng: 98.3008, radiusKm: 2.0 }, // Kata Beach Rd / main village (was in sand)
+  { key: 'karon',        name: 'Karon',        lat: 7.8449, lng: 98.3011, radiusKm: 1.8 }, // Patak Rd inland strip (was at beach edge)
+  { key: 'rawai',        name: 'Rawai',        lat: 7.7781, lng: 98.3281, radiusKm: 2.2 }, // Rawai seafront / Viset Rd (bay, not Andaman)
+  { key: 'bang tao',     name: 'Bang Tao',     lat: 7.9906, lng: 98.2921, radiusKm: 3.0 }, // Laguna / Bangtao Beach Rd (was at beach edge)
+  { key: 'phuket town',  name: 'Phuket Town',  lat: 7.8834, lng: 98.3920, radiusKm: 2.0 }, // Old Town / Thalang Rd area (was 500m too far west)
+  { key: 'kamala',       name: 'Kamala',       lat: 7.9476, lng: 98.2734, radiusKm: 1.5 }, // Kamala village / main road
+  { key: 'surin',        name: 'Surin',        lat: 7.9712, lng: 98.2843, radiusKm: 1.5 }, // Surin commercial area inland (was on beach)
   // ── Extended zones (AREAS coverage) ──────────────────────────────────────
-  { key: 'chalong',      name: 'Chalong',      lat: 7.8414, lng: 98.3533, radiusKm: 3.0 },
-  { key: 'nai harn',     name: 'Nai Harn',     lat: 7.7840, lng: 98.3020, radiusKm: 1.5 },
-  { key: 'cherng talay', name: 'Cherng Talay', lat: 7.9963, lng: 98.2993, radiusKm: 2.0 },
-  { key: 'mai khao',     name: 'Mai Khao',     lat: 8.1600, lng: 98.3028, radiusKm: 3.5 },
-  { key: 'thalang',      name: 'Thalang',      lat: 8.0212, lng: 98.3478, radiusKm: 2.5 },
-  { key: 'cape panwa',   name: 'Cape Panwa',   lat: 7.8100, lng: 98.4060, radiusKm: 2.0 },
-  { key: 'ko sirey',     name: 'Ko Sirey',     lat: 7.8862, lng: 98.4144, radiusKm: 1.5 },
+  { key: 'chalong',      name: 'Chalong',      lat: 7.8414, lng: 98.3533, radiusKm: 3.0 }, // Chalong roundabout area
+  { key: 'nai harn',     name: 'Nai Harn',     lat: 7.7840, lng: 98.3020, radiusKm: 1.5 }, // Nai Harn lake / beach area
+  { key: 'cherng talay', name: 'Cherng Talay', lat: 7.9963, lng: 98.2993, radiusKm: 2.0 }, // Srisoonthorn Rd area
+  { key: 'mai khao',     name: 'Mai Khao',     lat: 8.1551, lng: 98.3110, radiusKm: 3.5 }, // Thepkrasattri Rd / main road (was at beach)
+  { key: 'thalang',      name: 'Thalang',      lat: 8.0212, lng: 98.3478, radiusKm: 2.5 }, // Thalang town / Heroines Monument area
+  { key: 'cape panwa',   name: 'Cape Panwa',   lat: 7.8100, lng: 98.4060, radiusKm: 2.0 }, // Cape Panwa peninsula road
+  { key: 'ko sirey',     name: 'Ko Sirey',     lat: 7.8862, lng: 98.4144, radiusKm: 1.5 }, // Ko Sirey island main area
 ]
 
 /** Find the zone for a scooter location string */
