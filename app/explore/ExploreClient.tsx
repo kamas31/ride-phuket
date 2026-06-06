@@ -295,8 +295,8 @@ export default function ExploreClient({
           </div>
 
           {showMap && (
-            <div className="flex-1 min-w-0 bg-red-500/30">
-              <div className="sticky top-36 bg-green-500/30">
+            <div className="flex-1 min-w-0">
+              <div className="sticky top-36">
                 <ScooterMap
                   scooters={filtered}
                   selectedId={selectedId ?? undefined}
