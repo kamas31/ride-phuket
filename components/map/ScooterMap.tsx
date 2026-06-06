@@ -531,6 +531,22 @@ export default function ScooterMap({
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── TEST 3: Force map.resize() on scroll/resize (desktop only) ───────────
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handler = () => {
+      if (window.innerWidth >= 1024 && mapRef.current) {
+        mapRef.current.resize()
+      }
+    }
+    window.addEventListener('scroll', handler, { passive: true })
+    window.addEventListener('resize', handler, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handler)
+      window.removeEventListener('resize', handler)
+    }
+  }, [])
+
   // ── Effect 1: Create/remove shop markers + fitBounds ─────────
   useEffect(() => {
     if (!ready || !mapRef.current) return
@@ -693,7 +709,7 @@ export default function ScooterMap({
   }
 
   return (
-    <div className={cn('relative bg-[#dfe7df]', className)}>
+    <div className={cn('relative rounded-[20px] overflow-hidden bg-[#dfe7df]', className)}>
       {!ready && <MapSkeleton className="absolute inset-0 z-10" />}
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
 
