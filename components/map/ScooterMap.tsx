@@ -558,6 +558,9 @@ export default function ScooterMap({
       for (const id of ['landcover', 'national-park', 'landuse']) {
         if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
       }
+      // Terrain shading: hillshade is the sole layer producing mountain shadow/relief.
+      // Hiding it flattens the map visually without touching roads, water, or labels.
+      if (map.getLayer('hillshade')) map.setLayoutProperty('hillshade', 'visibility', 'none')
 
       setReady(true)
     })
