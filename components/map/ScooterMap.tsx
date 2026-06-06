@@ -553,15 +553,10 @@ export default function ScooterMap({
       for (const id of ['ferry', 'ferry-case']) {
         if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
       }
-      // national-park fill (Khao Phra Thaew NP) remains hidden — too large and dark.
-      if (map.getLayer('national-park')) map.setLayoutProperty('national-park', 'visibility', 'none')
-      // landcover: restore with wood excluded so only light grass/scrub/crop tones
-      // appear. wood is the heavy dark-green forest fill that made the map feel heavy.
-      // Override fill-opacity: streets-v12 interpolates it near-zero at low zoom,
-      // so we pin it to a flat value that stays readable when zoomed out.
-      if (map.getLayer('landcover')) {
-        map.setFilter('landcover', ['!=', ['get', 'class'], 'wood'])
-        map.setPaintProperty('landcover', 'fill-opacity', 0.6)
+      // Green vegetation: landcover (broad habitat polygons), national-park fills
+      // (visible in Phuket viewport — Khao Phra Thaew NP), and landuse park/grass fills
+      for (const id of ['landcover', 'national-park', 'landuse']) {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
       }
       // Terrain shading: hillshade is the sole layer producing mountain shadow/relief.
       // Hiding it flattens the map visually without touching roads, water, or labels.
