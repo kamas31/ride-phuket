@@ -6,7 +6,7 @@ import { MapPin, Zap, Check } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import { SaveButton } from '@/components/ride/SaveButton'
-import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
+import { TrustBadge, shouldShowNewListingBadge } from '@/components/ride/TrustBadge'
 import { cn, formatPrice, formatEngine, getScooterCover } from '@/lib/utils'
 import type { Scooter } from '@/types'
 
@@ -55,7 +55,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
       />
       <div className="p-2.5">
         <div className="flex items-center justify-between mb-0.5">
-          {isNewListing(scooter.createdAt) && (
+          {shouldShowNewListingBadge(scooter) && (
             <TrustBadge variant="new_listing" size="xs" />
           )}
           {!scooter.available && (
@@ -137,7 +137,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
             <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
             <span className="truncate">{scooter.location}</span>
           </div>
-          {isNewListing(scooter.createdAt) && (
+          {shouldShowNewListingBadge(scooter) && (
             <TrustBadge variant="new_listing" />
           )}
         </div>

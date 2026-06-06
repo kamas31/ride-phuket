@@ -10,7 +10,7 @@ import { formatPricePerDay, getScooterCover } from '@/lib/utils'
 import { SITE_URL, SITE_NAME } from '@/constants'
 import { getAreaForLocation } from '@/constants/areas'
 import { ImageGallery } from '@/components/ride/ImageGallery'
-import { TrustBadge, isNewListing } from '@/components/ride/TrustBadge'
+import { TrustBadge, shouldShowNewListingBadge } from '@/components/ride/TrustBadge'
 import { QuickContact } from '@/components/ride/QuickContact'
 import { DepositInfo } from '@/components/ride/DepositInfo'
 import { MessageOwnerButton } from './MessageOwnerButton'
@@ -141,7 +141,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
   const allScooterFeatures = [...scooterFeatureItems, ...unknownFeatures]
   const accessoryItems = scooter.features.filter(f => ACCESSORY_LABELS.includes(f))
 
-  const newListing = isNewListing(scooter.createdAt)
+  const newListing = shouldShowNewListingBadge(scooter)
   const openStatus = getShopOpenStatus(shop.openingHours)
 
   // Public FAQ from answered inquiries (useful SEO content)

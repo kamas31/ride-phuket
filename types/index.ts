@@ -88,7 +88,8 @@ export interface Scooter {
   insuranceIncluded: boolean
   minRentalDays: number
   description: string
-  createdAt?: string       // ISO date — used for "New listing" badge (< 30 days)
+  createdAt?: string       // ISO date — used for "New listing" badge (< 7 days)
+  showNewListingBadge?: boolean | null  // null=auto, true=force show, false=force hide
   mileageRange?: MileageRange
   // Deposit & trust fields (migration 011)
   depositAmount?: number        // THB, refundable deposit

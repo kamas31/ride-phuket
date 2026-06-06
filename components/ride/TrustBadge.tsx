@@ -134,6 +134,18 @@ export function isNewListing(createdAt?: string): boolean {
   return (Date.now() - new Date(createdAt).getTime()) < 7 * 24 * 60 * 60 * 1000
 }
 
+/**
+ * Resolves whether to show the New Listing badge, respecting manual override.
+ *   showNewListingBadge = true  → always show (marketing / screenshots)
+ *   showNewListingBadge = false → always hide
+ *   showNewListingBadge = null/undefined → auto (7-day createdAt rule)
+ */
+export function shouldShowNewListingBadge(scooter: { createdAt?: string; showNewListingBadge?: boolean | null }): boolean {
+  if (scooter.showNewListingBadge === true)  return true
+  if (scooter.showNewListingBadge === false) return false
+  return isNewListing(scooter.createdAt)
+}
+
 /** True if the shop responds fast (responseTime field includes "< 15" or "5" etc.) */
 export function isFastResponder(responseTime?: string): boolean {
   if (!responseTime) return false

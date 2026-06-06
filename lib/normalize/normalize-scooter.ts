@@ -106,6 +106,7 @@ export function normalizeScooter(row: any): Scooter {
     minRentalDays: Number(row.min_rental_days) || 1,
     description: row.description ?? '',
     createdAt: row.created_at ?? undefined,
+    showNewListingBadge: row.show_new_listing_badge ?? null,
     mileageRange: (row.mileage_range as MileageRange) ?? undefined,
     depositAmount: row.deposit_amount != null ? Number(row.deposit_amount) : undefined,
     depositType: (row.deposit_type as DepositType) ?? undefined,
