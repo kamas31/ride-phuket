@@ -557,7 +557,12 @@ export default function ScooterMap({
       if (map.getLayer('national-park')) map.setLayoutProperty('national-park', 'visibility', 'none')
       // landcover: restore with wood excluded so only light grass/scrub/crop tones
       // appear. wood is the heavy dark-green forest fill that made the map feel heavy.
-      if (map.getLayer('landcover')) map.setFilter('landcover', ['!=', ['get', 'class'], 'wood'])
+      // Override fill-opacity: streets-v12 interpolates it near-zero at low zoom,
+      // so we pin it to a flat value that stays readable when zoomed out.
+      if (map.getLayer('landcover')) {
+        map.setFilter('landcover', ['!=', ['get', 'class'], 'wood'])
+        map.setPaintProperty('landcover', 'fill-opacity', 0.6)
+      }
       // Terrain shading: hillshade is the sole layer producing mountain shadow/relief.
       // Hiding it flattens the map visually without touching roads, water, or labels.
       if (map.getLayer('hillshade')) map.setLayoutProperty('hillshade', 'visibility', 'none')
