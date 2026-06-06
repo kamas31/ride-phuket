@@ -231,5 +231,12 @@ export function computeRideScoreProxy(scooter: Scooter): number {
 
 /** Sort a scooter array by recommended (proxy RideScore), highest first */
 export function sortByRecommended(scooters: Scooter[]): Scooter[] {
-  return [...scooters].sort((a, b) => computeRideScoreProxy(b) - computeRideScoreProxy(a))
+  return [...scooters].sort((a, b) => {
+    const aPos = a.explorePosition ?? Infinity
+    const bPos = b.explorePosition ?? Infinity
+    // Pinned scooters first, ascending by position number
+    if (aPos !== bPos) return aPos - bPos
+    // Among unpinned (both Infinity): fall back to score
+    return computeRideScoreProxy(b) - computeRideScoreProxy(a)
+  })
 }

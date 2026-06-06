@@ -90,6 +90,7 @@ export interface Scooter {
   description: string
   createdAt?: string       // ISO date — used for "New listing" badge (< 7 days)
   showNewListingBadge?: boolean | null  // null=auto, true=force show, false=force hide
+  explorePosition?: number | null       // null=unpinned; 1,2,3… pins to front of Recommended sort
   mileageRange?: MileageRange
   // Deposit & trust fields (migration 011)
   depositAmount?: number        // THB, refundable deposit

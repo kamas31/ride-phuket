@@ -47,3 +47,44 @@ export async function adminSetNewListingBadge(
   revalidatePath('/')
   return {}
 }
+
+/**
+ * Admin-only: set or clear the Explore position pin on a scooter.
+ *   value = 1, 2, 3… → pin to that slot in the Recommended sort
+ *   value = null      → unpin (falls back to score-based ordering)
+ *
+ * Requires is_admin = true on the caller's profile.
+ */
+export async function adminSetExplorePosition(
+  scooterId: string,
+  value: number | null,
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: profile } = await (supabase as any)
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.is_admin) return { error: 'Admin access required' }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const admin = createAdminClient() as any
+  const { error } = await admin
+    .from('scooters')
+    .update({ explore_position: value, updated_at: new Date().toISOString() })
+    .eq('id', scooterId)
+
+  if (error) {
+    console.error('[adminSetExplorePosition]', error.message)
+    return { error: error.message }
+  }
+
+  revalidatePath(`/scooter/${scooterId}`)
+  revalidatePath('/explore')
+  return {}
+}
