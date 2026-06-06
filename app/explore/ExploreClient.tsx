@@ -20,8 +20,11 @@ interface ScreenshotPin {
   id: string
   lat: number
   lng: number
-  price: number
+  price: string
 }
+
+// Valid: "300" or "300+" — digits only, optional single trailing +
+const PRICE_RE = /^\d+\+?$/
 
 const ScooterMap = dynamic(() => import('@/components/map/ScooterMap'), {
   ssr: false,
@@ -178,8 +181,8 @@ export default function ExploreClient({
 
   const handleScreenshotPinSave = useCallback(() => {
     if (!pendingPin) return
-    const price = parseInt(priceInput.trim(), 10)
-    if (!price || price < 1) return
+    const price = priceInput.trim()
+    if (!PRICE_RE.test(price)) return
     setScreenshotPins(prev => [...prev, {
       id: `sp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       lat: pendingPin.lat,
@@ -477,8 +480,8 @@ export default function ExploreClient({
             <label className="block text-sm font-semibold text-[#0f0f0e] mb-1.5">Price (฿/day)</label>
             <input
               ref={priceInputRef}
-              type="number"
-              min={1}
+              type="text"
+              inputMode="text"
               value={priceInput}
               onChange={e => setPriceInput(e.target.value)}
               onKeyDown={e => {
@@ -497,7 +500,7 @@ export default function ExploreClient({
               </button>
               <button
                 onClick={handleScreenshotPinSave}
-                disabled={!priceInput.trim() || parseInt(priceInput, 10) < 1}
+                disabled={!PRICE_RE.test(priceInput.trim())}
                 className="flex-1 py-2.5 text-sm font-semibold text-white bg-[#FF6B35] rounded-full hover:bg-[#e85d29] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Save

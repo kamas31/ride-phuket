@@ -17,10 +17,10 @@ interface ScreenshotPin {
   id: string
   lat: number
   lng: number
-  price: number
+  price: string
 }
 
-function ScreenshotPinMarker({ price, onDelete }: { price: number; onDelete: () => void }) {
+function ScreenshotPinMarker({ price, onDelete }: { price: string; onDelete: () => void }) {
   const [showDelete, setShowDelete] = useState(false)
 
   return (
@@ -34,7 +34,7 @@ function ScreenshotPinMarker({ price, onDelete }: { price: number; onDelete: () 
           className="px-3 h-8 flex items-center rounded-full text-[13px] font-bold whitespace-nowrap border bg-white text-[#1a1a18] border-black/[0.08]"
           style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.12)' }}
         >
-          {formatPrice(price)}
+          ฿{price}
         </div>
         {showDelete && (
           <button
