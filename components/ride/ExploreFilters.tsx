@@ -33,12 +33,12 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
   return (
     <>
       {/* ── Quick filter bar ── */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex items-center gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
         {/* All filters toggle */}
         <button
           onClick={() => setShowPanel(true)}
           className={cn(
-            'flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors active:scale-[0.96]',
+            'flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-colors active:scale-[0.96]',
             activeFilterCount > 0
               ? 'bg-[#FF6B35] text-white border-[#FF6B35]'
               : 'bg-white text-[#0f0f0e] border-[#e8e8e4] hover:border-[#d0d0cc]'
@@ -57,7 +57,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
         <button
           onClick={() => update({ deliveryNow: !filters.deliveryNow })}
           className={cn(
-            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap active:scale-[0.96]',
+            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-medium transition-colors whitespace-nowrap active:scale-[0.96]',
             filters.deliveryNow
               ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
               : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
@@ -71,7 +71,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
         <button
           onClick={() => update({ noPassport: !filters.noPassport })}
           className={cn(
-            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-colors whitespace-nowrap active:scale-[0.96]',
+            'flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-medium transition-colors whitespace-nowrap active:scale-[0.96]',
             filters.noPassport
               ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
               : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'
@@ -86,7 +86,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
           <select
             value={filters.sortBy}
             onChange={e => update({ sortBy: e.target.value as FilterState['sortBy'] })}
-            className="px-4 py-2.5 rounded-full border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] cursor-pointer hover:border-[#d0d0cc] transition-colors appearance-none pr-8"
+            className="px-4 py-2 rounded-full border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] cursor-pointer hover:border-[#d0d0cc] transition-colors appearance-none pr-8"
           >
             {SORT_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>

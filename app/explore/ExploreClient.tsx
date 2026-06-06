@@ -200,9 +200,9 @@ export default function ExploreClient({
     <div className="min-h-screen bg-white pt-16">
       {/* ── Sticky top bar ── */}
       <div className="sticky top-16 z-30 bg-white border-b border-[#e8e8e4]">
-        <div className="max-w-6xl mx-auto px-4 py-3">
+        <div className="max-w-6xl mx-auto px-4 py-2">
           {/* Search row — includes mobile List/Map toggle */}
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9c9c98] pointer-events-none" />
               <input
@@ -218,7 +218,7 @@ export default function ExploreClient({
             <button
               onClick={toggleMap}
               className={cn(
-                'hidden lg:flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-sm font-medium flex-shrink-0 transition-colors',
+                'hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-medium flex-shrink-0 transition-colors',
                 showMap
                   ? 'bg-[#0f0f0e] text-white border-[#0f0f0e]'
                   : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]'

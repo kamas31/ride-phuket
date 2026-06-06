@@ -131,8 +131,8 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
       {/* Content */}
       <div className="p-3 sm:p-4">
 
-        {/* Location & Rating */}
-        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+        {/* Location & Rating — fixed height so badge-present cards match badge-absent cards */}
+        <div className="flex items-center justify-between mb-1.5 sm:mb-2 h-5">
           <div className="flex items-center gap-1 text-[#9c9c98] text-[10px] sm:text-xs min-w-0">
             <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
             <span className="truncate">{scooter.location}</span>

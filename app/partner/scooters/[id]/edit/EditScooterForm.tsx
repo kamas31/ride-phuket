@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import {
   ArrowLeft, Check, Plus, X, Star, ChevronRight,
   DollarSign, Truck, Shield, Clock, Save,
@@ -217,13 +218,23 @@ export default function EditScooterForm({ scooter, shopId, shopName }: EditScoot
       {/* Sticky header */}
       <div className="sticky top-16 z-20 bg-white border-b border-[#e8e8e4]">
         <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
-          <button
-            onClick={() => step === 1 ? window.location.href = '/partner/dashboard' : setStep(s => (s - 1) as Step)}
-            className="flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {step === 1 ? 'Dashboard' : 'Back'}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => step === 1 ? window.location.href = '/partner/dashboard' : setStep(s => (s - 1) as Step)}
+              className="flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {step === 1 ? 'Dashboard' : 'Back'}
+            </button>
+            {step > 1 && (
+              <Link
+                href="/partner/dashboard"
+                className="text-sm text-[#9c9c98] hover:text-[#FF6B35] transition-colors border-l border-[#e8e8e4] pl-3"
+              >
+                Dashboard
+              </Link>
+            )}
+          </div>
           <h1 className="font-bold text-sm text-[#0f0f0e]">Edit Scooter</h1>
           <div className="text-xs text-[#9c9c98]">{step}/3</div>
         </div>
