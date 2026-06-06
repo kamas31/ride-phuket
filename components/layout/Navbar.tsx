@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { SITE_NAME } from '@/constants'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
+import { useAdminPanelVisible } from '@/hooks/useAdminPanelVisible'
 import { useUnreadCount } from '@/hooks/useUnreadCount'
 import { useUnreadReviewCount } from '@/hooks/useUnreadReviewCount'
 
@@ -40,7 +41,8 @@ export default function Navbar() {
   const pathname          = usePathname()
   const router            = useRouter()
   const { user, signOut } = useAuth()
-  const { profile }       = useProfile()
+  const { profile, isAdmin } = useProfile()
+  const [adminPanelVisible, setAdminPanelVisible] = useAdminPanelVisible()
   const unread            = useUnreadCount()
   const unreadReviews     = useUnreadReviewCount()
   const combined          = unread + unreadReviews
@@ -217,6 +219,23 @@ export default function Navbar() {
                         </Link>
                       ))}
                     </div>
+                    {isAdmin && (
+                      <div className="border-t border-[#f0f0ec] px-4 py-2.5">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-[#9c9c98] mb-2">Admin</p>
+                        <button
+                          onClick={() => setAdminPanelVisible(!adminPanelVisible)}
+                          className="w-full flex items-center justify-between text-sm text-[#5c5c58] hover:text-[#0f0f0e] transition-colors"
+                        >
+                          <span>Admin Panel</span>
+                          <span className={cn(
+                            'text-[10px] font-bold px-2 py-0.5 rounded-full',
+                            adminPanelVisible ? 'bg-[#FF6B35] text-white' : 'bg-[#e8e8e4] text-[#9c9c98]',
+                          )}>
+                            {adminPanelVisible ? 'ON' : 'OFF'}
+                          </span>
+                        </button>
+                      </div>
+                    )}
                     <div className="border-t border-[#f0f0ec] py-1.5">
                       <button
                         onClick={() => { setUserMenuOpen(false); signOut() }}
@@ -332,6 +351,23 @@ export default function Navbar() {
                         </Link>
                       ))}
                     </div>
+                    {isAdmin && (
+                      <div className="border-t border-[#f0f0ec] px-3 py-2">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-[#9c9c98] mb-1.5">Admin</p>
+                        <button
+                          onClick={() => setAdminPanelVisible(!adminPanelVisible)}
+                          className="w-full flex items-center justify-between text-sm text-[#5c5c58]"
+                        >
+                          <span>Admin Panel</span>
+                          <span className={cn(
+                            'text-[10px] font-bold px-2 py-0.5 rounded-full',
+                            adminPanelVisible ? 'bg-[#FF6B35] text-white' : 'bg-[#e8e8e4] text-[#9c9c98]',
+                          )}>
+                            {adminPanelVisible ? 'ON' : 'OFF'}
+                          </span>
+                        </button>
+                      </div>
+                    )}
                     <div className="border-t border-[#f0f0ec] py-1">
                       <button
                         onClick={() => { setUserMenuOpen(false); signOut() }}

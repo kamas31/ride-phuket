@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useProfile } from '@/hooks/useProfile'
+import { useAdminPanelVisible } from '@/hooks/useAdminPanelVisible'
 import { adminSetNewListingBadge, adminSetExplorePosition } from '@/app/actions/admin-badge'
 
 interface AdminBadgeControlProps {
@@ -20,6 +21,7 @@ const OPTIONS: { value: BadgeState; label: string }[] = [
 
 export function AdminBadgeControl({ scooterId, initial, initialPosition }: AdminBadgeControlProps) {
   const { isAdmin, loading } = useProfile()
+  const [adminPanelVisible] = useAdminPanelVisible()
   const [current, setCurrent] = useState<BadgeState>(initial ?? null)
   const [isPending, startTransition] = useTransition()
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -29,7 +31,7 @@ export function AdminBadgeControl({ scooterId, initial, initialPosition }: Admin
   const [posError, setPosError] = useState<string | null>(null)
   const [posSaved, setPosSaved] = useState(false)
 
-  if (loading || !isAdmin) return null
+  if (loading || !isAdmin || !adminPanelVisible) return null
 
   const handleChange = (next: BadgeState) => {
     if (next === current || isPending) return

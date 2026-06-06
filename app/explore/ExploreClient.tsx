@@ -13,7 +13,15 @@ import { trackEvent } from '@/lib/analytics'
 import { createExploreFuse } from '@/lib/fuzzy-search'
 import { getZoneForLocation } from '@/lib/zones'
 import { useProfile } from '@/hooks/useProfile'
+import { useAdminPanelVisible } from '@/hooks/useAdminPanelVisible'
 import type { Scooter, FilterState } from '@/types'
+
+interface ScreenshotPin {
+  id: string
+  lat: number
+  lng: number
+  price: number
+}
 
 const ScooterMap = dynamic(() => import('@/components/map/ScooterMap'), {
   ssr: false,
@@ -50,12 +58,20 @@ export default function ExploreClient({
 }) {
   const router = useRouter()
   const { isAdmin, loading: profileLoading } = useProfile()
+  const [adminPanelVisible] = useAdminPanelVisible()
 
   // Calibration tool: only available when ?debugPins=1 AND the current user is an admin.
   // Both conditions must be true — URL param alone is not enough.
   const hasDebugParam = typeof window !== 'undefined' &&
     new URLSearchParams(window.location.search).get('debugPins') === '1'
   const debugMode = !profileLoading && hasDebugParam && isAdmin
+
+  // ── Screenshot pins (admin only, localStorage-backed) ───────
+  const [screenshotMode, setScreenshotMode]   = useState(false)
+  const [screenshotPins, setScreenshotPins]   = useState<ScreenshotPin[]>([])
+  const [pendingPin, setPendingPin]           = useState<{ lat: number; lng: number } | null>(null)
+  const [priceInput, setPriceInput]           = useState('')
+  const priceInputRef                         = useRef<HTMLInputElement>(null)
 
   const [filters, setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
   const [search, setSearch]           = useState(initialSearch)
@@ -70,6 +86,21 @@ export default function ExploreClient({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (localStorage.getItem('rp_show_map') === 'false') setShowMap(false)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Screenshot pins: load from localStorage on mount (admin only)
+  useEffect(() => {
+    if (!isAdmin) return
+    try {
+      const stored = localStorage.getItem('screenshotPins')
+      if (stored) setScreenshotPins(JSON.parse(stored))
+    } catch {}
+  }, [isAdmin]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Screenshot pins: persist to localStorage whenever they change
+  useEffect(() => {
+    if (!isAdmin) return
+    try { localStorage.setItem('screenshotPins', JSON.stringify(screenshotPins)) } catch {}
+  }, [screenshotPins, isAdmin])
 
   // Fuse instance — rebuilt only when the scooter list changes
   const fuse = useMemo(() => createExploreFuse(initialScooters), [initialScooters])
@@ -136,6 +167,36 @@ export default function ExploreClient({
   const handleHoverLeave = useCallback(() => {
     if (hoverTimer.current) clearTimeout(hoverTimer.current)
     hoverTimer.current = setTimeout(() => setHoveredId(null), 40)
+  }, [])
+
+  // ── Screenshot pin handlers ──────────────────────────────────
+  const handleScreenshotPinAdd = useCallback((lat: number, lng: number) => {
+    setPendingPin({ lat, lng })
+    setPriceInput('')
+    setTimeout(() => priceInputRef.current?.focus(), 80)
+  }, [])
+
+  const handleScreenshotPinSave = useCallback(() => {
+    if (!pendingPin) return
+    const price = parseInt(priceInput.trim(), 10)
+    if (!price || price < 1) return
+    setScreenshotPins(prev => [...prev, {
+      id: `sp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      lat: pendingPin.lat,
+      lng: pendingPin.lng,
+      price,
+    }])
+    setPendingPin(null)
+    setPriceInput('')
+  }, [pendingPin, priceInput])
+
+  const handleScreenshotPinDelete = useCallback((id: string) => {
+    setScreenshotPins(prev => prev.filter(p => p.id !== id))
+  }, [])
+
+  const handleClearAllPins = useCallback(() => {
+    setScreenshotPins([])
+    try { localStorage.removeItem('screenshotPins') } catch {}
   }, [])
 
   // ── Prefetch on first hover (desktop) or touchstart (mobile) ────
@@ -308,6 +369,10 @@ export default function ExploreClient({
                   activeZone={filters.location === 'all' ? null : filters.location}
                   className="h-[calc(100vh-10rem)] min-h-[480px]"
                   debugMode={debugMode}
+                  screenshotPins={isAdmin ? screenshotPins : undefined}
+                  screenshotMode={isAdmin && screenshotMode}
+                  onScreenshotPinAdd={isAdmin ? handleScreenshotPinAdd : undefined}
+                  onScreenshotPinDelete={isAdmin ? handleScreenshotPinDelete : undefined}
                 />
               </div>
             </div>
@@ -344,12 +409,103 @@ export default function ExploreClient({
               activeZone={filters.location === 'all' ? null : filters.location}
               className="h-[calc(100svh-13rem)] min-h-[420px]"
               debugMode={debugMode}
+              screenshotPins={isAdmin ? screenshotPins : undefined}
+              screenshotMode={isAdmin && screenshotMode}
+              onScreenshotPinAdd={isAdmin ? handleScreenshotPinAdd : undefined}
+              onScreenshotPinDelete={isAdmin ? handleScreenshotPinDelete : undefined}
             />
           )}
         </div>
       </div>
 
       {process.env.NODE_ENV === 'development' && <ImageMetricsOverlay />}
+
+      {/* ── Admin: Screenshot Pins panel ── */}
+      {!profileLoading && isAdmin && adminPanelVisible && (
+        <div className="fixed bottom-24 right-4 z-[9000] bg-[#0f0f0e] text-white rounded-[16px] p-3.5 shadow-2xl w-[148px] select-none">
+          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#9c9c98] mb-2.5">
+            Admin · Explore
+          </p>
+          <p className="text-[9px] text-[#9c9c98] mb-1.5">Screenshot Pins</p>
+          <div className="flex gap-1.5 mb-2">
+            <button
+              onClick={() => setScreenshotMode(false)}
+              className={cn(
+                'flex-1 text-xs font-semibold py-1.5 rounded-[9px] transition-colors',
+                !screenshotMode
+                  ? 'bg-[#FF6B35] text-white'
+                  : 'bg-white/[0.08] text-white/60 hover:bg-white/[0.15] hover:text-white',
+              )}
+            >
+              Off
+            </button>
+            <button
+              onClick={() => setScreenshotMode(true)}
+              className={cn(
+                'flex-1 text-xs font-semibold py-1.5 rounded-[9px] transition-colors',
+                screenshotMode
+                  ? 'bg-[#FF6B35] text-white'
+                  : 'bg-white/[0.08] text-white/60 hover:bg-white/[0.15] hover:text-white',
+              )}
+            >
+              On
+            </button>
+          </div>
+          {screenshotMode && (
+            <p className="text-[9px] text-[#9c9c98] mb-2 leading-tight">Click map to add a pin</p>
+          )}
+          {screenshotPins.length > 0 && (
+            <button
+              onClick={handleClearAllPins}
+              className="w-full text-[9px] text-red-400 hover:text-red-300 transition-colors py-1"
+            >
+              Clear all ({screenshotPins.length})
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── Admin: price input modal (appears after map click in screenshot mode) ── */}
+      {pendingPin && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setPendingPin(null)}
+          />
+          <div className="relative bg-white rounded-[20px] shadow-2xl p-5 w-64">
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#9c9c98] mb-3">Add Pin</p>
+            <label className="block text-sm font-semibold text-[#0f0f0e] mb-1.5">Price (฿/day)</label>
+            <input
+              ref={priceInputRef}
+              type="number"
+              min={1}
+              value={priceInput}
+              onChange={e => setPriceInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') handleScreenshotPinSave()
+                if (e.key === 'Escape') setPendingPin(null)
+              }}
+              placeholder="300"
+              className="w-full px-3 py-2.5 border border-[#e8e8e4] rounded-[10px] text-sm font-semibold focus:outline-none focus:border-[#FF6B35] mb-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPendingPin(null)}
+                className="flex-1 py-2.5 text-sm font-semibold text-[#5c5c58] bg-[#f8f8f6] rounded-full hover:bg-[#f0f0ec] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleScreenshotPinSave}
+                disabled={!priceInput.trim() || parseInt(priceInput, 10) < 1}
+                className="flex-1 py-2.5 text-sm font-semibold text-white bg-[#FF6B35] rounded-full hover:bg-[#e85d29] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -12,6 +12,48 @@ import type { Scooter } from '@/types'
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
+// ── Screenshot pins (admin-only, localStorage-backed) ──────────
+interface ScreenshotPin {
+  id: string
+  lat: number
+  lng: number
+  price: number
+}
+
+function ScreenshotPinMarker({ price, onDelete }: { price: number; onDelete: () => void }) {
+  const [showDelete, setShowDelete] = useState(false)
+
+  return (
+    <div
+      className="flex flex-col items-center select-none"
+      style={{ cursor: 'pointer' }}
+      onClick={e => { e.stopPropagation(); setShowDelete(v => !v) }}
+    >
+      <div className="relative">
+        <div
+          className="px-3 h-8 flex items-center rounded-full text-[13px] font-bold whitespace-nowrap border bg-white text-[#1a1a18] border-black/[0.08]"
+          style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.12)' }}
+        >
+          {formatPrice(price)}
+        </div>
+        {showDelete && (
+          <button
+            onClick={e => { e.stopPropagation(); onDelete() }}
+            className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
+            style={{ lineHeight: 1 }}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+      <div
+        className="w-0 h-0 -mt-px"
+        style={{ borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '7px solid white' }}
+      />
+    </div>
+  )
+}
+
 // ── Calibration tool ───────────────────────────────────────────
 interface CalibrationPin {
   id: string
@@ -323,6 +365,10 @@ interface ScooterMapProps {
   activeZone?: string | null
   className?: string
   debugMode?: boolean
+  screenshotPins?: ScreenshotPin[]
+  screenshotMode?: boolean
+  onScreenshotPinAdd?: (lat: number, lng: number) => void
+  onScreenshotPinDelete?: (id: string) => void
 }
 
 export default function ScooterMap({
@@ -336,6 +382,10 @@ export default function ScooterMap({
   activeZone,
   className,
   debugMode = false,
+  screenshotPins,
+  screenshotMode = false,
+  onScreenshotPinAdd,
+  onScreenshotPinDelete,
 }: ScooterMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<mapboxgl.Map | null>(null)
@@ -386,6 +436,15 @@ export default function ScooterMap({
         }])
       : null
   }, [debugMode])
+
+  // Screenshot pin refs
+  const screenshotMarkersRef = useRef<Map<string, { marker: mapboxgl.Marker; root: Root; container: HTMLDivElement }>>(new Map())
+  const screenshotModeRef        = useRef(screenshotMode)
+  const onScreenshotPinAddRef    = useRef(onScreenshotPinAdd)
+  const onScreenshotPinDeleteRef = useRef(onScreenshotPinDelete)
+  useEffect(() => { screenshotModeRef.current        = screenshotMode        }, [screenshotMode])
+  useEffect(() => { onScreenshotPinAddRef.current    = onScreenshotPinAdd    }, [onScreenshotPinAdd])
+  useEffect(() => { onScreenshotPinDeleteRef.current = onScreenshotPinDelete }, [onScreenshotPinDelete])
 
   // Scooter count per zone from current filtered list
   const zoneCounts = useMemo(() => {
@@ -505,7 +564,9 @@ export default function ScooterMap({
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
     map.on('click', (e) => {
-      if (addCalibPinRef.current) {
+      if (screenshotModeRef.current) {
+        onScreenshotPinAddRef.current?.(e.lngLat.lat, e.lngLat.lng)
+      } else if (addCalibPinRef.current) {
         addCalibPinRef.current(e.lngLat.lat, e.lngLat.lng)
       } else {
         onSelectRef.current(null)
@@ -525,6 +586,8 @@ export default function ScooterMap({
       calibMarkersRef.current.clear()
       zoneOverlayRef.current.forEach(m => m.remove())
       zoneOverlayRef.current = []
+      screenshotMarkersRef.current.forEach(({ marker, root }) => { root.unmount(); marker.remove() })
+      screenshotMarkersRef.current.clear()
       popupRef.current?.root.unmount()
       popupRef.current?.popup.remove()
       popupRef.current = null
@@ -653,6 +716,37 @@ export default function ScooterMap({
     popupRef.current = { popup, root, container }
   }, [selectedId, ready]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Screenshot pins ────────────────────────────────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return
+    const pins = screenshotPins ?? []
+    const currentIds = new Set(pins.map(p => p.id))
+    screenshotMarkersRef.current.forEach((entry, id) => {
+      if (!currentIds.has(id)) {
+        entry.root.unmount(); entry.marker.remove()
+        screenshotMarkersRef.current.delete(id)
+      }
+    })
+    pins.forEach(pin => {
+      if (!screenshotMarkersRef.current.has(pin.id)) {
+        const container = document.createElement('div')
+        const marker = new mapboxgl.Marker({ element: container, anchor: 'bottom' })
+          .setLngLat([pin.lng, pin.lat])
+          .addTo(mapRef.current!)
+        const root = createRoot(container)
+        container.addEventListener('click', e => e.stopPropagation())
+        screenshotMarkersRef.current.set(pin.id, { marker, root, container })
+      }
+      const { root } = screenshotMarkersRef.current.get(pin.id)!
+      root.render(
+        <ScreenshotPinMarker
+          price={pin.price}
+          onDelete={() => onScreenshotPinDeleteRef.current?.(pin.id)}
+        />
+      )
+    })
+  }, [screenshotPins, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!TOKEN) {
     return (
       <div className={cn('flex items-center justify-center bg-[#e8f4f8] rounded-[20px] border border-[#e8e8e4]', className)}>
@@ -696,7 +790,7 @@ export default function ScooterMap({
   }
 
   return (
-    <div className={cn('relative rounded-[20px] overflow-hidden bg-[#dfe7df]', className)}>
+    <div className={cn('relative rounded-[20px] overflow-hidden bg-[#dfe7df]', screenshotMode && '[&_.mapboxgl-canvas]:cursor-crosshair', className)}>
       {!ready && <MapSkeleton className="absolute inset-0 z-10" />}
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
 
