@@ -245,8 +245,8 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
               {/* Deposit type */}
               <div>
                 <p className="text-sm font-semibold text-[#0f0f0e] mb-3">Deposit Type</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {([['cash', 'Cash'], ['passport', 'Passport'], ['both', 'Cash + Passport']] as const).map(([val, label]) => (
+                <div className="grid grid-cols-2 gap-2">
+                  {([['cash', 'Cash'], ['passport', 'Passport']] as const).map(([val, label]) => (
                     <button
                       key={val}
                       onClick={() => update({ depositTypeFilter: filters.depositTypeFilter === val ? '' : val })}
