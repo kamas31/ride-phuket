@@ -630,6 +630,7 @@ export default function ScooterMap({
 
   // ── Effect 1: Create/remove shop markers + fitBounds ─────────
   useEffect(() => {
+    if (mapDebugMode) return
     if (!ready || !mapRef.current) return
     const map = mapRef.current
 
@@ -684,6 +685,7 @@ export default function ScooterMap({
 
   // ── Effect 2: Update marker appearance on hover/select ────────
   useEffect(() => {
+    if (mapDebugMode) return
     if (!ready) return
     const newActiveIds = new Set<string>(
       [selectedId, hoveredId].filter((id): id is string => Boolean(id)),
@@ -711,6 +713,7 @@ export default function ScooterMap({
 
   // ── Popup for selected shop ────────────────────────────────────
   useEffect(() => {
+    if (mapDebugMode) return
     if (!ready || !mapRef.current) return
     const map = mapRef.current
 
@@ -812,7 +815,7 @@ export default function ScooterMap({
       )}
 
       {/* "Search this area" — premium floating button */}
-      {showSearchHere && onBoundsChange && (
+      {!mapDebugMode && showSearchHere && onBoundsChange && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 animate-[fade-up_0.2s_ease_forwards]">
           <button
             onClick={handleSearchHere}
@@ -907,7 +910,7 @@ export default function ScooterMap({
       )}
 
       {/* Active zone count card — bottom right */}
-      {activeZone && activeZoneName && (
+      {!mapDebugMode && activeZone && activeZoneName && (
         <div className="absolute bottom-5 right-5 z-20 bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.16)] p-4 min-w-[190px]">
           <p className="text-[13px] font-bold text-[#0f0f0e] leading-tight">
             {activeZoneCount} scooter{activeZoneCount !== 1 ? 's' : ''} available
