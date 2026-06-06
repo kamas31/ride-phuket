@@ -553,10 +553,14 @@ export default function ScooterMap({
       for (const id of ['ferry', 'ferry-case']) {
         if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
       }
-      // Green vegetation: landcover (broad habitat polygons), national-park fills
-      // (visible in Phuket viewport — Khao Phra Thaew NP), and landuse park/grass fills
-      for (const id of ['landcover', 'national-park', 'landuse']) {
+      // national-park and landuse remain hidden.
+      for (const id of ['national-park', 'landuse']) {
         if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
+      }
+      // landcover: wood excluded (heavy forest fills), opacity lowered for subtlety.
+      if (map.getLayer('landcover')) {
+        map.setFilter('landcover', ['!=', ['get', 'class'], 'wood'])
+        map.setPaintProperty('landcover', 'fill-opacity', 0.35)
       }
       // Terrain shading: hillshade is the sole layer producing mountain shadow/relief.
       // Hiding it flattens the map visually without touching roads, water, or labels.
