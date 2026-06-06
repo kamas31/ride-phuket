@@ -95,6 +95,7 @@ export async function updateShop(
     revalidatePath('/partner/dashboard')
     revalidatePath('/partner/shop')
     revalidatePath(`/shop/${shopRow.slug ?? ''}`)
+    revalidatePath('/explore')
 
     return { success: true }
   } catch (e) {
