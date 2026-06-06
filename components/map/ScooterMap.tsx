@@ -557,9 +557,12 @@ export default function ScooterMap({
       for (const id of ['national-park', 'landuse']) {
         if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
       }
-      // landcover: wood excluded (heavy forest fills), opacity lowered for subtlety.
+      // landcover: wood excluded (heavy forest fills). Both fill-color and fill-opacity
+      // are fixed so the green is consistent at all zoom levels — streets-v12 uses
+      // zoom-interpolated expressions for both that fade out when zoomed out.
       if (map.getLayer('landcover')) {
         map.setFilter('landcover', ['!=', ['get', 'class'], 'wood'])
+        map.setPaintProperty('landcover', 'fill-color', '#c8ddb0')
         map.setPaintProperty('landcover', 'fill-opacity', 0.35)
       }
       // Terrain shading: hillshade is the sole layer producing mountain shadow/relief.
