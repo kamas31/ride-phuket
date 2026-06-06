@@ -285,14 +285,12 @@ export default async function HomePage() {
                 Where are you staying?
               </h2>
             </div>
-            {liveAreas.length > 6 && (
-              <Link
-                href="/locations"
-                className="hidden md:flex items-center gap-1 text-sm font-semibold text-[#FF6B35] hover:gap-2 transition-all"
-              >
-                View all {liveAreas.length} locations <ChevronRight className="w-4 h-4" />
-              </Link>
-            )}
+            <Link
+              href="/locations"
+              className="hidden md:flex items-center gap-1 text-sm font-semibold text-[#FF6B35] hover:gap-2 transition-all"
+            >
+              View all locations <ChevronRight className="w-4 h-4" />
+            </Link>
           </div>
           {liveAreas.length > 0 ? (
             <>
@@ -319,16 +317,14 @@ export default async function HomePage() {
                   </Link>
                 ))}
               </div>
-              {liveAreas.length > 6 && (
-                <div className="mt-5 text-center">
-                  <Link
-                    href="/locations"
-                    className="inline-flex items-center gap-2 px-6 py-3 border border-[#e8e8e4] rounded-full text-sm font-semibold text-[#0f0f0e] hover:bg-white hover:border-[#FF6B35] hover:text-[#FF6B35] transition-all"
-                  >
-                    View all {liveAreas.length} Phuket locations <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              )}
+              <div className="mt-5 text-center">
+                <Link
+                  href="/locations"
+                  className="inline-flex items-center gap-2 px-6 py-3 border border-[#e8e8e4] rounded-full text-sm font-semibold text-[#0f0f0e] hover:bg-white hover:border-[#FF6B35] hover:text-[#FF6B35] transition-all"
+                >
+                  View all Phuket locations <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </>
           ) : (
             <div className="text-center py-12 bg-white rounded-[20px] border border-[#e8e8e4]">
