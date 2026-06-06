@@ -38,8 +38,6 @@ export interface UpdateScooterPayload {
   passportCopyAllowed?: boolean
   isPremiumBike?: boolean
   depositNotes?: string
-  // Badge override (null = auto, true = force show, false = force hide)
-  showNewListingBadge?: boolean | null
 }
 
 export interface UpdateScooterResult {
@@ -109,7 +107,6 @@ export async function updateScooter(
         passport_copy_allowed: payload.passportCopyAllowed ?? true,
         is_premium_bike:      payload.isPremiumBike ?? false,
         deposit_notes:        payload.depositNotes ?? null,
-        show_new_listing_badge: payload.showNewListingBadge ?? null,
         updated_at:           new Date().toISOString(),
       })
       .eq('id', scooterId)

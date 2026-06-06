@@ -83,7 +83,6 @@ export default function EditScooterForm({ scooter, shopId, shopName }: EditScoot
     passportCopyAllowed: scooter.passportCopyAllowed ?? true,
     isPremiumBike:       scooter.isPremiumBike ?? false,
     depositNotes:        scooter.depositNotes ?? '',
-    showNewListingBadge: scooter.showNewListingBadge ?? false,
   })
 
   const set = useCallback((k: keyof typeof form, v: unknown) => setForm(f => ({ ...f, [k]: v })), [])
@@ -184,7 +183,6 @@ export default function EditScooterForm({ scooter, shopId, shopName }: EditScoot
         passportCopyAllowed: form.passportCopyAllowed,
         isPremiumBike:       form.isPremiumBike,
         depositNotes:        form.depositNotes  || undefined,
-        showNewListingBadge: form.showNewListingBadge || null,
       })
 
       clearTimeout(timeoutId)
@@ -384,16 +382,6 @@ export default function EditScooterForm({ scooter, shopId, shopName }: EditScoot
                 </div>
                 <div className={cn('w-11 h-6 rounded-full transition-colors relative flex-shrink-0', form.available ? 'bg-[#22c55e]' : 'bg-[#e8e8e4]')}>
                   <div className={cn('absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform', form.available ? 'translate-x-5' : 'translate-x-0.5')} />
-                </div>
-              </button>
-              <button type="button" onClick={() => set('showNewListingBadge', !form.showNewListingBadge)}
-                className="w-full flex items-center justify-between p-4 rounded-[14px] border border-[#e8e8e4] hover:border-[#d0d0cc]">
-                <div>
-                  <span className="text-sm font-medium text-[#0f0f0e]">Show New Listing badge</span>
-                  <p className="text-xs text-[#9c9c98] mt-0.5">Override automatic badge — useful for marketing and screenshots</p>
-                </div>
-                <div className={cn('w-11 h-6 rounded-full transition-colors relative flex-shrink-0', form.showNewListingBadge ? 'bg-[#FF6B35]' : 'bg-[#e8e8e4]')}>
-                  <div className={cn('absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform', form.showNewListingBadge ? 'translate-x-5' : 'translate-x-0.5')} />
                 </div>
               </button>
               <div>
