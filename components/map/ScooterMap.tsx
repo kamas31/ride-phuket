@@ -693,7 +693,7 @@ export default function ScooterMap({
   }
 
   return (
-    <div className={cn('relative overflow-hidden bg-[#dfe7df]', className)}>
+    <div className={cn('relative bg-[#dfe7df]', className)}>
       {!ready && <MapSkeleton className="absolute inset-0 z-10" />}
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
 
