@@ -553,9 +553,7 @@ export default function ScooterMap({
       for (const id of ['ferry', 'ferry-case']) {
         if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
       }
-      for (const id of ['landcover', 'landuse']) {
-        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
-      }
+      if (map.getLayer('landcover')) map.setLayoutProperty('landcover', 'visibility', 'none')
       // Terrain shading: hillshade is the sole layer producing mountain shadow/relief.
       // Hiding it flattens the map visually without touching roads, water, or labels.
       if (map.getLayer('hillshade')) map.setLayoutProperty('hillshade', 'visibility', 'none')
