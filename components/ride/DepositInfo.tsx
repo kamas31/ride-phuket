@@ -3,89 +3,103 @@ import { TrustBadge } from '@/components/ride/TrustBadge'
 import { formatPrice } from '@/lib/utils'
 import type { DepositType } from '@/types'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DepositInfo — displays deposit rules and protection status
-//
-// Adapts automatically:
-//   Standard scooters  → low deposit, copy OK, no passport
-//   Premium bikes      → higher deposit, passport may be required
-//
-// Business rule: passport requirements for 500cc+ / high-value bikes
-// are NORMAL and should be presented as professional/secure, not as a
-// risk signal. We use a blue "Secured Deposit" badge, not a warning.
-// ─────────────────────────────────────────────────────────────────────────────
-
-const DEPOSIT_TYPE_LABELS: Record<DepositType, string> = {
-  cash:      'Cash deposit (refundable)',
-  card_hold: 'Credit card hold',
-  flexible:  'Cash or card hold',
-  none:      'No deposit required',
-  passport:  'Passport deposit',
-  both:      'Cash or passport deposit',
-}
-
-const ACCEPTED_ICONS: Record<string, string> = {
-  cash:       '💵',
-  card_hold:  '💳',
-  flexible:   '💵 / 💳',
-  passport:   '🛂',
-  both:       '💵 / 🛂',
-}
-
 interface DepositInfoProps {
   depositAmount?: number
   depositType?: DepositType
+  // Legacy fields kept in interface for call-site compatibility — not used for display
   passportRequired?: boolean
   passportCopyAllowed?: boolean
   isPremiumBike?: boolean
   depositNotes?: string
-  depositProtected?: boolean  // shop enrolled in Deposit Protection program
+  depositProtected?: boolean
   className?: string
 }
 
 export function DepositInfo({
   depositAmount,
   depositType,
-  passportRequired = false,
-  passportCopyAllowed = true,
-  isPremiumBike = false,
   depositNotes,
   depositProtected = false,
   className,
 }: DepositInfoProps) {
-  // Nothing to show if no deposit info is configured
-  const hasInfo = depositAmount || depositType || depositProtected || isPremiumBike
-
+  const hasInfo = depositAmount || depositType || depositProtected
   if (!hasInfo) return null
+
+  const needsPassport  = depositType === 'passport'
+  const noPassportNeeded = depositType === 'cash' || depositType === 'both'
 
   return (
     <div className={className}>
       <h2 className="text-[16px] font-bold text-[#0f0f0e] mb-3 flex items-center gap-2">
-        {isPremiumBike ? <Lock className="w-4 h-4 text-[#2563eb]" /> : <Shield className="w-4 h-4 text-[#FF6B35]" />}
-        {isPremiumBike ? 'Premium Bike Deposit' : 'Deposit & Security'}
+        {needsPassport
+          ? <Lock className="w-4 h-4 text-[#2563eb]" />
+          : <Shield className="w-4 h-4 text-[#FF6B35]" />}
+        Deposit &amp; Security
       </h2>
 
       <div className="bg-[#f8f8f6] rounded-[16px] p-4 border border-[#e8e8e4] space-y-3">
-        {/* Deposit amount */}
-        {depositAmount && (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-[#5c5c58]">Deposit</span>
-            <span className="text-sm font-bold text-[#0f0f0e]">
-              {formatPrice(depositAmount)} <span className="font-normal text-[#9c9c98]">refundable</span>
-            </span>
-          </div>
+
+        {/* ── CASH ────────────────────────────────────────────────── */}
+        {depositType === 'cash' && (
+          <>
+            {depositAmount ? (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[#5c5c58]">Deposit</span>
+                <span className="text-sm font-bold text-[#0f0f0e]">
+                  {formatPrice(depositAmount)} <span className="font-normal text-[#9c9c98]">refundable</span>
+                </span>
+              </div>
+            ) : null}
+            <div className="flex items-center gap-2 text-sm text-[#22c55e]">
+              <Check className="w-4 h-4 flex-shrink-0" />
+              <span className="font-medium">No passport required</span>
+            </div>
+          </>
         )}
 
-        {/* Deposit type */}
-        {depositType && depositType !== 'none' && (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-[#5c5c58]">Accepted</span>
-            <span className="text-sm text-[#0f0f0e]">
-              {ACCEPTED_ICONS[depositType] ?? ''} {DEPOSIT_TYPE_LABELS[depositType]}
-            </span>
-          </div>
+        {/* ── PASSPORT ────────────────────────────────────────────── */}
+        {depositType === 'passport' && (
+          <>
+            <div className="flex items-start gap-2">
+              <Info className="w-4 h-4 text-[#2563eb] flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-[#0f0f0e] font-medium leading-snug">
+                Original passport required as deposit
+              </p>
+            </div>
+            <p className="text-xs text-[#5c5c58] leading-relaxed">
+              Your original passport is held by the shop and returned in full on
+              drop-off. A passport copy is not accepted.
+            </p>
+          </>
         )}
 
+        {/* ── CASH + PASSPORT (renter chooses either) ─────────────── */}
+        {depositType === 'both' && (
+          <>
+            <p className="text-sm font-semibold text-[#0f0f0e]">Choose one deposit option:</p>
+            {depositAmount ? (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[#5c5c58]">💵 Cash deposit</span>
+                <span className="text-sm font-bold text-[#0f0f0e]">
+                  {formatPrice(depositAmount)} <span className="font-normal text-[#9c9c98]">refundable</span>
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-sm text-[#5c5c58]">
+                <span>💵 Refundable cash deposit</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-sm text-[#5c5c58]">
+              <span>🛂 Original passport (returned on drop-off)</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-[#22c55e]">
+              <Check className="w-4 h-4 flex-shrink-0" />
+              <span>Passport optional — cash deposit accepted</span>
+            </div>
+          </>
+        )}
+
+        {/* ── NONE ────────────────────────────────────────────────── */}
         {depositType === 'none' && (
           <div className="flex items-center gap-2 text-sm text-[#22c55e]">
             <Check className="w-4 h-4" />
@@ -93,23 +107,19 @@ export function DepositInfo({
           </div>
         )}
 
-        {/* Passport rules */}
-        {isPremiumBike && passportRequired ? (
-          <div>
-            <div className="flex items-start gap-2">
-              <Info className="w-4 h-4 text-[#2563eb] flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-[#5c5c58] leading-relaxed">
-                Passport required for this premium bike. Standard practice for
-                motorcycles valued above ฿300,000. Your document is returned on drop-off.
-              </p>
-            </div>
-          </div>
-        ) : passportCopyAllowed ? (
-          <div className="flex items-center gap-2 text-sm text-[#22c55e]">
-            <Check className="w-4 h-4 flex-shrink-0" />
-            <span>Passport copy accepted — original not required</span>
-          </div>
-        ) : null}
+        {/* ── OTHER TYPES (card_hold, flexible) ───────────────────── */}
+        {depositType && !['cash', 'passport', 'both', 'none'].includes(depositType) && (
+          <>
+            {depositAmount ? (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[#5c5c58]">Deposit</span>
+                <span className="text-sm font-bold text-[#0f0f0e]">
+                  {formatPrice(depositAmount)} <span className="font-normal text-[#9c9c98]">refundable</span>
+                </span>
+              </div>
+            ) : null}
+          </>
+        )}
 
         {/* Deposit notes */}
         {depositNotes && (
@@ -118,19 +128,13 @@ export function DepositInfo({
           </p>
         )}
 
-        {/* Protection badges row */}
+        {/* Protection badges */}
         <div className="flex flex-wrap gap-1.5 pt-1">
           {depositProtected && <TrustBadge variant="deposit_protected" size="xs" />}
-          {isPremiumBike && passportRequired
-            ? <TrustBadge variant="premium_deposit" size="xs" />
-            : passportCopyAllowed
-            ? <TrustBadge variant="passport_copy" size="xs" />
-            : null
-          }
-          {!passportRequired && !isPremiumBike && <TrustBadge variant="no_passport" size="xs" />}
+          {needsPassport  && <TrustBadge variant="premium_deposit" size="xs" />}
+          {noPassportNeeded && <TrustBadge variant="no_passport" size="xs" />}
         </div>
       </div>
-
     </div>
   )
 }

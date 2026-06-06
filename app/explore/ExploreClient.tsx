@@ -158,7 +158,7 @@ export default function ExploreClient({
         if (!zone || zone.key !== filters.location.replace(/-/g, ' ')) return false
       }
       if (filters.depositProtected && !s.shop?.depositProtectedMember) return false
-      if (filters.noPassport && s.passportRequired) return false
+      if (filters.noPassport && s.depositType === 'passport') return false
       if (filters.requiredFeatures.length > 0 && !filters.requiredFeatures.every(f => s.features.includes(f))) return false
       if (filters.requiredAccessories.length > 0 && !filters.requiredAccessories.every(a => s.features.includes(a))) return false
       if (filters.depositTypeFilter) {

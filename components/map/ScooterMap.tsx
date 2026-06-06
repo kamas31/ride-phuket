@@ -489,13 +489,16 @@ export default function ScooterMap({
     map.on('load', () => {
       map.resize()
 
-      // ── Layer cleanup: remove maritime noise + vegetation clutter ──────────
+      // ── Layer cleanup: remove maritime noise + vegetation fills ──────────
       // Ferry route lines and their outlines (blue dashed sea routes)
       for (const id of ['ferry', 'ferry-case']) {
         if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
       }
-      // Natural landcover (green vegetation/habitat polygons) — parks/roads kept
-      if (map.getLayer('landcover')) map.setLayoutProperty('landcover', 'visibility', 'none')
+      // Green vegetation: landcover (broad habitat polygons), national-park fills
+      // (visible in Phuket viewport — Khao Phra Thaew NP), and landuse park/grass fills
+      for (const id of ['landcover', 'national-park', 'landuse']) {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
+      }
 
       setReady(true)
     })
