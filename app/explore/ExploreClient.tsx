@@ -57,6 +57,13 @@ export default function ExploreClient({
     new URLSearchParams(window.location.search).get('debugPins') === '1'
   const debugMode = !profileLoading && hasDebugParam && isAdmin
 
+  const mapDebugMode = typeof window !== 'undefined' &&
+    window.innerWidth >= 1024 &&
+    new URLSearchParams(window.location.search).get('mapDebug') === '1'
+
+  const stickyBarRef  = useRef<HTMLDivElement>(null)
+  const mapColumnRef  = useRef<HTMLDivElement>(null)
+
   const [filters, setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
   const [search, setSearch]           = useState(initialSearch)
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch)
@@ -199,7 +206,7 @@ export default function ExploreClient({
   return (
     <div className="min-h-screen bg-white pt-16">
       {/* ── Sticky top bar ── */}
-      <div className="sticky top-16 z-30 bg-white border-b border-[#e8e8e4]">
+      <div ref={stickyBarRef} className="sticky top-16 z-30 bg-white border-b border-[#e8e8e4]" style={mapDebugMode ? { outline: '2px solid blue' } : undefined}>
         <div className="max-w-6xl mx-auto px-4 py-3">
           {/* Search row — includes mobile List/Map toggle */}
           <div className="flex items-center gap-2 mb-3">
@@ -295,7 +302,7 @@ export default function ExploreClient({
           </div>
 
           {showMap && (
-            <div className="flex-1 min-w-0">
+            <div ref={mapColumnRef} className="flex-1 min-w-0" style={mapDebugMode ? { outline: '2px solid red' } : undefined}>
               <div className="relative">
                 <ScooterMap
                   scooters={filtered}
@@ -308,6 +315,7 @@ export default function ExploreClient({
                   activeZone={filters.location === 'all' ? null : filters.location}
                   className="h-[calc(100vh-10rem)] min-h-[480px]"
                   debugMode={debugMode}
+                  mapDebugMode={mapDebugMode}
                 />
               </div>
             </div>

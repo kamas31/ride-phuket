@@ -4,6 +4,7 @@
 import mapboxgl from 'mapbox-gl'
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { X, ArrowRight, Store } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
@@ -323,6 +324,7 @@ interface ScooterMapProps {
   activeZone?: string | null
   className?: string
   debugMode?: boolean
+  mapDebugMode?: boolean
 }
 
 export default function ScooterMap({
@@ -336,12 +338,22 @@ export default function ScooterMap({
   activeZone,
   className,
   debugMode = false,
+  mapDebugMode = false,
 }: ScooterMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<mapboxgl.Map | null>(null)
   const [ready, setReady]             = useState(false)
   const [showSearchHere, setShowSearchHere] = useState(false)
   const [showZoneCenters, setShowZoneCenters] = useState(false)
+
+  const [dbg, setDbg] = useState({
+    winW: 0, winH: 0, dpr: 1, scrollY: 0,
+    ctrW: 0, ctrH: 0,
+    canvasW: 0, canvasH: 0,
+    zoom: 0, moving: false, zooming: false,
+    webglOK: false, mapWebGL: false,
+  })
+  const dbgScrollTs = useRef(0)
 
   // Calibration tool state (debug mode only)
   const [calibPins, setCalibPins] = useState<CalibrationPin[]>([])
@@ -531,6 +543,91 @@ export default function ScooterMap({
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Map debug diagnostics (?mapDebug=1, desktop only) ─────────
+  useEffect(() => {
+    if (!mapDebugMode || typeof window === 'undefined') return
+
+    const testCanvas = document.createElement('canvas')
+    const webglOK = !!(testCanvas.getContext('webgl2') || testCanvas.getContext('webgl'))
+
+    const update = () => {
+      const map = mapRef.current
+      const ctr = containerRef.current
+      if (!ctr) return
+      const canvas = map?.getCanvas()
+      const r = ctr.getBoundingClientRect()
+      const mapWebGL = !!(canvas?.getContext('webgl2') || canvas?.getContext('webgl'))
+      setDbg({
+        winW: window.innerWidth,
+        winH: window.innerHeight,
+        dpr: window.devicePixelRatio,
+        scrollY: Math.round(window.scrollY),
+        ctrW: Math.round(r.width),
+        ctrH: Math.round(r.height),
+        canvasW: canvas?.width ?? 0,
+        canvasH: canvas?.height ?? 0,
+        zoom: map ? Math.round(map.getZoom() * 100) / 100 : 0,
+        moving: map?.isMoving() ?? false,
+        zooming: map?.isZooming() ?? false,
+        webglOK,
+        mapWebGL,
+      })
+    }
+
+    update()
+
+    const onWinResize = () => {
+      console.log(`[MAP DEBUG] window resize ${window.innerWidth}×${window.innerHeight}`)
+      update()
+    }
+
+    const onScroll = () => {
+      const now = Date.now()
+      if (now - dbgScrollTs.current < 250) return
+      dbgScrollTs.current = now
+      const ctr = containerRef.current
+      const canvas = mapRef.current?.getCanvas()
+      console.log(`[MAP DEBUG] scrollY=${Math.round(window.scrollY)}`)
+      if (ctr) console.log(`[MAP DEBUG] mapHeight=${Math.round(ctr.getBoundingClientRect().height)}`)
+      if (canvas) console.log(`[MAP DEBUG] canvasHeight=${canvas.height}`)
+      update()
+    }
+
+    const onMapResize = () => {
+      const canvas = mapRef.current?.getCanvas()
+      console.log(`[MAP DEBUG] map resize ${canvas?.width ?? '?'}×${canvas?.height ?? '?'}`)
+      update()
+    }
+
+    const ro = new ResizeObserver(entries => {
+      for (const e of entries) {
+        const { width, height } = e.contentRect
+        console.log(`[MAP DEBUG] container resize ${Math.round(width)}×${Math.round(height)}`)
+      }
+      update()
+    })
+
+    window.addEventListener('resize', onWinResize, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true })
+    if (containerRef.current) ro.observe(containerRef.current)
+    if (mapRef.current) mapRef.current.on('resize', onMapResize)
+
+    const canvas = mapRef.current?.getCanvas()
+    if (canvas) canvas.style.outline = '2px solid lime'
+
+    const ticker = setInterval(update, 500)
+
+    return () => {
+      window.removeEventListener('resize', onWinResize)
+      window.removeEventListener('scroll', onScroll)
+      ro.disconnect()
+      mapRef.current?.off('resize', onMapResize)
+      const c = mapRef.current?.getCanvas()
+      if (c) c.style.outline = ''
+      clearInterval(ticker)
+    }
+  }, [mapDebugMode, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Effect 1: Create/remove shop markers + fitBounds ─────────
   useEffect(() => {
     if (!ready || !mapRef.current) return
@@ -693,9 +790,26 @@ export default function ScooterMap({
   }
 
   return (
-    <div className={cn('relative bg-[#dfe7df]', className)}>
+    <div className={cn('relative bg-[#dfe7df]', className)} style={mapDebugMode ? { outline: '3px solid yellow' } : undefined}>
       {!ready && <MapSkeleton className="absolute inset-0 z-10" />}
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
+
+      {mapDebugMode && typeof document !== 'undefined' && createPortal(
+        <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 999999, background: 'rgba(0,0,0,0.88)', color: '#fff', fontFamily: 'monospace', fontSize: 11, padding: '10px 14px', borderRadius: 8, lineHeight: 1.7, pointerEvents: 'none', minWidth: 230 }}>
+          <div style={{ color: '#FF6B35', fontWeight: 'bold', marginBottom: 4, fontSize: 12 }}>MAP DEBUG</div>
+          <div>win: {dbg.winW}×{dbg.winH} &nbsp; dpr: {dbg.dpr}</div>
+          <div>scrollY: {dbg.scrollY}</div>
+          <div style={{ borderTop: '1px solid #444', margin: '4px 0' }} />
+          <div>container: {dbg.ctrW}×{dbg.ctrH}</div>
+          <div>canvas: {dbg.canvasW}×{dbg.canvasH}</div>
+          <div style={{ borderTop: '1px solid #444', margin: '4px 0' }} />
+          <div>zoom: {dbg.zoom} &nbsp; moving: {dbg.moving ? '●' : '○'} &nbsp; zooming: {dbg.zooming ? '●' : '○'}</div>
+          <div style={{ borderTop: '1px solid #444', margin: '4px 0' }} />
+          <div>WebGL support: <span style={{ color: dbg.webglOK ? '#4ade80' : '#f87171' }}>{dbg.webglOK ? '✓ yes' : '✗ no'}</span></div>
+          <div>Map WebGL ctx: <span style={{ color: dbg.mapWebGL ? '#4ade80' : '#f87171' }}>{dbg.mapWebGL ? '✓ yes' : '✗ no'}</span></div>
+        </div>,
+        document.body
+      )}
 
       {/* "Search this area" — premium floating button */}
       {showSearchHere && onBoundsChange && (
