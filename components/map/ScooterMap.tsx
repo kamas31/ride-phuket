@@ -449,18 +449,27 @@ export default function ScooterMap({
   const [calibPins, setCalibPins] = useState<CalibrationPin[]>([])
   const [copied, setCopied] = useState(false)
 
+  // TYPE 1 — Exact: precise pin placed by owner, differs from zone default
   const exactScooters = useMemo(
-    () => scooters.filter(s => (s.shop?.locationVisibility ?? 'exact') === 'exact'),
+    () => scooters.filter(s =>
+      (s.shop?.locationVisibility ?? 'exact') === 'exact' &&
+      (s.shop?.hasPrecisePin ?? false)
+    ),
     [scooters],
   )
-  const approxScooters = useMemo(
-    () => scooters.filter(s => s.shop?.locationVisibility === 'approximate'),
+  // TYPE 2 + TYPE 3 — Cluster: approximate visibility OR no precise pin (zone-default coords)
+  // Both render as AreaClusterPin at zone centre. Real coords never used.
+  const clusterScooters = useMemo(
+    () => scooters.filter(s =>
+      s.shop?.locationVisibility === 'approximate' ||
+      !(s.shop?.hasPrecisePin ?? false)
+    ),
     [scooters],
   )
-  // Exact shops: one aggregate per shop at real coordinates
+  // TYPE 1: one aggregate per shop at real coordinates → ShopPin
   const aggregates = useMemo(() => buildShopAggregates(exactScooters), [exactScooters])
-  // Approximate shops: one cluster per zone at zone-centre coordinates — real coords never used
-  const zoneAggregates = useMemo(() => buildZoneAggregates(approxScooters), [approxScooters])
+  // TYPE 2 + TYPE 3: one cluster per zone at zone-centre coordinates → AreaClusterPin
+  const zoneAggregates = useMemo(() => buildZoneAggregates(clusterScooters), [clusterScooters])
 
   // Stable callback refs
   const onBoundsChangeRef = useRef(onBoundsChange)

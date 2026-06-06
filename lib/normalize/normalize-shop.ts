@@ -32,11 +32,29 @@ function safeOpeningHours(val: unknown, id: string): OpeningHoursSchedule | unde
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// Tolerance for zone-centre detection: 0.0001° ≈ 11m.
+// The form auto-fills zone-centre coords (4 decimal places) when the owner selects
+// an area. A real GPS pin placed via the picker will virtually never land exactly on
+// the zone centre. Shops within this tolerance are treated as TYPE 3 (no precise pin).
+const ZONE_CENTRE_EPS = 0.0001
+
 export function normalizeShop(row: any): Shop {
   const id = row.id ?? 'unknown'
 
   if (!row.name) telemetry(id, 'name', row.name)
   if (row.verified == null) telemetry(id, 'verified', row.verified)
+
+  const rawLat = Number(row.lat) || 0
+  const rawLng = Number(row.lng) || 0
+  const zone   = getZoneForLocation(row.location ?? '')
+
+  // hasPrecisePin: the owner has explicitly placed a pin that is NOT the zone default.
+  // false when:  no coords at all  OR  coords match the auto-filled zone centre exactly.
+  const hasPrecisePin = rawLat !== 0 && rawLng !== 0 && (
+    !zone ||
+    Math.abs(rawLat - zone.lat) > ZONE_CENTRE_EPS ||
+    Math.abs(rawLng - zone.lng) > ZONE_CENTRE_EPS
+  )
 
   return {
     id,
@@ -47,8 +65,8 @@ export function normalizeShop(row: any): Shop {
     logo: row.logo_url ?? '',
     location: row.location ?? '',
     address: row.address ?? '',
-    lat: Number(row.lat) || (getZoneForLocation(row.location ?? '')?.lat ?? 7.9519),
-    lng: Number(row.lng) || (getZoneForLocation(row.location ?? '')?.lng ?? 98.3381),
+    lat: rawLat || (zone?.lat ?? 7.9519),
+    lng: rawLng || (zone?.lng ?? 98.3381),
     rating: Number(row.rating) || 0,
     reviewCount: Number(row.review_count) || 0,
     verified: Boolean(row.verified),
@@ -67,6 +85,7 @@ export function normalizeShop(row: any): Shop {
     depositProtectedMember: Boolean(row.deposit_protected_member),
     planType: (row.plan_type as PlanType) ?? 'founding_partner',
     locationVisibility: (row.location_visibility as 'exact' | 'approximate') ?? 'exact',
+    hasPrecisePin,
     showOpeningHours: row.show_opening_hours !== false,
   }
 }

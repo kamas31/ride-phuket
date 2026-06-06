@@ -55,6 +55,10 @@ export interface Shop {
   planType?: PlanType
   // Location visibility (migration 020)
   locationVisibility?: 'exact' | 'approximate'
+  // true only when the owner placed a pin that differs from the auto-filled zone default.
+  // Shops with only an area selected (zone-centre coords) have hasPrecisePin=false and
+  // render as area clusters on Explore — same visual treatment as approximate shops.
+  hasPrecisePin: boolean
   // Opening hours visibility (migration 022)
   showOpeningHours?: boolean
 }
