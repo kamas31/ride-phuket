@@ -70,11 +70,20 @@ export function normalizeScooter(row: any): Scooter {
 
   const images = safeStringArray(row.images, id, 'images')
 
-  // Prefer shop coordinates (set via map pin picker), then scooter coords,
-  // then zone centre, then Phuket island centre.
-  // Use || not ?? so that 0-values (invalid coords) also fall through.
-  const lat = row.shops?.lat || row.lat || getZoneForLocation(row.location ?? '')?.lat || 7.9519
-  const lng = row.shops?.lng || row.lng || getZoneForLocation(row.location ?? '')?.lng || 98.3381
+  // Coordinate resolution priority (|| so 0-values also fall through):
+  // 1. Shop lat/lng (canonical — set via map pin picker on the shop)
+  // 2. Scooter lat/lng (per-listing override)
+  // 3. Zone centre from scooter's location string
+  // 4. Zone centre from shop's location string (catches null scooter location)
+  // 5. Phuket island centre as last resort
+  const lat = row.shops?.lat || row.lat
+    || getZoneForLocation(row.location ?? '')?.lat
+    || getZoneForLocation(row.shops?.location ?? '')?.lat
+    || 7.9519
+  const lng = row.shops?.lng || row.lng
+    || getZoneForLocation(row.location ?? '')?.lng
+    || getZoneForLocation(row.shops?.location ?? '')?.lng
+    || 98.3381
 
   return {
     id,

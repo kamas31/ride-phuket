@@ -181,7 +181,7 @@ function buildZoneAggregates(scooters: Scooter[]): ZoneAggregate[] {
   const zoneMeta   = new Map<string, { zoneName: string; lat: number; lng: number }>()
   for (const s of scooters) {
     if (!s.shopId) continue
-    const zone = getZoneForLocation(s.location)
+    const zone = getZoneForLocation(s.location) ?? getZoneForLocation(s.shop?.location ?? '')
     if (!zone) continue
     if (!shopsByZone.has(zone.key)) {
       shopsByZone.set(zone.key, new Set())
