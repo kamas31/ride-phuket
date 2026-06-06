@@ -16,7 +16,7 @@ export async function getServerProfile(): Promise<Profile | null> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from('profiles')
-      .select('id,name,role,shop_id,avatar_url,phone,nationality,verified,created_at')
+      .select('id,name,role,is_admin,shop_id,avatar_url,phone,nationality,verified,created_at')
       .eq('id', user.id)
       .single()
 
@@ -33,6 +33,7 @@ export async function getServerProfile(): Promise<Profile | null> {
         id: user.id,
         name: (user.user_metadata?.name as string) ?? user.email ?? 'Rider',
         role: (user.user_metadata?.role as 'rider' | 'shop_owner') ?? 'rider',
+        is_admin: false,
         shop_id: null,
         avatar_url: null,
         phone: null,

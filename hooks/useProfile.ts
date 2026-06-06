@@ -9,6 +9,7 @@ export interface Profile {
   id: string
   name: string
   role: UserRole
+  is_admin: boolean
   shop_id: string | null
   avatar_url: string | null
   phone: string | null
@@ -48,7 +49,7 @@ export function useProfile() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(supabase as any)
       .from('profiles')
-      .select('id,name,role,shop_id,avatar_url,phone,nationality,verified,created_at')
+      .select('id,name,role,is_admin,shop_id,avatar_url,phone,nationality,verified,created_at')
       .eq('id', user.id)
       .single()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -74,6 +75,7 @@ export function useProfile() {
             id:          user.id,
             name:        (user.user_metadata?.name as string) ?? user.email ?? 'Rider',
             role:        'rider',
+            is_admin:    false,
             shop_id:     null,
             avatar_url:  null,
             phone:       null,
@@ -86,9 +88,9 @@ export function useProfile() {
       })
   }, [user?.id, authLoading])  // key on user.id — fires exactly when the identity changes
 
-  const isAdmin     = profile?.role === 'admin'
+  const isAdmin     = profile?.is_admin === true
   const isShopOwner = profile?.role === 'shop_owner'
-  const isRider     = !isShopOwner && !isAdmin
+  const isRider     = !isShopOwner
 
   return { profile, loading, isAdmin, isShopOwner, isRider, needsProfile }
 }

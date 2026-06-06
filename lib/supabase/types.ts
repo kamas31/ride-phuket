@@ -3,7 +3,7 @@
 
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
 
-export type UserRole = 'rider' | 'shop_owner' | 'admin'
+export type UserRole = 'rider' | 'shop_owner'
 export type BookingStatus = 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled'
 export type PaymentStatus = 'pending' | 'paid' | 'refunded'
 export type DeliveryMethod = 'delivery' | 'pickup'
@@ -17,6 +17,7 @@ export interface Database {
           id: string
           name: string
           role: UserRole
+          is_admin: boolean
           shop_id: string | null
           avatar_url: string | null
           phone: string | null
@@ -31,6 +32,7 @@ export interface Database {
           id: string
           name: string
           role?: UserRole
+          is_admin?: boolean
           shop_id?: string | null
           avatar_url?: string | null
           phone?: string | null
