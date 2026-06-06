@@ -4,7 +4,6 @@
 import mapboxgl from 'mapbox-gl'
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { X, ArrowRight, Store } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
@@ -324,7 +323,6 @@ interface ScooterMapProps {
   activeZone?: string | null
   className?: string
   debugMode?: boolean
-  mapDebugMode?: boolean
 }
 
 export default function ScooterMap({
@@ -338,24 +336,12 @@ export default function ScooterMap({
   activeZone,
   className,
   debugMode = false,
-  mapDebugMode = false,
 }: ScooterMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<mapboxgl.Map | null>(null)
   const [ready, setReady]             = useState(false)
   const [showSearchHere, setShowSearchHere] = useState(false)
   const [showZoneCenters, setShowZoneCenters] = useState(false)
-
-  const [dbg, setDbg] = useState({
-    winW: 0, winH: 0, dpr: 1, scrollY: 0,
-    ctrW: 0, ctrH: 0,
-    canvasW: 0, canvasH: 0,
-    zoom: 0, moving: false, zooming: false,
-    webglOK: false, mapWebGL: false,
-    renderCount: 0,
-  })
-  const dbgScrollTs  = useRef(0)
-  const dbgRenderCnt = useRef(0)
 
   // Calibration tool state (debug mode only)
   const [calibPins, setCalibPins] = useState<CalibrationPin[]>([])
@@ -545,138 +531,8 @@ export default function ScooterMap({
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Map debug diagnostics (?mapDebug=1, desktop only) ─────────
-  useEffect(() => {
-    if (!mapDebugMode || typeof window === 'undefined') return
-
-    const testCanvas = document.createElement('canvas')
-    const webglOK = !!(testCanvas.getContext('webgl2') || testCanvas.getContext('webgl'))
-
-    // One-time browser / GPU info
-    console.log(`[MAP DEBUG] mapboxgl.supported() = ${mapboxgl.supported()}`)
-    console.log(`[MAP DEBUG] userAgent = ${navigator.userAgent}`)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const gl = (mapRef.current as any)?.painter?.context?.gl as WebGLRenderingContext | null
-    if (gl) {
-      console.log(`[MAP DEBUG] GL RENDERER = ${gl.getParameter(gl.RENDERER)}`)
-      console.log(`[MAP DEBUG] GL VENDOR   = ${gl.getParameter(gl.VENDOR)}`)
-    } else {
-      console.log('[MAP DEBUG] GL context not available yet — will retry after map load')
-    }
-
-    const update = () => {
-      const map = mapRef.current
-      const ctr = containerRef.current
-      if (!ctr) return
-      const canvas = map?.getCanvas()
-      const r = ctr.getBoundingClientRect()
-      const mapWebGL = !!(canvas?.getContext('webgl2') || canvas?.getContext('webgl'))
-      setDbg({
-        winW: window.innerWidth,
-        winH: window.innerHeight,
-        dpr: window.devicePixelRatio,
-        scrollY: Math.round(window.scrollY),
-        ctrW: Math.round(r.width),
-        ctrH: Math.round(r.height),
-        canvasW: canvas?.width ?? 0,
-        canvasH: canvas?.height ?? 0,
-        zoom: map ? Math.round(map.getZoom() * 100) / 100 : 0,
-        moving: map?.isMoving() ?? false,
-        zooming: map?.isZooming() ?? false,
-        webglOK,
-        mapWebGL,
-        renderCount: dbgRenderCnt.current,
-      })
-    }
-
-    update()
-
-    const onWinResize = () => {
-      console.log(`[MAP DEBUG] window resize ${window.innerWidth}×${window.innerHeight}`)
-      update()
-    }
-
-    const onScroll = () => {
-      const now = Date.now()
-      if (now - dbgScrollTs.current < 250) return
-      dbgScrollTs.current = now
-      const ctr = containerRef.current
-      const canvas = mapRef.current?.getCanvas()
-      console.log(`[MAP DEBUG] scrollY=${Math.round(window.scrollY)}`)
-      if (ctr) console.log(`[MAP DEBUG] mapHeight=${Math.round(ctr.getBoundingClientRect().height)}`)
-      if (canvas) console.log(`[MAP DEBUG] canvasHeight=${canvas.height}`)
-      const el = document.elementFromPoint(window.innerWidth * 0.75, window.innerHeight * 0.75)
-      console.log(`[MAP DEBUG] elementFromPoint(75%w, 75%h) =`, el)
-      update()
-    }
-
-    const onMapResize = () => {
-      const canvas = mapRef.current?.getCanvas()
-      console.log(`[MAP DEBUG] map resize ${canvas?.width ?? '?'}×${canvas?.height ?? '?'}`)
-      update()
-    }
-
-    const onRender   = () => { dbgRenderCnt.current++ }
-    const onIdle     = () => { console.log(`[MAP DEBUG] map idle  renderCount=${dbgRenderCnt.current}`) }
-    const onMove     = () => { console.log(`[MAP DEBUG] map move  scrollY=${Math.round(window.scrollY)}`) }
-
-    const ro = new ResizeObserver(entries => {
-      for (const e of entries) {
-        const { width, height } = e.contentRect
-        console.log(`[MAP DEBUG] container resize ${Math.round(width)}×${Math.round(height)}`)
-      }
-      update()
-    })
-
-    window.addEventListener('resize', onWinResize, { passive: true })
-    window.addEventListener('scroll', onScroll, { passive: true })
-    if (containerRef.current) ro.observe(containerRef.current)
-    if (mapRef.current) {
-      mapRef.current.on('resize', onMapResize)
-      mapRef.current.on('render', onRender)
-      mapRef.current.on('idle',   onIdle)
-      mapRef.current.on('move',   onMove)
-    }
-
-    // Log GL info once map is confirmed ready (may have been unavailable above)
-    if (ready && mapRef.current) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const glReady = (mapRef.current as any).painter?.context?.gl as WebGLRenderingContext | null
-      if (glReady) {
-        console.log(`[MAP DEBUG] GL RENDERER (ready) = ${glReady.getParameter(glReady.RENDERER)}`)
-        console.log(`[MAP DEBUG] GL VENDOR   (ready) = ${glReady.getParameter(glReady.VENDOR)}`)
-      }
-    }
-
-    const canvas = mapRef.current?.getCanvas()
-    if (canvas) canvas.style.outline = '2px solid lime'
-
-    const styleTag = document.createElement('style')
-    styleTag.textContent = `.mapboxgl-canvas, .mapboxgl-canvas-container { background: lime !important; }`
-    document.head.appendChild(styleTag)
-
-    const ticker = setInterval(update, 500)
-
-    return () => {
-      window.removeEventListener('resize', onWinResize)
-      window.removeEventListener('scroll', onScroll)
-      ro.disconnect()
-      if (mapRef.current) {
-        mapRef.current.off('resize', onMapResize)
-        mapRef.current.off('render', onRender)
-        mapRef.current.off('idle',   onIdle)
-        mapRef.current.off('move',   onMove)
-      }
-      const c = mapRef.current?.getCanvas()
-      if (c) c.style.outline = ''
-      styleTag.remove()
-      clearInterval(ticker)
-    }
-  }, [mapDebugMode, ready]) // eslint-disable-line react-hooks/exhaustive-deps
-
   // ── Effect 1: Create/remove shop markers + fitBounds ─────────
   useEffect(() => {
-    if (mapDebugMode) return
     if (!ready || !mapRef.current) return
     const map = mapRef.current
 
@@ -731,7 +587,6 @@ export default function ScooterMap({
 
   // ── Effect 2: Update marker appearance on hover/select ────────
   useEffect(() => {
-    if (mapDebugMode) return
     if (!ready) return
     const newActiveIds = new Set<string>(
       [selectedId, hoveredId].filter((id): id is string => Boolean(id)),
@@ -759,7 +614,6 @@ export default function ScooterMap({
 
   // ── Popup for selected shop ────────────────────────────────────
   useEffect(() => {
-    if (mapDebugMode) return
     if (!ready || !mapRef.current) return
     const map = mapRef.current
 
@@ -839,43 +693,12 @@ export default function ScooterMap({
   }
 
   return (
-    <div
-      className={cn('relative bg-[#dfe7df]', className)}
-      style={mapDebugMode ? { outline: '3px solid yellow', background: 'red', position: 'relative', zIndex: 9999 } : undefined}
-    >
-      {mapDebugMode && (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,0,255,0.15)', pointerEvents: 'none', zIndex: 999999 }} />
-      )}
+    <div className={cn('relative rounded-[20px] overflow-hidden bg-[#dfe7df]', className)}>
       {!ready && <MapSkeleton className="absolute inset-0 z-10" />}
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
 
-      {mapDebugMode && typeof document !== 'undefined' && createPortal(
-        <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 999999, background: 'rgba(0,0,0,0.88)', color: '#fff', fontFamily: 'monospace', fontSize: 11, padding: '10px 14px', borderRadius: 8, lineHeight: 1.7, minWidth: 230 }}>
-          <div style={{ color: '#FF6B35', fontWeight: 'bold', marginBottom: 4, fontSize: 12 }}>MAP DEBUG</div>
-          <div>win: {dbg.winW}×{dbg.winH} &nbsp; dpr: {dbg.dpr}</div>
-          <div>scrollY: {dbg.scrollY}</div>
-          <div style={{ borderTop: '1px solid #444', margin: '4px 0' }} />
-          <div>container: {dbg.ctrW}×{dbg.ctrH}</div>
-          <div>canvas: {dbg.canvasW}×{dbg.canvasH}</div>
-          <div style={{ borderTop: '1px solid #444', margin: '4px 0' }} />
-          <div>zoom: {dbg.zoom} &nbsp; moving: {dbg.moving ? '●' : '○'} &nbsp; zooming: {dbg.zooming ? '●' : '○'}</div>
-          <div>renders: {dbg.renderCount}</div>
-          <div style={{ borderTop: '1px solid #444', margin: '4px 0' }} />
-          <div>WebGL support: <span style={{ color: dbg.webglOK ? '#4ade80' : '#f87171' }}>{dbg.webglOK ? '✓ yes' : '✗ no'}</span></div>
-          <div>Map WebGL ctx: <span style={{ color: dbg.mapWebGL ? '#4ade80' : '#f87171' }}>{dbg.mapWebGL ? '✓ yes' : '✗ no'}</span></div>
-          <div style={{ borderTop: '1px solid #444', margin: '6px 0 4px' }} />
-          <button
-            onClick={() => { mapRef.current?.resize(); mapRef.current?.triggerRepaint() }}
-            style={{ width: '100%', padding: '5px 0', background: '#FF6B35', color: '#fff', border: 'none', borderRadius: 4, fontFamily: 'monospace', fontSize: 11, cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            Force Resize
-          </button>
-        </div>,
-        document.body
-      )}
-
       {/* "Search this area" — premium floating button */}
-      {!mapDebugMode && showSearchHere && onBoundsChange && (
+      {showSearchHere && onBoundsChange && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 animate-[fade-up_0.2s_ease_forwards]">
           <button
             onClick={handleSearchHere}
@@ -970,7 +793,7 @@ export default function ScooterMap({
       )}
 
       {/* Active zone count card — bottom right */}
-      {!mapDebugMode && activeZone && activeZoneName && (
+      {activeZone && activeZoneName && (
         <div className="absolute bottom-5 right-5 z-20 bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.16)] p-4 min-w-[190px]">
           <p className="text-[13px] font-bold text-[#0f0f0e] leading-tight">
             {activeZoneCount} scooter{activeZoneCount !== 1 ? 's' : ''} available
