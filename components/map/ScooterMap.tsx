@@ -489,6 +489,14 @@ export default function ScooterMap({
     map.on('load', () => {
       map.resize()
 
+      // ── TEMPORARY: log all vegetation-related layer IDs ──────────
+      const vegKeywords = ['landcover', 'landuse', 'vegetation', 'park', 'natural', 'forest', 'grass', 'scrub', 'wood', 'sand', 'pitch', 'ground']
+      const allLayers = map.getStyle().layers ?? []
+      const vegLayers = allLayers.filter(l => vegKeywords.some(k => l.id.toLowerCase().includes(k)))
+      console.log('[MAP LAYERS] all IDs:', allLayers.map(l => l.id))
+      console.log('[MAP LAYERS] vegetation-related IDs:', vegLayers.map(l => `${l.id} (${l.type})`))
+      // ── END TEMPORARY ──────────────────────────────────────────────
+
       // ── Layer cleanup: remove maritime noise + vegetation fills ──────────
       // Ferry route lines and their outlines (blue dashed sea routes)
       for (const id of ['ferry', 'ferry-case']) {
