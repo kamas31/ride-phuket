@@ -352,8 +352,10 @@ export default function ScooterMap({
     canvasW: 0, canvasH: 0,
     zoom: 0, moving: false, zooming: false,
     webglOK: false, mapWebGL: false,
+    renderCount: 0,
   })
-  const dbgScrollTs = useRef(0)
+  const dbgScrollTs  = useRef(0)
+  const dbgRenderCnt = useRef(0)
 
   // Calibration tool state (debug mode only)
   const [calibPins, setCalibPins] = useState<CalibrationPin[]>([])
@@ -550,6 +552,18 @@ export default function ScooterMap({
     const testCanvas = document.createElement('canvas')
     const webglOK = !!(testCanvas.getContext('webgl2') || testCanvas.getContext('webgl'))
 
+    // One-time browser / GPU info
+    console.log(`[MAP DEBUG] mapboxgl.supported() = ${mapboxgl.supported()}`)
+    console.log(`[MAP DEBUG] userAgent = ${navigator.userAgent}`)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const gl = (mapRef.current as any)?.painter?.context?.gl as WebGLRenderingContext | null
+    if (gl) {
+      console.log(`[MAP DEBUG] GL RENDERER = ${gl.getParameter(gl.RENDERER)}`)
+      console.log(`[MAP DEBUG] GL VENDOR   = ${gl.getParameter(gl.VENDOR)}`)
+    } else {
+      console.log('[MAP DEBUG] GL context not available yet — will retry after map load')
+    }
+
     const update = () => {
       const map = mapRef.current
       const ctr = containerRef.current
@@ -571,6 +585,7 @@ export default function ScooterMap({
         zooming: map?.isZooming() ?? false,
         webglOK,
         mapWebGL,
+        renderCount: dbgRenderCnt.current,
       })
     }
 
@@ -599,6 +614,10 @@ export default function ScooterMap({
       update()
     }
 
+    const onRender   = () => { dbgRenderCnt.current++ }
+    const onIdle     = () => { console.log(`[MAP DEBUG] map idle  renderCount=${dbgRenderCnt.current}`) }
+    const onMove     = () => { console.log(`[MAP DEBUG] map move  scrollY=${Math.round(window.scrollY)}`) }
+
     const ro = new ResizeObserver(entries => {
       for (const e of entries) {
         const { width, height } = e.contentRect
@@ -610,7 +629,22 @@ export default function ScooterMap({
     window.addEventListener('resize', onWinResize, { passive: true })
     window.addEventListener('scroll', onScroll, { passive: true })
     if (containerRef.current) ro.observe(containerRef.current)
-    if (mapRef.current) mapRef.current.on('resize', onMapResize)
+    if (mapRef.current) {
+      mapRef.current.on('resize', onMapResize)
+      mapRef.current.on('render', onRender)
+      mapRef.current.on('idle',   onIdle)
+      mapRef.current.on('move',   onMove)
+    }
+
+    // Log GL info once map is confirmed ready (may have been unavailable above)
+    if (ready && mapRef.current) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const glReady = (mapRef.current as any).painter?.context?.gl as WebGLRenderingContext | null
+      if (glReady) {
+        console.log(`[MAP DEBUG] GL RENDERER (ready) = ${glReady.getParameter(glReady.RENDERER)}`)
+        console.log(`[MAP DEBUG] GL VENDOR   (ready) = ${glReady.getParameter(glReady.VENDOR)}`)
+      }
+    }
 
     const canvas = mapRef.current?.getCanvas()
     if (canvas) canvas.style.outline = '2px solid lime'
@@ -621,7 +655,12 @@ export default function ScooterMap({
       window.removeEventListener('resize', onWinResize)
       window.removeEventListener('scroll', onScroll)
       ro.disconnect()
-      mapRef.current?.off('resize', onMapResize)
+      if (mapRef.current) {
+        mapRef.current.off('resize', onMapResize)
+        mapRef.current.off('render', onRender)
+        mapRef.current.off('idle',   onIdle)
+        mapRef.current.off('move',   onMove)
+      }
       const c = mapRef.current?.getCanvas()
       if (c) c.style.outline = ''
       clearInterval(ticker)
@@ -798,7 +837,7 @@ export default function ScooterMap({
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
 
       {mapDebugMode && typeof document !== 'undefined' && createPortal(
-        <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 999999, background: 'rgba(0,0,0,0.88)', color: '#fff', fontFamily: 'monospace', fontSize: 11, padding: '10px 14px', borderRadius: 8, lineHeight: 1.7, pointerEvents: 'none', minWidth: 230 }}>
+        <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 999999, background: 'rgba(0,0,0,0.88)', color: '#fff', fontFamily: 'monospace', fontSize: 11, padding: '10px 14px', borderRadius: 8, lineHeight: 1.7, minWidth: 230 }}>
           <div style={{ color: '#FF6B35', fontWeight: 'bold', marginBottom: 4, fontSize: 12 }}>MAP DEBUG</div>
           <div>win: {dbg.winW}×{dbg.winH} &nbsp; dpr: {dbg.dpr}</div>
           <div>scrollY: {dbg.scrollY}</div>
@@ -807,9 +846,17 @@ export default function ScooterMap({
           <div>canvas: {dbg.canvasW}×{dbg.canvasH}</div>
           <div style={{ borderTop: '1px solid #444', margin: '4px 0' }} />
           <div>zoom: {dbg.zoom} &nbsp; moving: {dbg.moving ? '●' : '○'} &nbsp; zooming: {dbg.zooming ? '●' : '○'}</div>
+          <div>renders: {dbg.renderCount}</div>
           <div style={{ borderTop: '1px solid #444', margin: '4px 0' }} />
           <div>WebGL support: <span style={{ color: dbg.webglOK ? '#4ade80' : '#f87171' }}>{dbg.webglOK ? '✓ yes' : '✗ no'}</span></div>
           <div>Map WebGL ctx: <span style={{ color: dbg.mapWebGL ? '#4ade80' : '#f87171' }}>{dbg.mapWebGL ? '✓ yes' : '✗ no'}</span></div>
+          <div style={{ borderTop: '1px solid #444', margin: '6px 0 4px' }} />
+          <button
+            onClick={() => { mapRef.current?.resize(); mapRef.current?.triggerRepaint() }}
+            style={{ width: '100%', padding: '5px 0', background: '#FF6B35', color: '#fff', border: 'none', borderRadius: 4, fontFamily: 'monospace', fontSize: 11, cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Force Resize
+          </button>
         </div>,
         document.body
       )}
