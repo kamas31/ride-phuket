@@ -560,6 +560,9 @@ export default function ScooterMap({
       for (const id of ['landcover', 'national-park']) {
         if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none')
       }
+      // streets-v12 sets landuse minzoom ~11-12; override to 0 so urban green
+      // areas are visible at the default Explore zoom (~10.8) and below.
+      if (map.getLayer('landuse')) map.setLayerZoomRange('landuse', 0, 24)
       // Terrain shading: hillshade is the sole layer producing mountain shadow/relief.
       // Hiding it flattens the map visually without touching roads, water, or labels.
       if (map.getLayer('hillshade')) map.setLayoutProperty('hillshade', 'visibility', 'none')
