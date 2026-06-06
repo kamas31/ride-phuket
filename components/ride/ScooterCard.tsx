@@ -54,7 +54,8 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         sizes="(max-width: 640px) 50vw, 33vw"
       />
       <div className="p-2.5">
-        <div className="flex items-center justify-between mb-0.5">
+        {/* Fixed height so badge-present xs cards match badge-absent xs cards */}
+        <div className="flex items-center justify-between mb-0.5 h-[18px]">
           {shouldShowNewListingBadge(scooter) && (
             <TrustBadge variant="new_listing" size="xs" />
           )}
