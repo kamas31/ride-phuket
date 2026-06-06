@@ -605,6 +605,8 @@ export default function ScooterMap({
       console.log(`[MAP DEBUG] scrollY=${Math.round(window.scrollY)}`)
       if (ctr) console.log(`[MAP DEBUG] mapHeight=${Math.round(ctr.getBoundingClientRect().height)}`)
       if (canvas) console.log(`[MAP DEBUG] canvasHeight=${canvas.height}`)
+      const el = document.elementFromPoint(window.innerWidth * 0.75, window.innerHeight * 0.75)
+      console.log(`[MAP DEBUG] elementFromPoint(75%w, 75%h) =`, el)
       update()
     }
 
@@ -649,6 +651,10 @@ export default function ScooterMap({
     const canvas = mapRef.current?.getCanvas()
     if (canvas) canvas.style.outline = '2px solid lime'
 
+    const styleTag = document.createElement('style')
+    styleTag.textContent = `.mapboxgl-canvas, .mapboxgl-canvas-container { background: lime !important; }`
+    document.head.appendChild(styleTag)
+
     const ticker = setInterval(update, 500)
 
     return () => {
@@ -663,6 +669,7 @@ export default function ScooterMap({
       }
       const c = mapRef.current?.getCanvas()
       if (c) c.style.outline = ''
+      styleTag.remove()
       clearInterval(ticker)
     }
   }, [mapDebugMode, ready]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -832,7 +839,13 @@ export default function ScooterMap({
   }
 
   return (
-    <div className={cn('relative bg-[#dfe7df]', className)} style={mapDebugMode ? { outline: '3px solid yellow' } : undefined}>
+    <div
+      className={cn('relative bg-[#dfe7df]', className)}
+      style={mapDebugMode ? { outline: '3px solid yellow', background: 'red', position: 'relative', zIndex: 9999 } : undefined}
+    >
+      {mapDebugMode && (
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,0,255,0.15)', pointerEvents: 'none', zIndex: 999999 }} />
+      )}
       {!ready && <MapSkeleton className="absolute inset-0 z-10" />}
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
 
