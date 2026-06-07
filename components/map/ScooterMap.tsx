@@ -772,11 +772,16 @@ export default function ScooterMap({
         el.style.display = 'none'
       } else {
         el.style.display = ''
+        // Single TYPE 1 shop at low zoom: treat as shop pin click (shows card, stays on map)
+        const isSingleExact = !aboveBreakout && count === 1 && zc.exactAggregates.length === 1
         zoneClusterMarkersRef.current.get(zc.zoneKey)!.root.render(
           <ZoneClusterPin
             count={count}
             minPrice={minPrice}
-            onClick={() => onZoneClickRef.current?.(zc.zoneKey)}
+            onClick={() => isSingleExact
+              ? onSelectRef.current(zc.exactAggregates[0].shopId)
+              : onZoneClickRef.current?.(zc.zoneKey)
+            }
           />,
         )
       }
