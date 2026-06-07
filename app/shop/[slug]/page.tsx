@@ -105,8 +105,8 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
   const hasCoords = Boolean(shop.lat && shop.lng)
   const locMode   = shop.locationVisibility ?? 'exact'
-  // Only show map for TYPE 1 (exact pin) or TYPE 2 (approximate circle) — not TYPE 3 (zone default)
-  const showMap   = hasCoords && (shop.hasPrecisePin || locMode === 'approximate')
+  // Only show map when owner has placed a real pin — not for zone-default coords (TYPE 3)
+  const showMap   = hasCoords && shop.hasPrecisePin
 
   // LocalBusiness structured data — only real fields, no invented data
   const jsonLd: Record<string, unknown> = {
