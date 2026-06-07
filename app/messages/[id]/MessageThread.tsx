@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { sendMessage, markMessagesRead } from '@/app/actions/messaging'
 import { formatPrice, getInitials, cn } from '@/lib/utils'
 import ThreadMenu from './ThreadMenu'
+import { AdminThreadControl } from '@/components/admin/AdminThreadControl'
 import type { ConversationDetail, Message } from '@/app/actions/messaging'
 
 interface MessageThreadProps {
@@ -43,6 +44,8 @@ export default function MessageThread({
   const [isPending, startTransition] = useTransition()
   const [sendError, setSendError] = useState<string | null>(null)
   const [localBlockedByMe, setLocalBlockedByMe] = useState(conversation.blockedByMe)
+  const [showContext, setShowContext] = useState(true)
+  const [showTimestamps, setShowTimestamps] = useState(true)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const isInitialMount = useRef(true)
@@ -309,7 +312,7 @@ export default function MessageThread({
                 <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight group-hover:text-[#FF6B35] transition-colors">
                   {conversation.otherUserName}
                 </p>
-                {(conversation.scooterName || conversation.shopName) && (
+                {showContext && (conversation.scooterName || conversation.shopName) && (
                   <p className="text-[11px] text-[#9c9c98] truncate leading-tight">
                     {conversation.scooterName
                       ? `Regarding ${conversation.scooterName}`
@@ -338,7 +341,7 @@ export default function MessageThread({
                 <p className="font-bold text-[14px] text-[#0f0f0e] truncate leading-tight">
                   {conversation.otherUserName}
                 </p>
-                {(conversation.scooterName || conversation.shopName) && (
+                {showContext && (conversation.scooterName || conversation.shopName) && (
                   <p className="text-[11px] text-[#9c9c98] truncate leading-tight">
                     {conversation.scooterName
                       ? `Regarding ${conversation.scooterName}`
@@ -427,6 +430,7 @@ export default function MessageThread({
                     {group.msgs.map((msg, msgIndex) => {
                       // ── Context-switch separator ───────────────────────────
                       if (msg.type === 'context_switch') {
+                        if (!showContext) return null
                         return (
                           <div key={msg.id} className="flex items-center gap-3 py-2">
                             <div className="flex-1 h-px bg-[#e8e8e4]" />
@@ -490,9 +494,11 @@ export default function MessageThread({
                             >
                               {msg.content}
                             </div>
-                            <span className="text-[10px] text-[#c0c0bc] px-1 leading-none">
-                              {showSeen ? 'Seen' : formatTime(msg.createdAt)}
-                            </span>
+                            {showTimestamps && (
+                              <span className="text-[10px] text-[#c0c0bc] px-1 leading-none">
+                                {showSeen ? 'Seen' : formatTime(msg.createdAt)}
+                              </span>
+                            )}
                           </div>
                         </div>
                       )
@@ -510,6 +516,13 @@ export default function MessageThread({
           <div className="h-2" />
         </div>
       </div>
+
+      <AdminThreadControl
+        showContext={showContext}
+        onShowContext={setShowContext}
+        showTimestamps={showTimestamps}
+        onShowTimestamps={setShowTimestamps}
+      />
 
       {/* ── INPUT BAR ── */}
       {/* paddingBottom is a fixed 12px — env(safe-area-inset-bottom) is intentionally
