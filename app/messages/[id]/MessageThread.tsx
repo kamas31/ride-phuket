@@ -357,9 +357,11 @@ export default function MessageThread({
           {/* Price chip + rider quick actions + view listing + menu */}
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {!isShopConv && (
-              <span className="text-[12px] font-bold text-[#0f0f0e] bg-[#f5f5f2] px-2.5 py-1 rounded-full">
+              <span className="text-[12px] font-bold text-[#0f0f0e] bg-[#f5f5f2] px-2 py-1 rounded-full whitespace-nowrap">
                 {formatPrice(priceOverride.trim() ? Number(priceOverride) : conversation.scooterPricePerDay)}
-                <span className="text-[#9c9c98] font-normal">/{durationOverride}</span>
+                <span className="text-[#9c9c98] font-normal">
+                  /{durationOverride === 'day' ? 'day' : durationOverride === 'week' ? 'wk' : 'mo'}
+                </span>
               </span>
             )}
             {/* Call — riders only, when shop has a phone number */}
