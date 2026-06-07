@@ -153,9 +153,13 @@ export default function ExploreClient({
   }, [])
   const [mobileView, setMobileView]   = useState<MobileView>('list')
   const [mapBounds, setMapBounds]     = useState<{ sw: [number, number]; ne: [number, number] } | null>(null)
+  const [shopIdFilter, setShopIdFilter] = useState<string | null>(initialShopId ?? null)
 
   useEffect(() => {
-    if (initialShopId) setMobileView('list')
+    if (initialShopId) {
+      setShopIdFilter(initialShopId)
+      setMobileView('list')
+    }
   }, [initialShopId])
 
   const handleZoneClick = useCallback((key: string | null) => {
@@ -238,7 +242,7 @@ export default function ExploreClient({
 
   const filtered = useMemo(() => {
     let list = initialScooters.filter(s => {
-      if (initialShopId && s.shopId !== initialShopId) return false
+      if (shopIdFilter && s.shopId !== shopIdFilter) return false
       if (filters.category !== 'all' && s.category !== filters.category) return false
       if (s.pricePerDay > filters.priceMax) return false
       if (filters.deliveryNow && !s.deliveryAvailable) return false
@@ -275,7 +279,7 @@ export default function ExploreClient({
     if (filters.sortBy === 'price_desc') list = [...list].sort((a, b) => b.pricePerDay - a.pricePerDay)
     if (filters.sortBy === 'rating')     list = [...list].sort((a, b) => b.rating - a.rating)
     return list
-  }, [filters, fuseMatchIds, initialScooters, mapBounds])
+  }, [filters, fuseMatchIds, initialScooters, mapBounds, shopIdFilter])
 
   // Keep ref in sync after render so handleSelectFromMap always sees the latest filtered list
   useEffect(() => { filteredRef.current = filtered }, [filtered])
@@ -340,6 +344,7 @@ export default function ExploreClient({
                   setMobileView('map')
                   setFilters(prev => ({ ...prev, location: 'all' }))
                   setSelectedId(null)
+                  setShopIdFilter(null)
                 }}
                 className={cn(
                   'flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all',
