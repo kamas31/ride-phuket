@@ -429,6 +429,7 @@ export default function ExploreClient({
                 onZoneClick={handleZoneClick}
                 activeZone={filters.location === 'all' ? null : filters.location}
                 className="h-[calc(100svh-13rem)] min-h-[420px]"
+                showPopup={false}
                 debugMode={debugMode}
                 screenshotPins={isAdmin ? screenshotPins : undefined}
                 screenshotMode={isAdmin && screenshotMode}

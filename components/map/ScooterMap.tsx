@@ -452,6 +452,7 @@ interface ScooterMapProps {
   screenshotMode?: boolean
   onScreenshotPinAdd?: (lat: number, lng: number) => void
   onScreenshotPinDelete?: (id: string) => void
+  showPopup?: boolean
 }
 
 export default function ScooterMap({
@@ -469,6 +470,7 @@ export default function ScooterMap({
   screenshotMode = false,
   onScreenshotPinAdd,
   onScreenshotPinDelete,
+  showPopup = true,
 }: ScooterMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<mapboxgl.Map | null>(null)
@@ -815,14 +817,14 @@ export default function ScooterMap({
   // ── Popup for selected shop ────────────────────────────────────
   useEffect(() => {
     if (!ready || !mapRef.current) return
-    const map = mapRef.current
 
     if (popupRef.current) {
       popupRef.current.root.unmount()
       popupRef.current.popup.remove()
       popupRef.current = null
     }
-    if (!selectedId) return
+    if (!showPopup || !selectedId) return
+    const map = mapRef.current
 
     const agg = aggregatesById.current.get(selectedId)
     if (!agg) return
