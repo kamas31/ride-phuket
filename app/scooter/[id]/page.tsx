@@ -215,7 +215,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
   } : null
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen pt-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
