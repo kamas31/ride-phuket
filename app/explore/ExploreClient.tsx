@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { Search, Map, List, Bike } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ExploreFilters } from '@/components/ride/ExploreFilters'
@@ -153,6 +154,7 @@ export default function ExploreClient({
 
   const handleZoneClick = useCallback((key: string | null) => {
     setFilters(prev => ({ ...prev, location: key ?? 'all' }))
+    if (key) setMobileView('list')
   }, [])
 
   const cardRefs   = useRef<Record<string, HTMLDivElement | null>>({})
@@ -417,23 +419,72 @@ export default function ExploreClient({
               </div>
             )
           ) : (
-            <ScooterMap
-              scooters={filtered}
-              selectedId={selectedId ?? undefined}
-              hoveredId={hoveredId ?? undefined}
-              onSelect={(id) => {
-                setSelectedId(id)
-              }}
-              onHover={setHoveredId}
-              onZoneClick={handleZoneClick}
-              activeZone={filters.location === 'all' ? null : filters.location}
-              className="h-[calc(100svh-13rem)] min-h-[420px]"
-              debugMode={debugMode}
-              screenshotPins={isAdmin ? screenshotPins : undefined}
-              screenshotMode={isAdmin && screenshotMode}
-              onScreenshotPinAdd={isAdmin ? handleScreenshotPinAdd : undefined}
-              onScreenshotPinDelete={isAdmin ? handleScreenshotPinDelete : undefined}
-            />
+            <div className="relative">
+              <ScooterMap
+                scooters={filtered}
+                selectedId={selectedId ?? undefined}
+                hoveredId={hoveredId ?? undefined}
+                onSelect={(id) => { setSelectedId(id) }}
+                onHover={setHoveredId}
+                onZoneClick={handleZoneClick}
+                activeZone={filters.location === 'all' ? null : filters.location}
+                className="h-[calc(100svh-13rem)] min-h-[420px]"
+                debugMode={debugMode}
+                screenshotPins={isAdmin ? screenshotPins : undefined}
+                screenshotMode={isAdmin && screenshotMode}
+                onScreenshotPinAdd={isAdmin ? handleScreenshotPinAdd : undefined}
+                onScreenshotPinDelete={isAdmin ? handleScreenshotPinDelete : undefined}
+              />
+              {(() => {
+                if (!selectedId) return null
+                const shopScooters = filtered.filter(s => s.shopId === selectedId)
+                if (shopScooters.length === 0) return null
+                const shop = shopScooters[0].shop
+                const thumbs = shopScooters
+                  .slice(0, 3)
+                  .map(s => s.coverImage ?? s.images[0])
+                  .filter(Boolean) as string[]
+                return (
+                  <div className="absolute bottom-4 right-4 z-20 bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.16)] p-3.5 w-[200px]">
+                    <button
+                      onClick={() => setSelectedId(null)}
+                      className="absolute top-2.5 right-2.5 w-6 h-6 bg-[#f0f0ec] rounded-full flex items-center justify-center"
+                    >
+                      <span className="text-[10px] text-[#5c5c58] font-bold leading-none">✕</span>
+                    </button>
+
+                    <div className="flex items-center gap-2 mb-2.5 pr-6">
+                      {shop?.logo ? (
+                        <img src={shop.logo} alt={shop.name} className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-8 h-8 bg-[#f0ede8] rounded-lg flex-shrink-0" />
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-bold text-[#0f0f0e] leading-tight truncate">{shop?.name ?? '—'}</p>
+                        <p className="text-[10px] text-[#9c9c98]">{shopScooters.length} scooter{shopScooters.length !== 1 ? 's' : ''}</p>
+                      </div>
+                    </div>
+
+                    {thumbs.length > 0 && (
+                      <div className="flex gap-1.5 mb-2.5">
+                        {thumbs.map((src, i) => (
+                          <img key={i} src={src} alt="" className="w-[56px] h-[42px] rounded-[8px] object-cover flex-shrink-0" />
+                        ))}
+                      </div>
+                    )}
+
+                    {shop?.slug && (
+                      <Link
+                        href={`/shop/${shop.slug}`}
+                        className="flex items-center justify-center w-full py-2 bg-[#FF6B35] text-white text-[11px] font-bold rounded-full"
+                      >
+                        View shop
+                      </Link>
+                    )}
+                  </div>
+                )
+              })()}
+            </div>
           )}
         </div>
       </div>
