@@ -57,18 +57,18 @@ export function PricingClient({
                 type="button"
                 onClick={() => setSelected(opt.period)}
                 className={cn(
-                  'flex flex-col items-center px-2 py-4 rounded-[16px] border-2 transition-all duration-150 active:scale-[0.97]',
+                  'flex flex-col items-center px-2 py-3 rounded-[16px] border-2 transition-all duration-150 active:scale-[0.97]',
                   active
                     ? 'border-[#FF6B35] bg-[#fff4f0]'
                     : 'border-[#e8e8e4] bg-white hover:border-[#d0d0cc]',
                 )}
               >
                 <CalendarDays
-                  className={cn('w-4 h-4 mb-2 flex-shrink-0', active ? 'text-[#FF6B35]' : 'text-[#c8c8c4]')}
+                  className={cn('w-4 h-4 mb-1.5 flex-shrink-0', active ? 'text-[#FF6B35]' : 'text-[#c8c8c4]')}
                   strokeWidth={1.8}
                 />
                 <p className={cn(
-                  'text-[9px] font-semibold uppercase tracking-widest mb-2 whitespace-nowrap',
+                  'text-[9px] font-semibold uppercase tracking-widest mb-1.5 whitespace-nowrap',
                   active ? 'text-[#FF6B35]' : 'text-[#9c9c98]',
                 )}>
                   {opt.label}
