@@ -17,8 +17,8 @@ async function assertAdmin(admin: any): Promise<void> {
   const userClient = await createClient()
   const { data: { user } } = await userClient.auth.getUser()
   if (!user) throw new Error('Not authenticated')
-  const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') throw new Error('Not admin')
+  const { data: profile } = await admin.from('profiles').select('is_admin').eq('id', user.id).single()
+  if (!profile?.is_admin) throw new Error('Not admin')
 }
 
 export async function listDevShops(): Promise<DevShopRow[]> {
