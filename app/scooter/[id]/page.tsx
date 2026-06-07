@@ -251,7 +251,9 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 pt-4 pb-6 md:pt-6 md:pb-8">
+      <div className="h-4" />
+
+      <div className="max-w-5xl mx-auto px-4 pb-6 md:pb-8">
         <div>
           {/* ── LEFT COLUMN ── */}
           <div className="space-y-6">
