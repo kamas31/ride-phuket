@@ -329,7 +329,11 @@ export default function ExploreClient({
                 List
               </button>
               <button
-                onClick={() => setMobileView('map')}
+                onClick={() => {
+                  setMobileView('map')
+                  setFilters(prev => ({ ...prev, location: 'all' }))
+                  setSelectedId(null)
+                }}
                 className={cn(
                   'flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all',
                   mobileView === 'map'
