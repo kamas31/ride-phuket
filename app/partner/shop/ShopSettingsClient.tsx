@@ -841,8 +841,8 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
             {DAYS.map(({ key, label }) => {
               const day = form.hours[key]
               return (
-                <div key={key} className="flex items-center gap-3">
-                  <div className="w-24 flex-shrink-0">
+                <div key={key} className="flex items-center gap-2">
+                  <div className="w-[76px] flex-shrink-0">
                     <span className={cn(
                       'text-sm font-medium',
                       day.enabled ? 'text-[#0f0f0e]' : 'text-[#9c9c98]',
@@ -852,19 +852,19 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
                   </div>
                   <Toggle on={day.enabled} onChange={v => setHoursDay(key, { enabled: v })} />
                   {day.enabled ? (
-                    <div className="flex items-center gap-2 flex-1">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
                       <input
                         type="time"
                         value={day.open}
                         onChange={e => setHoursDay(key, { open: e.target.value })}
-                        className="flex-1 px-2.5 py-2 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-sm focus:outline-none focus:border-[#FF6B35]"
+                        className="flex-1 min-w-0 px-2 py-2 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-sm focus:outline-none focus:border-[#FF6B35]"
                       />
-                      <span className="text-xs text-[#9c9c98]">–</span>
+                      <span className="text-xs text-[#9c9c98] flex-shrink-0">–</span>
                       <input
                         type="time"
                         value={day.close}
                         onChange={e => setHoursDay(key, { close: e.target.value })}
-                        className="flex-1 px-2.5 py-2 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-sm focus:outline-none focus:border-[#FF6B35]"
+                        className="flex-1 min-w-0 px-2 py-2 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-sm focus:outline-none focus:border-[#FF6B35]"
                       />
                     </div>
                   ) : (
