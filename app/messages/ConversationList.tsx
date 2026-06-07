@@ -37,15 +37,12 @@ function SwipeableConvoRow({ conv, onDelete }: SwipeableConvoRowProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
-
-  // Refs so DOM listeners always see the latest value without re-registering
-  const isOpenRef = useRef(false)
   const startXRef = useRef(0)
   const startYRef = useRef(0)
-  // null = not yet decided, true = horizontal, false = vertical
+  // null=undecided, true=horizontal swipe, false=vertical scroll
   const directionRef = useRef<boolean | null>(null)
 
-  useEffect(() => { isOpenRef.current = isOpen }, [isOpen])
+  const hasUnread = conv.unreadCount > 0
 
   function applyTranslate(x: number, animated: boolean) {
     if (!contentRef.current) return
@@ -53,56 +50,35 @@ function SwipeableConvoRow({ conv, onDelete }: SwipeableConvoRowProps) {
     contentRef.current.style.transform = `translateX(${x}px)`
   }
 
-  // Register with { passive: false } on touchmove so we can preventDefault
-  // and stop the scroll container from stealing the horizontal gesture.
-  useEffect(() => {
-    const el = contentRef.current
-    if (!el) return
+  function handleTouchStart(e: React.TouchEvent) {
+    startXRef.current = e.touches[0].clientX
+    startYRef.current = e.touches[0].clientY
+    directionRef.current = null
+    applyTranslate(isOpen ? -SWIPE_WIDTH : 0, false)
+  }
 
-    function onTouchStart(e: TouchEvent) {
-      startXRef.current = e.touches[0].clientX
-      startYRef.current = e.touches[0].clientY
-      directionRef.current = null
-      applyTranslate(isOpenRef.current ? -SWIPE_WIDTH : 0, false)
+  function handleTouchMove(e: React.TouchEvent) {
+    const dx = e.touches[0].clientX - startXRef.current
+    const dy = e.touches[0].clientY - startYRef.current
+
+    if (directionRef.current === null && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+      directionRef.current = Math.abs(dx) > Math.abs(dy)
     }
+    if (directionRef.current !== true) return
 
-    function onTouchMove(e: TouchEvent) {
-      const dx = e.touches[0].clientX - startXRef.current
-      const dy = e.touches[0].clientY - startYRef.current
+    const base = isOpen ? -SWIPE_WIDTH : 0
+    const clamped = Math.min(0, Math.max(-SWIPE_WIDTH, base + dx))
+    applyTranslate(clamped, false)
+  }
 
-      // Decide gesture direction on first meaningful movement
-      if (directionRef.current === null && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
-        directionRef.current = Math.abs(dx) > Math.abs(dy)
-      }
-
-      if (!directionRef.current) return // vertical scroll — don't interfere
-
-      e.preventDefault() // block scroll while swiping horizontally
-      const base = isOpenRef.current ? -SWIPE_WIDTH : 0
-      const clamped = Math.min(0, Math.max(-SWIPE_WIDTH, base + dx))
-      applyTranslate(clamped, false)
-    }
-
-    function onTouchEnd(e: TouchEvent) {
-      if (!directionRef.current) return // was a vertical scroll, ignore
-      const dx = e.changedTouches[0].clientX - startXRef.current
-      const base = isOpenRef.current ? -SWIPE_WIDTH : 0
-      const newOpen = base + dx < -(SWIPE_WIDTH / 2)
-      isOpenRef.current = newOpen
-      setIsOpen(newOpen)
-      applyTranslate(newOpen ? -SWIPE_WIDTH : 0, true)
-    }
-
-    el.addEventListener('touchstart', onTouchStart, { passive: true })
-    el.addEventListener('touchmove', onTouchMove, { passive: false })
-    el.addEventListener('touchend', onTouchEnd, { passive: true })
-
-    return () => {
-      el.removeEventListener('touchstart', onTouchStart)
-      el.removeEventListener('touchmove', onTouchMove)
-      el.removeEventListener('touchend', onTouchEnd)
-    }
-  }, []) // empty: listeners read state via refs
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (directionRef.current !== true) return
+    const dx = e.changedTouches[0].clientX - startXRef.current
+    const base = isOpen ? -SWIPE_WIDTH : 0
+    const newOpen = base + dx < -(SWIPE_WIDTH / 2)
+    setIsOpen(newOpen)
+    applyTranslate(newOpen ? -SWIPE_WIDTH : 0, true)
+  }
 
   async function handleDelete() {
     setDeleting(true)
@@ -114,11 +90,9 @@ function SwipeableConvoRow({ conv, onDelete }: SwipeableConvoRowProps) {
     }
   }
 
-  const hasUnread = conv.unreadCount > 0
-
   return (
     <div className="relative overflow-hidden border-b border-[#f0f0ec] last:border-b-0">
-      {/* Delete action — revealed on left swipe */}
+      {/* Delete action revealed on left swipe */}
       <div className="absolute right-0 top-0 bottom-0 w-[72px] flex items-center justify-center bg-[#ef4444]">
         <button
           onClick={handleDelete}
@@ -130,17 +104,22 @@ function SwipeableConvoRow({ conv, onDelete }: SwipeableConvoRowProps) {
         </button>
       </div>
 
-      {/* Swipeable row */}
+      {/* Swipeable content
+          touch-action:pan-y tells the browser: "handle vertical scroll natively,
+          but don't intercept horizontal gestures" — this is what makes the swipe work
+          on iOS/Android without needing e.preventDefault(). */}
       <div
         ref={contentRef}
-        style={{ willChange: 'transform' }}
+        style={{ touchAction: 'pan-y', willChange: 'transform' }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <Link
           href={`/messages/${conv.id}`}
           onClick={e => {
             if (isOpen) {
               e.preventDefault()
-              isOpenRef.current = false
               setIsOpen(false)
               applyTranslate(0, true)
             }
