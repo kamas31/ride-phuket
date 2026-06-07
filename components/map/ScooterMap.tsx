@@ -167,35 +167,82 @@ function CalibrationMarker({
   )
 }
 
-// ── Zone aggregate (approximate-location shops) ────────────────
-interface ZoneAggregate {
+// ── Zone cluster data (hybrid zoom-based system) ───────────────
+const BREAKOUT_ZOOM = 12
+
+interface ZoneClusterData {
   zoneKey: string
   zoneName: string
   lat: number
   lng: number
-  shopCount: number
+  exactAggregates: ShopAggregate[]  // TYPE 1 shops — break out above BREAKOUT_ZOOM
+  clusterShopCount: number           // TYPE 2+3 shop count — permanent residual cluster
+  totalCount: number                 // exactAggregates.length + clusterShopCount
 }
 
-function buildZoneAggregates(scooters: Scooter[]): ZoneAggregate[] {
-  const shopsByZone = new Map<string, Set<string>>()
-  const zoneMeta   = new Map<string, { zoneName: string; lat: number; lng: number }>()
+function buildZoneClusters(scooters: Scooter[]): ZoneClusterData[] {
+  const exactAggsByZone    = new Map<string, Map<string, ShopAggregate>>()
+  const clusterShopsByZone = new Map<string, Set<string>>()
+  const zoneMeta           = new Map<string, { zoneName: string; lat: number; lng: number }>()
+
   for (const s of scooters) {
     if (!s.shopId) continue
     const zone = getZoneForLocation(s.location) ?? getZoneForLocation(s.shop?.location ?? '')
     if (!zone) continue
-    if (!shopsByZone.has(zone.key)) {
-      shopsByZone.set(zone.key, new Set())
+
+    if (!zoneMeta.has(zone.key)) {
       zoneMeta.set(zone.key, { zoneName: zone.name, lat: zone.lat, lng: zone.lng })
+      exactAggsByZone.set(zone.key, new Map())
+      clusterShopsByZone.set(zone.key, new Set())
     }
-    shopsByZone.get(zone.key)!.add(s.shopId)
+
+    const isExact = (s.shop?.locationVisibility ?? 'exact') === 'exact' && (s.shop?.hasPrecisePin ?? false)
+
+    if (isExact) {
+      const aggs = exactAggsByZone.get(zone.key)!
+      if (!aggs.has(s.shopId)) {
+        aggs.set(s.shopId, {
+          shopId:   s.shopId,
+          slug:     s.shop?.slug     ?? '',
+          name:     s.shop?.name     ?? '',
+          logo:     s.shop?.logo     ?? '',
+          verified: s.shop?.verified ?? false,
+          count:    0,
+          minPrice: s.pricePerDay,
+          maxPrice: s.pricePerDay,
+          minCc:    null,
+          maxCc:    null,
+          lat:      s.lat,
+          lng:      s.lng,
+        })
+      }
+      const agg = aggs.get(s.shopId)!
+      agg.count++
+      agg.minPrice = Math.min(agg.minPrice, s.pricePerDay)
+      agg.maxPrice = Math.max(agg.maxPrice, s.pricePerDay)
+      const cc = parseCc(s.specs?.engine ?? '')
+      if (cc !== null) {
+        agg.minCc = agg.minCc === null ? cc : Math.min(agg.minCc, cc)
+        agg.maxCc = agg.maxCc === null ? cc : Math.max(agg.maxCc, cc)
+      }
+    } else {
+      clusterShopsByZone.get(zone.key)!.add(s.shopId)
+    }
   }
-  return Array.from(shopsByZone.entries()).map(([zoneKey, shopIds]) => ({
-    zoneKey,
-    zoneName: zoneMeta.get(zoneKey)!.zoneName,
-    lat:      zoneMeta.get(zoneKey)!.lat,
-    lng:      zoneMeta.get(zoneKey)!.lng,
-    shopCount: shopIds.size,
-  }))
+
+  return Array.from(zoneMeta.entries()).map(([zoneKey, meta]) => {
+    const exactAggregates  = Array.from(exactAggsByZone.get(zoneKey)!.values())
+    const clusterShopCount = clusterShopsByZone.get(zoneKey)!.size
+    return {
+      zoneKey,
+      zoneName:        meta.zoneName,
+      lat:             meta.lat,
+      lng:             meta.lng,
+      exactAggregates,
+      clusterShopCount,
+      totalCount:      exactAggregates.length + clusterShopCount,
+    }
+  })
 }
 
 // ── Shop aggregate ─────────────────────────────────────────────
@@ -219,38 +266,6 @@ function parseCc(engine: string): number | null {
   return match ? parseInt(match[1], 10) : null
 }
 
-function buildShopAggregates(scooters: Scooter[]): ShopAggregate[] {
-  const map = new Map<string, ShopAggregate>()
-  for (const s of scooters) {
-    if (!s.shopId || !s.lat || !s.lng) continue
-    if (!map.has(s.shopId)) {
-      map.set(s.shopId, {
-        shopId: s.shopId,
-        slug:     s.shop?.slug     ?? '',
-        name:     s.shop?.name     ?? '',
-        logo:     s.shop?.logo     ?? '',
-        verified: s.shop?.verified ?? false,
-        count: 0,
-        minPrice: s.pricePerDay,
-        maxPrice: s.pricePerDay,
-        minCc: null,
-        maxCc: null,
-        lat: s.lat,
-        lng: s.lng,
-      })
-    }
-    const agg = map.get(s.shopId)!
-    agg.count++
-    agg.minPrice = Math.min(agg.minPrice, s.pricePerDay)
-    agg.maxPrice = Math.max(agg.maxPrice, s.pricePerDay)
-    const cc = parseCc(s.specs?.engine ?? '')
-    if (cc !== null) {
-      agg.minCc = agg.minCc === null ? cc : Math.min(agg.minCc, cc)
-      agg.maxCc = agg.maxCc === null ? cc : Math.max(agg.maxCc, cc)
-    }
-  }
-  return Array.from(map.values())
-}
 
 // ── Shop Pin — Airbnb-inspired price pill ─────────────────────
 function ShopPin({
@@ -372,23 +387,30 @@ function ShopPopupCard({ agg, onClose }: { agg: ShopAggregate; onClose: () => vo
   )
 }
 
-// ── Area Cluster Pin (approximate-location shops grouped by zone) ──
-function AreaClusterPin({ shopCount, onClick }: { shopCount: number; onClick: () => void }) {
+// ── Zone Cluster Pin (combined count at low zoom; TYPE 2+3 residual at high zoom) ──
+function ZoneClusterPin({ count, onClick }: { count: number; onClick: () => void }) {
   return (
     <div
-      className="flex flex-col items-center cursor-pointer select-none"
       onClick={onClick}
+      style={{
+        width: 40,
+        height: 40,
+        background: '#1a1a18',
+        borderRadius: '50%',
+        border: '2.5px solid rgba(255,255,255,0.92)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.30), 0 6px 18px rgba(0,0,0,0.18)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        userSelect: 'none',
+        color: 'white',
+        fontSize: 13,
+        fontWeight: 700,
+        fontFamily: 'inherit',
+      }}
     >
-      <div
-        className="px-3 h-8 flex items-center rounded-full text-[13px] font-bold whitespace-nowrap border bg-[#FF6B35] text-white border-[#FF6B35]/25"
-        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 8px 20px rgba(255,107,53,0.18)' }}
-      >
-        {shopCount} shop{shopCount !== 1 ? 's' : ''}
-      </div>
-      <div
-        className="w-0 h-0 -mt-px"
-        style={{ borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '7px solid #FF6B35' }}
-      />
+      {count}
     </div>
   )
 }
@@ -449,27 +471,8 @@ export default function ScooterMap({
   const [calibPins, setCalibPins] = useState<CalibrationPin[]>([])
   const [copied, setCopied] = useState(false)
 
-  // TYPE 1 — Exact: precise pin placed by owner, differs from zone default
-  const exactScooters = useMemo(
-    () => scooters.filter(s =>
-      (s.shop?.locationVisibility ?? 'exact') === 'exact' &&
-      (s.shop?.hasPrecisePin ?? false)
-    ),
-    [scooters],
-  )
-  // TYPE 2 + TYPE 3 — Cluster: approximate visibility OR no precise pin (zone-default coords)
-  // Both render as AreaClusterPin at zone centre. Real coords never used.
-  const clusterScooters = useMemo(
-    () => scooters.filter(s =>
-      s.shop?.locationVisibility === 'approximate' ||
-      !(s.shop?.hasPrecisePin ?? false)
-    ),
-    [scooters],
-  )
-  // TYPE 1: one aggregate per shop at real coordinates → ShopPin
-  const aggregates = useMemo(() => buildShopAggregates(exactScooters), [exactScooters])
-  // TYPE 2 + TYPE 3: one cluster per zone at zone-centre coordinates → AreaClusterPin
-  const zoneAggregates = useMemo(() => buildZoneAggregates(clusterScooters), [clusterScooters])
+  const zoneClusters = useMemo(() => buildZoneClusters(scooters), [scooters])
+  const [aboveBreakout, setAboveBreakout] = useState(false)
 
   // Stable callback refs
   const onBoundsChangeRef = useRef(onBoundsChange)
@@ -482,15 +485,14 @@ export default function ScooterMap({
   useEffect(() => { onHoverRef.current        = onHover        }, [onHover])
 
   // Shop marker refs — keyed by shopId
-  const markersRef    = useRef<Map<string, { marker: mapboxgl.Marker; root: Root; container: HTMLDivElement }>>(new Map())
+  const markersRef     = useRef<Map<string, { marker: mapboxgl.Marker; root: Root; container: HTMLDivElement }>>(new Map())
   const aggregatesById = useRef<Map<string, ShopAggregate>>(new Map())
-  const prevActiveIds = useRef(new Set<string>())
-  const popupRef      = useRef<{ popup: mapboxgl.Popup; root: Root; container: HTMLDivElement } | null>(null)
+  const popupRef       = useRef<{ popup: mapboxgl.Popup; root: Root; container: HTMLDivElement } | null>(null)
 
   // Zone marker refs (kept for cleanup safety, no longer rendered)
   const zoneMarkersRef = useRef<Map<string, { marker: mapboxgl.Marker; root: Root }>>(new Map())
-  // Area cluster markers (approximate shops — one per zone at zone-centre coords)
-  const areaMarkersRef = useRef<Map<string, { marker: mapboxgl.Marker; root: Root; container: HTMLDivElement }>>(new Map())
+  // Zone cluster markers — one per zone; shows totalCount at low zoom, clusterShopCount at high zoom
+  const zoneClusterMarkersRef = useRef<Map<string, { marker: mapboxgl.Marker; root: Root; container: HTMLDivElement }>>(new Map())
 
   // Debug zone-center markers (dev only)
   const dbgMarkersRef = useRef<mapboxgl.Marker[]>([])
@@ -635,6 +637,7 @@ export default function ScooterMap({
     })
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
+    map.on('zoom', () => { setAboveBreakout(map.getZoom() >= BREAKOUT_ZOOM) })
     map.on('click', (e) => {
       if (screenshotModeRef.current) {
         onScreenshotPinAddRef.current?.(e.lngLat.lat, e.lngLat.lng)
@@ -660,8 +663,8 @@ export default function ScooterMap({
       zoneOverlayRef.current = []
       screenshotMarkersRef.current.forEach(({ marker, root }) => { root.unmount(); marker.remove() })
       screenshotMarkersRef.current.clear()
-      areaMarkersRef.current.forEach(({ marker, root }) => { root.unmount(); marker.remove() })
-      areaMarkersRef.current.clear()
+      zoneClusterMarkersRef.current.forEach(({ marker, root }) => { root.unmount(); marker.remove() })
+      zoneClusterMarkersRef.current.clear()
       popupRef.current?.root.unmount()
       popupRef.current?.popup.remove()
       popupRef.current = null
@@ -671,37 +674,44 @@ export default function ScooterMap({
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Effect 1: Create/remove shop markers + fitBounds ─────────
+  // ── Unified marker effect: ShopPins + ZoneClusterPins, zoom-aware ──
   useEffect(() => {
     if (!ready || !mapRef.current) return
     const map = mapRef.current
 
+    // Populate aggregatesById so the popup effect can look up shop data
     aggregatesById.current.clear()
-    aggregates.forEach(agg => aggregatesById.current.set(agg.shopId, agg))
+    zoneClusters.forEach(zc =>
+      zc.exactAggregates.forEach(agg => aggregatesById.current.set(agg.shopId, agg))
+    )
 
-    const currentIds = new Set(aggregates.map(a => a.shopId))
+    // ── ShopPin markers (TYPE 1 — exact, visible above BREAKOUT_ZOOM) ──
+    const allExactAggs   = zoneClusters.flatMap(zc => zc.exactAggregates)
+    const currentExactIds = new Set(allExactAggs.map(a => a.shopId))
+
     markersRef.current.forEach((entry, id) => {
-      if (!currentIds.has(id)) {
+      if (!currentExactIds.has(id)) {
         entry.root.unmount()
         entry.marker.remove()
         markersRef.current.delete(id)
-        prevActiveIds.current.delete(id)
       }
     })
 
-    aggregates.forEach(agg => {
+    allExactAggs.forEach(agg => {
       if (!markersRef.current.has(agg.shopId)) {
         const container = document.createElement('div')
         const marker = new mapboxgl.Marker({ element: container, anchor: 'bottom' })
           .setLngLat([agg.lng, agg.lat])
           .addTo(map)
         const root = createRoot(container)
-        markersRef.current.set(agg.shopId, { marker, root, container })
         container.addEventListener('click', e => e.stopPropagation())
+        markersRef.current.set(agg.shopId, { marker, root, container })
       }
       const active = agg.shopId === selectedId || agg.shopId === hoveredId
-      const { root } = markersRef.current.get(agg.shopId)!
-      root.render(
+      const el = markersRef.current.get(agg.shopId)!.marker.getElement()
+      el.style.display = aboveBreakout ? '' : 'none'
+      el.style.zIndex  = active ? '20' : '10'
+      markersRef.current.get(agg.shopId)!.root.render(
         <ShopPin
           minPrice={agg.minPrice}
           count={agg.count}
@@ -711,46 +721,70 @@ export default function ScooterMap({
           onLeave={() => onHoverRef.current?.(null)}
         />,
       )
-      markersRef.current.get(agg.shopId)!.marker.getElement().style.zIndex = active ? '20' : '10'
     })
 
-    if (aggregates.length === 1) {
-      map.flyTo({ center: [aggregates[0].lng, aggregates[0].lat], zoom: 14, duration: 900 })
-    } else if (aggregates.length > 1) {
-      const lngs = aggregates.map(a => a.lng)
-      const lats = aggregates.map(a => a.lat)
+    // ── ZoneClusterPin markers (one per zone) ──────────────────────
+    // Low zoom: totalCount (TYPE 1 + TYPE 2 + TYPE 3)
+    // High zoom: clusterShopCount (TYPE 2 + TYPE 3 only — TYPE 1 have broken out as ShopPins)
+    const currentZoneKeys = new Set(zoneClusters.map(zc => zc.zoneKey))
+
+    zoneClusterMarkersRef.current.forEach((entry, key) => {
+      if (!currentZoneKeys.has(key)) {
+        entry.root.unmount()
+        entry.marker.remove()
+        zoneClusterMarkersRef.current.delete(key)
+      }
+    })
+
+    zoneClusters.forEach(zc => {
+      if (!zoneClusterMarkersRef.current.has(zc.zoneKey)) {
+        const container = document.createElement('div')
+        const marker = new mapboxgl.Marker({ element: container, anchor: 'center' })
+          .setLngLat([zc.lng, zc.lat])
+          .addTo(map)
+        const root = createRoot(container)
+        container.addEventListener('click', e => e.stopPropagation())
+        zoneClusterMarkersRef.current.set(zc.zoneKey, { marker, root, container })
+      }
+      const count = aboveBreakout ? zc.clusterShopCount : zc.totalCount
+      const el = zoneClusterMarkersRef.current.get(zc.zoneKey)!.marker.getElement()
+      if (count === 0) {
+        el.style.display = 'none'
+      } else {
+        el.style.display = ''
+        zoneClusterMarkersRef.current.get(zc.zoneKey)!.root.render(
+          <ZoneClusterPin
+            count={count}
+            onClick={() => onZoneClickRef.current?.(zc.zoneKey)}
+          />,
+        )
+      }
+    })
+  }, [zoneClusters, aboveBreakout, selectedId, hoveredId, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── fitBounds when zone cluster data changes ───────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return
+    const map = mapRef.current
+
+    const coords: Array<[number, number]> = zoneClusters.flatMap(zc => {
+      const pts: Array<[number, number]> = [[zc.lng, zc.lat]]
+      zc.exactAggregates.forEach(agg => pts.push([agg.lng, agg.lat]))
+      return pts
+    })
+
+    if (coords.length === 0) return
+
+    if (coords.length === 1) {
+      map.flyTo({ center: coords[0], zoom: 14, duration: 900 })
+    } else {
+      const lngs = coords.map(c => c[0])
+      const lats = coords.map(c => c[1])
       const sw: [number, number] = [Math.min(...lngs) - 0.01, Math.min(...lats) - 0.01]
       const ne: [number, number] = [Math.max(...lngs) + 0.01, Math.max(...lats) + 0.01]
       map.fitBounds([sw, ne], { padding: { top: 80, bottom: 80, left: 60, right: 60 }, maxZoom: 14, duration: 900 })
     }
-  }, [aggregates, ready]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Effect 2: Update marker appearance on hover/select ────────
-  useEffect(() => {
-    if (!ready) return
-    const newActiveIds = new Set<string>(
-      [selectedId, hoveredId].filter((id): id is string => Boolean(id)),
-    )
-    const updateMarker = (id: string, active: boolean) => {
-      const entry = markersRef.current.get(id)
-      const agg   = aggregatesById.current.get(id)
-      if (!entry || !agg) return
-      entry.root.render(
-        <ShopPin
-          minPrice={agg.minPrice}
-          count={agg.count}
-          active={active}
-          onClick={() => onSelectRef.current(id === selectedId ? null : id)}
-          onEnter={() => onHoverRef.current?.(id)}
-          onLeave={() => onHoverRef.current?.(null)}
-        />,
-      )
-      entry.marker.getElement().style.zIndex = active ? '20' : '10'
-    }
-    newActiveIds.forEach(id => { if (!prevActiveIds.current.has(id)) updateMarker(id, true) })
-    prevActiveIds.current.forEach(id => { if (!newActiveIds.has(id)) updateMarker(id, false) })
-    prevActiveIds.current = newActiveIds
-  }, [selectedId, hoveredId, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [zoneClusters, ready]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Popup for selected shop ────────────────────────────────────
   useEffect(() => {
@@ -820,36 +854,6 @@ export default function ScooterMap({
       )
     })
   }, [screenshotPins, ready]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Area cluster markers (approximate shops) ──────────────────
-  useEffect(() => {
-    if (!ready || !mapRef.current) return
-    const currentKeys = new Set(zoneAggregates.map(z => z.zoneKey))
-    areaMarkersRef.current.forEach((entry, key) => {
-      if (!currentKeys.has(key)) {
-        entry.root.unmount(); entry.marker.remove()
-        areaMarkersRef.current.delete(key)
-      }
-    })
-    zoneAggregates.forEach(za => {
-      if (!areaMarkersRef.current.has(za.zoneKey)) {
-        const container = document.createElement('div')
-        const marker = new mapboxgl.Marker({ element: container, anchor: 'bottom' })
-          .setLngLat([za.lng, za.lat])
-          .addTo(mapRef.current!)
-        const root = createRoot(container)
-        container.addEventListener('click', e => e.stopPropagation())
-        areaMarkersRef.current.set(za.zoneKey, { marker, root, container })
-      }
-      const { root } = areaMarkersRef.current.get(za.zoneKey)!
-      root.render(
-        <AreaClusterPin
-          shopCount={za.shopCount}
-          onClick={() => onZoneClickRef.current?.(za.zoneKey)}
-        />
-      )
-    })
-  }, [zoneAggregates, ready]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!TOKEN) {
     return (
