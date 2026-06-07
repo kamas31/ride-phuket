@@ -8,8 +8,10 @@ import Image from 'next/image'
 import {
   ArrowLeft, Save, Check, Loader2, Camera,
   Phone, MessageCircle, Globe, MapPin,
-  AtSign, AlertCircle, ImageOff,
+  AtSign, AlertCircle, ImageOff, X, ZoomIn,
 } from 'lucide-react'
+import EasyCrop from 'react-easy-crop'
+import type { Area } from 'react-easy-crop'
 import { createClient } from '@/lib/supabase/client'
 import { updateShop } from '@/app/actions/shop-update'
 import { cn } from '@/lib/utils'
@@ -63,62 +65,144 @@ function parseHours(raw: string | null): OpeningHoursSchedule {
   }
 }
 
-// ── Single-image upload helper ─────────────────────────────────
+// ── Upload blob to Supabase storage ───────────────────────────
 
-async function uploadShopAsset(
+async function uploadBlob(
   shopId: string,
-  file: File,
+  blob: Blob,
   type: 'logo' | 'cover',
 ): Promise<string | null> {
+  const supabase = createClient()
+  const path = `shops/${shopId}/${type}/${Date.now()}.webp`
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any).storage
+    .from('scooter-images')
+    .upload(path, blob, { contentType: 'image/webp', upsert: true })
+  if (error) return null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: urlData } = (supabase as any).storage
+    .from('scooter-images')
+    .getPublicUrl(data.path)
+  return urlData.publicUrl
+}
+
+// ── Process logo file (auto center-crop to square, max 400px) ──
+
+async function processLogo(file: File): Promise<Blob | null> {
   return new Promise(resolve => {
     const reader = new FileReader()
-    reader.onload = async e => {
+    reader.onload = e => {
       const img = new window.Image()
-      img.onload = async () => {
-        const maxW       = type === 'logo' ? 400  : 1600
-        const targetRatio = type === 'logo' ? 1    : 16 / 5
-
-        // Center-crop to target aspect ratio
-        const srcRatio = img.width / img.height
-        let cropX = 0, cropY = 0
-        let cropW = img.width, cropH = img.height
-        if (srcRatio > targetRatio) {
-          cropW = Math.round(img.height * targetRatio)
-          cropX = Math.round((img.width - cropW) / 2)
-        } else {
-          cropH = Math.round(img.width / targetRatio)
-          cropY = Math.round((img.height - cropH) / 2)
-        }
-
-        const scale = Math.min(1, maxW / cropW)
-        const outW = Math.round(cropW * scale)
-        const outH = Math.round(cropH * scale)
-
+      img.onload = () => {
+        const size = Math.min(img.width, img.height, 400)
+        const cropX = Math.round((img.width  - Math.min(img.width, img.height)) / 2)
+        const cropY = Math.round((img.height - Math.min(img.width, img.height)) / 2)
+        const srcS  = Math.min(img.width, img.height)
         const canvas = document.createElement('canvas')
-        canvas.width = outW; canvas.height = outH
-        const ctx = canvas.getContext('2d')!
-        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, outW, outH)
-
-        canvas.toBlob(async blob => {
-          if (!blob) { resolve(null); return }
-          const supabase = createClient()
-          const path = `shops/${shopId}/${type}/${Date.now()}.webp`
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data, error } = await (supabase as any).storage
-            .from('scooter-images')
-            .upload(path, blob, { contentType: 'image/webp', upsert: true })
-          if (error) { resolve(null); return }
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data: urlData } = (supabase as any).storage
-            .from('scooter-images')
-            .getPublicUrl(data.path)
-          resolve(urlData.publicUrl)
-        }, 'image/webp', 0.88)
+        canvas.width = size; canvas.height = size
+        canvas.getContext('2d')!.drawImage(img, cropX, cropY, srcS, srcS, 0, 0, size, size)
+        canvas.toBlob(b => resolve(b), 'image/webp', 0.88)
       }
       img.src = e.target!.result as string
     }
     reader.readAsDataURL(file)
   })
+}
+
+// ── Produce final 1600×400 banner from crop area ───────────────
+
+async function cropToBannerBlob(imageSrc: string, pixels: Area): Promise<Blob | null> {
+  return new Promise(resolve => {
+    const img = new window.Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 1600; canvas.height = 400
+      canvas.getContext('2d')!.drawImage(
+        img,
+        pixels.x, pixels.y, pixels.width, pixels.height,
+        0, 0, 1600, 400,
+      )
+      canvas.toBlob(b => resolve(b), 'image/webp', 0.90)
+    }
+    img.src = imageSrc
+  })
+}
+
+// ── Banner crop modal ──────────────────────────────────────────
+
+function BannerCropModal({
+  imageSrc,
+  onConfirm,
+  onCancel,
+}: {
+  imageSrc: string
+  onConfirm: (pixels: Area) => void
+  onCancel: () => void
+}) {
+  const [crop, setCrop]   = useState({ x: 0, y: 0 })
+  const [zoom, setZoom]   = useState(1)
+  const [pixels, setPixels] = useState<Area | null>(null)
+
+  const onComplete = useCallback((_: Area, px: Area) => setPixels(px), [])
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4">
+      <div className="bg-white rounded-[20px] shadow-2xl w-full max-w-[640px] overflow-hidden">
+        {/* Header */}
+        <div className="px-5 pt-5 pb-4 flex items-center justify-between border-b border-[#f0f0ec]">
+          <div>
+            <h3 className="text-[15px] font-bold text-[#0f0f0e]">Adjust banner</h3>
+            <p className="text-[11px] text-[#9c9c98] mt-0.5">Pan and zoom to frame your banner (4:1)</p>
+          </div>
+          <button onClick={onCancel} className="w-8 h-8 rounded-full bg-[#f0f0ec] flex items-center justify-center hover:bg-[#e8e8e4] transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Crop area */}
+        <div className="relative w-full bg-[#1a1a1a]" style={{ height: 240 }}>
+          <EasyCrop
+            image={imageSrc}
+            crop={crop}
+            zoom={zoom}
+            aspect={4 / 1}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={onComplete}
+            showGrid={false}
+            style={{ containerStyle: { borderRadius: 0 } }}
+          />
+        </div>
+
+        {/* Zoom slider */}
+        <div className="px-5 pt-4 pb-2 flex items-center gap-3">
+          <ZoomIn className="w-4 h-4 text-[#9c9c98] flex-shrink-0" />
+          <input
+            type="range" min={1} max={3} step={0.01} value={zoom}
+            onChange={e => setZoom(Number(e.target.value))}
+            className="flex-1 accent-[#FF6B35]"
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="px-5 pb-5 flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 rounded-full border border-[#e8e8e4] text-sm font-semibold text-[#5c5c58] hover:bg-[#f8f8f6] transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => pixels && onConfirm(pixels)}
+            disabled={!pixels}
+            className="flex-[2] py-3 rounded-full bg-[#FF6B35] text-white text-sm font-semibold hover:bg-[#e85d29] transition-colors disabled:opacity-50"
+          >
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // ── Single-image field component ───────────────────────────────
@@ -135,17 +219,55 @@ function ImageField({
   type: 'logo' | 'cover'
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = useState(false)
+  const [uploading, setUploading]     = useState(false)
+  const [cropSrc, setCropSrc]         = useState<string | null>(null)
 
   const handleFile = async (file: File) => {
+    if (type === 'cover') {
+      // Show cropper first
+      const url = URL.createObjectURL(file)
+      setCropSrc(url)
+      return
+    }
+    // Logo: auto-process and upload immediately
     setUploading(true)
-    const url = await uploadShopAsset(shopId, file, type)
-    if (url) onChange(url)
+    const blob = await processLogo(file)
+    if (blob) {
+      const url = await uploadBlob(shopId, blob, 'logo')
+      if (url) onChange(url)
+    }
     setUploading(false)
+  }
+
+  const handleCropConfirm = async (pixels: Area) => {
+    if (!cropSrc) return
+    setCropSrc(null)
+    setUploading(true)
+    const blob = await cropToBannerBlob(cropSrc, pixels)
+    URL.revokeObjectURL(cropSrc)
+    if (blob) {
+      const url = await uploadBlob(shopId, blob, 'cover')
+      if (url) onChange(url)
+    }
+    setUploading(false)
+  }
+
+  const handleCropCancel = () => {
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
+    if (inputRef.current) inputRef.current.value = ''
   }
 
   return (
     <div>
+      {cropSrc && (
+        <BannerCropModal
+          imageSrc={cropSrc}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
+      )}
+
       <p className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-2">{label}</p>
       <div className="flex items-center gap-4">
         <button
@@ -154,12 +276,12 @@ function ImageField({
           className={cn(
             'relative flex-shrink-0 bg-[#f0f0ec] border-2 border-dashed border-[#e8e8e4] overflow-hidden',
             'hover:border-[#FF6B35]/50 transition-colors group',
-            round ? 'w-20 h-20 rounded-full' : 'w-32 h-20 rounded-[12px]',
+            round ? 'w-20 h-20 rounded-full' : 'w-40 h-10 rounded-[12px]',
             uploading && 'opacity-50 pointer-events-none',
           )}
         >
           {value ? (
-            <Image src={value} alt={label} fill className={round ? 'object-cover' : 'object-cover'} unoptimized />
+            <Image src={value} alt={label} fill className="object-cover" unoptimized />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
               <ImageOff className="w-5 h-5 text-[#c4bfb8]" />
