@@ -807,21 +807,21 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
 
           {form.showOpeningHours && (<>
           {/* Apply all shortcut */}
-          <div className="flex items-center gap-3 pb-1">
-            <p className="text-xs text-[#9c9c98] flex-1">Set hours for all days at once:</p>
+          <div className="pb-1">
+            <p className="text-xs text-[#9c9c98] mb-2">Set hours for all days at once:</p>
             <div className="flex items-center gap-2">
               <input
                 type="time"
                 defaultValue="08:00"
                 id="bulk-open"
-                className="px-2 py-1 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-xs focus:outline-none focus:border-[#FF6B35]"
+                className="flex-1 min-w-0 px-2 py-1.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-sm focus:outline-none focus:border-[#FF6B35]"
               />
-              <span className="text-xs text-[#9c9c98]">–</span>
+              <span className="text-xs text-[#9c9c98] flex-shrink-0">–</span>
               <input
                 type="time"
                 defaultValue="20:00"
                 id="bulk-close"
-                className="px-2 py-1 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-xs focus:outline-none focus:border-[#FF6B35]"
+                className="flex-1 min-w-0 px-2 py-1.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-sm focus:outline-none focus:border-[#FF6B35]"
               />
               <button
                 type="button"
@@ -830,7 +830,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
                   const c = (document.getElementById('bulk-close') as HTMLInputElement).value
                   applyAllDays({ open: o, close: c })
                 }}
-                className="px-3 py-1.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-xs font-semibold text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
+                className="flex-shrink-0 px-3 py-1.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-sm font-semibold text-[#5c5c58] hover:border-[#d0d0cc] transition-colors"
               >
                 Apply all
               </button>
