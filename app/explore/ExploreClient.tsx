@@ -508,12 +508,16 @@ export default function ExploreClient({
                     )}
 
                     {selectedId && (
-                      <Link
-                        href={`/explore?shopId=${selectedId}`}
+                      <button
+                        onClick={() => {
+                          setShopIdFilter(selectedId)
+                          setMobileView('list')
+                          setSelectedId(null)
+                        }}
                         className="flex items-center justify-center w-full py-2 bg-[#FF6B35] text-white text-[11px] font-bold rounded-full"
                       >
                         View scooters
-                      </Link>
+                      </button>
                     )}
                   </div>
                 )
