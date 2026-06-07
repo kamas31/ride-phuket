@@ -74,6 +74,7 @@ export function normalizeShop(row: any): Shop {
     phone: row.phone ?? '',
     whatsapp: row.whatsapp ?? undefined,
     coverImage: row.cover_image ?? null,
+    mobileBanner: row.mobile_banner ?? null,
     deliveryZones: safeArray(row.delivery_zones, id, 'delivery_zones'),
     openingHours: safeOpeningHours(row.opening_hours, id),
     instagram: row.instagram ?? undefined,

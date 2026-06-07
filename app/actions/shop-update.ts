@@ -24,6 +24,7 @@ export interface UpdateShopPayload {
   showOpeningHours?: boolean
   logoUrl?: string | null
   coverImage?: string | null
+  mobileBanner?: string | null
   gallery?: string[]
   locationVisibility?: 'exact' | 'approximate'
 }
@@ -80,7 +81,8 @@ export async function updateShop(
         opening_hours:        payload.openingHours ? JSON.stringify(payload.openingHours) : null,
         show_opening_hours:   payload.showOpeningHours ?? true,
         logo_url:             payload.logoUrl ?? null,
-        cover_image:      payload.coverImage ?? null,
+        cover_image:          payload.coverImage ?? null,
+        mobile_banner:        payload.mobileBanner ?? null,
         gallery:              payload.gallery ?? [],
         location_visibility:  payload.locationVisibility ?? 'exact',
         updated_at:           new Date().toISOString(),

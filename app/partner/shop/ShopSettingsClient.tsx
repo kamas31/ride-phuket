@@ -70,7 +70,7 @@ function parseHours(raw: string | null): OpeningHoursSchedule {
 async function uploadBlob(
   shopId: string,
   blob: Blob,
-  type: 'logo' | 'cover',
+  type: 'logo' | 'cover' | 'mobile_banner',
 ): Promise<string | null> {
   const supabase = createClient()
   const path = `shops/${shopId}/${type}/${Date.now()}.webp`
@@ -111,16 +111,16 @@ async function processLogo(file: File): Promise<Blob | null> {
 
 // ── Produce final 1600×400 banner from crop area ───────────────
 
-async function cropToBannerBlob(imageSrc: string, pixels: Area): Promise<Blob | null> {
+async function cropToBannerBlob(imageSrc: string, pixels: Area, outW: number, outH: number): Promise<Blob | null> {
   return new Promise(resolve => {
     const img = new window.Image()
     img.onload = () => {
       const canvas = document.createElement('canvas')
-      canvas.width = 1600; canvas.height = 400
+      canvas.width = outW; canvas.height = outH
       canvas.getContext('2d')!.drawImage(
         img,
         pixels.x, pixels.y, pixels.width, pixels.height,
-        0, 0, 1600, 400,
+        0, 0, outW, outH,
       )
       canvas.toBlob(b => resolve(b), 'image/webp', 0.90)
     }
@@ -132,15 +132,19 @@ async function cropToBannerBlob(imageSrc: string, pixels: Area): Promise<Blob | 
 
 function BannerCropModal({
   imageSrc,
+  aspect,
+  label,
   onConfirm,
   onCancel,
 }: {
   imageSrc: string
+  aspect: number
+  label: string
   onConfirm: (pixels: Area) => void
   onCancel: () => void
 }) {
-  const [crop, setCrop]   = useState({ x: 0, y: 0 })
-  const [zoom, setZoom]   = useState(1)
+  const [crop, setCrop]     = useState({ x: 0, y: 0 })
+  const [zoom, setZoom]     = useState(1)
   const [pixels, setPixels] = useState<Area | null>(null)
 
   const onComplete = useCallback((_: Area, px: Area) => setPixels(px), [])
@@ -151,8 +155,8 @@ function BannerCropModal({
         {/* Header */}
         <div className="px-5 pt-5 pb-4 flex items-center justify-between border-b border-[#f0f0ec]">
           <div>
-            <h3 className="text-[15px] font-bold text-[#0f0f0e]">Adjust banner</h3>
-            <p className="text-[11px] text-[#9c9c98] mt-0.5">Pan and zoom to frame your banner (4:1)</p>
+            <h3 className="text-[15px] font-bold text-[#0f0f0e]">Adjust {label}</h3>
+            <p className="text-[11px] text-[#9c9c98] mt-0.5">Pan and zoom to frame your banner</p>
           </div>
           <button onClick={onCancel} className="w-8 h-8 rounded-full bg-[#f0f0ec] flex items-center justify-center hover:bg-[#e8e8e4] transition-colors">
             <X className="w-4 h-4" />
@@ -165,7 +169,7 @@ function BannerCropModal({
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            aspect={4 / 1}
+            aspect={aspect}
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onComplete}
@@ -205,6 +209,25 @@ function BannerCropModal({
   )
 }
 
+// ── Banner crop config per type ────────────────────────────────
+
+const BANNER_CONFIGS = {
+  cover: {
+    aspect: 4 / 1,
+    outW: 1600,
+    outH: 400,
+    previewCls: 'w-40 h-10 rounded-[12px]',
+    cropLabel: 'desktop banner',
+  },
+  mobile_banner: {
+    aspect: 16 / 9,
+    outW: 1200,
+    outH: 675,
+    previewCls: 'w-[107px] h-[60px] rounded-[12px]',
+    cropLabel: 'mobile banner',
+  },
+} as const
+
 // ── Single-image field component ───────────────────────────────
 
 function ImageField({
@@ -216,20 +239,20 @@ function ImageField({
   onChange: (url: string | null) => void
   round?: boolean
   shopId: string
-  type: 'logo' | 'cover'
+  type: 'logo' | 'cover' | 'mobile_banner'
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading]     = useState(false)
-  const [cropSrc, setCropSrc]         = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [cropSrc, setCropSrc]     = useState<string | null>(null)
+
+  const isBanner = type === 'cover' || type === 'mobile_banner'
+  const bannerCfg = isBanner ? BANNER_CONFIGS[type] : null
 
   const handleFile = async (file: File) => {
-    if (type === 'cover') {
-      // Show cropper first
-      const url = URL.createObjectURL(file)
-      setCropSrc(url)
+    if (isBanner) {
+      setCropSrc(URL.createObjectURL(file))
       return
     }
-    // Logo: auto-process and upload immediately
     setUploading(true)
     const blob = await processLogo(file)
     if (blob) {
@@ -240,13 +263,13 @@ function ImageField({
   }
 
   const handleCropConfirm = async (pixels: Area) => {
-    if (!cropSrc) return
+    if (!cropSrc || !bannerCfg) return
     setCropSrc(null)
     setUploading(true)
-    const blob = await cropToBannerBlob(cropSrc, pixels)
+    const blob = await cropToBannerBlob(cropSrc, pixels, bannerCfg.outW, bannerCfg.outH)
     URL.revokeObjectURL(cropSrc)
     if (blob) {
-      const url = await uploadBlob(shopId, blob, 'cover')
+      const url = await uploadBlob(shopId, blob, type as 'cover' | 'mobile_banner')
       if (url) onChange(url)
     }
     setUploading(false)
@@ -258,11 +281,17 @@ function ImageField({
     if (inputRef.current) inputRef.current.value = ''
   }
 
+  const previewCls = round
+    ? 'w-20 h-20 rounded-full'
+    : (bannerCfg?.previewCls ?? 'w-20 h-20 rounded-[12px]')
+
   return (
     <div>
-      {cropSrc && (
+      {cropSrc && bannerCfg && (
         <BannerCropModal
           imageSrc={cropSrc}
+          aspect={bannerCfg.aspect}
+          label={bannerCfg.cropLabel}
           onConfirm={handleCropConfirm}
           onCancel={handleCropCancel}
         />
@@ -276,7 +305,7 @@ function ImageField({
           className={cn(
             'relative flex-shrink-0 bg-[#f0f0ec] border-2 border-dashed border-[#e8e8e4] overflow-hidden',
             'hover:border-[#FF6B35]/50 transition-colors group',
-            round ? 'w-20 h-20 rounded-full' : 'w-40 h-10 rounded-[12px]',
+            previewCls,
             uploading && 'opacity-50 pointer-events-none',
           )}
         >
@@ -426,8 +455,9 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
     deliveryZones:      (shop.delivery_zones ?? []) as string[],
     locationVisibility: ((shop.location_visibility ?? 'exact') as 'exact' | 'approximate'),
     // Branding
-    logoUrl:    shop.logo_url ?? '',
-    coverImage: shop.cover_image ?? '',
+    logoUrl:      shop.logo_url ?? '',
+    coverImage:   shop.cover_image ?? '',
+    mobileBanner: shop.mobile_banner ?? '',
     // Gallery existing URLs
     galleryUrls: (shop.gallery ?? []) as string[],
     // Hours
@@ -488,6 +518,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
         showOpeningHours:   form.showOpeningHours,
         logoUrl:        form.logoUrl || null,
         coverImage:     form.coverImage || null,
+        mobileBanner:   form.mobileBanner || null,
         gallery:        form.galleryUrls,
       })
 
@@ -860,12 +891,23 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
 
           <div className="border-t border-[#f0f0ec] pt-4">
             <ImageField
-              label="Cover Image"
-              hint="Wide banner image shown on your public shop page."
+              label="Desktop Banner"
+              hint="Shown on desktop & tablet. Recommended: 2000 × 500 px (4:1). Cropped to 1600 × 400."
               value={form.coverImage || null}
               onChange={url => set('coverImage', url ?? '')}
               shopId={shop.id}
               type="cover"
+            />
+          </div>
+
+          <div className="border-t border-[#f0f0ec] pt-4">
+            <ImageField
+              label="Mobile Banner"
+              hint="Shown on phones only. Recommended: 1200 × 675 px (16:9). Falls back to desktop banner if not set."
+              value={form.mobileBanner || null}
+              onChange={url => set('mobileBanner', url ?? '')}
+              shopId={shop.id}
+              type="mobile_banner"
             />
           </div>
 

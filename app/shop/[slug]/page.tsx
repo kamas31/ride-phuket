@@ -61,9 +61,9 @@ export async function generateMetadata({ params }: ShopPageProps) {
 //   const DEFAULT_BANNER_URL = '/default-shop-banner.png'
 const DEFAULT_BANNER_URL: string | null = null
 
-function DefaultShopBanner() {
+function DefaultShopBanner({ mobile = false }: { mobile?: boolean }) {
   return (
-    <div className="h-[220px] md:h-[260px] relative overflow-hidden">
+    <div className={mobile ? 'aspect-[16/9] relative overflow-hidden' : 'h-[260px] relative overflow-hidden'}>
       <div
         className="absolute inset-0"
         style={{ background: 'linear-gradient(135deg, #0d1520 0%, #1a1208 55%, #2d1008 100%)' }}
@@ -170,6 +170,10 @@ export default async function ShopPage({ params }: ShopPageProps) {
     ],
   }
 
+  // Desktop: coverImage → mobileBanner → default  |  Mobile: mobileBanner → coverImage → default
+  const desktopBannerSrc = shop.coverImage || shop.mobileBanner || DEFAULT_BANNER_URL
+  const mobileBannerSrc  = shop.mobileBanner || shop.coverImage || DEFAULT_BANNER_URL
+
   return (
     <div className="bg-white min-h-screen pt-16">
       <script
@@ -197,20 +201,24 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
       {/* ── Banner ── */}
       <div className="relative">
-        {shop.coverImage || DEFAULT_BANNER_URL ? (
-          <ScooterImage
-            src={(shop.coverImage ?? DEFAULT_BANNER_URL)!}
-            alt={shop.name}
-            className="h-[220px] md:h-[260px]"
-            overlay
-            priority
-            sizes="100vw"
-          />
-        ) : (
-          <DefaultShopBanner />
-        )}
+        {/* Desktop banner (≥ 768px) */}
+        <div className="hidden md:block">
+          {desktopBannerSrc ? (
+            <ScooterImage src={desktopBannerSrc} alt={shop.name} className="h-[260px]" overlay priority sizes="100vw" />
+          ) : (
+            <DefaultShopBanner />
+          )}
+        </div>
+        {/* Mobile banner (< 768px) */}
+        <div className="block md:hidden">
+          {mobileBannerSrc ? (
+            <ScooterImage src={mobileBannerSrc} alt={shop.name} className="aspect-[16/9]" overlay priority sizes="100vw" />
+          ) : (
+            <DefaultShopBanner mobile />
+          )}
+        </div>
 
-        {/* Shop identity over banner */}
+        {/* Shop identity overlaid on banner */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end px-5 md:px-8 pb-7">
           <div className="max-w-5xl mx-auto w-full">
             {/* Logo — only rendered when present; no fallback, no placeholder */}

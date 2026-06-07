@@ -40,7 +40,8 @@ export interface Shop {
   phone: string
   whatsapp?: string
   // Premium shop fields (migration 005)
-  coverImage?: string | null
+  coverImage?: string | null    // desktop banner 4:1 (1600×400)
+  mobileBanner?: string | null  // mobile banner 16:9 (1200×675) — migration 044
   deliveryZones?: string[]
   openingHours?: OpeningHoursSchedule
   instagram?: string
