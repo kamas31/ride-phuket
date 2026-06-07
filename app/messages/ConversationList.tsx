@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { MessageCircle } from 'lucide-react'
+import { MessageCircle, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { deleteConversation } from '@/app/actions/moderation'
 import { cn, getInitials } from '@/lib/utils'
 import type { ConversationPreview } from '@/app/actions/messaging'
 
@@ -25,12 +26,167 @@ function timeAgo(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
+const SWIPE_WIDTH = 72
+
+interface SwipeableConvoRowProps {
+  conv: ConversationPreview
+  onDelete: (id: string) => void
+}
+
+function SwipeableConvoRow({ conv, onDelete }: SwipeableConvoRowProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const startXRef = useRef(0)
+  const isDraggingRef = useRef(false)
+
+  const hasUnread = conv.unreadCount > 0
+
+  function applyTranslate(x: number, animated: boolean) {
+    if (!contentRef.current) return
+    contentRef.current.style.transition = animated ? 'transform 0.2s ease' : 'none'
+    contentRef.current.style.transform = `translateX(${x}px)`
+  }
+
+  function onTouchStart(e: React.TouchEvent) {
+    startXRef.current = e.touches[0].clientX
+    isDraggingRef.current = false
+    applyTranslate(isOpen ? -SWIPE_WIDTH : 0, false)
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    const dx = e.touches[0].clientX - startXRef.current
+    isDraggingRef.current = Math.abs(dx) > 5
+    const base = isOpen ? -SWIPE_WIDTH : 0
+    const clamped = Math.min(0, Math.max(-SWIPE_WIDTH, base + dx))
+    applyTranslate(clamped, false)
+  }
+
+  function onTouchEnd(e: React.TouchEvent) {
+    const dx = e.changedTouches[0].clientX - startXRef.current
+    const base = isOpen ? -SWIPE_WIDTH : 0
+    const newOpen = base + dx < -(SWIPE_WIDTH / 2)
+    setIsOpen(newOpen)
+    applyTranslate(newOpen ? -SWIPE_WIDTH : 0, true)
+  }
+
+  async function handleDelete() {
+    setDeleting(true)
+    const result = await deleteConversation(conv.id)
+    if ('ok' in result) {
+      onDelete(conv.id)
+    } else {
+      setDeleting(false)
+    }
+  }
+
+  return (
+    <div className="relative overflow-hidden border-b border-[#f0f0ec] last:border-b-0">
+      {/* Delete action — revealed behind the row on left swipe */}
+      <div className="absolute right-0 top-0 bottom-0 w-[72px] flex items-center justify-center bg-[#ef4444]">
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          aria-label="Delete conversation"
+          className="w-full h-full flex items-center justify-center active:bg-[#dc2626] transition-colors disabled:opacity-60"
+        >
+          <Trash2 className="w-5 h-5 text-white" />
+        </button>
+      </div>
+
+      {/* Swipeable content */}
+      <div
+        ref={contentRef}
+        style={{ transform: 'translateX(0)', willChange: 'transform' }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        <Link
+          href={`/messages/${conv.id}`}
+          onClick={e => {
+            if (isOpen) {
+              e.preventDefault()
+              setIsOpen(false)
+              applyTranslate(0, true)
+            }
+          }}
+          className={cn(
+            'flex items-center gap-3.5 px-4 py-4 transition-colors active:bg-[#f5f5f0]',
+            hasUnread ? 'bg-[#fffaf7] hover:bg-[#fff6f2]' : 'bg-white hover:bg-[#fafaf8]',
+          )}
+        >
+          {/* Avatar */}
+          <div className="w-[46px] h-[46px] rounded-full overflow-hidden flex-shrink-0">
+            {conv.otherUserAvatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={conv.otherUserAvatarUrl}
+                alt={conv.otherUserName}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] flex items-center justify-center text-white text-sm font-bold">
+                {getInitials(conv.otherUserName)}
+              </div>
+            )}
+          </div>
+
+          {/* Text */}
+          <div className="flex-1 min-w-0">
+            {/* Row 1: name + timestamp */}
+            <div className="flex items-baseline justify-between gap-2 mb-[2px]">
+              <p className={cn(
+                'text-[14px] truncate leading-tight',
+                hasUnread ? 'font-bold text-[#0f0f0e]' : 'font-semibold text-[#0f0f0e]',
+              )}>
+                {conv.otherUserName}
+              </p>
+              {conv.lastMessageAt && (
+                <span className={cn(
+                  'text-[11px] flex-shrink-0 leading-none',
+                  hasUnread ? 'text-[#FF6B35] font-semibold' : 'text-[#b0b0ac]',
+                )}>
+                  {timeAgo(conv.lastMessageAt)}
+                </span>
+              )}
+            </div>
+
+            {/* Row 2: scooter / shop context */}
+            {conv.scooterName ? (
+              <p className="text-[12px] text-[#9c9c98] leading-tight mb-[3px] truncate">
+                Regarding {conv.scooterName}
+              </p>
+            ) : conv.shopName ? (
+              <p className="text-[12px] text-[#9c9c98] leading-tight mb-[3px] truncate">
+                {conv.shopName}
+              </p>
+            ) : null}
+
+            {/* Row 3: last message + unread dot */}
+            <div className="flex items-center gap-2">
+              <p className={cn(
+                'text-[13px] truncate leading-snug flex-1',
+                hasUnread ? 'text-[#3a3a38] font-medium' : 'text-[#9c9c98]',
+              )}>
+                {conv.lastMessage ?? 'Start a conversation'}
+              </p>
+              {hasUnread && (
+                <span className="w-[9px] h-[9px] bg-[#FF6B35] rounded-full flex-shrink-0 shadow-sm" />
+              )}
+            </div>
+          </div>
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 export default function ConversationList({
   initialConversations,
   currentUserId,
 }: ConversationListProps) {
   const [conversations, setConversations] = useState<ConversationPreview[]>(
-    // Sort by most recent activity on mount
     [...initialConversations].sort((a, b) => {
       const ta = a.lastMessageAt ?? a.id
       const tb = b.lastMessageAt ?? b.id
@@ -55,24 +211,21 @@ export default function ConversationList({
             type?: string
             created_at: string
           }
-          // System events must not update the preview text or unread count
           if ((m.type ?? 'message') === 'context_switch') return
 
           setConversations(prev => {
             const idx = prev.findIndex(c => c.id === m.conversation_id)
-            if (idx === -1) return prev   // not one of our conversations
+            if (idx === -1) return prev
 
             const updated = {
               ...prev[idx],
               lastMessage: m.content,
               lastMessageAt: m.created_at,
-              // Increment unread only if the message is from the OTHER party
               unreadCount:
                 m.sender_id !== currentUserId
                   ? prev[idx].unreadCount + 1
                   : prev[idx].unreadCount,
             }
-            // Bubble the updated conversation to the top
             const next = [...prev]
             next.splice(idx, 1)
             return [updated, ...next]
@@ -83,7 +236,6 @@ export default function ConversationList({
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'messages' },
         (payload) => {
-          // A message was marked read — zero out unread for that conversation
           const m = payload.new as { conversation_id: string; read_at: string | null }
           if (!m.read_at) return
           setConversations(prev =>
@@ -97,6 +249,10 @@ export default function ConversationList({
 
     return () => { supabase.removeChannel(channel) }
   }, [currentUserId])
+
+  function handleDelete(id: string) {
+    setConversations(prev => prev.filter(c => c.id !== id))
+  }
 
   if (conversations.length === 0) {
     return (
@@ -119,81 +275,14 @@ export default function ConversationList({
   }
 
   return (
-    <div className="divide-y divide-[#f0f0ec]">
-      {conversations.map(conv => {
-        const hasUnread = conv.unreadCount > 0
-        return (
-          <Link
-            key={conv.id}
-            href={`/messages/${conv.id}`}
-            className={cn(
-              'flex items-center gap-3.5 px-4 py-4 transition-colors active:bg-[#f5f5f0]',
-              hasUnread ? 'bg-[#fffaf7] hover:bg-[#fff6f2]' : 'bg-white hover:bg-[#fafaf8]',
-            )}
-          >
-            {/* Avatar: other user's photo or initials */}
-            <div className="w-[46px] h-[46px] rounded-full overflow-hidden flex-shrink-0">
-              {conv.otherUserAvatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={conv.otherUserAvatarUrl}
-                  alt={conv.otherUserName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-[#FF6B35] to-[#ff9a5c] flex items-center justify-center text-white text-sm font-bold">
-                  {getInitials(conv.otherUserName)}
-                </div>
-              )}
-            </div>
-
-            {/* Text */}
-            <div className="flex-1 min-w-0">
-              {/* Row 1: other user name + timestamp */}
-              <div className="flex items-baseline justify-between gap-2 mb-[2px]">
-                <p className={cn(
-                  'text-[14px] truncate leading-tight',
-                  hasUnread ? 'font-bold text-[#0f0f0e]' : 'font-semibold text-[#0f0f0e]',
-                )}>
-                  {conv.otherUserName}
-                </p>
-                {conv.lastMessageAt && (
-                  <span className={cn(
-                    'text-[11px] flex-shrink-0 leading-none',
-                    hasUnread ? 'text-[#FF6B35] font-semibold' : 'text-[#b0b0ac]',
-                  )}>
-                    {timeAgo(conv.lastMessageAt)}
-                  </span>
-                )}
-              </div>
-
-              {/* Row 2: scooter context */}
-              {conv.scooterName ? (
-                <p className="text-[12px] text-[#9c9c98] leading-tight mb-[3px] truncate">
-                  Regarding {conv.scooterName}
-                </p>
-              ) : conv.shopName ? (
-                <p className="text-[12px] text-[#9c9c98] leading-tight mb-[3px] truncate">
-                  {conv.shopName}
-                </p>
-              ) : null}
-
-              {/* Row 3: last message + unread dot */}
-              <div className="flex items-center gap-2">
-                <p className={cn(
-                  'text-[13px] truncate leading-snug flex-1',
-                  hasUnread ? 'text-[#3a3a38] font-medium' : 'text-[#9c9c98]',
-                )}>
-                  {conv.lastMessage ?? 'Start a conversation'}
-                </p>
-                {hasUnread && (
-                  <span className="w-[9px] h-[9px] bg-[#FF6B35] rounded-full flex-shrink-0 shadow-sm" />
-                )}
-              </div>
-            </div>
-          </Link>
-        )
-      })}
+    <div>
+      {conversations.map(conv => (
+        <SwipeableConvoRow
+          key={conv.id}
+          conv={conv}
+          onDelete={handleDelete}
+        />
+      ))}
     </div>
   )
 }

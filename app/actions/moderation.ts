@@ -99,6 +99,42 @@ export async function unblockUser(
   return { ok: true }
 }
 
+export async function deleteConversation(
+  conversationId: string,
+): Promise<{ ok: true } | { error: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const admin = createAdminClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: convo } = await (admin as any)
+    .from('conversations')
+    .select('client_id, owner_id')
+    .eq('id', conversationId)
+    .single()
+
+  if (!convo) return { error: 'Conversation not found.' }
+  if (convo.client_id !== user.id && convo.owner_id !== user.id) {
+    return { error: 'Unauthorized.' }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (admin as any)
+    .from('conversations')
+    .delete()
+    .eq('id', conversationId)
+
+  if (error) {
+    console.error('[deleteConversation]', error.message)
+    return { error: 'Failed to delete conversation.' }
+  }
+
+  revalidatePath('/messages')
+  return { ok: true }
+}
+
 export async function reportConversation(
   conversationId: string,
   reason: 'spam' | 'scam' | 'harassment' | 'other',

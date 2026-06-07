@@ -2,13 +2,14 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { MoreVertical, X } from 'lucide-react'
-import { blockUser, unblockUser, reportConversation } from '@/app/actions/moderation'
+import { blockUser, unblockUser, reportConversation, deleteConversation } from '@/app/actions/moderation'
 import { cn } from '@/lib/utils'
 
 interface ThreadMenuProps {
   conversationId: string
   blockedByMe: boolean
   onBlockChange: (blocked: boolean) => void
+  onDelete?: () => void
 }
 
 const REPORT_REASONS = [
@@ -20,10 +21,11 @@ const REPORT_REASONS = [
 
 type ReportReason = (typeof REPORT_REASONS)[number]['value']
 
-export default function ThreadMenu({ conversationId, blockedByMe, onBlockChange }: ThreadMenuProps) {
+export default function ThreadMenu({ conversationId, blockedByMe, onBlockChange, onDelete }: ThreadMenuProps) {
   const [open, setOpen] = useState(false)
   const [showBlockConfirm, setShowBlockConfirm] = useState(false)
   const [showReport, setShowReport] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [reportReason, setReportReason] = useState<ReportReason>('spam')
   const [reportDetails, setReportDetails] = useState('')
   const [isPending, setIsPending] = useState(false)
@@ -56,6 +58,16 @@ export default function ThreadMenu({ conversationId, blockedByMe, onBlockChange 
     if ('ok' in result) {
       onBlockChange(false)
       setOpen(false)
+    }
+  }
+
+  async function handleDelete() {
+    setIsPending(true)
+    const result = await deleteConversation(conversationId)
+    setIsPending(false)
+    if ('ok' in result) {
+      setShowDeleteConfirm(false)
+      onDelete?.()
     }
   }
 
@@ -96,6 +108,13 @@ export default function ThreadMenu({ conversationId, blockedByMe, onBlockChange 
             >
               Report conversation
             </button>
+            <div className="h-px bg-[#f0f0ec]" />
+            <button
+              onClick={() => { setOpen(false); setShowDeleteConfirm(true) }}
+              className="w-full text-left px-4 py-3 text-[13px] text-[#ef4444] hover:bg-[#fafaf8] transition-colors"
+            >
+              Delete conversation
+            </button>
           </div>
         )}
       </div>
@@ -120,6 +139,31 @@ export default function ThreadMenu({ conversationId, blockedByMe, onBlockChange 
               className="flex-1 h-11 rounded-full bg-[#0f0f0e] text-white text-[14px] font-semibold disabled:opacity-50 hover:bg-[#2a2a28] transition-colors"
             >
               {isPending ? 'Blocking…' : 'Block'}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Delete confirmation */}
+      {showDeleteConfirm && (
+        <Modal onClose={() => setShowDeleteConfirm(false)}>
+          <p className="text-[16px] font-bold text-[#0f0f0e] mb-1.5">Delete conversation?</p>
+          <p className="text-[13px] text-[#5c5c58] leading-relaxed mb-6">
+            This will permanently delete the conversation and all its messages. This action cannot be undone.
+          </p>
+          <div className="flex gap-2.5">
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              className="flex-1 h-11 rounded-full border border-[#e8e8e4] text-[14px] text-[#5c5c58] font-medium hover:bg-[#f8f8f6] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={isPending}
+              className="flex-1 h-11 rounded-full bg-[#ef4444] text-white text-[14px] font-semibold disabled:opacity-50 hover:bg-[#dc2626] transition-colors"
+            >
+              {isPending ? 'Deleting…' : 'Delete'}
             </button>
           </div>
         </Modal>

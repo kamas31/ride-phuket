@@ -391,6 +391,7 @@ export default function MessageThread({
               conversationId={conversation.id}
               blockedByMe={localBlockedByMe}
               onBlockChange={setLocalBlockedByMe}
+              onDelete={() => router.push('/messages')}
             />
           </div>
         </div>
