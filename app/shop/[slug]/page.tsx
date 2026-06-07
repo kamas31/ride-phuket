@@ -271,6 +271,14 @@ export default async function ShopPage({ params }: ShopPageProps) {
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-[#0f0f0e] truncate">{shop.name}</p>
+                    <p className="text-[11px] text-[#9c9c98] mt-0.5 truncate">{shop.address || shop.location + ', Phuket'}</p>
+                    {shop.showOpeningHours !== false && shop.openingHours?.monday && (
+                      <p className="text-[11px] text-[#9c9c98] truncate">
+                        {shop.openingHours.monday.enabled
+                          ? `Mon–Fri ${shop.openingHours.monday.open}–${shop.openingHours.monday.close}`
+                          : 'See shop for hours'}
+                      </p>
+                    )}
                     {chatStats.isFastResponder && (
                       <div className="mt-1">
                         <TrustBadge variant="fast_response" size="xs" />
@@ -323,20 +331,6 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
                 {/* Info rows */}
                 <div className="space-y-2 mt-4 pt-4 border-t border-[#f0f0ec] text-sm">
-                  <div className="flex items-start gap-2.5 text-[#5c5c58]">
-                    <MapPin className="w-4 h-4 text-[#FF6B35] flex-shrink-0 mt-0.5" />
-                    <span>{shop.address || shop.location + ', Phuket'}</span>
-                  </div>
-                  {shop.showOpeningHours !== false && shop.openingHours?.monday && (
-                    <div className="flex items-start gap-2.5 text-[#5c5c58]">
-                      <Clock className="w-4 h-4 text-[#0ea5e9] flex-shrink-0 mt-0.5" />
-                      <span>
-                        {shop.openingHours.monday.enabled
-                          ? `Mon–Fri ${shop.openingHours.monday.open}–${shop.openingHours.monday.close}`
-                          : 'See shop for hours'}
-                      </span>
-                    </div>
-                  )}
                   {shop.phone && !shop.whatsapp && (
                     <a href={`tel:${shop.phone}`} className="flex items-center gap-2.5 text-[#5c5c58] hover:text-[#FF6B35] transition-colors">
                       <Phone className="w-4 h-4 text-[#9c9c98] flex-shrink-0" />
