@@ -48,7 +48,6 @@ export function PricingClient({
   ]
 
   const selectedOption = options.find(o => o.period === selected) ?? options[0]
-  const hasSavings = options.some(o => o.saving)
 
   return (
     <>
@@ -86,21 +85,17 @@ export function PricingClient({
                 <p className="text-[20px] font-bold text-[#0f0f0e] leading-none tabular-nums">
                   {formatPrice(opt.price)}
                 </p>
-                <p className={cn('text-[10px] mt-1.5', active ? 'text-[#FF6B35]/70' : 'text-[#b0b0ac]')}>
-                  {opt.unit}
-                </p>
                 {opt.saving && opt.theoretical ? (
-                  <div className="mt-1.5 flex flex-col items-center gap-0.5">
-                    <span className="text-[9px] text-[#b0b0ac] line-through tabular-nums">
-                      {formatPrice(opt.theoretical)}
-                    </span>
-                    <span className="text-[9px] font-semibold text-[#16a34a] whitespace-nowrap">
-                      save {formatPrice(opt.saving)}
-                    </span>
-                  </div>
-                ) : hasSavings ? (
-                  <div className="mt-1.5 h-[30px]" />
-                ) : null}
+                  <p className="mt-1.5 text-[8px] tabular-nums whitespace-nowrap leading-tight text-center">
+                    <span className="line-through text-[#b0b0ac]">{formatPrice(opt.theoretical)}</span>
+                    {' '}
+                    <span className="font-semibold text-[#16a34a]">save {formatPrice(opt.saving)}</span>
+                  </p>
+                ) : (
+                  <p className={cn('text-[10px] mt-1.5', active ? 'text-[#FF6B35]/70' : 'text-[#b0b0ac]')}>
+                    {opt.unit}
+                  </p>
+                )}
               </button>
             )
           })}
