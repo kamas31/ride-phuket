@@ -177,6 +177,7 @@ interface ZoneClusterData {
   lng: number
   exactAggregates: ShopAggregate[]  // TYPE 1 shops — break out above BREAKOUT_ZOOM
   clusterShopCount: number           // TYPE 2+3 shop count — permanent residual cluster
+  clusterShopIds: string[]           // TYPE 2+3 shop IDs (needed for single-shop card)
   clusterMinPrice: number | null     // min price across TYPE 2+3 scooters (for single-shop label)
   totalCount: number                 // exactAggregates.length + clusterShopCount
 }
@@ -242,7 +243,8 @@ function buildZoneClusters(scooters: Scooter[]): ZoneClusterData[] {
 
   return Array.from(zoneMeta.entries()).map(([zoneKey, meta]) => {
     const exactAggregates  = Array.from(exactAggsByZone.get(zoneKey)!.values())
-    const clusterShopCount = clusterShopsByZone.get(zoneKey)!.size
+    const clusterShopIds   = Array.from(clusterShopsByZone.get(zoneKey)!)
+    const clusterShopCount = clusterShopIds.length
     return {
       zoneKey,
       zoneName:        meta.zoneName,
@@ -250,6 +252,7 @@ function buildZoneClusters(scooters: Scooter[]): ZoneClusterData[] {
       lng:             meta.lng,
       exactAggregates,
       clusterShopCount,
+      clusterShopIds,
       clusterMinPrice: clusterMinPriceByZone.get(zoneKey) ?? null,
       totalCount:      exactAggregates.length + clusterShopCount,
     }
@@ -774,14 +777,18 @@ export default function ScooterMap({
         el.style.display = 'none'
       } else {
         el.style.display = ''
-        // Single TYPE 1 shop at low zoom: treat as shop pin click (shows card, stays on map)
-        const isSingleExact = !aboveBreakout && count === 1 && zc.exactAggregates.length === 1
+        // count=1 (any type): treat as shop pin click — shows card, stays on map
+        const singleShopId = count === 1
+          ? (aboveBreakout
+              ? (zc.clusterShopIds[0] ?? null)
+              : (zc.exactAggregates[0]?.shopId ?? zc.clusterShopIds[0] ?? null))
+          : null
         zoneClusterMarkersRef.current.get(zc.zoneKey)!.root.render(
           <ZoneClusterPin
             count={count}
             minPrice={minPrice}
-            onClick={() => isSingleExact
-              ? onSelectRef.current(zc.exactAggregates[0].shopId)
+            onClick={() => singleShopId
+              ? onSelectRef.current(singleShopId)
               : onZoneClickRef.current?.(zc.zoneKey)
             }
           />,
