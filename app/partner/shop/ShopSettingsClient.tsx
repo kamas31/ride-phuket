@@ -857,14 +857,14 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
                         type="time"
                         value={day.open}
                         onChange={e => setHoursDay(key, { open: e.target.value })}
-                        className="flex-1 min-w-0 px-2 py-2 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-sm focus:outline-none focus:border-[#FF6B35]"
+                        className="flex-1 min-w-0 px-2 py-2 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-sm focus:outline-none focus:border-[#FF6B35] [&::-webkit-calendar-picker-indicator]:hidden"
                       />
                       <span className="text-xs text-[#9c9c98] flex-shrink-0">–</span>
                       <input
                         type="time"
                         value={day.close}
                         onChange={e => setHoursDay(key, { close: e.target.value })}
-                        className="flex-1 min-w-0 px-2 py-2 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-sm focus:outline-none focus:border-[#FF6B35]"
+                        className="flex-1 min-w-0 px-2 py-2 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[8px] text-sm focus:outline-none focus:border-[#FF6B35] [&::-webkit-calendar-picker-indicator]:hidden"
                       />
                     </div>
                   ) : (
