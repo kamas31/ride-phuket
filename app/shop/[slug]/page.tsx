@@ -105,6 +105,8 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
   const hasCoords = Boolean(shop.lat && shop.lng)
   const locMode   = shop.locationVisibility ?? 'exact'
+  // Only show map for TYPE 1 (exact pin) or TYPE 2 (approximate circle) — not TYPE 3 (zone default)
+  const showMap   = hasCoords && (shop.hasPrecisePin || locMode === 'approximate')
 
   // LocalBusiness structured data — only real fields, no invented data
   const jsonLd: Record<string, unknown> = {
@@ -351,7 +353,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
               </div>
 
               {/* Location map — desktop only (mobile map appears in left column) */}
-              {hasCoords && (
+              {showMap && (
                 <div className="hidden lg:block">
                   <p className="text-[11px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-2 px-1">
                     Location
