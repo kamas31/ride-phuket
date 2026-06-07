@@ -258,7 +258,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
             <div id="sticky-contact-sentinel" className="-mt-1" aria-hidden />
 
             {/* Image gallery — edge-to-edge on mobile, rounded on desktop */}
-            <div className="-mx-4 md:mx-0">
+            <div className="-mx-4 md:mx-0 mt-2">
               <ImageGallery images={scooter.images} name={scooter.name} coverImage={scooter.coverImage} />
             </div>
 
