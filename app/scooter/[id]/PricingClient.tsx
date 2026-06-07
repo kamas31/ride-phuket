@@ -32,13 +32,23 @@ export function PricingClient({
 }: PricingClientProps) {
   const [selected, setSelected] = useState<Period>('daily')
 
-  const options: { period: Period; price: number; label: string; unit: string }[] = [
-    { period: 'daily',   price: pricePerDay,            label: 'Daily',   unit: '/day'   },
-    ...(pricePerWeek  ? [{ period: 'weekly'  as Period, price: pricePerWeek,  label: 'Weekly',  unit: '/week'  }] : []),
-    ...(pricePerMonth ? [{ period: 'monthly' as Period, price: pricePerMonth, label: 'Monthly', unit: '/month' }] : []),
+  const weeklyTheoretical  = pricePerDay * 7
+  const monthlyTheoretical = pricePerDay * 30
+
+  const options: { period: Period; price: number; label: string; unit: string; theoretical?: number; saving?: number }[] = [
+    { period: 'daily',   price: pricePerDay,   label: 'Daily',   unit: '/day'   },
+    ...(pricePerWeek  ? [{
+      period: 'weekly'  as Period, price: pricePerWeek,  label: 'Weekly',  unit: '/week',
+      ...(weeklyTheoretical  > pricePerWeek  ? { theoretical: weeklyTheoretical,  saving: weeklyTheoretical  - pricePerWeek  } : {}),
+    }] : []),
+    ...(pricePerMonth ? [{
+      period: 'monthly' as Period, price: pricePerMonth, label: 'Monthly', unit: '/month',
+      ...(monthlyTheoretical > pricePerMonth ? { theoretical: monthlyTheoretical, saving: monthlyTheoretical - pricePerMonth } : {}),
+    }] : []),
   ]
 
   const selectedOption = options.find(o => o.period === selected) ?? options[0]
+  const hasSavings = options.some(o => o.saving)
 
   return (
     <>
@@ -79,6 +89,18 @@ export function PricingClient({
                 <p className={cn('text-[10px] mt-1.5', active ? 'text-[#FF6B35]/70' : 'text-[#b0b0ac]')}>
                   {opt.unit}
                 </p>
+                {opt.saving && opt.theoretical ? (
+                  <div className="mt-1.5 flex flex-col items-center gap-0.5">
+                    <span className="text-[9px] text-[#b0b0ac] line-through tabular-nums">
+                      {formatPrice(opt.theoretical)}
+                    </span>
+                    <span className="text-[9px] font-semibold text-[#16a34a] whitespace-nowrap">
+                      save {formatPrice(opt.saving)}
+                    </span>
+                  </div>
+                ) : hasSavings ? (
+                  <div className="mt-1.5 h-[30px]" />
+                ) : null}
               </button>
             )
           })}
