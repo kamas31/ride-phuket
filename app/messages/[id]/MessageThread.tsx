@@ -429,7 +429,7 @@ export default function MessageThread({
                     <div className="flex-1 h-px bg-[#f0f0ec]" />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {group.msgs.map((msg, msgIndex) => {
                       // ── Context-switch separator ───────────────────────────
                       if (msg.type === 'context_switch') {
