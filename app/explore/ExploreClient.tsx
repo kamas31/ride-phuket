@@ -87,7 +87,6 @@ export default function ExploreClient({
   const toggleRecommended = (next: boolean) => {
     setShowRecommended(next)
     try { localStorage.setItem('adminShowRecommended', String(next)) } catch {}
-    if (!next) setFilters(f => f.sortBy === 'recommended' ? { ...f, sortBy: 'price_asc' } : f)
   }
 
   const [search, setSearch]           = useState(initialSearch)

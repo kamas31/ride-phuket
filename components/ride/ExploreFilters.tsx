@@ -18,10 +18,6 @@ export function ExploreFilters({ filters, onChange, showRecommended = true }: Ex
 
   const update = (patch: Partial<FilterState>) => onChange({ ...filters, ...patch })
 
-  const sortOptions = showRecommended
-    ? SORT_OPTIONS
-    : SORT_OPTIONS.filter(o => o.value !== 'recommended')
-
   const activeFilterCount = [
     filters.category !== 'all',
     filters.deliveryNow,
@@ -86,18 +82,20 @@ export function ExploreFilters({ filters, onChange, showRecommended = true }: Ex
           No Passport
         </button>
 
-        {/* Sort */}
-        <div className="flex-shrink-0 ml-auto">
-          <select
-            value={filters.sortBy}
-            onChange={e => update({ sortBy: e.target.value as FilterState['sortBy'] })}
-            className="px-4 py-2 rounded-full border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] cursor-pointer hover:border-[#d0d0cc] transition-colors appearance-none pr-8"
-          >
-            {sortOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
+        {/* Sort — hidden by admin toggle when showRecommended=false */}
+        {showRecommended && (
+          <div className="flex-shrink-0 ml-auto">
+            <select
+              value={filters.sortBy}
+              onChange={e => update({ sortBy: e.target.value as FilterState['sortBy'] })}
+              className="px-4 py-2 rounded-full border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] cursor-pointer hover:border-[#d0d0cc] transition-colors appearance-none pr-8"
+            >
+              {SORT_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* ── Filter modal — portalled to document.body to escape sticky z-30 stacking context ── */}
