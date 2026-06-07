@@ -433,7 +433,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
               {scooters.length > 0 ? (
                 <div className="grid grid-cols-2 gap-3">
                   {scooters.map(scooter => (
-                    <ScooterCard key={scooter.id} scooter={scooter} compact />
+                    <ScooterCard key={scooter.id} scooter={scooter} compact hideTrustRow />
                   ))}
                 </div>
               ) : (

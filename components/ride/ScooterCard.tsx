@@ -15,6 +15,7 @@ interface ScooterCardProps {
   className?: string
   compact?: boolean
   xs?: boolean  // 2-column mobile grid: aspect-ratio image, minimal content
+  hideTrustRow?: boolean
 }
 
 // Unified glass pill for image overlays
@@ -35,7 +36,7 @@ function OverlayBadge({
   )
 }
 
-export const ScooterCard = memo(function ScooterCard({ scooter, className, compact = false, xs = false }: ScooterCardProps) {
+export const ScooterCard = memo(function ScooterCard({ scooter, className, compact = false, xs = false, hideTrustRow = false }: ScooterCardProps) {
   // xs variant: minimal 2-column mobile grid card
   if (xs) return (
     <Link
@@ -171,7 +172,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         </div>
 
         {/* Trust micro-row */}
-        <div className="flex items-center gap-1.5 mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-[#f0f0ec]">
+        {!hideTrustRow && <div className="flex items-center gap-1.5 mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-[#f0f0ec]">
           <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#22c55e] flex-shrink-0" />
           <span className="text-[9px] sm:text-[11px] text-[#9c9c98] truncate">
             {[
@@ -180,7 +181,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
               'Flexible terms',
             ].filter(Boolean).join(' · ')}
           </span>
-        </div>
+        </div>}
 
       </div>
     </Link>
