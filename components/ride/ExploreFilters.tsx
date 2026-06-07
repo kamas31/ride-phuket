@@ -10,12 +10,17 @@ import type { FilterState } from '@/types'
 interface ExploreFiltersProps {
   filters: FilterState
   onChange: (filters: FilterState) => void
+  showRecommended?: boolean
 }
 
-export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
+export function ExploreFilters({ filters, onChange, showRecommended = true }: ExploreFiltersProps) {
   const [showPanel, setShowPanel] = useState(false)
 
   const update = (patch: Partial<FilterState>) => onChange({ ...filters, ...patch })
+
+  const sortOptions = showRecommended
+    ? SORT_OPTIONS
+    : SORT_OPTIONS.filter(o => o.value !== 'recommended')
 
   const activeFilterCount = [
     filters.category !== 'all',
@@ -88,7 +93,7 @@ export function ExploreFilters({ filters, onChange }: ExploreFiltersProps) {
             onChange={e => update({ sortBy: e.target.value as FilterState['sortBy'] })}
             className="px-4 py-2 rounded-full border border-[#e8e8e4] bg-white text-sm font-medium text-[#5c5c58] cursor-pointer hover:border-[#d0d0cc] transition-colors appearance-none pr-8"
           >
-            {SORT_OPTIONS.map(opt => (
+            {sortOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>

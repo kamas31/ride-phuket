@@ -78,6 +78,18 @@ export default function ExploreClient({
   const priceInputRef                         = useRef<HTMLInputElement>(null)
 
   const [filters, setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
+
+  // Admin: show/hide "Recommended" sort option — persisted in localStorage
+  const [showRecommended, setShowRecommended] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return localStorage.getItem('adminShowRecommended') !== 'false'
+  })
+  const toggleRecommended = (next: boolean) => {
+    setShowRecommended(next)
+    try { localStorage.setItem('adminShowRecommended', String(next)) } catch {}
+    if (!next) setFilters(f => f.sortBy === 'recommended' ? { ...f, sortBy: 'price_asc' } : f)
+  }
+
   const [search, setSearch]           = useState(initialSearch)
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch)
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -322,7 +334,7 @@ export default function ExploreClient({
             </div>
           </div>
 
-          <ExploreFilters filters={filters} onChange={setFilters} />
+          <ExploreFilters filters={filters} onChange={setFilters} showRecommended={showRecommended} />
         </div>
       </div>
 
@@ -433,6 +445,25 @@ export default function ExploreClient({
           <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#9c9c98] mb-2.5">
             Admin · Explore
           </p>
+
+          {/* Recommended sort toggle */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[9px] text-[#9c9c98] leading-tight">Recommended</span>
+            <button
+              onClick={() => toggleRecommended(!showRecommended)}
+              className={[
+                'rounded-full transition-colors duration-200 shrink-0',
+                showRecommended ? 'bg-[#FF6B35]' : 'bg-white/20',
+              ].join(' ')}
+              style={{ width: 30, height: 18, position: 'relative' }}
+            >
+              <span
+                className="absolute top-[2px] bg-white rounded-full transition-all duration-200"
+                style={{ width: 14, height: 14, left: showRecommended ? 14 : 2 }}
+              />
+            </button>
+          </div>
+
           <p className="text-[9px] text-[#9c9c98] mb-1.5">Screenshot Pins</p>
           <div className="flex gap-1.5 mb-2">
             <button
