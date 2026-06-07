@@ -19,6 +19,7 @@ import { ShopLocationMapClient as ShopLocationMap } from '@/components/map/ShopL
 import { getShopChatStats } from '@/lib/shop-chat-stats'
 import { getShopReviews } from '@/app/actions/reviews'
 import ReviewsSection from './ReviewsSection'
+import { AdminShopControl } from '@/components/admin/AdminShopControl'
 
 interface ShopPageProps {
   params: Promise<{ slug: string }>
@@ -174,6 +175,12 @@ export default async function ShopPage({ params }: ShopPageProps) {
   const desktopBannerSrc = shop.coverImage || shop.mobileBanner || DEFAULT_BANNER_URL
   const mobileBannerSrc  = shop.mobileBanner || shop.coverImage || DEFAULT_BANNER_URL
 
+  // Admin display overrides — NULL means "use real value"
+  const displayRating       = shop.adminRating       ?? shop.rating
+  const displayReviewCount  = shop.adminReviewCount  ?? shop.reviewCount
+  const displayScooterCount = shop.adminScooterCount ?? scooters.length
+  const showScooterCount    = shop.showScooterCount  !== false
+
   return (
     <div className="bg-white min-h-screen pt-16">
       <script
@@ -237,16 +244,20 @@ export default async function ShopPage({ params }: ShopPageProps) {
                 <MapPin className="w-3.5 h-3.5" />
                 {shop.location}, Phuket
               </span>
-              {shop.reviewCount > 0 && (
+              {displayReviewCount > 0 && (
                 <span className="flex items-center gap-1 text-white/70 text-sm">
                   <Star className="w-3.5 h-3.5 text-[#FF6B35] fill-[#FF6B35]" />
-                  {shop.rating.toFixed(1)} ({shop.reviewCount} reviews)
+                  {displayRating.toFixed(1)} ({displayReviewCount} reviews)
                 </span>
               )}
-              <span className="text-white/30">·</span>
-              <span className="text-white/70 text-sm">
-                {scooters.length} scooter{scooters.length !== 1 ? 's' : ''} available
-              </span>
+              {showScooterCount && (
+                <>
+                  <span className="text-white/30">·</span>
+                  <span className="text-white/70 text-sm">
+                    {displayScooterCount} scooter{displayScooterCount !== 1 ? 's' : ''} available
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -299,13 +310,13 @@ export default async function ShopPage({ params }: ShopPageProps) {
                       </div>
                     )}
                   </div>
-                  {shop.reviewCount > 0 && (
+                  {displayReviewCount > 0 && (
                     <div className="flex-shrink-0 flex flex-col items-center gap-0.5">
                       <div className="flex items-center gap-1">
                         <Star className="w-3.5 h-3.5 text-[#f59e0b] fill-[#f59e0b]" />
-                        <span className="text-sm font-bold text-[#0f0f0e]">{shop.rating.toFixed(1)}</span>
+                        <span className="text-sm font-bold text-[#0f0f0e]">{displayRating.toFixed(1)}</span>
                       </div>
-                      <span className="text-[10px] text-[#9c9c98]">{shop.reviewCount} reviews</span>
+                      <span className="text-[10px] text-[#9c9c98]">{displayReviewCount} reviews</span>
                     </div>
                   )}
                 </div>
@@ -392,14 +403,16 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
               {/* Stats */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white rounded-[16px] border border-[#e8e8e4] p-3.5 text-center">
-                  <p className="text-[22px] font-bold text-[#0f0f0e] leading-none">{scooters.length}</p>
-                  <p className="text-[10px] text-[#9c9c98] mt-1">Scooters available</p>
-                </div>
-                {shop.reviewCount > 0 ? (
+                {showScooterCount && (
                   <div className="bg-white rounded-[16px] border border-[#e8e8e4] p-3.5 text-center">
-                    <p className="text-[22px] font-bold text-[#0f0f0e] leading-none">{shop.rating.toFixed(1)}</p>
-                    <p className="text-[10px] text-[#9c9c98] mt-1">{shop.reviewCount} reviews</p>
+                    <p className="text-[22px] font-bold text-[#0f0f0e] leading-none">{displayScooterCount}</p>
+                    <p className="text-[10px] text-[#9c9c98] mt-1">Scooters available</p>
+                  </div>
+                )}
+                {displayReviewCount > 0 ? (
+                  <div className="bg-white rounded-[16px] border border-[#e8e8e4] p-3.5 text-center">
+                    <p className="text-[22px] font-bold text-[#0f0f0e] leading-none">{displayRating.toFixed(1)}</p>
+                    <p className="text-[10px] text-[#9c9c98] mt-1">{displayReviewCount} reviews</p>
                   </div>
                 ) : chatStats.avgMinutes !== null ? (
                   <div className="bg-white rounded-[16px] border border-[#e8e8e4] p-3.5 text-center">
@@ -436,7 +449,9 @@ export default async function ShopPage({ params }: ShopPageProps) {
             <section>
               <h2 className="text-[18px] font-bold text-[#0f0f0e] mb-4">
                 Available scooters
-                <span className="ml-2 text-sm font-normal text-[#9c9c98]">({scooters.length})</span>
+                {showScooterCount && (
+                  <span className="ml-2 text-sm font-normal text-[#9c9c98]">({displayScooterCount})</span>
+                )}
               </h2>
               {scooters.length > 0 ? (
                 <div className="grid grid-cols-2 gap-3">
@@ -535,6 +550,13 @@ export default async function ShopPage({ params }: ShopPageProps) {
         </div>
       </div>
 
+      <AdminShopControl
+        shopId={shop.id}
+        initialRating={shop.adminRating ?? null}
+        initialReviewCount={shop.adminReviewCount ?? null}
+        initialScooterCount={shop.adminScooterCount ?? null}
+        initialShowScooterCount={showScooterCount}
+      />
     </div>
   )
 }

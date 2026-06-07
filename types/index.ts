@@ -62,6 +62,11 @@ export interface Shop {
   hasPrecisePin: boolean
   // Opening hours visibility (migration 022)
   showOpeningHours?: boolean
+  // Admin display overrides (migration 045) — null = use real value
+  adminRating?: number | null
+  adminReviewCount?: number | null
+  adminScooterCount?: number | null
+  showScooterCount?: boolean
 }
 
 export interface Scooter {
