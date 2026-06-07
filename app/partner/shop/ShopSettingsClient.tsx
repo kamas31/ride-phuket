@@ -17,7 +17,7 @@ import { updateShop } from '@/app/actions/shop-update'
 import { cn } from '@/lib/utils'
 import type { FullShopRow } from '@/app/actions/profile'
 import type { OpeningHoursSchedule, OpeningHoursDay } from '@/types'
-import { PHUKET_ZONES, getZoneForLocation } from '@/lib/zones'
+import { PHUKET_ZONES, getZoneForLocation, getNearestZone } from '@/lib/zones'
 
 const PinPickerMap = dynamic(() => import('@/components/map/PinPickerMap'), {
   ssr: false,
@@ -709,8 +709,13 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
               lat={Number(form.lat) || 7.9019}
               lng={Number(form.lng) || 98.3381}
               onChange={({ lat, lng }) => {
-                set('lat', String(lat))
-                set('lng', String(lng))
+                const zone = getNearestZone(lat, lng)
+                setForm(f => ({
+                  ...f,
+                  lat: String(lat),
+                  lng: String(lng),
+                  location: zone.name,
+                }))
               }}
             />
           )}
