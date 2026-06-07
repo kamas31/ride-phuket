@@ -20,39 +20,8 @@ import { SaveButton } from '@/components/ride/SaveButton'
 import { getPublicInquiries } from '@/app/actions/inquiry-actions'
 import { TrackView } from '@/components/analytics/TrackView'
 import { AdminBadgeControl } from '@/components/admin/AdminBadgeControl'
+import { OpeningHoursDropdown } from '@/components/shop/OpeningHoursDropdown'
 
-import type { OpeningHoursSchedule } from '@/types'
-
-function getShopOpenStatus(hours: OpeningHoursSchedule | undefined): { isOpen: boolean; label: string } | null {
-  if (!hours) return null
-  try {
-    const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'] as const
-    const now  = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }))
-    const key  = days[now.getDay()]
-    const day  = hours[key]
-    if (!day) return null
-    if (!day.enabled) return { isOpen: false, label: 'Closed today' }
-    if (!day.open || !day.close) return null
-    const cur   = now.getHours() * 60 + now.getMinutes()
-    const [oh, om] = day.open.split(':').map(Number)
-    const [ch, cm] = day.close.split(':').map(Number)
-    if (isNaN(oh) || isNaN(om) || isNaN(ch) || isNaN(cm)) return null
-    const open  = oh * 60 + om
-    const close = ch * 60 + cm
-    if (cur < open)  return { isOpen: false, label: `Opens at ${day.open}` }
-    if (cur < close) return { isOpen: true,  label: `Closes at ${day.close}` }
-    for (let i = 1; i <= 7; i++) {
-      const next = hours[days[(now.getDay() + i) % 7]]
-      if (next?.enabled && next.open) {
-        const name = i === 1 ? 'Tomorrow' : days[(now.getDay() + i) % 7].charAt(0).toUpperCase() + days[(now.getDay() + i) % 7].slice(1)
-        return { isOpen: false, label: `Opens ${name} at ${next.open}` }
-      }
-    }
-    return { isOpen: false, label: 'Temporarily closed' }
-  } catch {
-    return null
-  }
-}
 
 interface ScooterPageProps {
   params: Promise<{ id: string }>
@@ -145,7 +114,6 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
   const accessoryItems = scooter.features.filter(f => ACCESSORY_LABELS.includes(f))
 
   const newListing = shouldShowNewListingBadge(scooter)
-  const openStatus = getShopOpenStatus(shop.openingHours)
 
   // Public FAQ from answered inquiries (useful SEO content)
   const faqItems = await getPublicInquiries(scooter.id)
@@ -430,11 +398,11 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     </div>
                   )}
                   <div className="flex items-center gap-2.5 mt-1 flex-wrap">
-                    {openStatus && (
-                      <span className={`flex items-center gap-1.5 text-xs font-medium ${openStatus.isOpen ? 'text-[#16a34a]' : 'text-[#9c9c98]'}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${openStatus.isOpen ? 'bg-[#22c55e]' : 'bg-[#d0d0cc]'}`} />
-                        {openStatus.label}
-                      </span>
+                    {shop.showOpeningHours !== false && shop.openingHours && (
+                      <OpeningHoursDropdown
+                        hours={shop.openingHours}
+                        variant="dot"
+                      />
                     )}
                   </div>
                 </div>

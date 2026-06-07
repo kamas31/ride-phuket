@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
-  ArrowLeft, MapPin, Phone, MessageCircle, Clock,
+  ArrowLeft, MapPin, Phone, MessageCircle,
   Globe, Shield, Zap, Check, Star, ExternalLink, Bike, Store,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
@@ -20,6 +20,7 @@ import { getShopChatStats } from '@/lib/shop-chat-stats'
 import { getShopReviews } from '@/app/actions/reviews'
 import ReviewsSection from './ReviewsSection'
 import { AdminShopControl } from '@/components/admin/AdminShopControl'
+import { OpeningHoursDropdown } from '@/components/shop/OpeningHoursDropdown'
 
 interface ShopPageProps {
   params: Promise<{ slug: string }>
@@ -295,15 +296,12 @@ export default async function ShopPage({ params }: ShopPageProps) {
                       <MapPin className="w-3 h-3 text-[#FF6B35] flex-shrink-0" />
                       <span className="text-[11px] text-[#5c5c58] font-medium truncate">{shop.address || shop.location + ', Phuket'}</span>
                     </div>
-                    {shop.showOpeningHours !== false && shop.openingHours?.monday && (
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <Clock className="w-3 h-3 text-[#0ea5e9] flex-shrink-0" />
-                        <span className="text-[11px] text-[#5c5c58] truncate">
-                          {shop.openingHours.monday.enabled
-                            ? `Mon–Fri ${shop.openingHours.monday.open}–${shop.openingHours.monday.close}`
-                            : 'See shop for hours'}
-                        </span>
-                      </div>
+                    {shop.showOpeningHours !== false && shop.openingHours && (
+                      <OpeningHoursDropdown
+                        hours={shop.openingHours}
+                        variant="default"
+                        className="mt-0.5"
+                      />
                     )}
                     {chatStats.isFastResponder && (
                       <div className="mt-1">
