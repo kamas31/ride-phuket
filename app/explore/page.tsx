@@ -37,14 +37,14 @@ export const metadata: Metadata = {
 export default async function ExplorePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>
+  searchParams: Promise<{ q?: string; shopId?: string }>
 }) {
-  const { q } = await searchParams
+  const { q, shopId } = await searchParams
   const scooters = await getScooters({ available: true })
   return (
     <>
       <h1 className="sr-only">Scooter Rentals in Phuket — Browse All Available Scooters</h1>
-      <ExploreClient initialScooters={scooters} initialSearch={q ?? ''} />
+      <ExploreClient initialScooters={scooters} initialSearch={q ?? ''} initialShopId={shopId} />
     </>
   )
 }

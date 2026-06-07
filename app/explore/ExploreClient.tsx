@@ -57,9 +57,11 @@ type MobileView = 'list' | 'map'
 export default function ExploreClient({
   initialScooters,
   initialSearch = '',
+  initialShopId,
 }: {
   initialScooters: Scooter[]
   initialSearch?: string
+  initialShopId?: string
 }) {
   const router = useRouter()
   const { isAdmin, loading: profileLoading } = useProfile()
@@ -232,6 +234,7 @@ export default function ExploreClient({
 
   const filtered = useMemo(() => {
     let list = initialScooters.filter(s => {
+      if (initialShopId && s.shopId !== initialShopId) return false
       if (filters.category !== 'all' && s.category !== filters.category) return false
       if (s.pricePerDay > filters.priceMax) return false
       if (filters.deliveryNow && !s.deliveryAvailable) return false
@@ -479,12 +482,12 @@ export default function ExploreClient({
                       </div>
                     )}
 
-                    {shop?.slug && (
+                    {selectedId && (
                       <Link
-                        href={`/shop/${shop.slug}`}
+                        href={`/explore?shopId=${selectedId}`}
                         className="flex items-center justify-center w-full py-2 bg-[#FF6B35] text-white text-[11px] font-bold rounded-full"
                       >
-                        View shop
+                        View scooters
                       </Link>
                     )}
                   </div>
