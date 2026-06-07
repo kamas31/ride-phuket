@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { sendMessage, markMessagesRead } from '@/app/actions/messaging'
 import { formatPrice, getInitials, cn } from '@/lib/utils'
 import ThreadMenu from './ThreadMenu'
-import { AdminThreadControl } from '@/components/admin/AdminThreadControl'
+import { AdminThreadControl, type PriceDuration } from '@/components/admin/AdminThreadControl'
 import type { ConversationDetail, Message } from '@/app/actions/messaging'
 
 interface MessageThreadProps {
@@ -46,6 +46,8 @@ export default function MessageThread({
   const [localBlockedByMe, setLocalBlockedByMe] = useState(conversation.blockedByMe)
   const [showContext, setShowContext] = useState(true)
   const [showTimestamps, setShowTimestamps] = useState(true)
+  const [priceOverride, setPriceOverride] = useState('')
+  const [durationOverride, setDurationOverride] = useState<PriceDuration>('day')
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const isInitialMount = useRef(true)
@@ -356,7 +358,8 @@ export default function MessageThread({
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {!isShopConv && (
               <span className="text-[12px] font-bold text-[#0f0f0e] bg-[#f5f5f2] px-2.5 py-1 rounded-full">
-                {formatPrice(conversation.scooterPricePerDay)}<span className="text-[#9c9c98] font-normal">/day</span>
+                {formatPrice(priceOverride.trim() ? Number(priceOverride) : conversation.scooterPricePerDay)}
+                <span className="text-[#9c9c98] font-normal">/{durationOverride}</span>
               </span>
             )}
             {/* Call — riders only, when shop has a phone number */}
@@ -522,6 +525,10 @@ export default function MessageThread({
         onShowContext={setShowContext}
         showTimestamps={showTimestamps}
         onShowTimestamps={setShowTimestamps}
+        priceOverride={priceOverride}
+        onPriceOverride={setPriceOverride}
+        durationOverride={durationOverride}
+        onDurationOverride={setDurationOverride}
       />
 
       {/* ── INPUT BAR ── */}
