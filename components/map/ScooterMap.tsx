@@ -7,7 +7,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import Link from 'next/link'
 import { X, ArrowRight, Store } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
-import { PHUKET_ZONES, getZoneForLocation } from '@/lib/zones'
+import { PHUKET_ZONES, getZoneForLocation, getNearestZone } from '@/lib/zones'
 import type { Scooter } from '@/types'
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
@@ -189,16 +189,22 @@ function buildZoneClusters(scooters: Scooter[]): ZoneClusterData[] {
 
   for (const s of scooters) {
     if (!s.shopId) continue
-    const zone = getZoneForLocation(s.location) ?? getZoneForLocation(s.shop?.location ?? '')
-    if (!zone) continue
+
+    const isExact = (s.shop?.locationVisibility ?? 'exact') === 'exact' && (s.shop?.hasPrecisePin ?? false)
+
+    // TYPE 1 (precise pin): zone from actual coords — prevents mismatch when the owner
+    // placed a pin in a different area than their stored location text (e.g. pinned in
+    // Chalong but location says "kata").
+    // TYPE 2/3: zone from location text; fall back to nearest zone by coords.
+    const zone = isExact
+      ? getNearestZone(s.lat, s.lng)
+      : (getZoneForLocation(s.location) ?? getZoneForLocation(s.shop?.location ?? '') ?? getNearestZone(s.lat, s.lng))
 
     if (!zoneMeta.has(zone.key)) {
       zoneMeta.set(zone.key, { zoneName: zone.name, lat: zone.lat, lng: zone.lng })
       exactAggsByZone.set(zone.key, new Map())
       clusterShopsByZone.set(zone.key, new Set())
     }
-
-    const isExact = (s.shop?.locationVisibility ?? 'exact') === 'exact' && (s.shop?.hasPrecisePin ?? false)
 
     if (isExact) {
       const aggs = exactAggsByZone.get(zone.key)!

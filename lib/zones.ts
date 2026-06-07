@@ -42,6 +42,15 @@ export const PHUKET_ZONES: PhuketZone[] = [
   { key: 'ko sirey',     name: 'Ko Sirey',     lat: 7.8870, lng: 98.4270, radiusKm: 1.5 },
 ]
 
+/** Find the nearest zone to a lat/lng coordinate (squared Euclidean — sufficient at Phuket scale) */
+export function getNearestZone(lat: number, lng: number): PhuketZone {
+  return PHUKET_ZONES.reduce((nearest, zone) => {
+    const d  = (lat - zone.lat) ** 2 + (lng - zone.lng) ** 2
+    const nd = (lat - nearest.lat) ** 2 + (lng - nearest.lng) ** 2
+    return d < nd ? zone : nearest
+  })
+}
+
 /** Find the zone for a scooter location string */
 export function getZoneForLocation(location: string): PhuketZone | null {
   const loc = location.toLowerCase()
