@@ -154,6 +154,10 @@ export default function ExploreClient({
   const [mobileView, setMobileView]   = useState<MobileView>('list')
   const [mapBounds, setMapBounds]     = useState<{ sw: [number, number]; ne: [number, number] } | null>(null)
 
+  useEffect(() => {
+    if (initialShopId) setMobileView('list')
+  }, [initialShopId])
+
   const handleZoneClick = useCallback((key: string | null) => {
     setFilters(prev => ({ ...prev, location: key ?? 'all' }))
     if (key) setMobileView('list')
@@ -456,7 +460,7 @@ export default function ExploreClient({
                   .map(s => s.coverImage ?? s.images[0])
                   .filter(Boolean) as string[]
                 return (
-                  <div className="absolute bottom-4 right-4 z-20 bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.16)] p-3.5 w-[200px]">
+                  <div className="absolute bottom-24 right-4 z-20 bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.16)] p-3.5 w-[200px]">
                     <button
                       onClick={() => setSelectedId(null)}
                       className="absolute top-2.5 right-2.5 w-6 h-6 bg-[#f0f0ec] rounded-full flex items-center justify-center"
