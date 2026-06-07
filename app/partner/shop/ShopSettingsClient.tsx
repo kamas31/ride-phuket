@@ -75,16 +75,29 @@ async function uploadShopAsset(
     reader.onload = async e => {
       const img = new window.Image()
       img.onload = async () => {
-        const maxW = type === 'logo' ? 400 : 1600
-        const maxH = type === 'logo' ? 400 : Infinity
-        const scale = Math.min(1, maxW / img.width, maxH / img.height)
-        const outW = Math.round(img.width * scale)
-        const outH = Math.round(img.height * scale)
+        const maxW       = type === 'logo' ? 400  : 1600
+        const targetRatio = type === 'logo' ? 1    : 16 / 5
+
+        // Center-crop to target aspect ratio
+        const srcRatio = img.width / img.height
+        let cropX = 0, cropY = 0
+        let cropW = img.width, cropH = img.height
+        if (srcRatio > targetRatio) {
+          cropW = Math.round(img.height * targetRatio)
+          cropX = Math.round((img.width - cropW) / 2)
+        } else {
+          cropH = Math.round(img.width / targetRatio)
+          cropY = Math.round((img.height - cropH) / 2)
+        }
+
+        const scale = Math.min(1, maxW / cropW)
+        const outW = Math.round(cropW * scale)
+        const outH = Math.round(cropH * scale)
 
         const canvas = document.createElement('canvas')
         canvas.width = outW; canvas.height = outH
         const ctx = canvas.getContext('2d')!
-        ctx.drawImage(img, 0, 0, outW, outH)
+        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, outW, outH)
 
         canvas.toBlob(async blob => {
           if (!blob) { resolve(null); return }
