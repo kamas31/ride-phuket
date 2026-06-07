@@ -67,6 +67,8 @@ export interface Shop {
   adminReviewCount?: number | null
   adminScooterCount?: number | null
   showScooterCount?: boolean
+  // Admin badge override (migration 046)
+  showNewListingBadges?: boolean
 }
 
 export interface Scooter {

@@ -16,6 +16,7 @@ interface ScooterCardProps {
   compact?: boolean
   xs?: boolean  // 2-column mobile grid: aspect-ratio image, minimal content
   hideTrustRow?: boolean
+  hideNewListingBadge?: boolean
 }
 
 // Unified glass pill for image overlays
@@ -36,7 +37,7 @@ function OverlayBadge({
   )
 }
 
-export const ScooterCard = memo(function ScooterCard({ scooter, className, compact = false, xs = false, hideTrustRow = false }: ScooterCardProps) {
+export const ScooterCard = memo(function ScooterCard({ scooter, className, compact = false, xs = false, hideTrustRow = false, hideNewListingBadge = false }: ScooterCardProps) {
   // xs variant: minimal 2-column mobile grid card
   if (xs) return (
     <Link
@@ -57,7 +58,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
       <div className="p-2.5">
         {/* Fixed height so badge-present xs cards match badge-absent xs cards */}
         <div className="flex items-center justify-between mb-0.5 h-[18px]">
-          {shouldShowNewListingBadge(scooter) && (
+          {!hideNewListingBadge && shouldShowNewListingBadge(scooter) && (
             <TrustBadge variant="new_listing" size="xs" />
           )}
           {!scooter.available && (
@@ -139,7 +140,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
             <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
             <span className="truncate">{scooter.location}</span>
           </div>
-          {shouldShowNewListingBadge(scooter) && (
+          {!hideNewListingBadge && shouldShowNewListingBadge(scooter) && (
             <TrustBadge variant="new_listing" />
           )}
         </div>

@@ -9,6 +9,7 @@ export interface ShopOverrides {
   adminReviewCount: number | null
   adminScooterCount: number | null
   showScooterCount: boolean
+  showNewListingBadges: boolean
 }
 
 export async function adminSetShopOverrides(
@@ -41,10 +42,11 @@ export async function adminSetShopOverrides(
     const { error: updateErr } = await (admin as any)
       .from('shops')
       .update({
-        admin_rating:        overrides.adminRating,
-        admin_review_count:  overrides.adminReviewCount,
-        admin_scooter_count: overrides.adminScooterCount,
-        show_scooter_count:  overrides.showScooterCount,
+        admin_rating:           overrides.adminRating,
+        admin_review_count:     overrides.adminReviewCount,
+        admin_scooter_count:    overrides.adminScooterCount,
+        show_scooter_count:     overrides.showScooterCount,
+        show_new_listing_badges: overrides.showNewListingBadges,
       })
       .eq('id', shopId)
 

@@ -179,7 +179,8 @@ export default async function ShopPage({ params }: ShopPageProps) {
   const displayRating       = shop.adminRating       ?? shop.rating
   const displayReviewCount  = shop.adminReviewCount  ?? shop.reviewCount
   const displayScooterCount = shop.adminScooterCount ?? scooters.length
-  const showScooterCount    = shop.showScooterCount  !== false
+  const showScooterCount      = shop.showScooterCount      !== false
+  const showNewListingBadges  = shop.showNewListingBadges  !== false
 
   return (
     <div className="bg-white min-h-screen pt-16">
@@ -456,7 +457,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
               {scooters.length > 0 ? (
                 <div className="grid grid-cols-2 gap-3">
                   {scooters.map(scooter => (
-                    <ScooterCard key={scooter.id} scooter={scooter} compact hideTrustRow />
+                    <ScooterCard key={scooter.id} scooter={scooter} compact hideTrustRow hideNewListingBadge={!showNewListingBadges} />
                   ))}
                 </div>
               ) : (
@@ -556,6 +557,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
         initialReviewCount={shop.adminReviewCount ?? null}
         initialScooterCount={shop.adminScooterCount ?? null}
         initialShowScooterCount={showScooterCount}
+        initialShowNewListingBadges={showNewListingBadges}
       />
     </div>
   )

@@ -88,9 +88,10 @@ export function normalizeShop(row: any): Shop {
     locationVisibility: (row.location_visibility as 'exact' | 'approximate') ?? 'exact',
     hasPrecisePin,
     showOpeningHours:  row.show_opening_hours !== false,
-    adminRating:       row.admin_rating       ?? null,
-    adminReviewCount:  row.admin_review_count  ?? null,
-    adminScooterCount: row.admin_scooter_count ?? null,
-    showScooterCount:  row.show_scooter_count  !== false,
+    adminRating:          row.admin_rating            ?? null,
+    adminReviewCount:     row.admin_review_count       ?? null,
+    adminScooterCount:    row.admin_scooter_count      ?? null,
+    showScooterCount:     row.show_scooter_count       !== false,
+    showNewListingBadges: row.show_new_listing_badges  !== false,
   }
 }

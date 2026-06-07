@@ -11,6 +11,7 @@ interface Props {
   initialReviewCount: number | null
   initialScooterCount: number | null
   initialShowScooterCount: boolean
+  initialShowNewListingBadges: boolean
 }
 
 export function AdminShopControl({
@@ -19,6 +20,7 @@ export function AdminShopControl({
   initialReviewCount,
   initialScooterCount,
   initialShowScooterCount,
+  initialShowNewListingBadges,
 }: Props) {
   const { isAdmin, loading } = useProfile()
   const [adminPanelVisible] = useAdminPanelVisible()
@@ -27,6 +29,7 @@ export function AdminShopControl({
   const [reviewCount,  setReviewCount]  = useState(initialReviewCount  != null ? String(initialReviewCount)  : '')
   const [scooterCount, setScooterCount] = useState(initialScooterCount != null ? String(initialScooterCount) : '')
   const [showCount,    setShowCount]    = useState(initialShowScooterCount)
+  const [showBadges,   setShowBadges]   = useState(initialShowNewListingBadges)
 
   const [isPending, startTransition] = useTransition()
   const [saved,  setSaved]  = useState(false)
@@ -46,10 +49,11 @@ export function AdminShopControl({
     if (parsedCount   != null && (isNaN(parsedCount)   || parsedCount   < 0))                       { setError('Count must be ≥ 0'); return }
     startTransition(async () => {
       const result = await adminSetShopOverrides(shopId, {
-        adminRating:        parsedRating,
-        adminReviewCount:   parsedReviews,
-        adminScooterCount:  parsedCount,
-        showScooterCount:   showCount,
+        adminRating:          parsedRating,
+        adminReviewCount:     parsedReviews,
+        adminScooterCount:    parsedCount,
+        showScooterCount:     showCount,
+        showNewListingBadges: showBadges,
       })
       if (result.error) setError(result.error)
       else setSaved(true)
@@ -101,8 +105,29 @@ export function AdminShopControl({
         <p className="text-[8px] text-white/30 mt-1 leading-tight">Empty = live count</p>
       </div>
 
+      {/* Show / hide "New listing" badge */}
+      <div className="border-t border-white/10 pt-2.5 mb-2.5">
+        <p className="text-[9px] text-[#9c9c98] uppercase tracking-widest mb-1.5">New listing badge</p>
+        <div className="flex gap-1.5">
+          {([true, false] as const).map(v => (
+            <button
+              key={String(v)}
+              onClick={() => { setShowBadges(v); setSaved(false) }}
+              className={[
+                'flex-1 text-xs font-semibold px-2 py-1.5 rounded-[8px] transition-colors',
+                showBadges === v
+                  ? 'bg-[#FF6B35] text-white'
+                  : 'bg-white/[0.08] text-white/60 hover:bg-white/[0.15] hover:text-white',
+              ].join(' ')}
+            >
+              {v ? 'Show' : 'Hide'}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Show / hide scooter count label */}
-      <div className="border-t border-white/10 pt-2.5 mb-3">
+      <div className="pt-2.5 mb-3">
         <p className="text-[9px] text-[#9c9c98] uppercase tracking-widest mb-1.5">Count label</p>
         <div className="flex gap-1.5">
           {([true, false] as const).map(v => (
