@@ -301,17 +301,19 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
             </div>
 
             {/* Pricing */}
-            <PricingClient
-              pricePerDay={scooter.pricePerDay}
-              pricePerWeek={scooter.pricePerWeek ?? null}
-              pricePerMonth={scooter.pricePerMonth ?? null}
-              minRentalDays={scooter.minRentalDays}
-              scooterName={scooter.name}
-              scooterId={scooter.id}
-              available={scooter.available}
-              shopWhatsapp={shop.whatsapp}
-              shopPhone={shop.phone}
-            />
+            <div className="-mt-2">
+              <PricingClient
+                pricePerDay={scooter.pricePerDay}
+                pricePerWeek={scooter.pricePerWeek ?? null}
+                pricePerMonth={scooter.pricePerMonth ?? null}
+                minRentalDays={scooter.minRentalDays}
+                scooterName={scooter.name}
+                scooterId={scooter.id}
+                available={scooter.available}
+                shopWhatsapp={shop.whatsapp}
+                shopPhone={shop.phone}
+              />
+            </div>
 
             {/* Quick contact — two side-by-side buttons below pricing */}
             <div className="flex gap-3">
