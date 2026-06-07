@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, MapPin, Zap, Check,
-  Phone, MessageCircle, Store,
+  MessageCircle, Store,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { getScooterById } from '@/lib/supabase/queries'
@@ -107,6 +107,8 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
   // shop is optional in the type — guard explicitly so all downstream code is safe
   const shop = scooter.shop
   if (!shop) notFound()
+
+  const contactNumber = shop.whatsapp || shop.phone || ''
 
   // Filter out empty / N/A values — no fake placeholders
   const isValidSpec = (v: string | undefined) =>
@@ -316,9 +318,9 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               <div className="flex-1">
                 <MessageOwnerButton scooterId={scooter.id} scooterName={scooter.name} />
               </div>
-              {shop.whatsapp ? (
+              {contactNumber && (
                 <WhatsAppButton
-                  href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
+                  href={`https://wa.me/${contactNumber.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
                   shopId={shop.id}
                   scooterId={scooter.id}
                   className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full bg-[#16a34a] text-white text-[15px] font-bold hover:bg-[#15803d] transition-colors active:scale-[0.98]"
@@ -326,15 +328,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   <MessageCircle className="w-5 h-5" />
                   WhatsApp
                 </WhatsAppButton>
-              ) : shop.phone ? (
-                <a
-                  href={`tel:${shop.phone}`}
-                  className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full border border-[#e8e8e4] text-[#5c5c58] text-[15px] font-medium hover:border-[#d0d0cc] transition-colors active:scale-[0.98]"
-                >
-                  <Phone className="w-5 h-5" />
-                  Call
-                </a>
-              ) : null}
+              )}
             </div>
 
             {/* Description */}
@@ -457,9 +451,9 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
               <div className="space-y-3">
                 <MessageOwnerButton scooterId={scooter.id} scooterName={scooter.name} />
 
-                {shop.whatsapp ? (
+                {contactNumber && (
                   <WhatsAppButton
-                    href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
+                    href={`https://wa.me/${contactNumber.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
                     shopId={shop.id}
                     scooterId={scooter.id}
                     className="flex items-center justify-center gap-2.5 w-full py-4 rounded-[14px] bg-[#16a34a] text-white text-[15px] font-bold hover:bg-[#15803d] transition-colors active:scale-[0.98]"
@@ -467,21 +461,13 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     <MessageCircle className="w-5 h-5" />
                     Message on WhatsApp
                   </WhatsAppButton>
-                ) : shop.phone ? (
-                  <a
-                    href={`tel:${shop.phone}`}
-                    className="flex items-center justify-center gap-2.5 w-full py-4 rounded-[14px] bg-[#0f0f0e] text-white text-[15px] font-bold hover:bg-[#2a2a28] transition-colors active:scale-[0.98]"
-                  >
-                    <Phone className="w-5 h-5" />
-                    Call the shop
-                  </a>
-                ) : null}
+                )}
               </div>
 
               {/* Quick question chips */}
-              {shop.whatsapp && (
+              {contactNumber && (
                 <QuickContact
-                  whatsapp={shop.whatsapp}
+                  whatsapp={contactNumber}
                   shopId={shop.id}
                   scooterId={scooter.id}
                   shopName={shop.name}
