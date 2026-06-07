@@ -26,12 +26,14 @@ function ScreenshotPinMarker({ price, onDelete }: { price: string; onDelete: () 
   return (
     <div
       className="flex flex-col items-center select-none"
-      style={{ cursor: 'pointer' }}
+      style={{
+        cursor: 'pointer',
+        filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.18)) drop-shadow(0 4px 12px rgba(0,0,0,0.14))',
+      }}
       onClick={e => { e.stopPropagation(); setShowDelete(v => !v) }}
     >
       <div
         className="relative px-3 h-8 flex items-center rounded-full text-[13px] font-bold whitespace-nowrap border bg-white text-[#1a1a18] border-black/[0.08]"
-        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.12)' }}
       >
         ฿{price}
         {showDelete && (
