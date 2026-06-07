@@ -462,10 +462,8 @@ export default function ExploreClient({
                     </button>
 
                     <div className="flex items-center gap-2 mb-2.5 pr-6">
-                      {shop?.logo ? (
+                      {shop?.logo && (
                         <img src={shop.logo} alt={shop.name} className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
-                      ) : (
-                        <div className="w-8 h-8 bg-[#f0ede8] rounded-lg flex-shrink-0" />
                       )}
                       <div className="min-w-0">
                         <p className="text-[12px] font-bold text-[#0f0f0e] leading-tight truncate">{shop?.name ?? '—'}</p>
