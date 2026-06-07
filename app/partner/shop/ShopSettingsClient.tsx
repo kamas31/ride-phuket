@@ -76,7 +76,7 @@ async function uploadShopAsset(
       const img = new window.Image()
       img.onload = async () => {
         const maxW = type === 'logo' ? 400 : 1600
-        const maxH = type === 'logo' ? 400 : 500
+        const maxH = type === 'logo' ? 400 : Infinity
         const scale = Math.min(1, maxW / img.width, maxH / img.height)
         const outW = Math.round(img.width * scale)
         const outH = Math.round(img.height * scale)
