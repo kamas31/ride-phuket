@@ -277,6 +277,15 @@ export default async function ShopPage({ params }: ShopPageProps) {
                       </div>
                     )}
                   </div>
+                  {shop.reviewCount > 0 && (
+                    <div className="flex-shrink-0 flex flex-col items-center gap-0.5">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 text-[#f59e0b] fill-[#f59e0b]" />
+                        <span className="text-sm font-bold text-[#0f0f0e]">{shop.rating.toFixed(1)}</span>
+                      </div>
+                      <span className="text-[10px] text-[#9c9c98]">{shop.reviewCount} reviews</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Response time — only shown when backed by real data */}
