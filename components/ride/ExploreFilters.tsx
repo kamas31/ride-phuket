@@ -11,9 +11,10 @@ interface ExploreFiltersProps {
   filters: FilterState
   onChange: (filters: FilterState) => void
   showRecommended?: boolean
+  maxPrice?: number
 }
 
-export function ExploreFilters({ filters, onChange, showRecommended = true }: ExploreFiltersProps) {
+export function ExploreFilters({ filters, onChange, showRecommended = true, maxPrice = 2000 }: ExploreFiltersProps) {
   const [showPanel, setShowPanel] = useState(false)
 
   const update = (patch: Partial<FilterState>) => onChange({ ...filters, ...patch })
@@ -23,7 +24,7 @@ export function ExploreFilters({ filters, onChange, showRecommended = true }: Ex
     filters.deliveryNow,
     filters.helmetIncluded,
     filters.location !== 'all',
-    filters.priceMax < 2000,
+    filters.priceMax < maxPrice,
     filters.depositProtected,
     filters.noPassport,
     filters.requiredFeatures.length > 0,
@@ -127,7 +128,7 @@ export function ExploreFilters({ filters, onChange, showRecommended = true }: Ex
                 <input
                   type="range"
                   min={150}
-                  max={2000}
+                  max={maxPrice}
                   step={50}
                   value={filters.priceMax}
                   onChange={e => update({ priceMax: Number(e.target.value) })}
@@ -135,7 +136,7 @@ export function ExploreFilters({ filters, onChange, showRecommended = true }: Ex
                 />
                 <div className="flex justify-between text-xs text-[#9c9c98] mt-1.5">
                   <span>฿150</span>
-                  <span>฿2,000</span>
+                  <span>฿{maxPrice.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -270,7 +271,7 @@ export function ExploreFilters({ filters, onChange, showRecommended = true }: Ex
             {/* Footer actions */}
             <div className="sticky bottom-0 bg-white border-t border-[#f0f0ec] px-6 py-4 flex gap-3">
               <button
-                onClick={() => onChange({ priceMin: 150, priceMax: 2000, category: 'all', deliveryNow: false, helmetIncluded: false, location: 'all', sortBy: 'recommended', depositProtected: false, noPassport: false, requiredFeatures: [], requiredAccessories: [], depositTypeFilter: '' })}
+                onClick={() => onChange({ priceMin: 150, priceMax: maxPrice, category: 'all', deliveryNow: false, helmetIncluded: false, location: 'all', sortBy: 'recommended', depositProtected: false, noPassport: false, requiredFeatures: [], requiredAccessories: [], depositTypeFilter: '' })}
                 className="flex-1 py-3 rounded-full border border-[#e8e8e4] text-sm font-semibold text-[#5c5c58] hover:bg-[#f8f8f6] transition-colors"
               >
                 Reset

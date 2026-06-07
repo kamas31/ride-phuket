@@ -77,7 +77,12 @@ export default function ExploreClient({
   const [priceInput, setPriceInput]           = useState('')
   const priceInputRef                         = useRef<HTMLInputElement>(null)
 
-  const [filters, setFilters]         = useState<FilterState>(DEFAULT_FILTERS)
+  // Dynamic price ceiling: highest scooter price rounded up to the nearest ฿500
+  const maxPrice = Math.ceil(
+    Math.max(2000, ...initialScooters.map(s => s.pricePerDay)) / 500
+  ) * 500
+
+  const [filters, setFilters] = useState<FilterState>({ ...DEFAULT_FILTERS, priceMax: maxPrice })
 
   // Admin: show/hide "Recommended" sort option — persisted in localStorage
   const [showRecommended, setShowRecommended] = useState(() => {
@@ -333,7 +338,7 @@ export default function ExploreClient({
             </div>
           </div>
 
-          <ExploreFilters filters={filters} onChange={setFilters} showRecommended={showRecommended} />
+          <ExploreFilters filters={filters} onChange={setFilters} showRecommended={showRecommended} maxPrice={maxPrice} />
         </div>
       </div>
 
