@@ -742,7 +742,7 @@ export default function ScooterMap({
     zoneClusters.forEach(zc => {
       if (!zoneClusterMarkersRef.current.has(zc.zoneKey)) {
         const container = document.createElement('div')
-        const marker = new mapboxgl.Marker({ element: container, anchor: 'center' })
+        const marker = new mapboxgl.Marker({ element: container, anchor: 'bottom' })
           .setLngLat([zc.lng, zc.lat])
           .addTo(map)
         const root = createRoot(container)
