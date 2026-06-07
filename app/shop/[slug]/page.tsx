@@ -233,7 +233,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
               <img
                 src={shop.logo}
                 alt={shop.name}
-                className="w-14 h-14 rounded-2xl object-cover border border-white/20 mb-3"
+                className="w-16 h-16 rounded-2xl object-cover border border-white/20 mb-3"
               />
             )}
             <h1 className="text-white font-bold text-[26px] md:text-[34px] leading-tight tracking-tight mb-1.5">
