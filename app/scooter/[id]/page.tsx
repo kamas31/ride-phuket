@@ -251,14 +251,14 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-6 md:py-8">
+      <div className="max-w-5xl mx-auto px-4 pt-4 pb-6 md:pt-6 md:pb-8">
         <div>
           {/* ── LEFT COLUMN ── */}
           <div className="space-y-6">
             <div id="sticky-contact-sentinel" className="-mt-1" aria-hidden />
 
             {/* Image gallery — edge-to-edge on mobile, rounded on desktop */}
-            <div className="-mx-4 md:mx-0 mt-2">
+            <div className="-mx-4 md:mx-0">
               <ImageGallery images={scooter.images} name={scooter.name} coverImage={scooter.coverImage} />
             </div>
 
