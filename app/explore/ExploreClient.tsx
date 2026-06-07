@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
 import { sortByRecommended } from '@/lib/ridescore'
 import { trackEvent } from '@/lib/analytics'
 import { createExploreFuse } from '@/lib/fuzzy-search'
-import { getZoneForLocation } from '@/lib/zones'
+import { getZoneForLocation, getNearestZone } from '@/lib/zones'
 import { useProfile } from '@/hooks/useProfile'
 import { useAdminPanelVisible } from '@/hooks/useAdminPanelVisible'
 import { AdminDevShopsPanel } from '@/components/admin/AdminDevShopsPanel'
@@ -237,7 +237,10 @@ export default function ExploreClient({
       if (filters.deliveryNow && !s.deliveryAvailable) return false
       if (filters.helmetIncluded && !s.helmetIncluded) return false
       if (filters.location !== 'all') {
-        const zone = getZoneForLocation(s.location)
+        const isExact = (s.shop?.locationVisibility ?? 'exact') === 'exact' && (s.shop?.hasPrecisePin ?? false)
+        const zone = isExact
+          ? getNearestZone(s.lat, s.lng)
+          : (getZoneForLocation(s.location) ?? getZoneForLocation(s.shop?.location ?? '') ?? getNearestZone(s.lat, s.lng))
         if (!zone || zone.key !== filters.location.replace(/-/g, ' ')) return false
       }
       if (filters.depositProtected && !s.shop?.depositProtectedMember) return false
