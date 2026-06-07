@@ -63,7 +63,7 @@ const DEFAULT_BANNER_URL: string | null = null
 
 function DefaultShopBanner() {
   return (
-    <div className="w-full aspect-[4/1] relative overflow-hidden">
+    <div className="h-[220px] md:h-[260px] relative overflow-hidden">
       <div
         className="absolute inset-0"
         style={{ background: 'linear-gradient(135deg, #0d1520 0%, #1a1208 55%, #2d1008 100%)' }}
@@ -171,7 +171,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
   }
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen pt-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -201,7 +201,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
           <ScooterImage
             src={(shop.coverImage ?? DEFAULT_BANNER_URL)!}
             alt={shop.name}
-            className="w-full aspect-[4/1]"
+            className="h-[220px] md:h-[260px]"
             overlay
             priority
             sizes="100vw"
