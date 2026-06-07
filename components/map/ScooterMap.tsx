@@ -177,13 +177,15 @@ interface ZoneClusterData {
   lng: number
   exactAggregates: ShopAggregate[]  // TYPE 1 shops — break out above BREAKOUT_ZOOM
   clusterShopCount: number           // TYPE 2+3 shop count — permanent residual cluster
+  clusterMinPrice: number | null     // min price across TYPE 2+3 scooters (for single-shop label)
   totalCount: number                 // exactAggregates.length + clusterShopCount
 }
 
 function buildZoneClusters(scooters: Scooter[]): ZoneClusterData[] {
-  const exactAggsByZone    = new Map<string, Map<string, ShopAggregate>>()
-  const clusterShopsByZone = new Map<string, Set<string>>()
-  const zoneMeta           = new Map<string, { zoneName: string; lat: number; lng: number }>()
+  const exactAggsByZone     = new Map<string, Map<string, ShopAggregate>>()
+  const clusterShopsByZone  = new Map<string, Set<string>>()
+  const clusterMinPriceByZone = new Map<string, number>()
+  const zoneMeta            = new Map<string, { zoneName: string; lat: number; lng: number }>()
 
   for (const s of scooters) {
     if (!s.shopId) continue
@@ -227,6 +229,8 @@ function buildZoneClusters(scooters: Scooter[]): ZoneClusterData[] {
       }
     } else {
       clusterShopsByZone.get(zone.key)!.add(s.shopId)
+      const prev = clusterMinPriceByZone.get(zone.key)
+      clusterMinPriceByZone.set(zone.key, prev === undefined ? s.pricePerDay : Math.min(prev, s.pricePerDay))
     }
   }
 
@@ -240,6 +244,7 @@ function buildZoneClusters(scooters: Scooter[]): ZoneClusterData[] {
       lng:             meta.lng,
       exactAggregates,
       clusterShopCount,
+      clusterMinPrice: clusterMinPriceByZone.get(zoneKey) ?? null,
       totalCount:      exactAggregates.length + clusterShopCount,
     }
   })
@@ -387,8 +392,13 @@ function ShopPopupCard({ agg, onClose }: { agg: ShopAggregate; onClose: () => vo
   )
 }
 
-// ── Zone Cluster Pin (same pill design as ShopPin, shows shop count) ──
-function ZoneClusterPin({ count, onClick }: { count: number; onClick: () => void }) {
+// ── Zone Cluster Pin (same pill design as ShopPin) ──
+// count=1 + minPrice → shows price ("200B"); count>1 → shows "N shops"
+function ZoneClusterPin({ count, minPrice, onClick }: { count: number; minPrice: number | null; onClick: () => void }) {
+  const label = count === 1 && minPrice !== null
+    ? formatPrice(minPrice)
+    : `${count} shop${count !== 1 ? 's' : ''}`
+
   return (
     <div
       className="flex flex-col items-center cursor-pointer select-none"
@@ -398,7 +408,7 @@ function ZoneClusterPin({ count, onClick }: { count: number; onClick: () => void
         className="px-3 h-8 flex items-center rounded-full text-[13px] font-bold whitespace-nowrap border bg-white text-[#1a1a18] border-black/[0.08]"
         style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.12)' }}
       >
-        {count} shop{count !== 1 ? 's' : ''}
+        {label}
       </div>
       <div
         className="w-0 h-0 -mt-px"
@@ -740,6 +750,17 @@ export default function ScooterMap({
         zoneClusterMarkersRef.current.set(zc.zoneKey, { marker, root, container })
       }
       const count = aboveBreakout ? zc.clusterShopCount : zc.totalCount
+      // Resolve the single-shop price for the "200B" label when count===1
+      let minPrice: number | null = null
+      if (count === 1) {
+        if (aboveBreakout) {
+          minPrice = zc.clusterMinPrice
+        } else if (zc.exactAggregates.length === 1) {
+          minPrice = zc.exactAggregates[0].minPrice
+        } else {
+          minPrice = zc.clusterMinPrice
+        }
+      }
       const el = zoneClusterMarkersRef.current.get(zc.zoneKey)!.marker.getElement()
       if (count === 0) {
         el.style.display = 'none'
@@ -748,6 +769,7 @@ export default function ScooterMap({
         zoneClusterMarkersRef.current.get(zc.zoneKey)!.root.render(
           <ZoneClusterPin
             count={count}
+            minPrice={minPrice}
             onClick={() => onZoneClickRef.current?.(zc.zoneKey)}
           />,
         )
