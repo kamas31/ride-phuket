@@ -360,6 +360,22 @@ export default function ExploreClient({
           </div>
 
           <ExploreFilters filters={filters} onChange={setFilters} showRecommended={showRecommended} maxPrice={maxPrice} />
+          {shopIdFilter && (() => {
+            const shopName = initialScooters.find(s => s.shopId === shopIdFilter)?.shop?.name
+            return shopName ? (
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <div className="flex items-center gap-1.5 pl-3 pr-2 py-1 bg-[#FF6B35] text-white text-xs font-semibold rounded-full">
+                  <span>{shopName}</span>
+                  <button
+                    onClick={() => setShopIdFilter(null)}
+                    className="w-4 h-4 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors flex-shrink-0"
+                  >
+                    <span className="text-[9px] leading-none">✕</span>
+                  </button>
+                </div>
+              </div>
+            ) : null
+          })()}
         </div>
       </div>
 
