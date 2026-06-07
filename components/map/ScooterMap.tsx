@@ -387,30 +387,23 @@ function ShopPopupCard({ agg, onClose }: { agg: ShopAggregate; onClose: () => vo
   )
 }
 
-// ── Zone Cluster Pin (combined count at low zoom; TYPE 2+3 residual at high zoom) ──
+// ── Zone Cluster Pin (same pill design as ShopPin, shows shop count) ──
 function ZoneClusterPin({ count, onClick }: { count: number; onClick: () => void }) {
   return (
     <div
+      className="flex flex-col items-center cursor-pointer select-none"
       onClick={onClick}
-      style={{
-        width: 40,
-        height: 40,
-        background: '#1a1a18',
-        borderRadius: '50%',
-        border: '2.5px solid rgba(255,255,255,0.92)',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.30), 0 6px 18px rgba(0,0,0,0.18)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        userSelect: 'none',
-        color: 'white',
-        fontSize: 13,
-        fontWeight: 700,
-        fontFamily: 'inherit',
-      }}
     >
-      {count}
+      <div
+        className="px-3 h-8 flex items-center rounded-full text-[13px] font-bold whitespace-nowrap border bg-white text-[#1a1a18] border-black/[0.08]"
+        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.12)' }}
+      >
+        {count} shop{count !== 1 ? 's' : ''}
+      </div>
+      <div
+        className="w-0 h-0 -mt-px"
+        style={{ borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '7px solid white' }}
+      />
     </div>
   )
 }
