@@ -96,21 +96,22 @@ export default async function HomePage() {
               <span className="text-white block">Explore Phuket</span>
               <span className="block" style={{ color: '#FF6B35' }}>your way.</span>
             </h1>
-            <p className="text-white/75 text-[14px] leading-[1.4] mb-6" style={{ maxWidth: '260px' }}>
+            <p className="text-white/75 text-[14px] leading-[1.4]" style={{ maxWidth: '260px' }}>
               Find your perfect scooter in Phuket.
             </p>
-            <Link
-              href="/explore"
-              className="flex items-center justify-center gap-2 w-full py-[13px] rounded-full text-white text-[14px] font-bold
-                         bg-white/[0.12] backdrop-blur-md
-                         border border-[rgba(255,107,53,0.55)]
-                         shadow-[0_0_18px_rgba(255,107,53,0.25),inset_0_0_12px_rgba(255,107,53,0.06)]
-                         active:scale-[0.97] transition-all duration-200"
-            >
-              Explore Scooters
-              <ArrowRight className="w-4 h-4" />
-            </Link>
           </div>
+          <Link
+            href="/explore"
+            className="flex items-center justify-center gap-2 w-full py-[13px] rounded-full text-white text-[14px] font-bold mt-14
+                       bg-white/[0.12] backdrop-blur-md
+                       border border-[rgba(255,107,53,0.55)]
+                       shadow-[0_0_18px_rgba(255,107,53,0.25),inset_0_0_12px_rgba(255,107,53,0.06)]
+                       active:scale-[0.97] transition-all duration-200"
+            style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.25s' }}
+          >
+            Explore Scooters
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
 
         {/* ── DESKTOP LAYOUT ── */}
