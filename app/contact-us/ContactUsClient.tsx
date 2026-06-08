@@ -25,16 +25,17 @@ export default function ContactUsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f8f6] flex flex-col pt-16">
-      {/* Top bar */}
-      <div className="px-4 pt-4 pb-0 max-w-md mx-auto w-full">
-        <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </button>
+    <div className="min-h-screen bg-[#f8f8f6] pt-16">
+      <div className="sticky top-16 z-20 bg-white border-b border-[#e8e8e4]">
+        <div className="max-w-md mx-auto px-4 py-3">
+          <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
+        </div>
       </div>
 
-      <div className="flex-1 flex items-start justify-center px-4 py-10">
+      <div className="flex items-start justify-center px-4 py-10">
         <div className="w-full max-w-sm">
           <div
             className="bg-white rounded-[24px] border border-[#e8e8e4] overflow-hidden"

@@ -10,9 +10,13 @@ const LAST_UPDATED = 'June 2026'
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#f8f8f6]">
-      <div className="max-w-2xl mx-auto px-4 pt-20 pb-16">
-        <BackButton className="inline-flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] mb-8 transition-colors" />
+    <div className="min-h-screen bg-[#f8f8f6] pt-16">
+      <div className="sticky top-16 z-20 bg-white border-b border-[#e8e8e4]">
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <BackButton />
+        </div>
+      </div>
+      <div className="max-w-2xl mx-auto px-4 pt-10 pb-16">
 
         <div className="bg-white rounded-[24px] border border-[#e8e8e4] p-8 md:p-10">
           <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-3">Legal</p>
