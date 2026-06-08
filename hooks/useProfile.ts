@@ -38,9 +38,9 @@ export function useProfile() {
       return
     }
 
-    // Clear stale data before the fetch starts so no previous user's
-    // profile is ever visible during the transition to the new user.
-    setProfile(null)
+    // Keep existing profile if same user (prevents flash on page navigation).
+    // Clear only when switching to a different user account.
+    setProfile(prev => prev?.id === user.id ? prev : null)
     setNeedsProfile(false)
     setLoading(true)
 
