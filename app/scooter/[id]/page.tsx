@@ -207,7 +207,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
           <Link
             href="/explore"
             prefetch={true}
-            className="flex items-center gap-2 py-2 pr-3 text-sm font-semibold text-[#5c5c58] hover:text-[#0f0f0e] transition-colors active:opacity-50 active:scale-95 rounded-[10px] hover:bg-[#f8f8f6]"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-[#f5f4f2] text-[#5c5c58] hover:bg-[#ececea] hover:text-[#0f0f0e] transition-all active:scale-95"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Explore</span>

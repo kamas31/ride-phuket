@@ -86,7 +86,7 @@ export default function BookingsClient({ bookings: initial, shopId }: BookingsCl
         <div className="max-w-2xl mx-auto px-4 pt-20 pb-5">
           <Link
             href="/partner/dashboard"
-            className="inline-flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] mb-4 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-[#f5f4f2] text-[#5c5c58] hover:bg-[#ececea] hover:text-[#0f0f0e] transition-all active:scale-95 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             Dashboard

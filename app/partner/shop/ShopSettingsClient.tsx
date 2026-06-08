@@ -547,7 +547,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
         <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link
             href="/partner/dashboard"
-            className="flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-[#f5f4f2] text-[#5c5c58] hover:bg-[#ececea] hover:text-[#0f0f0e] transition-all active:scale-95"
           >
             <ArrowLeft className="w-4 h-4" />
             Dashboard

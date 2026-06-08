@@ -28,7 +28,7 @@ export default function ContactUsClient() {
     <div className="min-h-screen bg-[#f8f8f6] pt-16">
       <div className="sticky top-16 z-20 bg-white border-b border-[#e8e8e4]">
         <div className="max-w-md mx-auto px-4 py-3">
-          <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] transition-colors">
+          <button onClick={() => router.back()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-[#f5f4f2] text-[#5c5c58] hover:bg-[#ececea] hover:text-[#0f0f0e] transition-all active:scale-95">
             <ArrowLeft className="w-4 h-4" />
             Back
           </button>
