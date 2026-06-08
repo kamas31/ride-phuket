@@ -295,3 +295,308 @@ The Navbar is a Client Component that reads the current profile via `useProfile`
 - Tiny waterfall: auth → profile query → render (< 200ms on warm session)
 - Alternative (Server Component Navbar) would require passing session as prop from every layout — more complex
 - Acceptable for v1 given the scale
+
+---
+
+## ADR-017: Sign in with Apple — native id_token flow via Capacitor
+
+**Status:** Accepted  
+**Date:** 2026-06-07
+
+**Context:**  
+App Store guideline 4.8 requires Sign in with Apple when any third-party login is offered. Google OAuth uses a browser redirect (`signInWithOAuth`) which is blocked by WKWebView on iOS. Needed a native flow.
+
+**Decision:**  
+Use `@capacitor-community/apple-sign-in` (v7.1.0) to trigger the native iOS sheet, receive an `identityToken` JWT, pass it to `supabase.auth.signInWithIdToken({ provider: 'apple', token, nonce })`.
+
+**Architecture:**
+```
+Native Apple sheet
+→ identityToken + givenName/familyName (first login only)
+→ supabase.signInWithIdToken() — establishes session client-side
+→ updateUser({ full_name }) — saves name (Apple sends it only once)
+→ profile check: new user → /auth/select-role or completeOAuthProfile()
+→ returning user → route by existingRole
+```
+
+**Key implementation details:**
+- Cryptographic nonce (SHA-256) generated per request to prevent replay attacks
+- Apple only sends `givenName`/`familyName` on **first** sign-in; subsequent logins return null → `updateUser` is only called when non-null
+- `completeOAuthProfile()` reads `user.user_metadata.full_name` — works because `updateUser` is awaited before the server action call
+- `skipAutoRedirect` ref in login page prevents `onAuthStateChange` from racing with explicit navigation
+- Signup page calls `completeOAuthProfile(role)` directly (role already chosen in Step 1) — skips `/auth/select-role`
+- `isIOS()` guard: Apple button only shown on native iOS. Google button: web only. Email: all platforms.
+
+**Supabase auto-linking:**  
+When Apple email matches an existing Google/email account, Supabase merges identities → single `auth.users` record → no duplicate profile. Requires Supabase dashboard → "Link accounts to existing user" setting.
+
+**Remaining manual steps (before App Store submission):**
+1. `npx cap sync ios` on Mac
+2. Xcode: add "Sign in with Apple" capability
+3. Apple Developer Console: enable for App ID `com.kohride.app`, create Service ID + `.p8` key
+4. Supabase Dashboard → Auth → Providers → Apple → configure
+
+---
+
+## ADR-018: Map mobile UX — zone clusters vs shop pins
+
+**Status:** Accepted  
+**Date:** 2026-06-07
+
+**Context:**  
+On mobile, the Explore page has separate List and Map tabs. Tapping a cluster should navigate to the filtered list; tapping a single shop should show a bottom card and stay on the map.
+
+**Decision:**  
+- Zone cluster (count > 1): fires `onZoneClick` → `setFilters(location)` + `setMobileView('list')`
+- Single-shop zone cluster (count = 1, any TYPE): fires `onSelect(shopId)` instead of `onZoneClick` — stays on map, shows overlay card
+- Shop overlay card: `absolute bottom-24 right-4 z-20` positioned outside ScooterMap's `overflow-hidden`, always visible while panning
+- `showPopup={false}` on mobile ScooterMap — disables the Mapbox floating popup, overlay card handles display instead
+- Switching back to Map tab: resets `filters.location`, `selectedId`, and `shopIdFilter` to clear all state
+
+**Key fix — TYPE 2/3 shops (no precise pin):**  
+`clusterShopIds: string[]` added to `ZoneClusterData` so single-shop zones without a precise pin can resolve their `shopId` and call `onSelect` correctly.
+
+**"View scooters" button:**  
+Sets local state (`shopIdFilter`, `mobileView('list')`) instead of navigating to `/explore?shopId=...` via URL. Avoids the stale-prop issue where `useEffect([initialShopId])` wouldn't re-fire for the same shop.
+
+---
+
+## ADR-019: Zone detection — coordinates vs location text
+
+**Status:** Accepted  
+**Date:** 2026-06-07
+
+**Context:**  
+After a shop owner moves their pin to a different zone (e.g., from Kata to Patong), their `scooter.location` text might still say "Kata". The explore filter used `getZoneForLocation(s.location)` which only reads the text field.
+
+**Decision:**  
+Mirror the `buildZoneClusters` logic in the explore filter: for shops with `hasPrecisePin = true` and `locationVisibility = 'exact'`, use `getNearestZone(s.lat, s.lng)` for zone detection. Others fall back to text.
+
+Also: when a shop owner moves their map pin in shop settings, `getNearestZone(lat, lng)` auto-syncs the `location` dropdown to the nearest zone.
+
+---
+
+## ADR-020: Supabase Realtime — unique channel names per hook instance
+
+**Status:** Accepted  
+**Date:** 2026-06-08
+
+**Context:**  
+`useUnreadCount` used a hardcoded channel name `'unread-count-shared'`. When mounted in multiple components simultaneously, Supabase returns the same already-subscribed channel object, causing `cannot add postgres_changes callbacks after subscribe()` errors.
+
+**Decision:**  
+Each hook instance generates a unique channel name via `useRef(`unread-count-${Math.random().toString(36).slice(2)}`)`. Added a `cancelled` ref to prevent state updates after unmount (async race condition fix).
+
+**Files:** `hooks/useUnreadCount.ts`, `hooks/useUnreadReviewCount.ts`
+
+---
+
+## ADR-021: useProfile — keep profile during same-user navigation
+
+**Status:** Accepted  
+**Date:** 2026-06-08
+
+**Context:**  
+`useProfile` started with `profile = null` and called `setProfile(null)` before every fetch. On page navigation, components remounted → brief `isShopOwner = false` → UI flashed rider state before correcting.
+
+**Decision:**  
+Change `setProfile(null)` to `setProfile(prev => prev?.id === user.id ? prev : null)`. Keeps the existing profile if the same user is navigating (no flash). Only clears when switching to a different account (security preserved).
+
+**File:** `hooks/useProfile.ts`
+
+---
+
+## ADR-022: Page layout — pt-16 offset for fixed navbar
+
+**Status:** Accepted  
+**Date:** 2026-06-08
+
+**Context:**  
+The global Navbar is `fixed top-0 h-16 z-50`. The `<main>` wrapper in `layout.tsx` has `pt-safe` (iOS safe-area inset only, NOT navbar height). Pages must account for the 64px navbar themselves.
+
+**Correct patterns:**
+1. `pt-16` on the page root div → content starts at y=64
+2. `sticky top-16` as first child → self-positions at y=64 automatically
+
+**Pages with confirmed issues (audit 2026-06-08):**
+- `messages/ConversationList` — bare `<div>` no offset (critical)
+- `faq/page.tsx` — hero section hidden under navbar
+- `partner/page.tsx` — dark hero hidden
+- `profile/ProfileClient`, `saved/SavedRidesContent` — header section potentially clipped
+- `auth/login`, `auth/signup`, `auth/select-role`, `auth/reset-password` — custom top bar hidden under navbar, card visible by coincidence (top-bar height ≈ navbar height)
+- `partner/bookings`, `partner/availability`, `partner/dashboard` — use `pt-20` internal padding which compensates, but is fragile
+
+**Status:** Partially fixed. To be completed.
+
+---
+
+## ADR-023: Back button design — orange pill
+
+**Status:** Accepted  
+**Date:** 2026-06-08
+
+**Decision:**  
+All `ArrowLeft` back buttons use the same pill style, matching the Save button family:
+```
+flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold
+bg-[#FF6B35] text-white hover:bg-[#e85d29] transition-all active:scale-95
+```
+
+Back buttons in sticky `top-16` headers are consistent across: shop settings, scooter page, shop page, feedback, contact-us, terms, privacy, partner bookings, availability, new/edit scooter forms.
+
+**`BackButton` component:** `components/ui/BackButton.tsx` — a client component wrapper for `router.back()`, used by server component pages (terms, privacy) that cannot use `useRouter` directly.
+
+---
+
+## ADR-024: Messaging — delete conversation
+
+**Status:** Accepted  
+**Date:** 2026-06-07
+
+**Decision:**  
+Added "Delete conversation" in the 3-dot ThreadMenu with a confirmation modal. Server action `deleteConversation` in `app/actions/moderation.ts` verifies the user is a participant before hard-deleting the `conversations` row. Cascades to messages via FK.
+
+---
+
+## ADR-025: Opening hours — expandable dropdown component
+
+**Status:** Accepted  
+**Date:** 2026-06-07
+
+**Decision:**  
+`OpeningHoursDropdown` component (`components/shop/OpeningHoursDropdown.tsx`) replaces static hour display. Two variants:
+- `variant="default"`: clock icon + today's status (used in shop contact card)
+- `variant="dot"`: colored dot (used in scooter card shop section)
+
+Clicking expands all 7 days (Monday-first, like Google Maps). Bangkok timezone (`Asia/Bangkok`) for "open/closed" state. Today's day highlighted in bold.
+
+---
+
+## ADR-026: i18n — defer to post-launch
+
+**Status:** Deferred  
+**Date:** 2026-06-08
+
+**Context:**  
+App targets Phuket market with riders from France, Russia, Thailand. Full i18n would require ~1,500-2,000 translatable strings, `next-intl`, URL prefix routing (`/fr/`, `/th/`, `/ru/`), and 10-17 days of work.
+
+**Decision:**  
+Submit App Store in English only (Apple does not require multilingual for approval). Add Thai first (primary market, simplest) as a v1.1 post-launch update. French and Russian in v1.2+ if demand justifies.
+
+**Reasoning:**  
+App is evolving rapidly. i18n maintenance during active development adds ~30-40% overhead per feature. Better to ship English → validate → localize.
+
+---
+
+## ADR-027: Admin panel — thread/explore controls
+
+**Status:** Accepted  
+**Date:** 2026-06-07
+
+**Decision:**  
+Admin-only floating panels (guarded by `useProfile().isAdmin + useAdminPanelVisible()`) provide runtime overrides for:
+- **Thread page** (`AdminThreadControl`): show/hide context pills, timestamps, price override, duration override (Day/Wk/Mo)
+- **Explore page**: screenshot pins, recommended sort toggle
+
+Panels are `fixed bottom-24 right-4 z-[9000]` dark overlays. Used for App Store screenshots. Overrides are session-only (not persisted to DB by default).
+
+**Note:** Resetting DB admin overrides requires running SQL directly in Supabase dashboard — see conversation history for the exact query.
+
+---
+
+## ADR-028: Apple Sign In — security audit findings
+
+**Status:** Accepted  
+**Date:** 2026-06-08
+
+**Context:**  
+Deep audit of the Apple Sign In implementation (name persistence, shop owner onboarding, account deduplication) following the initial implementation in ADR-017.
+
+**Name persistence — verified correct:**
+- Apple JWT does NOT contain name claims. Name comes separately in the plugin response (`response.givenName`, `response.familyName`), present only on the first sign-in.
+- `updateUser({ data: { full_name } })` is called immediately after `signInWithIdToken()` and before the profile check. Because it is `await`-ed, the cookie is updated before `completeOAuthProfile()` runs on the server.
+- On subsequent sign-ins: Apple returns null for both name fields → `updateUser` is never called → `profiles.name` is preserved forever.
+- `on_auth_user_updated` DB trigger (migration 007): safe because Supabase merges metadata (does not replace), so `role` is preserved in `raw_user_meta_data` across `updateUser` calls.
+- **Fix applied:** `updateUser` return value now checked; error logged non-fatally (was silently ignored).
+
+**Shop owner onboarding — verified correct:**
+- Signup page: `completeOAuthProfile('shop_owner')` called directly with the chosen role (skips `/auth/select-role`). Profile created with correct role.
+- Login page new user: routed to `/auth/select-role` — user picks role there. No hint passed (minor UX: pre-selects 'rider' by default).
+- `/partner/dashboard` guarded server-side: `if (!profile || profile.role !== 'shop_owner') redirect('/')`.
+- No accidental rider assignment possible. `profiles.id` PRIMARY KEY enforces one profile per auth user.
+
+**Deduplication:**
+- Same email across providers (Google → Apple): Supabase auto-links → single `auth.users` → profile found → `isNewUser: false` → no duplicate.
+- Apple "Hide My Email" → different email → two accounts by design. Unavoidable; acceptable.
+- Email/password → Apple same email: safe IF Supabase dashboard → Auth → "Duplicate email behavior" = **"Link accounts to existing user"** (default). Must be verified before submission.
+- `completeOAuthProfile` has idempotency guard (`if (!existing) { insert }`); DB PRIMARY KEY enforces no duplicate profiles.
+
+**Production readiness: 8.5/10.**  
+Two pre-submission requirements: (1) test on physical iPhone, (2) verify Supabase duplicate email policy.
+
+---
+
+## ADR-029: Hero mobile CTA — glassmorphism button
+
+**Status:** Accepted  
+**Date:** 2026-06-08
+
+**Context:**  
+The original solid orange `#FF6B35` CTA button on the mobile hero was visually too heavy ("tâche") on the scenic sunset background.
+
+**Decision:**  
+Replace solid orange with a warm amber-tinted glass button on mobile only (`md:hidden` section). Desktop CTA unchanged.
+
+**Final style:**
+```
+bg-[rgba(255,150,60,0.18)] backdrop-blur-[4px]
+border border-white/25
+shadow-[0_2px_20px_rgba(0,0,0,0.3)]
+text-white font-bold
+```
+
+**Reasoning:**
+- Warm amber tint (rgba 255,150,60) matches the sunset hero colors — button feels part of the scene
+- 4px blur: gives depth without obscuring the hero image
+- White border (25% opacity): defines shape without drawing attention
+- Dark drop shadow: anchors the button visually
+- Desktop button stays solid orange (correct on white background)
+
+**Position:** `mt-20` below the subtitle text, separated from the text block (`opacity-0` with staggered `fade-up` animation at 0.25s delay vs 0.1s for text).
+
+---
+
+## ADR-030: Partner dashboard — Support and Account sections
+
+**Status:** Accepted  
+**Date:** 2026-06-08
+
+**Context:**  
+Shop owners had no way to access Feedback, Contact Us, Sign Out, or Delete Account from the partner dashboard. They had to navigate to the rider profile page.
+
+**Decision:**  
+Added Support and Account sections at the bottom of `DashboardClient.tsx`, mirroring the rider profile page sections.
+
+**Structure:**
+- **Support:** Feedback → `/feedback`, Contact Us → `/contact-us`
+- **Account:** Sign Out (calls `useAuth().signOut()` directly), Delete Account (links to `/profile` where the full shop owner deletion request flow exists)
+
+**Reasoning:**  
+Delete Account was not duplicated inline because the shop owner deletion flow (`requestShopAccountDeletion`) has a multi-step confirmation UI that's already fully built on the profile page. Linking there avoids duplication and reduces maintenance risk.
+
+---
+
+## ADR-031: Feedback and Contact Us pages — back button and layout fix
+
+**Status:** Accepted  
+**Date:** 2026-06-08
+
+**Context:**  
+Both pages had a "Home" link (→ `/`) as the back button. The link was also hidden behind the fixed 64px navbar because the page outer div lacked `pt-16`.
+
+**Decision:**
+1. Replace `<Link href="/">Home</Link>` with `<button onClick={() => router.back()}>Back</button>` — returns to the actual previous page (dashboard, profile, etc.)
+2. Add `pt-16` to the outer `min-h-screen` div so the back button is visible below the fixed navbar.
+
+**Root cause of invisible top bar:**  
+`app/layout.tsx` wraps pages in `<main className="pt-safe ...">` — `pt-safe` is iOS safe area inset only (≈0 on non-iOS). Pages must add `pt-16` themselves to account for the 64px fixed Navbar. The top bar div (approx 40px tall) was hidden under the navbar; the card appeared correctly below the navbar only by coincidence (top bar height ≈ navbar height).
