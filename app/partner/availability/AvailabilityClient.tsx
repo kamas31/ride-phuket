@@ -57,7 +57,7 @@ export default function AvailabilityClient({
         <div className="max-w-2xl mx-auto px-4 pt-20 pb-5">
           <Link
             href="/partner/dashboard"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-[#f5f4f2] text-[#5c5c58] hover:bg-[#ececea] hover:text-[#0f0f0e] transition-all active:scale-95 mb-4"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-[#FF6B35] text-white hover:bg-[#e85d29] transition-all active:scale-95 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             Dashboard
@@ -177,3 +177,4 @@ export default function AvailabilityClient({
     </div>
   )
 }
+
