@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Check } from 'lucide-react'
+import { SITE_NAME } from '@/constants'
 import { submitFeedback, type FeedbackType } from '@/app/actions/feedback'
 
 const TYPES: { value: FeedbackType; label: string; emoji: string }[] = [

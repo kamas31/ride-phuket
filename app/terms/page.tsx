@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { BackButton } from '@/components/ui/BackButton'
 
 export const metadata = {
   title: 'Terms of Service — Koh Ride',
@@ -12,13 +12,7 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-[#f8f8f6]">
       <div className="max-w-2xl mx-auto px-4 pt-20 pb-16">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] mb-8 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Link>
+        <BackButton className="inline-flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] mb-8 transition-colors" />
 
         <div className="bg-white rounded-[24px] border border-[#e8e8e4] p-8 md:p-10">
           <p className="text-xs font-semibold text-[#FF6B35] uppercase tracking-widest mb-3">Legal</p>
