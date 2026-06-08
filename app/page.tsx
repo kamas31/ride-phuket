@@ -102,8 +102,8 @@ export default async function HomePage() {
           </div>
           <Link
             href="/explore"
-            className="flex items-center justify-center gap-2 w-full py-[13px] rounded-full text-[14px] font-bold mt-24
-                       bg-white/[0.06] backdrop-blur-md
+            className="flex items-center justify-center gap-2 w-full py-[13px] rounded-full text-[14px] font-bold mt-20
+                       bg-white/[0.04]
                        border border-[rgba(255,107,53,0.45)]
                        shadow-[0_0_18px_rgba(255,107,53,0.15)]
                        active:scale-[0.97] transition-all duration-200"
