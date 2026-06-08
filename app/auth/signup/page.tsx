@@ -2,11 +2,12 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { MapPin, Mail, Lock, Eye, EyeOff, ArrowLeft, User, Check } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { completeOAuthProfile } from '@/app/actions/profile'
 import { trackEvent } from '@/lib/analytics'
-import { isNative } from '@/lib/platform'
+import { isNative, isIOS } from '@/lib/platform'
 import { SITE_NAME } from '@/constants'
 import type { UserRole } from '@/lib/supabase/types'
 
@@ -34,12 +35,14 @@ const ROLE_OPTIONS: {
 ]
 
 function SignupForm() {
+  const router = useRouter()
   const searchParams = useSearchParams()
 
-  const { signUpWithEmail } = useAuth()
+  const { signUpWithEmail, signInWithApple } = useAuth()
 
   const [role, setRole] = useState<UserRole>('rider')
   const [step, setStep] = useState<1 | 2>(1)
+  const [appleLoading, setAppleLoading] = useState(false)
   const [name, setName]         = useState('')
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
@@ -88,6 +91,30 @@ function SignupForm() {
     await supabase.auth.resend({ type: 'signup', email })
     setResending(false)
     setResendSent(true)
+  }
+
+  const handleAppleSignup = async (selectedRole: UserRole) => {
+    setError(null)
+    setAppleLoading(true)
+
+    const result = await signInWithApple(selectedRole)
+    setAppleLoading(false)
+
+    if (result.error === 'cancelled') return
+    if (result.error) { setError(result.error); return }
+
+    trackEvent({ eventType: 'auth_signup', metadata: { role: selectedRole, provider: 'apple' } })
+
+    if (result.isNewUser) {
+      // Role was already chosen in Step 1 — complete profile directly,
+      // no need to send the user through /auth/select-role.
+      const { error: profileErr } = await completeOAuthProfile(selectedRole)
+      if (profileErr) { setError(profileErr); return }
+      router.replace(selectedRole === 'shop_owner' ? '/partner/dashboard' : '/')
+    } else {
+      // Returning user — route to their existing role's home
+      router.replace(result.existingRole === 'shop_owner' ? '/partner/dashboard' : '/')
+    }
   }
 
   if (success) {
@@ -206,7 +233,7 @@ function SignupForm() {
                 ))}
               </div>
 
-              {/* Google OAuth shortcut — hidden on native iOS (WKWebView blocked by Google) */}
+              {/* Google OAuth shortcut — web only (WKWebView blocks Google OAuth) */}
               {!isNative() && (
                 <>
                   <button
@@ -227,6 +254,33 @@ function SignupForm() {
                   >
                     <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
                     Continue with Google as {role === 'rider' ? 'Rider' : 'Shop Owner'}
+                  </button>
+
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex-1 h-px bg-[#e8e8e4]" />
+                    <span className="text-xs text-[#9c9c98] font-medium">or with email</span>
+                    <div className="flex-1 h-px bg-[#e8e8e4]" />
+                  </div>
+                </>
+              )}
+
+              {/* Sign in with Apple — native iOS only (guideline 4.8 compliance) */}
+              {isIOS() && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleAppleSignup(role)}
+                    disabled={appleLoading}
+                    className="w-full flex items-center justify-center gap-3 py-3 bg-black text-white text-sm font-medium rounded-[12px] active:opacity-80 transition-opacity disabled:opacity-50 mb-4"
+                  >
+                    {appleLoading ? (
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <svg width="14" height="17" viewBox="0 0 14 17" fill="white" aria-hidden="true">
+                        <path d="M13.295 13.023c-.248.574-.541 1.103-.877 1.59-.46.66-.837 1.117-1.126 1.371-.45.41-.932.622-1.448.634-.37 0-.817-.106-1.338-.32-.522-.215-.999-.32-1.436-.32-.457 0-.948.105-1.476.32-.528.214-.954.326-1.282.337-.494.02-.98-.198-1.455-.656-.31-.27-.703-.74-1.178-1.413C.898 13.84.493 12.909.19 11.85c-.326-1.14-.49-2.244-.49-3.313 0-1.226.265-2.283.796-3.168A4.672 4.672 0 0 1 2.166 3.65a4.447 4.447 0 0 1 2.235-.633c.437 0 1.009.135 1.72.402.709.267 1.164.402 1.363.402.148 0 .652-.158 1.503-.473.806-.294 1.487-.415 2.044-.367 1.51.122 2.645.717 3.398 1.789-1.35.818-2.017 1.963-2.004 3.43.012 1.143.427 2.094 1.24 2.849.37.35.782.621 1.239.813-.099.289-.204.565-.31.829zM10.115.332c0 .896-.328 1.733-.98 2.505-.788.922-1.74 1.454-2.773 1.37a2.789 2.789 0 0 1-.02-.34c0-.86.374-1.779 1.038-2.53.332-.382.754-.699 1.267-.95C9.161.138 9.648.013 10.1 0c.013.111.015.222.015.332z"/>
+                      </svg>
+                    )}
+                    Continue with Apple as {role === 'rider' ? 'Rider' : 'Shop Owner'}
                   </button>
 
                   <div className="flex items-center gap-3 mb-4">

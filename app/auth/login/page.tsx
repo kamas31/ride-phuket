@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MapPin, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { trackEvent } from '@/lib/analytics'
-import { isNative } from '@/lib/platform'
+import { isNative, isIOS } from '@/lib/platform'
 import { SITE_NAME } from '@/constants'
 import { emailExists } from '@/app/actions/auth'
 
@@ -16,15 +16,19 @@ function LoginForm() {
   const redirect    = searchParams.get('next') ?? searchParams.get('redirect') ?? '/'
   const authError   = searchParams.get('error')
 
-  const { user, loading, signInWithEmail, signInWithGoogle, resetPassword } = useAuth()
+  const { user, loading, signInWithEmail, signInWithGoogle, signInWithApple, resetPassword } = useAuth()
 
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw]     = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [appleLoading, setAppleLoading] = useState(false)
   const [error, setError]       = useState<string | null>(
     authError === 'auth_failed' ? 'Authentication failed. Please try again.' : null
   )
+  // Prevents the auto-redirect useEffect from firing during Apple Sign In —
+  // we navigate explicitly once we know whether the user is new or returning.
+  const skipAutoRedirect = useRef(false)
   const [forgotMode, setForgotMode]   = useState(false)
   const [resetEmail, setResetEmail]   = useState('')
   const [resetSending, setResetSending] = useState(false)
@@ -32,8 +36,36 @@ function LoginForm() {
   const [resetError, setResetError]   = useState<string | null>(null)
   const [noAccountMode, setNoAccountMode] = useState(false)
   useEffect(() => {
-    if (!loading && user) router.replace(redirect)
+    if (!loading && user && !skipAutoRedirect.current) router.replace(redirect)
   }, [user, loading, router, redirect])
+
+  const handleAppleSignIn = async () => {
+    setError(null)
+    setAppleLoading(true)
+    skipAutoRedirect.current = true
+
+    const result = await signInWithApple()
+    setAppleLoading(false)
+
+    if (result.error === 'cancelled') {
+      skipAutoRedirect.current = false
+      return
+    }
+    if (result.error) {
+      skipAutoRedirect.current = false
+      setError(result.error)
+      return
+    }
+
+    trackEvent({ eventType: 'auth_login' })
+
+    if (result.isNewUser) {
+      router.push('/auth/select-role')
+    } else {
+      const destination = result.existingRole === 'shop_owner' ? '/partner/dashboard' : redirect
+      router.replace(destination)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -189,7 +221,7 @@ function LoginForm() {
                   <h1 className="text-[22px] font-bold text-[#0f0f0e] mb-1">Welcome back</h1>
                   <p className="text-sm text-[#9c9c98] mb-6">Sign in to your Koh Ride account.</p>
 
-                  {/* Google OAuth — hidden on native iOS (WKWebView blocked by Google) */}
+                  {/* Google OAuth — web only (WKWebView blocks Google OAuth) */}
                   {!isNative() && (
                     <>
                       <button
@@ -204,6 +236,33 @@ function LoginForm() {
                           <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/>
                         </svg>
                         Continue with Google
+                      </button>
+
+                      <div className="flex items-center gap-3 mb-5">
+                        <div className="flex-1 h-px bg-[#e8e8e4]" />
+                        <span className="text-xs text-[#9c9c98] font-medium">or</span>
+                        <div className="flex-1 h-px bg-[#e8e8e4]" />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Sign in with Apple — native iOS only (guideline 4.8 compliance) */}
+                  {isIOS() && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleAppleSignIn}
+                        disabled={appleLoading}
+                        className="w-full flex items-center justify-center gap-3 py-3 bg-black text-white text-sm font-medium rounded-[12px] active:opacity-80 transition-opacity disabled:opacity-50 mb-5"
+                      >
+                        {appleLoading ? (
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <svg width="14" height="17" viewBox="0 0 14 17" fill="white" aria-hidden="true">
+                            <path d="M13.295 13.023c-.248.574-.541 1.103-.877 1.59-.46.66-.837 1.117-1.126 1.371-.45.41-.932.622-1.448.634-.37 0-.817-.106-1.338-.32-.522-.215-.999-.32-1.436-.32-.457 0-.948.105-1.476.32-.528.214-.954.326-1.282.337-.494.02-.98-.198-1.455-.656-.31-.27-.703-.74-1.178-1.413C.898 13.84.493 12.909.19 11.85c-.326-1.14-.49-2.244-.49-3.313 0-1.226.265-2.283.796-3.168A4.672 4.672 0 0 1 2.166 3.65a4.447 4.447 0 0 1 2.235-.633c.437 0 1.009.135 1.72.402.709.267 1.164.402 1.363.402.148 0 .652-.158 1.503-.473.806-.294 1.487-.415 2.044-.367 1.51.122 2.645.717 3.398 1.789-1.35.818-2.017 1.963-2.004 3.43.012 1.143.427 2.094 1.24 2.849.37.35.782.621 1.239.813-.099.289-.204.565-.31.829zM10.115.332c0 .896-.328 1.733-.98 2.505-.788.922-1.74 1.454-2.773 1.37a2.789 2.789 0 0 1-.02-.34c0-.86.374-1.779 1.038-2.53.332-.382.754-.699 1.267-.95C9.161.138 9.648.013 10.1 0c.013.111.015.222.015.332z"/>
+                          </svg>
+                        )}
+                        Sign in with Apple
                       </button>
 
                       <div className="flex items-center gap-3 mb-5">

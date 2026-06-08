@@ -19,6 +19,7 @@
     "assets:generate": "npx capacitor-assets generate --assetPath resources"
   },
   "dependencies": {
+    "@capacitor-community/apple-sign-in": "^7.1.0",
     "@capacitor/app": "^8.1.0",
     "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",
