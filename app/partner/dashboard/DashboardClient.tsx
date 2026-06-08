@@ -8,12 +8,14 @@ import {
   Bike, Plus, Settings, MapPin,
   ChevronDown, ChevronRight, ArrowRight, Trash2, ShoppingBag,
   ExternalLink, Eye, MessageCircle, MessageSquare, Star,
+  LogOut, Headphones,
 } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
 import { deleteScooter } from '@/app/actions/scooter-delete'
 import { toggleScooterAvailability } from '@/app/actions/scooter-availability'
 import { updateShopLogo } from '@/app/actions/profile'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/hooks/useAuth'
 import {
   canAccessAdvancedAnalytics, canAccessHotScooters, canAccessLeadInsights,
 } from '@/lib/plans'
@@ -45,6 +47,7 @@ interface DashboardClientProps {
 export default function DashboardClient({
   profile, shop, scooters: initial, bookingStats: _bookingStats, analytics, unreadCount, unreadPreview, unreadReviewCount,
 }: DashboardClientProps) {
+  const { signOut } = useAuth()
   const [scooters, setScooters]           = useState(initial)
   const [togglingId, setTogglingId]       = useState<string | null>(null)
   const [deletingId, setDeletingId]       = useState<string | null>(null)
@@ -634,10 +637,61 @@ export default function DashboardClient({
                 <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:translate-x-0.5 transition-transform" />
               </Link>
 
-
             </div>
           </div>
         )}
+
+        {/* ── SUPPORT ── */}
+        <div className="pb-3">
+          <p className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-widest mb-3 px-1">Support</p>
+          <div className="bg-white rounded-[20px] overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.04),0_2px_12px_-2px_rgba(0,0,0,0.05)] divide-y divide-[#f2f2ef]">
+            <Link
+              href="/feedback"
+              className="flex items-center gap-3.5 px-5 py-4 hover:bg-[#fafaf8] active:bg-[#f5f4f2] transition-colors group"
+            >
+              <div className="w-8 h-8 bg-[#f5f4f2] rounded-[10px] flex items-center justify-center flex-shrink-0 group-hover:bg-[#ececea] transition-colors">
+                <MessageSquare className="w-3.5 h-3.5 text-[#5c5c58]" />
+              </div>
+              <span className="flex-1 text-[14px] font-medium text-[#0f0f0e]">Feedback</span>
+              <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+            <Link
+              href="/contact-us"
+              className="flex items-center gap-3.5 px-5 py-4 hover:bg-[#fafaf8] active:bg-[#f5f4f2] transition-colors group"
+            >
+              <div className="w-8 h-8 bg-[#f5f4f2] rounded-[10px] flex items-center justify-center flex-shrink-0 group-hover:bg-[#ececea] transition-colors">
+                <Headphones className="w-3.5 h-3.5 text-[#5c5c58]" />
+              </div>
+              <span className="flex-1 text-[14px] font-medium text-[#0f0f0e]">Contact Us</span>
+              <ChevronRight className="w-4 h-4 text-[#c8c8c4] group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
+        </div>
+
+        {/* ── ACCOUNT ── */}
+        <div className="pb-8">
+          <p className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-widest mb-3 px-1">Account</p>
+          <div className="bg-white rounded-[20px] overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.04),0_2px_12px_-2px_rgba(0,0,0,0.05)] divide-y divide-[#f2f2ef]">
+            <button
+              onClick={signOut}
+              className="w-full flex items-center gap-3.5 px-5 py-4 hover:bg-[#fafaf8] active:bg-[#f5f4f2] transition-colors group"
+            >
+              <div className="w-8 h-8 bg-[#f5f4f2] rounded-[10px] flex items-center justify-center flex-shrink-0 group-hover:bg-[#ececea] transition-colors">
+                <LogOut className="w-3.5 h-3.5 text-[#5c5c58]" />
+              </div>
+              <span className="flex-1 text-[14px] font-medium text-[#0f0f0e] text-left">Sign Out</span>
+            </button>
+            <Link
+              href="/profile"
+              className="flex items-center gap-3.5 px-5 py-4 hover:bg-[#fff5f5] active:bg-[#fee2e2] transition-colors group"
+            >
+              <div className="w-8 h-8 bg-[#fff5f5] rounded-[10px] flex items-center justify-center flex-shrink-0 group-hover:bg-[#fee2e2] transition-colors">
+                <Trash2 className="w-3.5 h-3.5 text-[#ef4444]" />
+              </div>
+              <span className="flex-1 text-[14px] font-medium text-[#ef4444]">Delete Account</span>
+            </Link>
+          </div>
+        </div>
 
       </div>
     </div>
