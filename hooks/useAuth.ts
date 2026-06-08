@@ -117,7 +117,10 @@ export function useAuth(): AuthState {
         const fullName = [response.givenName, response.familyName]
           .filter(Boolean)
           .join(' ')
-        await supabase.auth.updateUser({ data: { full_name: fullName } })
+        const { error: nameError } = await supabase.auth.updateUser({ data: { full_name: fullName } })
+        // Non-fatal — auth succeeded. If this fails, completeOAuthProfile falls
+        // back to the user's email. The name can be corrected in profile settings.
+        if (nameError) console.warn('[Apple Sign In] Failed to persist name:', nameError.message)
       }
 
       // Determine new vs returning user by checking for an existing profile row.
