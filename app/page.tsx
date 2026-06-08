@@ -101,8 +101,10 @@ export default async function HomePage() {
             </p>
             <Link
               href="/explore"
-              className="flex items-center justify-center gap-2 w-full py-[13px] bg-[#FF6B35] text-white text-[14px] font-bold rounded-full
-                         shadow-[0_4px_20px_rgba(255,107,53,0.5)]
+              className="flex items-center justify-center gap-2 w-full py-[13px] rounded-full text-white text-[14px] font-bold
+                         bg-white/[0.12] backdrop-blur-md
+                         border border-[rgba(255,107,53,0.55)]
+                         shadow-[0_0_18px_rgba(255,107,53,0.25),inset_0_0_12px_rgba(255,107,53,0.06)]
                          active:scale-[0.97] transition-all duration-200"
             >
               Explore Scooters
