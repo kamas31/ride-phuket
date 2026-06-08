@@ -1,10 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, MapPin, Check } from 'lucide-react'
-import { SITE_NAME } from '@/constants'
+import { ArrowLeft, Check } from 'lucide-react'
 import { submitContactMessage } from '@/app/actions/contact'
 
 export default function ContactUsClient() {
@@ -28,17 +26,11 @@ export default function ContactUsClient() {
   return (
     <div className="min-h-screen bg-[#f8f8f6] flex flex-col pt-16">
       {/* Top bar */}
-      <div className="px-4 pt-4 pb-0 flex items-center justify-between max-w-md mx-auto w-full">
+      <div className="px-4 pt-4 pb-0 max-w-md mx-auto w-full">
         <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back
         </button>
-        <Link href="/" className="flex items-center gap-1.5">
-          <div className="w-7 h-7 bg-[#FF6B35] rounded-[8px] flex items-center justify-center">
-            <MapPin className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-          </div>
-          <span className="font-bold text-sm text-[#0f0f0e]">{SITE_NAME}</span>
-        </Link>
       </div>
 
       <div className="flex-1 flex items-start justify-center px-4 py-10">

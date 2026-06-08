@@ -17,7 +17,7 @@ export default function PrivacyPage() {
           className="inline-flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] mb-8 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Home
+          Back
         </Link>
 
         <div className="bg-white rounded-[24px] border border-[#e8e8e4] p-8 md:p-10">
