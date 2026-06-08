@@ -1,23 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-// Returns the number of unread reviews for the logged-in shop owner.
-// Returns 0 for riders or unauthenticated users.
-// Queries the DB directly from the browser client (same pattern as useUnreadCount)
-// so there is no server action auth round-trip that could silently fail.
 export function useUnreadReviewCount(): number {
   const [count, setCount] = useState(0)
+  const channelId = useRef(`unread-review-count-${Math.random().toString(36).slice(2)}`)
 
   useEffect(() => {
     const supabase = createClient()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let channel: ReturnType<typeof supabase.channel> | null = null
+    let cancelled = false
 
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user || cancelled) return
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: shopRow } = await (supabase as any)
@@ -27,15 +24,18 @@ export function useUnreadReviewCount(): number {
         .maybeSingle()
 
       const shopId: string | undefined = shopRow?.id
-      if (!shopId) return
+      if (!shopId || cancelled) return
 
       async function fetchCount() {
+        if (cancelled) return
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: shopData } = await (supabase as any)
           .from('shops')
           .select('reviews_last_seen_at')
           .eq('id', shopId)
           .single()
+
+        if (cancelled) return
 
         const lastSeen: string = shopData?.reviews_last_seen_at ?? '1970-01-01T00:00:00Z'
 
@@ -46,26 +46,23 @@ export function useUnreadReviewCount(): number {
           .eq('shop_id', shopId)
           .gt('created_at', lastSeen)
 
-        setCount(c ?? 0)
+        if (!cancelled) setCount(c ?? 0)
       }
 
       await fetchCount()
+      if (cancelled) return
 
       channel = supabase
-        .channel(`unread-review-count-${shopId}`)
+        .channel(channelId.current)
         .on(
           'postgres_changes',
-          // Fires when markReviewsSeen clears reviews_last_seen_at,
-          // or when trg_update_shop_rating updates review_count on new review.
           { event: 'UPDATE', schema: 'public', table: 'shops', filter: `id=eq.${shopId}` },
-          () => { fetchCount() },
+          () => { if (!cancelled) fetchCount() },
         )
         .on(
           'postgres_changes',
-          // Direct trigger on review INSERT so new reviews are caught immediately,
-          // without waiting for the trigger → shops UPDATE chain.
           { event: 'INSERT', schema: 'public', table: 'reviews', filter: `shop_id=eq.${shopId}` },
-          () => { fetchCount() },
+          () => { if (!cancelled) fetchCount() },
         )
         .subscribe()
     }
@@ -73,6 +70,7 @@ export function useUnreadReviewCount(): number {
     init()
 
     return () => {
+      cancelled = true
       if (channel) supabase.removeChannel(channel)
     }
   }, [])

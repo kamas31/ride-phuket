@@ -1,16 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export function useUnreadCount(): number {
   const [unread, setUnread] = useState(0)
+  // Unique channel name per instance — prevents conflict when hook is used in
+  // multiple components simultaneously (Supabase shares channels by name).
+  const channelId = useRef(`unread-count-${Math.random().toString(36).slice(2)}`)
 
   useEffect(() => {
     const supabase = createClient()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let channel: ReturnType<typeof supabase.channel> | null = null
-    let currentUserId: string | null = null
+    let cancelled = false
 
     async function fetchUnread(uid: string) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,6 +21,7 @@ export function useUnreadCount(): number {
         .select('id')
         .or(`client_id.eq.${uid},owner_id.eq.${uid}`)
 
+      if (cancelled) return
       if (!convos?.length) { setUnread(0); return }
 
       const ids = convos.map((c: { id: string }) => c.id)
@@ -31,27 +34,26 @@ export function useUnreadCount(): number {
         .or(`sender_id.neq.${uid},sender_id.is.null`)
         .is('read_at', null)
 
-      setUnread(count ?? 0)
+      if (!cancelled) setUnread(count ?? 0)
     }
 
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user || cancelled) return
 
-      currentUserId = user.id
       fetchUnread(user.id)
 
       channel = supabase
-        .channel('unread-count-shared')
+        .channel(channelId.current)
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'messages' },
-          () => { if (currentUserId) fetchUnread(currentUserId) },
+          () => { if (!cancelled) fetchUnread(user.id) },
         )
         .on(
           'postgres_changes',
           { event: 'UPDATE', schema: 'public', table: 'messages' },
-          () => { if (currentUserId) fetchUnread(currentUserId) },
+          () => { if (!cancelled) fetchUnread(user.id) },
         )
         .subscribe()
     }
@@ -59,6 +61,7 @@ export function useUnreadCount(): number {
     init()
 
     return () => {
+      cancelled = true
       if (channel) supabase.removeChannel(channel)
     }
   }, [])
