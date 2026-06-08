@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, MapPin, Check } from 'lucide-react'
 import { SITE_NAME } from '@/constants'
 import { submitFeedback, type FeedbackType } from '@/app/actions/feedback'
@@ -13,6 +14,7 @@ const TYPES: { value: FeedbackType; label: string; emoji: string }[] = [
 ]
 
 export default function FeedbackPage() {
+  const router = useRouter()
   const [type, setType]           = useState<FeedbackType>('general')
   const [message, setMessage]     = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -33,10 +35,10 @@ export default function FeedbackPage() {
     <div className="min-h-screen bg-[#f8f8f6] flex flex-col">
       {/* Top bar */}
       <div className="px-4 pt-6 pb-0 flex items-center justify-between max-w-md mx-auto w-full">
-        <Link href="/" className="flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] transition-colors">
+        <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] transition-colors">
           <ArrowLeft className="w-4 h-4" />
-          Home
-        </Link>
+          Back
+        </button>
         <Link href="/" className="flex items-center gap-1.5">
           <div className="w-7 h-7 bg-[#FF6B35] rounded-[8px] flex items-center justify-center">
             <MapPin className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
