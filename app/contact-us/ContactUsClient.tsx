@@ -26,9 +26,9 @@ export default function ContactUsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f8f6] flex flex-col">
+    <div className="min-h-screen bg-[#f8f8f6] flex flex-col pt-16">
       {/* Top bar */}
-      <div className="px-4 pt-6 pb-0 flex items-center justify-between max-w-md mx-auto w-full">
+      <div className="px-4 pt-4 pb-0 flex items-center justify-between max-w-md mx-auto w-full">
         <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-[#5c5c58] hover:text-[#0f0f0e] transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back
