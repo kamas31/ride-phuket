@@ -88,7 +88,7 @@ Admin-only floating panels for App Store screenshot session overrides. Thread co
 
 ---
 
-## 2025-05-02
+## 2026-05-02
 
 ### Feat: Multi-role auth — rider / shop_owner (ADR-013, ADR-014)
 **Files:** Auth pages, DB triggers, profiles schema
@@ -107,7 +107,7 @@ Client Component reads `useProfile`. Nav links, CTA, and user dropdown adapt bas
 
 ---
 
-## 2025-05-01
+## 2026-05-01
 
 ### Init: Project scaffold
 Next.js 15 App Router, TypeScript strict, Tailwind v4, shadcn/ui + Radix, Supabase schema, Vercel config, PWA manifest.

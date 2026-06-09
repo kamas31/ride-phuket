@@ -93,7 +93,7 @@ Design principles:
 
 ---
 
-## Current Status (May 2025)
+## Current Status (May 2026)
 
 - ✅ Project scaffolded (Next.js 15, TypeScript, Tailwind)
 - ✅ Design system implemented (tokens, components)

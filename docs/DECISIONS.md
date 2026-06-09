@@ -5,7 +5,7 @@
 ## ADR-001: Next.js App Router
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Decision:**  
 Next.js 15 with App Router.
@@ -25,7 +25,7 @@ Server components cannot use hooks. Client components marked with `'use client'`
 ## ADR-002: Supabase as Backend
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Decision:**  
 Supabase as the BaaS layer.
@@ -45,7 +45,7 @@ Firebase (NoSQL — poor for relational marketplace data), PlanetScale (no auth/
 ## ADR-003: Tailwind CSS v4 (no separate config file)
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Decision:**  
 Use Tailwind v4 CSS-first configuration. All design tokens in `globals.css`.
@@ -63,7 +63,7 @@ Less familiar for devs used to v3. Some plugins may not be compatible yet.
 ## ADR-004: shadcn/ui + Radix UI for components
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Decision:**  
 Use Radix UI primitives with custom Tailwind styling, following the shadcn/ui pattern.
@@ -81,7 +81,7 @@ Material UI (too opinionated), Chakra (v3 breaking changes), Ant Design (too cor
 ## ADR-005: Client-side filtering on Explore page
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Decision:**  
 Use `useMemo` with local state for filtering on the client. Data fetched once from Supabase, filtered in-browser.
@@ -98,7 +98,7 @@ When fleet grows to 1000+ scooters, move to server-side filtering with URL param
 ## ADR-006: Map strategy — placeholder first, Mapbox later
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Decision:**  
 Build a visual map placeholder with pinned price markers. Replace with real Mapbox implementation in Phase 2.
@@ -112,7 +112,7 @@ Build a visual map placeholder with pinned price markers. Replace with real Mapb
 ## ADR-007: Mobile-first, no dark mode in v1
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Decision:**  
 Mobile-first responsive design. No dark mode in v1.
@@ -127,7 +127,7 @@ Mobile-first responsive design. No dark mode in v1.
 ## ADR-008: Routing structure
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Decision:**
 ```
@@ -146,7 +146,7 @@ Mobile-first responsive design. No dark mode in v1.
 ## ADR-009: TypeScript strict mode
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Decision:**  
 `strict: true` in tsconfig.
@@ -160,7 +160,7 @@ Mobile-first responsive design. No dark mode in v1.
 ## ADR-010: Vercel region — Singapore (sin1)
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Reasoning:**
 - Closest Vercel region to Thailand
@@ -171,7 +171,7 @@ Mobile-first responsive design. No dark mode in v1.
 ## ADR-011: Payment strategy — cash first, Stripe later
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Reasoning:**
 - Stripe requires business registration in Thailand
@@ -184,7 +184,7 @@ Mobile-first responsive design. No dark mode in v1.
 ## ADR-012: State management — React useState, no global store
 
 **Status:** Accepted  
-**Date:** 2025-05-01
+**Date:** 2026-05-01
 
 **Reasoning:**
 - v1 has no complex shared state
@@ -196,7 +196,7 @@ Mobile-first responsive design. No dark mode in v1.
 ## ADR-013: Multi-role auth — `rider` / `shop_owner` stored in `profiles.role`
 
 **Status:** Accepted  
-**Date:** 2025-05-02
+**Date:** 2026-05-02
 
 **Decision:**  
 Store `role` as a TEXT column on `public.profiles` with a CHECK constraint (`rider` | `shop_owner`). Role is also written to `auth.users.user_metadata.role` at signup time.
@@ -215,7 +215,7 @@ Store `role` as a TEXT column on `public.profiles` with a CHECK constraint (`rid
 ## ADR-014: Auth trigger reads role from `user_metadata`
 
 **Status:** Accepted  
-**Date:** 2025-05-02
+**Date:** 2026-05-02
 
 **Decision:**  
 The `handle_new_user()` DB trigger reads `raw_user_meta_data->>'role'` to set `profiles.role` automatically. For Google OAuth, the callback route explicitly sets the role via `supabase.auth.updateUser()` before the profile upsert.
@@ -229,7 +229,7 @@ The `handle_new_user()` DB trigger reads `raw_user_meta_data->>'role'` to set `p
 ## ADR-015: Partner dashboard — Server Component + Client island
 
 **Status:** Accepted  
-**Date:** 2025-05-02
+**Date:** 2026-05-02
 
 **Decision:**  
 `/partner/dashboard/page.tsx` is a Server Component that fetches shop + scooter data server-side, then passes it as props to `DashboardClient.tsx` (Client Component). Availability toggles use the Supabase browser client directly from the Client Component.
@@ -243,7 +243,7 @@ The `handle_new_user()` DB trigger reads `raw_user_meta_data->>'role'` to set `p
 ## ADR-016: Role-aware Navbar uses `useProfile` hook
 
 **Status:** Accepted  
-**Date:** 2025-05-02
+**Date:** 2026-05-02
 
 **Decision:**  
 The Navbar is a Client Component that reads the current profile via `useProfile` hook. Nav links, CTA button, and user dropdown all adapt based on `profile.role`.
