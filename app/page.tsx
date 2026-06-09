@@ -81,7 +81,10 @@ export default async function HomePage() {
       />
     <div className="flex flex-col">
       {/* ── HERO ── */}
-      <section className="relative h-[100dvh] min-h-[600px] flex flex-col overflow-hidden">
+      <section
+        className="relative h-[100dvh] min-h-[600px] flex flex-col overflow-hidden"
+        style={{ marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))' }}
+      >
 
         {/* Hero images — scroll-driven blur + fade via HeroImages client component */}
         <HeroImages />
