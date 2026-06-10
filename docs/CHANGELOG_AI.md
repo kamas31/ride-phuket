@@ -4,6 +4,25 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-10 (suite)
+
+### Fix: zone count card supprimé sur desktop map (cluster click)
+**Files:** `app/explore/ExploreClient.tsx`
+
+Sur desktop, cliquer un cluster de zone affichait le card "X scooters available in [zone]" en bas à droite de la map (`activeZone` prop). Ce card est conçu pour mobile (où l'utilisateur bascule en vue liste). Sur desktop les deux colonnes sont toujours visibles — le feedback est la liste filtrée + la barre de filtres. Suppression de la prop `activeZone` sur le ScooterMap desktop uniquement.
+
+### Feat: overlay card sur desktop map (match comportement mobile) — ADR-034
+**Files:** `app/explore/ExploreClient.tsx`
+
+Desktop map : même overlay card que mobile quand on clique un pin (shop logo, nom, nb scooters, 3 thumbnails, bouton "View scooters"). `showPopup={false}` sur la map desktop pour désactiver le popup Mapbox natif. Wrapper `div.relative` autour de la map desktop pour ancrer l'overlay card. "View scooters" → `setShopIdFilter + setSelectedId(null)` sans `setMobileView` (les deux colonnes restent visibles sur desktop).
+
+### Fix: CLAUDE.md — mise à jour docs/ après chaque changement
+**Files:** `CLAUDE.md`
+
+Ajout d'une règle explicite : mettre à jour docs/ après chaque commit, sans attendre le compactage.
+
+---
+
 ## 2026-06-10
 
 ### Audit: Sentry — full production readiness audit (ADR-033)

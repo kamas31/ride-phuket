@@ -503,6 +503,26 @@ Add `style={{ marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))' }}` to the h
 
 ---
 
+## ADR-034: Desktop map — overlay card identique au mobile
+
+**Status:** Accepted
+**Date:** 2026-06-10
+
+**Context:**
+Sur desktop, cliquer un pin de map affichait un popup Mapbox natif (`ShopPopupCard`) avec "View shop" → navigation vers `/shop/slug`. Comportement différent du mobile (overlay card avec thumbnails + "View scooters" → filtre la liste).
+
+**Decision:**
+Aligner le comportement desktop sur le mobile :
+- `showPopup={false}` sur le ScooterMap desktop → supprime le popup Mapbox
+- Wrapper `div.relative` autour de `ScooterMap` sur desktop
+- Même overlay card que mobile : logo, nom, nb scooters, 3 thumbnails, "View scooters"
+- "View scooters" desktop → `setShopIdFilter(selectedId) + setSelectedId(null)` (pas de `setMobileView` — les deux colonnes restent visibles)
+- `activeZone` non passé au ScooterMap desktop → supprime le card "X scooters in [zone]" qui s'affichait lors des clics sur cluster (redondant avec la liste filtrée et la barre de filtres)
+
+**File modified:** `app/explore/ExploreClient.tsx`
+
+---
+
 ## ADR-033: Sentry — state audit and implementation plan
 
 **Status:** Accepted (audit only — implementation pending)

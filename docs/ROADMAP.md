@@ -63,6 +63,9 @@ Last updated: 2026-06-10
 - [x] Deposit section: removed redundant passport hints (DepositInfo.tsx)
 - [x] Filters modal: fixed sticky header/footer z-index bug (ExploreFilters.tsx)
 - [x] docs/ structure created (PROJECT_CONTEXT, DECISIONS, ROADMAP, CHANGELOG_AI)
+- [x] Desktop map: overlay card identique au mobile (ADR-034)
+- [x] Desktop map: suppression zone count card sur cluster click
+- [x] CLAUDE.md: règle mise à jour docs/ après chaque changement
 
 ---
 
