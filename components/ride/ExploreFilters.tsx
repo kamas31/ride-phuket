@@ -108,7 +108,7 @@ export function ExploreFilters({ filters, onChange, showRecommended = true, maxP
           {/* Panel — bottom sheet on mobile, centered dialog on desktop */}
           <div className="relative w-full md:max-w-[520px] bg-white rounded-t-[24px] md:rounded-[20px] shadow-xl max-h-[88vh] md:max-h-[78vh] overflow-y-auto overscroll-contain">
             {/* Header */}
-            <div className="sticky top-0 bg-white px-6 pt-5 pb-4 flex items-center justify-between border-b border-[#f0f0ec]">
+            <div className="sticky top-0 z-10 bg-white px-6 pt-5 pb-4 flex items-center justify-between border-b border-[#f0f0ec]">
               <h3 className="text-[16px] font-bold text-[#0f0f0e]">Filters</h3>
               <button
                 onClick={() => setShowPanel(false)}
@@ -269,7 +269,7 @@ export function ExploreFilters({ filters, onChange, showRecommended = true, maxP
             </div>
 
             {/* Footer actions */}
-            <div className="sticky bottom-0 bg-white border-t border-[#f0f0ec] px-6 py-4 flex gap-3">
+            <div className="sticky bottom-0 z-10 bg-white border-t border-[#f0f0ec] px-6 py-4 flex gap-3">
               <button
                 onClick={() => onChange({ priceMin: 150, priceMax: maxPrice, category: 'all', deliveryNow: false, helmetIncluded: false, location: 'all', sortBy: 'recommended', depositProtected: false, noPassport: false, requiredFeatures: [], requiredAccessories: [], depositTypeFilter: '' })}
                 className="flex-1 py-3 rounded-full border border-[#e8e8e4] text-sm font-semibold text-[#5c5c58] hover:bg-[#f8f8f6] transition-colors"
