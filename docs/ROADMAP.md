@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-06-09
+Last updated: 2026-06-10
 
 ---
 
@@ -58,8 +58,11 @@ Last updated: 2026-06-09
 - [x] Vercel deploy (region: sin1)
 - [x] App Store screenshots (5 screens)
 - [x] Hero glassmorphism CTA (mobile)
-- [x] Hero mobile positioning fix (safe-area offset correction)
+- [x] Hero mobile positioning fix (safe-area offset correction, ADR-032)
 - [x] Partner dashboard Support + Account sections
+- [x] Deposit section: removed redundant passport hints (DepositInfo.tsx)
+- [x] Filters modal: fixed sticky header/footer z-index bug (ExploreFilters.tsx)
+- [x] docs/ structure created (PROJECT_CONTEXT, DECISIONS, ROADMAP, CHANGELOG_AI)
 
 ---
 
@@ -72,6 +75,8 @@ Last updated: 2026-06-09
 
 ## NEXT (pre-launch)
 
+- [ ] **Sentry: set env vars** in Vercel (DSN, AUTH_TOKEN, ORG, PROJECT) — score goes 2.5→7/10 instantly
+- [ ] **Sentry: create `instrumentation-client.ts`** + add `Sentry.setUser()` in useAuth
 - [ ] Physical iPhone testing (TestFlight)
 - [ ] Verify Supabase "Link accounts to existing user" setting
 - [ ] TestFlight distribution

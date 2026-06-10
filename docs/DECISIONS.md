@@ -500,3 +500,53 @@ Add `style={{ marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))' }}` to the h
 **Note:** On iPhone, the inner div's `pt-24` (96px) places the text block at y=96, while the Navbar (44px safe area + 64px content) extends to y=108 — 12px overlap. Visually invisible because the Navbar is transparent in hero mode.
 
 **File modified:** `app/page.tsx`
+
+---
+
+## ADR-033: Sentry — state audit and implementation plan
+
+**Status:** Accepted (audit only — implementation pending)
+**Date:** 2026-06-10
+
+**Context:**  
+Complete 8-part audit of the Sentry integration before App Store launch. SDK is installed and config files are well-written, but Sentry is completely inactive because the DSN is not set.
+
+**Findings:**
+
+SDK: `@sentry/nextjs@^10.54.0`
+
+Files present: `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `instrumentation.ts`, `next.config.ts` (withSentryConfig).
+
+Files missing: `instrumentation-client.ts` (needed for Next.js 15+/turbopack client init).
+
+**What is configured correctly (will work once DSN is set):**
+- `replaysOnErrorSampleRate: 1.0` (replay on every error in prod)
+- `replaysSessionSampleRate: 0` (no ambient recording — GDPR safe)
+- `maskAllText: true`, `blockAllMedia: true` (privacy-correct replay)
+- `beforeSend` strips cookies, emails, auth tokens (client + server)
+- `ignoreErrors` filters Safari noise
+- `sourcemaps: { deleteSourcemapsAfterUpload: true }` (no public exposure)
+- `app/error.tsx` and `app/global-error.tsx` call `Sentry.captureException()`
+
+**What is missing:**
+1. `NEXT_PUBLIC_SENTRY_DSN` — not set → Sentry completely inactive (all `if (dsn)` guards skip init)
+2. `SENTRY_AUTH_TOKEN` + `SENTRY_ORG` + `SENTRY_PROJECT` — not set → source maps never uploaded → production stack traces are minified/unreadable
+3. `instrumentation-client.ts` — missing → client init relies on webpack injection (fails with turbopack)
+4. `Sentry.setUser()` — never called → no user identity on errors
+5. Server actions (24 files) — catch errors silently, none call `Sentry.captureException()`
+6. No tags: `role`, `platform` (web vs ios_native), `scooter_id`, `shop_id`
+
+**Mobile (Capacitor):**  
+App loads `https://kohride.com` via remote URL mode. `@sentry/nextjs` runs in WKWebView — JS errors captured once DSN is set. Native iOS crashes not captured (no `@sentry/capacitor` — acceptable for v1).
+
+**Privacy / GDPR / App Store:** Configuration is safe as-is.
+
+**Production readiness score: 2.5/10** (config quality good, nothing active)
+
+**Implementation plan (ordered):**
+1. Set env vars in Vercel: `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`
+2. Create `instrumentation-client.ts` at root → import `./sentry.client.config`
+3. Add `Sentry.setUser({ id })` + `Sentry.setTag('role', ...)` in `useAuth` on auth state change; `Sentry.setUser(null)` on sign-out
+4. Add `Sentry.captureException(e)` in catch blocks of critical server actions: `partner.ts`, `messaging.ts`, `booking-actions.ts`, `auth.ts`
+5. Add `Sentry.setTag('platform', isNative ? 'ios_native' : 'web')` in `CapacitorProvider`
+6. Post-launch: add `@sentry/capacitor` for native iOS crash reporting

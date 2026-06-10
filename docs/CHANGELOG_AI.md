@@ -4,6 +4,41 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-10
+
+### Audit: Sentry — full production readiness audit (ADR-033)
+**Files:** read-only audit
+
+Complete 8-part audit of the Sentry setup. Findings:
+- SDK `@sentry/nextjs@^10.54.0` installed, config files present and well-written
+- **Sentry completely inactive**: `NEXT_PUBLIC_SENTRY_DSN` not set in `.env.local` or confirmed in Vercel → `if (dsn)` guard skips all `Sentry.init()` calls
+- `SENTRY_AUTH_TOKEN` / `ORG` / `PROJECT` missing → source maps never uploaded → stack traces unreadable in production
+- `instrumentation-client.ts` absent (needed for Next.js 15+/turbopack client init)
+- Zero user context: no `Sentry.setUser()`, no `Sentry.setTag()` anywhere in app code
+- 24 server action files catch errors silently — none call `Sentry.captureException()`
+- Privacy config is good: `maskAllText`, `blockAllMedia`, `beforeSend` strips cookies/emails/tokens
+- Session replay: `replaysOnErrorSampleRate: 1.0`, `replaysSessionSampleRate: 0` — privacy-correct
+- Capacitor: JS errors in WKWebView captured (remote URL mode), native iOS crashes not captured (no `@sentry/capacitor`)
+- Production readiness score: **2.5/10** (config quality good, but nothing is active)
+- Implementation plan established — 6 steps ordered by priority (see ADR-033)
+
+### Fix: Filters modal sticky header/footer z-index
+**Files:** `components/ride/ExploreFilters.tsx`
+
+Sticky header and footer inside `overflow-y-auto` modal had no `z-index` — scrolling content rendered on top of the close button and "Show Results" bar. Added `z-10` to both sticky elements. Audited entire codebase: no other instances of this bug found.
+
+### Fix: Remove redundant deposit hints from scooter detail page
+**Files:** `components/ride/DepositInfo.tsx`
+
+Removed "Passport optional — cash deposit accepted" green line (case `both`) and the "No Passport" TrustBadge (cases `cash` and `both`). The deposit options listed above already make this self-evident. Also removed unused `noPassportNeeded` variable.
+
+### Docs: Create docs/ folder structure (CLAUDE.md requirement)
+**Files:** `docs/PROJECT_CONTEXT.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`, `docs/CHANGELOG_AI.md`
+
+Migrated context.md + decisions.md + PROJECT_CONTEXT_COMPLETE.md into the structured `docs/` layout required by CLAUDE.md. Corrected project start dates (2025 → 2026). Added ADR-032 (hero mobile fix).
+
+---
+
 ## 2026-06-09
 
 ### Fix: Hero mobile CTA positioning (ADR-032)
