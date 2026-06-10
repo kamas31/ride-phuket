@@ -25,8 +25,7 @@ export function DepositInfo({
   const hasInfo = depositAmount || depositType || depositProtected
   if (!hasInfo) return null
 
-  const needsPassport  = depositType === 'passport'
-  const noPassportNeeded = depositType === 'cash' || depositType === 'both'
+  const needsPassport = depositType === 'passport'
 
   return (
     <div className={className}>
@@ -92,10 +91,6 @@ export function DepositInfo({
             <div className="flex items-center gap-2 text-sm text-[#5c5c58]">
               <span>🛂 Original passport (returned on drop-off)</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-[#22c55e]">
-              <Check className="w-4 h-4 flex-shrink-0" />
-              <span>Passport optional — cash deposit accepted</span>
-            </div>
           </>
         )}
 
@@ -132,7 +127,6 @@ export function DepositInfo({
         <div className="flex flex-wrap gap-1.5 pt-1">
           {depositProtected && <TrustBadge variant="deposit_protected" size="xs" />}
           {needsPassport  && <TrustBadge variant="premium_deposit" size="xs" />}
-          {noPassportNeeded && <TrustBadge variant="no_passport" size="xs" />}
         </div>
       </div>
     </div>
