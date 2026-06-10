@@ -424,7 +424,6 @@ export default function ExploreClient({
                     onHover={setHoveredId}
                     onBoundsChange={setMapBounds}
                     onZoneClick={handleZoneClick}
-                    activeZone={filters.location === 'all' ? null : filters.location}
                     className="h-[calc(100vh-10rem)] min-h-[480px]"
                     showPopup={false}
                     debugMode={debugMode}
