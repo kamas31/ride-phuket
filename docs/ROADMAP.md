@@ -71,6 +71,11 @@ Last updated: 2026-06-10
 - [x] Messages headers: BackButton + titre centré (rider + shop owner)
 - [x] Swipe-to-delete conversations: iOS fix (passive:false + touch-action:pan-y)
 - [x] Shop owner messages: ConversationList partagé, swipe-to-delete actif (ADR-036)
+- [x] Hero diagnostics overlay supprimé
+- [x] Terms of Service v2 — 6 additions + 2 correctifs (startup-ready)
+- [x] Privacy Policy v2 — 6 additions + 2 correctifs (public launch ready)
+- [x] Bottom nav shop owner: "Live" → "Listings"
+- [x] Bottom nav rider: icône Saved Bookmark → Heart
 
 ---
 

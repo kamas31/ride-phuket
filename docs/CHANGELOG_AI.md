@@ -4,6 +4,44 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-13
+
+### Chore: remove HeroDiagnostics overlay
+**Files:** `app/page.tsx`, `components/home/HeroDiagnostics.tsx` (deleted)
+
+Suppression du panneau de diagnostics temporaire. Import, composant, et IDs temporaires (`hero-section`, `hero-cta`) retirés de `page.tsx`.
+
+### Copy: home page CTA card — in-app chat vs WhatsApp
+**Files:** `app/page.tsx`
+
+Texte de la carte CTA finale : "Local scooters, direct WhatsApp contact…" → "Browse local scooters, chat directly with shops in the app — the simplest way to rent in Phuket."
+
+### Legal: Terms of Service — v2 (startup-ready)
+**Files:** `app/terms/page.tsx`
+
+6 additions : âge minimum 18 ans (section 2), règles d'utilisation/abus (section 2), nouvelle section 3 Licences & Legal Compliance (responsabilité sole de l'utilisateur pour permis/assurance thaïlandais), disclaimer As Is/As Available (section 6), suspension/termination de compte étendue (section 7), nouvelle section 8 Governing Law (Thaïlande). 10 sections au total.
+
+Puis 2 correctifs ciblés : section 4 Shop Listings (shops auto-publient, Koh Ride ne "vérifie" plus), section 10 Contact (lien direct vers Contact page).
+
+### Legal: Privacy Policy — v2 (public launch ready)
+**Files:** `app/privacy/page.tsx`
+
+6 additions : account security data + user ID (section 2), messages in-app (section 2), uploaded content — photos/logos shops (section 2), technical diagnostics/Sentry-compatible (section 2), nouvelle section 5 International Data Processing, suppression account via settings (section 7), data retention — exceptions sécurité/fraude/légal (section 8), contact via Contact page (section 9).
+
+Puis 2 correctifs ciblés : data sharing — wording plus précis (section 4), "scheduled for deletion" vs "removed" (section 8).
+
+### Feat: bottom nav shop owner — "Live" → "Listings"
+**Files:** `components/layout/MobileBottomNav.tsx`
+
+Label du tab de gestion des scooters renommé "Listings". Icône, route, active state inchangés. Strings "Live in search", "X live" (statuts fonctionnels) préservées.
+
+### Feat: bottom nav rider — Saved icon Bookmark → Heart
+**Files:** `components/layout/MobileBottomNav.tsx`
+
+Icône "Saved" alignée avec le cœur utilisé dans le profil rider.
+
+---
+
 ## 2026-06-12
 
 ### Fix: Messages headers — BackButton + titre centré (rider + shop owner)
