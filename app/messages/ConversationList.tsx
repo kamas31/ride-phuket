@@ -36,47 +36,64 @@ interface SwipeableConvoRowProps {
 function SwipeableConvoRow({ conv, onDelete }: SwipeableConvoRowProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const startXRef = useRef(0)
-  const startYRef = useRef(0)
-  // null=undecided, true=horizontal swipe, false=vertical scroll
-  const directionRef = useRef<boolean | null>(null)
+  const contentRef   = useRef<HTMLDivElement>(null)
+  const startXRef    = useRef(0)
+  const startYRef    = useRef(0)
+  // null = undecided, true = horizontal, false = vertical
+  const isHorizRef   = useRef<boolean | null>(null)
+  // Mirror of isOpen for use inside the passive-false DOM listener closure
+  const isOpenRef    = useRef(false)
 
   const hasUnread = conv.unreadCount > 0
 
+  useEffect(() => { isOpenRef.current = isOpen }, [isOpen])
+
   function applyTranslate(x: number, animated: boolean) {
     if (!contentRef.current) return
-    contentRef.current.style.transition = animated ? 'transform 0.2s ease' : 'none'
-    contentRef.current.style.transform = `translateX(${x}px)`
+    contentRef.current.style.transition = animated ? 'transform 0.22s ease' : 'none'
+    contentRef.current.style.transform  = `translateX(${x}px)`
   }
 
   function handleTouchStart(e: React.TouchEvent) {
-    startXRef.current = e.touches[0].clientX
-    startYRef.current = e.touches[0].clientY
-    directionRef.current = null
-    applyTranslate(isOpen ? -SWIPE_WIDTH : 0, false)
+    startXRef.current  = e.touches[0].clientX
+    startYRef.current  = e.touches[0].clientY
+    isHorizRef.current = null
+    applyTranslate(isOpenRef.current ? -SWIPE_WIDTH : 0, false)
   }
 
-  function handleTouchMove(e: React.TouchEvent) {
-    const dx = e.touches[0].clientX - startXRef.current
-    const dy = e.touches[0].clientY - startYRef.current
+  // touchmove must be a direct DOM listener with { passive: false } so we can
+  // call e.preventDefault() on iOS. React's synthetic onTouchMove is passive
+  // and iOS will hijack the gesture for page scroll before we can act on it.
+  useEffect(() => {
+    const el = contentRef.current
+    if (!el) return
 
-    if (directionRef.current === null && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
-      directionRef.current = Math.abs(dx) > Math.abs(dy)
+    function onMove(e: TouchEvent) {
+      const dx = e.touches[0].clientX - startXRef.current
+      const dy = e.touches[0].clientY - startYRef.current
+
+      if (isHorizRef.current === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+        isHorizRef.current = Math.abs(dx) > Math.abs(dy)
+      }
+      if (isHorizRef.current !== true) return
+
+      e.preventDefault() // stop iOS from stealing the gesture as a scroll
+      const base    = isOpenRef.current ? -SWIPE_WIDTH : 0
+      const clamped = Math.min(0, Math.max(-SWIPE_WIDTH, base + dx))
+      applyTranslate(clamped, false)
     }
-    if (directionRef.current !== true) return
 
-    const base = isOpen ? -SWIPE_WIDTH : 0
-    const clamped = Math.min(0, Math.max(-SWIPE_WIDTH, base + dx))
-    applyTranslate(clamped, false)
-  }
+    el.addEventListener('touchmove', onMove, { passive: false })
+    return () => el.removeEventListener('touchmove', onMove)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleTouchEnd(e: React.TouchEvent) {
-    if (directionRef.current !== true) return
-    const dx = e.changedTouches[0].clientX - startXRef.current
-    const base = isOpen ? -SWIPE_WIDTH : 0
+    if (isHorizRef.current !== true) return
+    const dx      = e.changedTouches[0].clientX - startXRef.current
+    const base    = isOpenRef.current ? -SWIPE_WIDTH : 0
     const newOpen = base + dx < -(SWIPE_WIDTH / 2)
     setIsOpen(newOpen)
+    isOpenRef.current = newOpen
     applyTranslate(newOpen ? -SWIPE_WIDTH : 0, true)
   }
 
@@ -104,15 +121,10 @@ function SwipeableConvoRow({ conv, onDelete }: SwipeableConvoRowProps) {
         </button>
       </div>
 
-      {/* Swipeable content
-          touch-action:pan-y tells the browser: "handle vertical scroll natively,
-          but don't intercept horizontal gestures" — this is what makes the swipe work
-          on iOS/Android without needing e.preventDefault(). */}
       <div
         ref={contentRef}
-        style={{ touchAction: 'pan-y', willChange: 'transform' }}
+        style={{ willChange: 'transform' }}
         onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         <Link
