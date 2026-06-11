@@ -71,9 +71,14 @@ export default function TermsPage() {
             <section>
               <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">4. Shop Listings</h2>
               <p>
-                Koh Ride verifies partner shops before listing them. However, we cannot guarantee the
-                accuracy of pricing, availability, or specifications at the time of your inquiry.
-                Always confirm details directly with the shop before committing.
+                Koh Ride allows local rental shops to publish listings on the platform. Shops are
+                responsible for the accuracy of the information they provide, including pricing,
+                availability, specifications, and rental conditions.
+              </p>
+              <p className="mt-3">
+                Koh Ride cannot guarantee the accuracy of pricing, availability, specifications, or
+                rental conditions at the time of your inquiry. Always confirm details directly with
+                the shop before committing.
               </p>
               <p className="mt-3">
                 Prices shown are indicative daily rates. Actual prices, deposit requirements, and rental
@@ -139,8 +144,8 @@ export default function TermsPage() {
             <section>
               <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">10. Contact</h2>
               <p>
-                For questions about these terms, contact us through the platform or via the
-                Contact page.
+                For questions about these terms, please contact Koh Ride through the{' '}
+                <Link href="/contact-us" className="text-[#FF6B35] hover:underline">Contact page</Link>.
               </p>
             </section>
 
