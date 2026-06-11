@@ -68,6 +68,9 @@ Last updated: 2026-06-10
 - [x] CLAUDE.md: règle mise à jour docs/ après chaque changement
 - [x] Hero CTA design final: orange #FF6B35, clamp spacing, w-auto pill, py-8px centré (ADR-035)
 - [x] Hero diagnostics overlay (temporaire, à retirer avant App Store)
+- [x] Messages headers: BackButton + titre centré (rider + shop owner)
+- [x] Swipe-to-delete conversations: iOS fix (passive:false + touch-action:pan-y)
+- [x] Shop owner messages: ConversationList partagé, swipe-to-delete actif (ADR-036)
 
 ---
 

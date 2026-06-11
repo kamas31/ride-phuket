@@ -4,6 +4,31 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-12
+
+### Fix: Messages headers — BackButton + titre centré (rider + shop owner)
+**Files:** `app/messages/page.tsx`, `app/partner/messages/page.tsx`
+
+Les deux pages messages ont maintenant un header sticky `top-16` avec :
+- BackButton orange pill à gauche (`router.back()`)
+- Titre "Messages" centré en absolu (`absolute left-1/2 -translate-x-1/2`)
+- Badge unread / compteur conversations à droite
+- "Inbox" renommé en "Messages" sur la page shop owner
+
+### Fix: Swipe-to-delete conversations — iOS PWA
+**Files:** `app/messages/ConversationList.tsx`
+
+Correction en deux étapes :
+1. Remplacement de `onTouchMove` React (passif) par `addEventListener('touchmove', fn, { passive: false })` direct sur le DOM → permet `e.preventDefault()` pour bloquer le scroll iOS lors d'un swipe horizontal
+2. Restauration de `touch-action: pan-y` sur le div swipeable (retiré par erreur dans l'étape 1) — les deux sont nécessaires ensemble : le CSS hint indique à iOS que l'élément gère les gestes horizontaux, le listener non-passif bloque le scroll JS
+
+### Feat: Swipe-to-delete — shop owner (ADR-036)
+**Files:** `app/partner/messages/page.tsx`
+
+La page shop owner utilisait un rendu inline Server Component sans swipe. Remplacée par le composant partagé `ConversationList`. Les deux profils (rider + shop owner) bénéficient du swipe-to-delete via un seul composant. `getOwnerConversations()` et `getAllConversations()` retournent le même type `ConversationPreview[]` — aucune adaptation nécessaire.
+
+---
+
 ## 2026-06-11
 
 ### Debug: Hero diagnostics overlay (TEMPORAIRE)

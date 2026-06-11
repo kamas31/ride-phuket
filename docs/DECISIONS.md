@@ -503,6 +503,24 @@ Add `style={{ marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))' }}` to the h
 
 ---
 
+## ADR-036: ConversationList partagé rider + shop owner
+
+**Status:** Accepted
+**Date:** 2026-06-12
+
+**Decision:**
+La page `/partner/messages` utilise le même composant `ConversationList` que `/messages` (rider). Suppression du rendu inline Server Component qui n'avait pas de swipe-to-delete.
+
+**Reasoning:**
+- `getOwnerConversations()` et `getAllConversations()` retournent tous les deux `ConversationPreview[]` — types identiques, composant directement réutilisable
+- Zéro duplication de code
+- Swipe-to-delete automatiquement disponible pour les deux profils
+- Realtime (Supabase channel) et suppression de conversation inclus sans effort
+
+**Files:** `app/partner/messages/page.tsx`, `app/messages/ConversationList.tsx`
+
+---
+
 ## ADR-035: Hero mobile CTA — design final
 
 **Status:** Accepted
