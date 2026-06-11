@@ -4,6 +4,28 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-11
+
+### Debug: Hero diagnostics overlay (TEMPORAIRE)
+**Files:** `app/page.tsx`, `components/home/HeroDiagnostics.tsx`
+
+Overlay fixe en bas à gauche du hero mesurant : `window.innerHeight`, `visualViewport.height`, `env(safe-area-inset-top)` (via probe DOM), `100dvh`, `section.top`, `section.height`, `cta.top`. Déployé pour comparer Chrome DevTools vs iPhone PWA et valider le diagnostic avant toute correction du statusBarStyle. À retirer avant App Store submission.
+
+### Audit niveau 2 — Hero CTA positioning (diagnostic)
+
+Découverte clé : l'utilisateur teste via **Safari "Add to Home Screen"** (PWA), pas via l'app Capacitor native. Avec `statusBarStyle: 'default'` dans le metadata Next.js, le WebView Safari PWA démarre à physical y=44 (sous la status bar), `100dvh` = 768px (pas 812px), et `env(safe-area-inset-top)` = 0. Le fix précédent (`marginTop: -env()`) avait 0 effet car `env()` = 0. La cause racine réelle : `apple-mobile-web-app-status-bar-style: 'default'` → fix correct = passer à `'black-translucent'` (en attente de validation via diagnostics).
+
+### Feat: Hero CTA — design final (ADR-035)
+**Files:** `app/page.tsx`
+
+Série de 4 changements successifs sur le CTA mobile du hero :
+1. Revert glassmorphism → fond orange solide `#FF6B35` (retour au design d'origine)
+2. `mt-20` (80px fixe) → `marginTop: clamp(16px, 4vh, 48px)` (responsive viewport-height)
+3. `w-full py-[14px]` → `w-auto mx-auto px-8 pb-[14px]` + `pt: 8px` (plus court, plus étroit, bas fixe)
+4. `py-[8px]` symétrique + `marginTop: calc(clamp(...) + 12px)` (texte centré verticalement, bas toujours fixe)
+
+---
+
 ## 2026-06-10 (suite)
 
 ### Fix: zone count card supprimé sur desktop map (cluster click)

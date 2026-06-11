@@ -503,6 +503,44 @@ Add `style={{ marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))' }}` to the h
 
 ---
 
+## ADR-035: Hero mobile CTA — design final
+
+**Status:** Accepted
+**Date:** 2026-06-11
+
+**Context:**
+Le CTA mobile du hero a subi plusieurs itérations depuis sa création. L'état final résulte de décisions successives sur le fond, l'espacement, et les dimensions.
+
+**État final du CTA :**
+```tsx
+className="flex items-center justify-center gap-2 w-auto mx-auto px-8 py-[8px]
+           rounded-full text-white text-[14px] font-bold tracking-wide
+           bg-[#FF6B35] hover:bg-[#e85d29]
+           shadow-[0_4px_28px_rgba(255,107,53,0.5),0_2px_8px_rgba(0,0,0,0.3)]
+           active:scale-[0.97] transition-all duration-200"
+style={{
+  opacity: 0,
+  animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.25s',
+  marginTop: 'calc(clamp(16px, 4vh, 48px) + 12px)',
+}}
+```
+
+**Historique des décisions :**
+1. **ADR-029 (2026-06-08)** : Glassmorphism (`rgba(255,150,60,0.18)` + `backdrop-blur`) — remplacé
+2. **2026-06-11** : Retour au fond orange solide `#FF6B35` (design identique au bouton desktop)
+3. **2026-06-11** : `mt-20` (80px fixe) → `clamp(16px, 4vh, 48px)` — espacement responsive basé sur la hauteur viewport. À ~768px : 31px. À ~932px : 37px.
+4. **2026-06-11** : `w-full` → `w-auto mx-auto px-8` — largeur réduite, pill centré sur le contenu
+5. **2026-06-11** : `py-[8px]` symétrique + compensation marginTop (+12px total) — texte centré verticalement, bord bas du bouton ancré
+
+**Mécanique d'ancrage du bas :**
+Pour réduire la hauteur depuis le haut sans bouger le bas :
+`new_marginTop = old_marginTop + (old_pt - new_pt)`
+Chaque px retiré du `pt` est ajouté au `marginTop` → le bord bas reste à la même position absolue.
+
+**File modified:** `app/page.tsx`
+
+---
+
 ## ADR-034: Desktop map — overlay card identique au mobile
 
 **Status:** Accepted

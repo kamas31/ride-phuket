@@ -66,6 +66,8 @@ Last updated: 2026-06-10
 - [x] Desktop map: overlay card identique au mobile (ADR-034)
 - [x] Desktop map: suppression zone count card sur cluster click
 - [x] CLAUDE.md: règle mise à jour docs/ après chaque changement
+- [x] Hero CTA design final: orange #FF6B35, clamp spacing, w-auto pill, py-8px centré (ADR-035)
+- [x] Hero diagnostics overlay (temporaire, à retirer avant App Store)
 
 ---
 
