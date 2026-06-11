@@ -26,7 +26,7 @@ const RIDER_NAV: NavItem[] = [
 const OWNER_NAV: NavItem[] = [
   { href: '/',                     label: 'Home',    icon: Home          },
   { href: '/explore',              label: 'Explore', icon: Map           },
-  { href: '/partner/availability', label: 'Live',    icon: Radio         },
+  { href: '/partner/availability', label: 'Listings', icon: Radio         },
   { href: '/partner/messages',     label: 'Messages',icon: MessageCircle },
   {
     href: '/partner/dashboard',
