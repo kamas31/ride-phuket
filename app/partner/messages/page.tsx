@@ -39,9 +39,10 @@ export default async function PartnerMessagesPage() {
     <div className="bg-[#f8f8f6] min-h-screen pt-16">
       {/* Header */}
       <div className="sticky top-16 z-20 bg-white border-b border-[#e8e8e4]">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
+        <div className="max-w-2xl mx-auto px-4 py-4 relative flex items-center justify-between">
           <BackButton />
-          <div className="flex-1 min-w-0">
+          {/* Truly centered title — absolute so it ignores sibling widths */}
+          <div className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none">
             <h1 className="text-[18px] font-bold text-[#0f0f0e] tracking-tight leading-tight">Inbox</h1>
             <p className="text-xs text-[#9c9c98]">
               {conversations.length === 0
@@ -49,10 +50,13 @@ export default async function PartnerMessagesPage() {
                 : `${conversations.length} conversation${conversations.length !== 1 ? 's' : ''}${totalUnread > 0 ? ` · ${totalUnread} unread` : ''}`}
             </p>
           </div>
-          {totalUnread > 0 && (
-            <span className="px-2.5 py-1 bg-[#FF6B35] text-white text-xs font-bold rounded-full flex-shrink-0">
+          {/* Right side — balances the layout */}
+          {totalUnread > 0 ? (
+            <span className="px-2.5 py-1 bg-[#FF6B35] text-white text-xs font-bold rounded-full">
               {totalUnread} new
             </span>
+          ) : (
+            <div className="w-[60px]" />
           )}
         </div>
       </div>
