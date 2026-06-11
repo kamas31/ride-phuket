@@ -384,7 +384,7 @@ export default async function HomePage() {
               Your perfect scooter<br />is waiting.
             </h2>
             <p className="text-white/50 text-base mb-8 max-w-sm mx-auto leading-relaxed">
-              Local scooters, direct WhatsApp contact — the honest way to explore Phuket.
+              Browse local scooters, chat directly with shops in the app — the simplest way to rent in Phuket.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
