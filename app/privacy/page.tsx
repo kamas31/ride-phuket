@@ -79,9 +79,9 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">4. Data Sharing</h2>
               <p className="mb-3">
-                Your personal information is not shared with rental shops. When you message a shop
-                through the platform, only the content of that conversation is visible to the
-                relevant shop.
+                Your personal information is not shared with rental shops except where necessary
+                to provide platform features such as in-app messaging. Information you choose to
+                share during conversations with shops may be visible to those shops.
               </p>
               <p className="mb-3">
                 Koh Ride uses trusted service providers to operate the platform, including services
@@ -127,7 +127,7 @@ export default function PrivacyPage() {
               <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">8. Data Retention</h2>
               <p>
                 We retain your account data for as long as your account is active. If you delete
-                your account, your personal data is removed within 30 days. Anonymised usage
+                your account, your personal data is scheduled for deletion within 30 days. Anonymised usage
                 statistics may be retained indefinitely. Some information may be retained for
                 a limited period where required for security, fraud prevention, or legal obligations.
               </p>
