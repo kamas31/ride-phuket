@@ -110,12 +110,12 @@ export default async function HomePage() {
           <Link
             id="hero-cta"
             href="/explore"
-            className="flex items-center justify-center gap-2 w-full py-[14px] rounded-full text-white text-[14px] font-bold tracking-wide mt-20
+            className="flex items-center justify-center gap-2 w-full py-[14px] rounded-full text-white text-[14px] font-bold tracking-wide
                        bg-[rgba(255,150,60,0.18)] backdrop-blur-[4px]
                        border border-white/25
                        shadow-[0_2px_20px_rgba(0,0,0,0.3)]
                        active:scale-[0.97] transition-all duration-200"
-            style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.25s' }}
+            style={{ opacity: 0, animation: 'fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.25s', marginTop: 'clamp(16px, 4vh, 48px)' }}
           >
             Explore Scooters
             <ArrowRight className="w-4 h-4" />
