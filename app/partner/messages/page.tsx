@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { MessageCircle } from 'lucide-react'
+import { MessageCircle, ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getOwnerConversations } from '@/app/actions/messaging'
 import { getServerProfile } from '@/app/actions/profile'
@@ -124,12 +124,13 @@ export default async function PartnerMessagesPage() {
         )}
 
         {/* Back to dashboard */}
-        <div className="mt-4 text-center">
+        <div className="mt-4">
           <Link
             href="/partner/dashboard"
-            className="text-sm text-[#9c9c98] hover:text-[#5c5c58] transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-[#FF6B35] text-white hover:bg-[#e85d29] transition-all active:scale-95"
           >
-            ← Back to dashboard
+            <ArrowLeft className="w-4 h-4" />
+            Back to dashboard
           </Link>
         </div>
       </div>
