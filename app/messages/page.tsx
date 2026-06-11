@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getAllConversations } from '@/app/actions/messaging'
 import ConversationList from './ConversationList'
+import { BackButton } from '@/components/ui/BackButton'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Messages — Koh Ride' }
@@ -20,13 +21,17 @@ export default async function MessagesPage() {
 
       {/* Sticky sub-header — sits right below the fixed navbar */}
       <div className="sticky top-16 z-20 bg-white border-b border-[#e8e8e4]">
-        <div className="max-w-lg mx-auto px-4 h-14 flex items-center">
-          <h1 className="text-[18px] font-bold text-[#0f0f0e] tracking-tight">Messages</h1>
-          {conversations.length > 0 && (
-            <span className="ml-2 text-[14px] text-[#9c9c98] font-normal">
-              {conversations.length}
-            </span>
-          )}
+        <div className="max-w-lg mx-auto px-4 py-4 relative flex items-center justify-between">
+          <BackButton />
+          <div className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none">
+            <h1 className="text-[18px] font-bold text-[#0f0f0e] tracking-tight leading-tight">Messages</h1>
+            {conversations.length > 0 && (
+              <p className="text-xs text-[#9c9c98]">
+                {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
+          <div className="w-[60px]" />
         </div>
       </div>
 
