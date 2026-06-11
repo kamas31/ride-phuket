@@ -40,15 +40,23 @@ export default function PrivacyPage() {
               <div className="space-y-3">
                 <div className="p-4 bg-[#f8f8f6] rounded-[12px]">
                   <p className="font-semibold text-[#0f0f0e] text-sm mb-1">Account data</p>
-                  <p className="text-sm">Email address, name, and optional phone number — provided when you create an account.</p>
+                  <p className="text-sm">Email address, name, and optional phone number provided when you create an account. We also store your user ID, authentication information, and account security data necessary to manage and protect your account.</p>
+                </div>
+                <div className="p-4 bg-[#f8f8f6] rounded-[12px]">
+                  <p className="font-semibold text-[#0f0f0e] text-sm mb-1">Messages</p>
+                  <p className="text-sm">Messages exchanged through the Koh Ride in-app messaging system are stored to provide and maintain the messaging service.</p>
+                </div>
+                <div className="p-4 bg-[#f8f8f6] rounded-[12px]">
+                  <p className="font-semibold text-[#0f0f0e] text-sm mb-1">Uploaded content</p>
+                  <p className="text-sm">Shops may upload profile images, logos, banners, and scooter photos. This content is stored to operate and display listings on the marketplace.</p>
                 </div>
                 <div className="p-4 bg-[#f8f8f6] rounded-[12px]">
                   <p className="font-semibold text-[#0f0f0e] text-sm mb-1">Saved listings</p>
                   <p className="text-sm">The scooter listings you save — stored so your list syncs across devices.</p>
                 </div>
                 <div className="p-4 bg-[#f8f8f6] rounded-[12px]">
-                  <p className="font-semibold text-[#0f0f0e] text-sm mb-1">Usage data</p>
-                  <p className="text-sm">Standard server logs (page visits, errors) for debugging and platform improvement. No behavioural tracking or advertising profiles.</p>
+                  <p className="font-semibold text-[#0f0f0e] text-sm mb-1">Technical diagnostics</p>
+                  <p className="text-sm">Error reports, crash information, and device or browser data used for troubleshooting and improving platform stability. No behavioural tracking or advertising profiles.</p>
                 </div>
               </div>
             </section>
@@ -57,9 +65,10 @@ export default function PrivacyPage() {
               <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">3. How We Use Your Data</h2>
               <ul className="space-y-2 list-disc list-inside marker:text-[#FF6B35]">
                 <li>To provide and maintain your account</li>
+                <li>To deliver the in-app messaging service</li>
                 <li>To sync your saved scooter listings across devices</li>
                 <li>To send account-related emails (confirmation, password reset)</li>
-                <li>To improve platform performance and fix bugs</li>
+                <li>To improve platform performance, fix bugs, and diagnose errors</li>
               </ul>
               <p className="mt-3">
                 We do <strong className="text-[#0f0f0e]">not</strong> sell your data. We do not use your data for advertising.
@@ -70,18 +79,34 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">4. Data Sharing</h2>
               <p className="mb-3">
-                Your personal information is not shared with rental shops. When you contact a shop
-                via WhatsApp, you initiate that conversation directly — Koh Ride is not involved
-                in that exchange.
+                Your personal information is not shared with rental shops. When you message a shop
+                through the platform, only the content of that conversation is visible to the
+                relevant shop.
+              </p>
+              <p className="mb-3">
+                Koh Ride uses trusted service providers to operate the platform, including services
+                related to authentication, database infrastructure, email delivery, and diagnostics.
+                We use{' '}
+                <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="text-[#FF6B35] hover:underline">Supabase</a>{' '}
+                for database and authentication infrastructure. Data is stored in accordance with
+                their security practices.
               </p>
               <p>
-                We use <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="text-[#FF6B35] hover:underline">Supabase</a> for database
-                and authentication infrastructure. Data is stored in accordance with their security practices.
+                We do not sell or share your data with third parties for marketing purposes.
               </p>
             </section>
 
             <section>
-              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">5. Cookies</h2>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">5. International Data Processing</h2>
+              <p>
+                Some service providers we use may be located outside Thailand and may process or
+                store data on servers in other countries. Where this occurs, we use providers
+                that apply appropriate security and privacy standards.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">6. Cookies</h2>
               <p>
                 We use only essential cookies — required for authentication and session management.
                 No advertising cookies, no tracking pixels.
@@ -89,28 +114,30 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">6. Your Rights</h2>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">7. Your Rights</h2>
               <p className="mb-3">You can at any time:</p>
               <ul className="space-y-2 list-disc list-inside marker:text-[#FF6B35]">
                 <li>Update your profile information from your account settings</li>
-                <li>Delete your account and all associated data by contacting us</li>
-                <li>Request a copy of your data</li>
+                <li>Delete your account directly from your account settings or partner dashboard</li>
+                <li>Request a copy of the data we hold about you</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">7. Data Retention</h2>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">8. Data Retention</h2>
               <p>
                 We retain your account data for as long as your account is active. If you delete
                 your account, your personal data is removed within 30 days. Anonymised usage
-                statistics may be retained indefinitely.
+                statistics may be retained indefinitely. Some information may be retained for
+                a limited period where required for security, fraud prevention, or legal obligations.
               </p>
             </section>
 
             <section>
-              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">8. Contact</h2>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">9. Contact</h2>
               <p>
-                For privacy-related requests or questions, contact us through the platform.
+                For privacy-related requests or questions, please contact Koh Ride through the{' '}
+                <Link href="/contact-us" className="text-[#FF6B35] hover:underline">Contact page</Link>.
                 We aim to respond within 5 business days.
               </p>
             </section>
