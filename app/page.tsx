@@ -6,7 +6,6 @@ import { getScooters } from '@/lib/supabase/queries'
 import { computeLiveAreas } from '@/lib/live-areas'
 import { cn, formatPrice } from '@/lib/utils'
 import { HeroImages } from '@/components/home/HeroImages'
-import { HeroDiagnostics } from '@/components/home/HeroDiagnostics'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/constants'
 
 export const revalidate = 60
@@ -83,15 +82,12 @@ export default async function HomePage() {
     <div className="flex flex-col">
       {/* ── HERO ── */}
       <section
-        id="hero-section"
         className="relative h-[100dvh] min-h-[600px] flex flex-col overflow-hidden"
         style={{ marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))' }}
       >
 
         {/* Hero images — scroll-driven blur + fade via HeroImages client component */}
         <HeroImages />
-        {/* TEMPORARY — remove before App Store submission */}
-        <HeroDiagnostics />
 
         {/* ── MOBILE LAYOUT ── */}
         <div className="md:hidden relative flex-1 flex flex-col px-5 pt-24">
@@ -108,7 +104,6 @@ export default async function HomePage() {
             </p>
           </div>
           <Link
-            id="hero-cta"
             href="/explore"
             className="flex items-center justify-center gap-2 w-auto mx-auto px-8 py-[8px] rounded-full text-white text-[14px] font-bold tracking-wide
                        bg-[#FF6B35] hover:bg-[#e85d29]
