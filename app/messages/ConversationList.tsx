@@ -123,7 +123,7 @@ function SwipeableConvoRow({ conv, onDelete }: SwipeableConvoRowProps) {
 
       <div
         ref={contentRef}
-        style={{ willChange: 'transform' }}
+        style={{ touchAction: 'pan-y', willChange: 'transform' }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
