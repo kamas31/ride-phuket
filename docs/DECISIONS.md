@@ -503,6 +503,124 @@ Add `style={{ marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))' }}` to the h
 
 ---
 
+## ADR-037: Hero CTA — root cause investigation (statusBarStyle)
+
+**Status:** Accepted (investigation, pas encore résolu)
+**Date:** 2026-06-11
+
+**Problème rencontré :**
+Le CTA du hero apparaît ~44px plus bas sur iPhone réel que dans Chrome DevTools (émulation iPhone 13 Mini).
+
+**Première hypothèse (incorrecte) :**
+La cause était `pt-safe` sur `<main>` (`padding-top: env(safe-area-inset-top, 0px)`). Fix appliqué : `marginTop: 'calc(-1 * env(safe-area-inset-top, 0px))'` sur la section hero.
+
+**Résultat : aucun changement visible.**
+
+**Cause racine réelle (confirmée via HeroDiagnostics overlay) :**
+L'utilisateur teste via **Safari "Add to Home Screen"** (PWA), pas via l'app Capacitor native.
+
+Mesures sur iPhone réel :
+- `innerHeight` = 762px (pas 812px)
+- `env(safe-area-inset-top)` = 0px
+- `100dvh` = 762px
+
+Avec `apple-mobile-web-app-status-bar-style: 'default'` dans les metadata Next.js :
+- Le WebView Safari PWA démarre à physical y=44 (sous la status bar)
+- La status bar (44px) est exclue du viewport
+- `100dvh` = 812 − 44 = **768px** (pas 812px)
+- `env(safe-area-inset-top)` = **0px** (pas de safe area — le WebView est déjà sous la barre)
+- Le fix CSS `calc(-1 * env(...))` = `calc(-1 * 0px)` = **zéro effet**
+
+**Conséquence :**
+Le CTA est à WebView y=288px, mais physiquement à y=44+288=**332px** sur l'écran.
+Chrome DevTools simule un viewport 375×812 sans offset de status bar → CTA à y=288px.
+**Écart = 44px = hauteur de la status bar.**
+
+**Fix permanent prévu :**
+Changer `statusBarStyle: 'default'` → `'black-translucent'` dans `layout.tsx` (metadata). Cela étendrait le WebView derrière la status bar, activerait `env(sat-top) = 44px`, et le fix CSS existant fonctionnerait.
+
+**Pourquoi pas encore appliqué :**
+Risque de status bar icons blancs non lisibles sur pages à fond blanc. À tester sur iPhone avant de valider.
+
+**Solution intermédiaire appliquée :**
+`marginTop: 'clamp(16px, 4vh, 48px)'` — espacement CTA responsive basé sur la hauteur viewport (voir ADR-035).
+
+**File:** `app/layout.tsx` (changement `statusBarStyle` à venir)
+
+---
+
+## ADR-038: Swipe-to-delete conversations — root cause iOS PWA
+
+**Status:** Accepted
+**Date:** 2026-06-12
+
+**Problème rencontré :**
+Le swipe-to-delete des conversations ne fonctionnait pas sur iPhone (PWA Safari).
+
+**Cause racine :**
+React's `onTouchMove` synthetic handler est **passif** (passive event listener). Sur iOS Safari, les listeners passifs ne peuvent pas appeler `e.preventDefault()`. Résultat : iOS interprète le geste horizontal comme un scroll de page avant que le JS puisse réagir.
+
+De plus, sans `touch-action: pan-y`, iOS ne sait pas en avance que l'élément gère les gestes horizontaux, et peut locker le scroll vertical dès le début du toucher.
+
+**Erreur commise pendant le fix :**
+Lors du passage au listener DOM direct, `touch-action: pan-y` a été **accidentellement retiré** du style. Sans ce CSS hint, même avec `{ passive: false }`, iOS pouvait encore intercepter le geste. Corrigé dans le commit suivant.
+
+**Solution finale (deux éléments nécessaires ensemble) :**
+
+```tsx
+// 1. CSS hint — dit à iOS EN AVANCE que l'élément gère l'horizontal
+style={{ touchAction: 'pan-y', willChange: 'transform' }}
+
+// 2. Listener DOM direct (non-passif) — permet e.preventDefault()
+useEffect(() => {
+  el.addEventListener('touchmove', onMove, { passive: false })
+  return () => el.removeEventListener('touchmove', onMove)
+}, [])
+```
+
+`touch-action: pan-y` seul : iOS ignore parfois le hint et scroll quand même.
+`{ passive: false }` seul (sans le CSS hint) : iOS a déjà décidé du scroll avant que le listener s'exécute.
+**Les deux ensemble : fiable sur iOS Safari PWA et WKWebView natif.**
+
+**Autre problème résolu :**
+`isOpen` state ne peut pas être lu dans la closure du DOM listener (valeur capturée au moment du `useEffect`). Solution : `isOpenRef` (useRef) miroir du state, mis à jour à chaque render via `useEffect(() => { isOpenRef.current = isOpen }, [isOpen])`.
+
+**File:** `app/messages/ConversationList.tsx`
+
+---
+
+## ADR-039: Legal pages — approche startup
+
+**Status:** Accepted
+**Date:** 2026-06-13
+
+**Contexte :**
+Koh Ride prépare le lancement App Store. Les pages Terms et Privacy existantes étaient trop légères pour un lancement public, mais on ne voulait pas de documents juridiques corporate de 10 pages.
+
+**Décision :**
+Approche "startup-friendly" : termes concis, lisibles, en anglais simple. Chaque clause doit être vraie, précise, et protéger Koh Ride sans alienner les utilisateurs.
+
+**Points clés documentés :**
+- Koh Ride est un **marketplace** (jamais une société de location)
+- Les shops **auto-publient** leurs listings (Koh Ride ne "vérifie" pas)
+- Paiements entièrement hors plateforme — Koh Ride n'est pas partie à la transaction
+- Responsabilité licence/assurance : 100% à l'utilisateur (droit thaïlandais)
+- Age minimum : 18 ans
+- Governing law : Thaïlande
+- "As is / as available" : protège contre les garanties implicites
+
+**Erreur évitée :**
+Phrase initiale "Koh Ride verifies partner shops before listing them" — incorrecte car les shops s'inscrivent eux-mêmes. Corrigée en "Koh Ride allows local rental shops to publish listings."
+
+**Approche Privacy :**
+- Sentry mentionné comme "technical diagnostics / error reports" (future-compatible sans nommer le vendor)
+- Suppression de compte via settings (pas "en nous contactant") — reflète la réalité
+- "Scheduled for deletion within 30 days" (pas "removed") — couvre les backups et queues
+
+**Files:** `app/terms/page.tsx`, `app/privacy/page.tsx`
+
+---
+
 ## ADR-036: ConversationList partagé rider + shop owner
 
 **Status:** Accepted
