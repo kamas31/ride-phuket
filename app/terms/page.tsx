@@ -40,17 +40,36 @@ export default function TermsPage() {
 
             <section>
               <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">2. Using the Platform</h2>
-              <p>By using Koh Ride, you agree to:</p>
+              <p>
+                You must be <strong className="text-[#0f0f0e]">at least 18 years old</strong> to create
+                an account or use Koh Ride. By using Koh Ride, you also agree to:
+              </p>
               <ul className="mt-3 space-y-2 list-disc list-inside marker:text-[#FF6B35]">
                 <li>Provide accurate information when creating an account</li>
                 <li>Use the platform only for legitimate rental inquiries</li>
-                <li>Not misuse shop contact information for spam or unrelated purposes</li>
-                <li>Comply with local laws and licensing requirements when renting a scooter</li>
+                <li>Not post unlawful, fraudulent, misleading, or harassing content</li>
+                <li>Not engage in spam or abuse directed at shops or other users</li>
+                <li>Not misuse shop contact information for unrelated purposes</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">3. Shop Listings</h2>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">3. Licences &amp; Legal Compliance</h2>
+              <p>
+                You are <strong className="text-[#0f0f0e]">solely responsible</strong> for ensuring you
+                hold any licence, permit, insurance, or legal authorisation required under Thai law
+                before operating a scooter or motorcycle. This includes an International Driving Permit
+                or a valid Thai motorcycle licence where applicable.
+              </p>
+              <p className="mt-3">
+                Koh Ride does not verify licences or insurance status and accepts no responsibility
+                for any legal, financial, or physical consequences arising from unlicensed or
+                uninsured riding.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">4. Shop Listings</h2>
               <p>
                 Koh Ride verifies partner shops before listing them. However, we cannot guarantee the
                 accuracy of pricing, availability, or specifications at the time of your inquiry.
@@ -63,7 +82,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">4. No Platform Fees</h2>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">5. No Platform Fees</h2>
               <p>
                 Koh Ride charges no platform fees, booking fees, or service charges to renters.
                 All payments are made directly to the rental shop. Koh Ride is not a party to
@@ -72,7 +91,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">5. Liability</h2>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">6. Liability &amp; Disclaimer</h2>
               <p>
                 Koh Ride is a marketplace platform only. We are not liable for:
               </p>
@@ -82,22 +101,35 @@ export default function TermsPage() {
                 <li>Disputes between you and a rental shop</li>
                 <li>Shop closures, availability changes, or price discrepancies</li>
               </ul>
-              <p className="mt-3">
-                Always ensure you have adequate insurance and a valid licence before riding.
+              <p className="mt-4">
+                Koh Ride is provided <strong className="text-[#0f0f0e]">&ldquo;as is&rdquo;</strong> and{' '}
+                <strong className="text-[#0f0f0e]">&ldquo;as available&rdquo;</strong>. We do not guarantee
+                uninterrupted access to the platform, the accuracy of all listings, or that the platform
+                will meet your specific needs. Use of Koh Ride is at your own risk.
               </p>
             </section>
 
             <section>
-              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">6. Accounts</h2>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">7. Accounts</h2>
               <p>
-                You are responsible for maintaining the security of your account. Koh Ride
-                reserves the right to suspend accounts that violate these terms or engage in
-                abusive behaviour toward partner shops or other users.
+                You are responsible for maintaining the security of your account. Koh Ride may
+                suspend or terminate accounts where necessary to protect users, partner shops, or
+                the integrity of the platform — including cases involving fraud, abuse, harassment,
+                misleading content, or repeated violations of these terms.
               </p>
             </section>
 
             <section>
-              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">7. Changes to These Terms</h2>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">8. Governing Law</h2>
+              <p>
+                These terms are governed by the laws of Thailand. Any disputes arising from the
+                use of Koh Ride are subject to the exclusive jurisdiction of the competent
+                courts of Thailand.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">9. Changes to These Terms</h2>
               <p>
                 We may update these terms from time to time. Continued use of Koh Ride after
                 any changes constitutes acceptance of the revised terms.
@@ -105,10 +137,10 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">8. Contact</h2>
+              <h2 className="text-[17px] font-bold text-[#0f0f0e] mb-3">10. Contact</h2>
               <p>
-                For questions about these terms, contact us through the platform or reach out to a
-                shop directly via WhatsApp.
+                For questions about these terms, contact us through the platform or via the
+                Contact page.
               </p>
             </section>
 
