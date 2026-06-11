@@ -43,7 +43,7 @@ export default async function PartnerMessagesPage() {
           <BackButton />
           {/* Truly centered title — absolute so it ignores sibling widths */}
           <div className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none">
-            <h1 className="text-[18px] font-bold text-[#0f0f0e] tracking-tight leading-tight">Inbox</h1>
+            <h1 className="text-[18px] font-bold text-[#0f0f0e] tracking-tight leading-tight">Messages</h1>
             <p className="text-xs text-[#9c9c98]">
               {conversations.length === 0
                 ? 'No conversations yet'
