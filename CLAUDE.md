@@ -25,12 +25,23 @@ Rules per file:
 ### docs/DECISIONS.md
 - Add an ADR for every accepted decision that has a lasting impact on the codebase.
 - Minor UI fixes (< 5 lines) go in CHANGELOG_AI only.
-- Include: context, decision, reasoning, files modified.
+- Each ADR must answer ALL of the following:
+  - **What was the problem?** — describe the symptom and root cause found
+  - **What was tried first and why it failed?** — document wrong paths taken
+  - **What decision was made?** — the final solution chosen
+  - **Why this solution and not another?** — explicit reasoning
+  - **What are the consequences or risks?** — what to watch out for
+- An ADR that only says "we did X" is incomplete. Future sessions must be able to understand the full context without reading the conversation history.
 - Never reopen a documented decision unless explicitly requested.
 
 ### docs/CHANGELOG_AI.md
 - Record every implementation session under a dated heading (YYYY-MM-DD).
-- Include: what changed, which files, why.
+- For each entry, include:
+  - **What changed** (files, UI strings, behaviour)
+  - **Why it was needed** (the user problem or product reason)
+  - **Problems encountered** during implementation, even if minor
+  - **How they were solved**
+- A changelog entry that only lists file names is not sufficient.
 - Most recent at the top.
 
 ### docs/ROADMAP.md
