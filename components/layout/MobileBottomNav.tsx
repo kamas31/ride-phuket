@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Map, Bookmark, MessageCircle, User, Radio, Store } from 'lucide-react'
+import { Home, Map, Heart, MessageCircle, User, Radio, Store } from 'lucide-react'
 import { useProfile } from '@/hooks/useProfile'
 import { useUnreadCount } from '@/hooks/useUnreadCount'
 import { useUnreadReviewCount } from '@/hooks/useUnreadReviewCount'
@@ -18,7 +18,7 @@ type NavItem = {
 const RIDER_NAV: NavItem[] = [
   { href: '/',         label: 'Home',     icon: Home          },
   { href: '/explore',  label: 'Explore',  icon: Map           },
-  { href: '/saved',    label: 'Saved',    icon: Bookmark      },
+  { href: '/saved',    label: 'Saved',    icon: Heart         },
   { href: '/messages', label: 'Messages', icon: MessageCircle },
   { href: '/profile',  label: 'Profile',  icon: User          },
 ]
