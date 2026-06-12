@@ -4,6 +4,18 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-12 (session 2)
+
+### Chore: remove dev screenshot tooling (pre-launch cleanup)
+**Files deleted:** `app/dev/create-shop/page.tsx`, `app/dev/create-shop/DevShopCreator.tsx`, `app/dev/create-shop/actions.ts`, `app/actions/admin-dev-shops.ts`, `components/admin/AdminDevShopsPanel.tsx`
+**Files modified:** `app/explore/ExploreClient.tsx` (removed import + render of AdminDevShopsPanel)
+
+**Problème root cause :** Le répertoire `app/dev/` contenait un outil de création de shops dev protégé par `DEV_SCREENSHOT_MODE=true`. La variable était présente dans `.env.local` et risquait d'être accidentellement laissée dans Vercel production. `AdminDevShopsPanel` était importé dans `ExploreClient` avec retour null pour les non-admins, mais le code restait compilé dans le bundle production.
+
+**Vérification effectuée :** grep exhaustif confirme zéro référence restante à `AdminDevShopsPanel`, `admin-dev-shops`, `DEV_SCREENSHOT_MODE`, `DevShopCreator`, `createDevShop`, `DevShopRow`. Aucun changement utilisateur final.
+
+---
+
 ## 2026-06-12
 
 ### Fix: SEO — canonical URLs manquants sur /terms et /privacy

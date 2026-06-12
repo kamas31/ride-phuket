@@ -79,6 +79,7 @@ Last updated: 2026-06-12
 - [x] SEO audit: canonical fix /terms et /privacy (ADR-040)
 - [x] SEO audit: noindex /contact via route layout (ADR-040)
 - [x] SEO audit: lien /locations dans homepage empty state (ADR-041)
+- [x] Pre-launch: suppression tooling dev screenshots (app/dev/, admin-dev-shops, AdminDevShopsPanel)
 
 ---
 

@@ -15,7 +15,6 @@ import { createExploreFuse } from '@/lib/fuzzy-search'
 import { getZoneForLocation, getNearestZone } from '@/lib/zones'
 import { useProfile } from '@/hooks/useProfile'
 import { useAdminPanelVisible } from '@/hooks/useAdminPanelVisible'
-import { AdminDevShopsPanel } from '@/components/admin/AdminDevShopsPanel'
 import type { Scooter, FilterState } from '@/types'
 
 interface ScreenshotPin {
@@ -578,9 +577,6 @@ export default function ExploreClient({
       </div>
 
       {process.env.NODE_ENV === 'development' && <ImageMetricsOverlay />}
-
-      {/* ── Admin: Dev Shops toggle panel ── */}
-      <AdminDevShopsPanel />
 
       {/* ── Admin: Screenshot Pins panel ── */}
       {!profileLoading && isAdmin && adminPanelVisible && (
