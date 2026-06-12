@@ -4,6 +4,48 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-12
+
+### Fix: SEO — canonical URLs manquants sur /terms et /privacy
+**Files:** `app/terms/page.tsx`, `app/privacy/page.tsx`
+
+**Problème root cause :** Les deux pages exportaient `metadata` sans `alternates.canonical`. En Next.js App Router, les pages qui n'overrident pas ce champ héritent du canonical du root layout (`app/layout.tsx:24` : `alternates: { canonical: SITE_URL }`), soit `https://kohride.com`. Google voyait `/terms` et `/privacy` comme des duplicates de la homepage — bloquant leur indexation malgré leur présence dans le sitemap.
+
+**Fix :** Ajout de `import type { Metadata } from 'next'`, `import { SITE_URL } from '@/constants'`, et `alternates: { canonical: '${SITE_URL}/terms' }` (resp. `/privacy`) dans chaque page. Le HTML généré passe de `<link rel="canonical" href="https://kohride.com" />` à `<link rel="canonical" href="https://kohride.com/terms" />`.
+
+**Aucun problème rencontré.**
+
+### Fix: SEO — noindex explicite pour la route /contact
+**Files:** `app/contact/layout.tsx` (nouveau fichier)
+
+**Problème root cause :** La route `/contact` (page "Contact the Shop" utilisée dans le flow checkout legacy) est un client component sans export `metadata`. Sans directive noindex dans le HTML, la protection reposait uniquement sur `robots.txt disallow` — une seule couche de défense. Google Search Console avait signalé `https://kohride.com/day` en 404, dont l'investigation a révélé l'existence de cette route orpheline sans protection HTML.
+
+**Investigation préalable :** Redirect `/contact` → `/contact-us` rejeté — `/contact` est une page fonctionnelle qui reçoit `?scooterId=xxx` depuis `/checkout` et affiche les CTA WhatsApp/téléphone spécifiques au scooter. Redirect casserait ce flow.
+
+**Fix :** Création de `app/contact/layout.tsx` (server component, 7 lignes) exportant `metadata: { robots: { index: false, follow: false } }`. Applique `<meta name="robots" content="noindex, nofollow">` sur toutes les URLs sous `/contact` sans modifier la page ni le checkout flow. Défense en profondeur : robots.txt + HTML noindex.
+
+**Aucun problème rencontré.**
+
+### Feat: Homepage — lien /locations dans l'état vide (marketplace sans inventaire)
+**Files:** `app/page.tsx`
+
+**Problème root cause :** La section "By Location" de la homepage (`liveAreas.length > 0 ? ... : ...`) affichait un message "New scooter listings are being added" sans aucun lien vers `/locations`. Le lien "View all locations" existant dans cette section est `hidden md:flex` (invisible sur mobile). Les utilisateurs mobiles arrivant sur la homepage pendant la phase pre-launch (marketplace vide) n'avaient aucun chemin direct vers les pages area depuis le body de la homepage.
+
+**Fix :** Ajout d'un bouton `<Link href="/locations">Browse all Phuket areas</Link>` dans la branche `) : (` du ternaire. S'affiche uniquement quand `liveAreas.length === 0`. Disparaît dès le premier scooter actif. Style identique au bouton "View all Phuket locations" existant. `ArrowRight` et `Link` déjà importés — aucun nouvel import.
+
+**Aucun problème rencontré.**
+
+### Investigation: SEO audit complet — "Discovered, currently not indexed"
+**Files:** lecture seule
+
+Audit technique de 30 points sur 4 types de pages (`/explore`, `/faq`, `/locations`, `/partner`, `/contact-us`, `/terms`, `/privacy`, `/phuket/*`, `/shop/*`, `/scooter/*`). Cause principale identifiée : **domaine jeune / autorité quasi-nulle (85%)**, bugs techniques secondaires (15%). 
+
+Deux bugs canoniques confirmés et corrigés (terms/privacy). Redirect `/contact` → `/contact-us` rejeté (page fonctionnelle, flow checkout). Changement liens area page `/explore?location=slug` → `/explore` implémenté puis **revert** après vérification : le canonical de `/explore?location=patong` pointe vers `https://kohride.com/explore` côté serveur (searchParams ne lit pas `location`) — les liens de navigation UX préservés, aucun risque SEO.
+
+Top 10 fixes identifiés dont fix footer (6→16 zones) rejeté pour raison de layout, et `/locations` homepage accepté.
+
+---
+
 ## 2026-06-13
 
 ### Chore: remove HeroDiagnostics overlay

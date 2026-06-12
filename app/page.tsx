@@ -335,6 +335,12 @@ export default async function HomePage() {
             <div className="text-center py-12 bg-white rounded-[20px] border border-[#e8e8e4]">
               <p className="text-[#5c5c58] font-medium mb-1">New scooter listings are being added.</p>
               <p className="text-[#9c9c98] text-sm">Check back soon — or browse all available scooters now.</p>
+              <Link
+                href="/locations"
+                className="inline-flex items-center gap-2 mt-5 px-6 py-3 border border-[#e8e8e4] rounded-full text-sm font-semibold text-[#0f0f0e] hover:border-[#FF6B35] hover:text-[#FF6B35] transition-all"
+              >
+                Browse all Phuket areas <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           )}
         </div>

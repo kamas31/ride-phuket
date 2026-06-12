@@ -1,9 +1,12 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { BackButton } from '@/components/ui/BackButton'
+import { SITE_URL } from '@/constants'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Terms of Service — Koh Ride',
   description: 'Terms of Service for Koh Ride, a scooter rental discovery marketplace in Phuket, Thailand.',
+  alternates: { canonical: `${SITE_URL}/terms` },
 }
 
 const LAST_UPDATED = 'June 2026'

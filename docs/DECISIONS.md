@@ -589,6 +589,65 @@ useEffect(() => {
 
 ---
 
+## ADR-040: SEO — canonical manquant sur /terms et /privacy + noindex /contact
+
+**Status:** Accepted
+**Date:** 2026-06-12
+
+**Problème rencontré :**
+Google Search Console signale "Discovered — currently not indexed" pour la majorité des pages du site. Audit technique révèle deux bugs canoniques actifs :
+
+1. `app/terms/page.tsx` et `app/privacy/page.tsx` exportaient `metadata` sans `alternates.canonical`. En Next.js App Router, un champ non défini dans la metadata d'une page est hérité du layout parent le plus proche. Le root layout (`app/layout.tsx:24`) déclare `alternates: { canonical: SITE_URL }` (`https://kohride.com`). Résultat : Google voyait `<link rel="canonical" href="https://kohride.com" />` sur `/terms` et `/privacy` — les traitant comme des duplicates de la homepage, refusant de les indexer malgré leur présence dans le sitemap.
+
+2. La route `/contact` (page "Contact the Shop") est un client component sans export `metadata`. Les client components ne peuvent pas exporter de metadata en App Router. Sans `noindex` dans le HTML, la seule protection était `robots.txt disallow` — une seule couche. Google Search Console avait signalé `kohride.com/day` en 404 ; l'investigation de la route a révélé ce gap de protection.
+
+**Ce qui a été essayé d'abord et rejeté :**
+
+- Redirect 301 `/contact` → `/contact-us` envisagé pour le SEO. **Rejeté** : investigation a montré que `/contact` est une page fonctionnelle recevant `?scooterId=xxx` depuis le flow `/checkout` et affichant image + prix du scooter + boutons WhatsApp/téléphone. Redirect casserait ce parcours utilisateur.
+- Modification directe de `app/contact/page.tsx` pour ajouter metadata. **Impossible** : fichier est `'use client'`, les client components ne peuvent pas exporter `metadata` en Next.js App Router.
+
+**Décisions prises :**
+
+1. `app/terms/page.tsx` : ajout de `import type { Metadata }`, `import { SITE_URL }`, et `alternates: { canonical: '${SITE_URL}/terms' }` dans l'objet metadata.
+2. `app/privacy/page.tsx` : même fix, canonical `'${SITE_URL}/privacy'`.
+3. Création de `app/contact/layout.tsx` — server component wrapper exportant `metadata: { robots: { index: false, follow: false } }`. S'applique à toute la route `/contact` et ses variantes (`?scooterId=xxx`) sans modifier la logique de la page.
+
+**Pourquoi ces solutions et pas d'autres :**
+- Le canonical page-level override est le pattern correct documenté par Next.js — les champs metadata sont fusionnés, le niveau le plus proche l'emporte.
+- Le layout route-segment pour noindex est la seule façon d'injecter metadata sur un client component en App Router sans transformer la page en server component (ce qui nécessiterait de refactoriser la logique Suspense/useSearchParams).
+
+**Conséquences et risques :**
+- Google corrige la canonical pour `/terms` et `/privacy` au prochain crawl → débloque l'indexation.
+- `/contact` est protégé par deux couches indépendantes (robots.txt + HTML noindex) — si l'une échoue, l'autre tient.
+- Aucun risque fonctionnel : les pages existantes sont inchangées, seule la metadata HTML change.
+- Surveiller Google Search Console 2-3 semaines post-déploiement pour confirmer l'indexation de `/terms` et `/privacy`.
+
+---
+
+## ADR-041: Homepage — lien /locations dans l'état vide
+
+**Status:** Accepted
+**Date:** 2026-06-12
+
+**Problème rencontré :**
+La section "By Location" de la homepage utilise le ternaire `{liveAreas.length > 0 ? <grid zones> : <message vide>}`. Dans la branche vide (marketplace sans inventaire, phase pre-launch), le message "New scooter listings are being added" n'avait aucun lien vers `/locations` ou les pages area. Le lien "View all locations" existant dans cette section est `className="hidden md:flex"` — invisible sur mobile. Les utilisateurs mobiles en pre-launch n'avaient aucun chemin direct vers les area pages depuis le body de la homepage.
+
+**Ce qui a été essayé d'abord :**
+Modification du footer pour passer de 6 zones à 16. **Rejeté** : le footer utilise un grid `md:grid-cols-6` entièrement occupé. Ajouter 10 zones dans la colonne "Popular Locations" (déjà 6 liens + "View all") créerait une colonne de ~560px contre ~140px pour les autres — déséquilibre visuel sévère. Changer le grid nécessiterait une refonte du layout footer global.
+
+**Décision :**
+Ajout d'un bouton `<Link href="/locations">Browse all Phuket areas</Link>` exclusivement dans la branche `) : (` du ternaire. 4 lignes de JSX. Utilise `ArrowRight` et `Link` déjà importés — aucun nouvel import. Style identique au bouton "View all Phuket locations" de la branche live.
+
+**Pourquoi ce changement améliore le SEO :**
+Google peut suivre ce lien depuis la homepage → `/locations` → 16 pages area. PageRank distribué vers toutes les zones même en pre-launch. Sans ce lien, les area pages ne recevaient aucun PageRank depuis la homepage pendant la phase vide.
+
+**Conséquences et risques :**
+- Disparaît automatiquement dès que `liveAreas.length > 0` — zéro impact sur la homepage avec inventaire.
+- Aucun routing, canonical, sitemap, ni SEO config modifié.
+- Risque : nul.
+
+---
+
 ## ADR-039: Legal pages — approche startup
 
 **Status:** Accepted

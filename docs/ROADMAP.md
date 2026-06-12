@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-06-10
+Last updated: 2026-06-12
 
 ---
 
@@ -76,6 +76,9 @@ Last updated: 2026-06-10
 - [x] Privacy Policy v2 — 6 additions + 2 correctifs (public launch ready)
 - [x] Bottom nav shop owner: "Live" → "Listings"
 - [x] Bottom nav rider: icône Saved Bookmark → Heart
+- [x] SEO audit: canonical fix /terms et /privacy (ADR-040)
+- [x] SEO audit: noindex /contact via route layout (ADR-040)
+- [x] SEO audit: lien /locations dans homepage empty state (ADR-041)
 
 ---
 

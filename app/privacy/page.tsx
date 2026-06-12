@@ -1,9 +1,12 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { BackButton } from '@/components/ui/BackButton'
+import { SITE_URL } from '@/constants'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Privacy Policy — Koh Ride',
   description: 'Privacy Policy for Koh Ride. How we collect, use, and protect your information.',
+  alternates: { canonical: `${SITE_URL}/privacy` },
 }
 
 const LAST_UPDATED = 'June 2026'
