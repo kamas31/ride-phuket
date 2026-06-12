@@ -81,12 +81,14 @@ export default function Navbar() {
 
   const NAV_LINKS = isShopOwner
     ? [
-        { href: '/',                   label: 'Home'      },
-        { href: '/partner/dashboard',  label: 'Dashboard' },
-        { href: '/partner/messages',   label: 'Messages'  },
-        { href: '/explore',            label: 'Explore'   },
+        { href: '/',                     label: 'Home'     },
+        { href: '/explore',              label: 'Explore'  },
+        { href: '/partner/availability', label: 'Listings' },
+        { href: '/partner/messages',     label: 'Messages' },
+        { href: '/partner/dashboard',    label: 'Shop'     },
       ]
     : [
+        { href: '/',          label: 'Home'     },
         { href: '/explore',   label: 'Explore'  },
         { href: '/saved',     label: 'Saved'    },
         { href: '/messages',  label: 'Messages' },
@@ -161,7 +163,7 @@ export default function Navbar() {
               badge={
                 link.label === 'Messages'
                   ? unread
-                  : (link.label === 'Dashboard' && isShopOwner && combined > 0)
+                  : (link.label === 'Shop' && isShopOwner && combined > 0)
                   ? combined
                   : undefined
               }
