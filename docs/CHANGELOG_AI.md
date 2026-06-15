@@ -4,6 +4,32 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-16
+
+### Fix: Email/password login redirige vers /auth/login au lieu de /profile
+
+**Fichiers modifiés :**
+- `app/auth/login/page.tsx` (2 lignes changées)
+- `app/profile/ProfileClient.tsx`, `components/layout/Navbar.tsx`, `components/layout/MobileBottomNav.tsx`, `hooks/useAuth.ts` — logs de debug temporaires ajoutés (commit `08f9999`), non retirés à ce stade
+
+**Symptôme :** Après login email/password, les riders voyaient la page Sign In au lieu du profil. Le bug se résolvait seul après ~30 secondes. Les comptes shop owner n'étaient pas affectés. Le login Google fonctionnait immédiatement.
+
+**Investigation :**
+1. Ajout de logs serveur (`[PROFILE]`, `[getServerProfile]`) → GET /profile retourne 200, ProfileClient rendu côté serveur. Élimine tout problème serveur.
+2. Ajout de logs client (`[useAuth]`, `[Navbar]`, `[ProfileClient]`) → révèle que `pathname=/auth/login` alors que `user=65b78...` est authentifié. La navigation vers `/auth/login` est **cliente**, pas serveur.
+3. Analyse de la séquence : SIGNED_IN à t=29376ms → pathname=/ à t=31663ms → pathname=/auth/login à t=34272ms (2,6s après le login).
+4. Comparaison OAuth vs email/password : OAuth utilise `NextResponse.redirect` (hard navigation HTTP 302, vide le router cache). Email/password utilisait `router.replace` (soft navigation, préserve le router cache).
+
+**Root cause :** Next.js App Router précharge `/profile` via `<Link>` pendant que l'utilisateur est sur `/auth/login` (non authentifié). Le serveur retourne une redirection vers `/auth/login?redirect=/profile` qui est mise en cache dans le **router cache client**. Après login, `router.replace('/')` (soft nav) préserve ce cache. Le clic sur Profile sert la redirection en cache → boucle jusqu'à expiration (~30s pour routes `force-dynamic`).
+
+**Fix :** Dans `app/auth/login/page.tsx`, remplacement de `router.replace(redirect)` par `window.location.replace(redirect)` aux deux endroits (ligne 39 dans `useEffect`, ligne 86 dans `handleSubmit`). Hard navigation identique au callback OAuth → router cache vidé → requête fraîche avec cookies de session.
+
+**Problèmes rencontrés :** Longue investigation en plusieurs sessions. Plusieurs théories invalidées : rendu serveur (prouvé OK), RLS (prouvé OK), href nav (prouvé corrects), timing cookies. La clé a été les logs client qui ont révélé `user` authentifié sur `pathname=/auth/login`.
+
+**Build : OK. Commits : `08f9999` (logs debug), `07121a4` (fix).**
+
+---
+
 ## 2026-06-15
 
 ### Fix: /auth/select-role redirecting to login instead of showing role form

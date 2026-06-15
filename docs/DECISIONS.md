@@ -648,6 +648,47 @@ Google peut suivre ce lien depuis la homepage → `/locations` → 16 pages area
 
 ---
 
+## ADR-042: Email/password login — hard navigation post-login pour vider le router cache Next.js
+
+**Status:** Accepted
+**Date:** 2026-06-16
+
+**Problème rencontré :**
+Après un login email/password réussi, les riders arrivaient sur `/auth/login` au lieu de `/profile`. L'utilisateur était authentifié côté client (`SIGNED_IN` confirmé par les logs), mais le pathname passait de `/` à `/auth/login` ~2,6 secondes après le login. Le problème était spécifique aux comptes rider (non aux shop owners) et se résolvait seul après ~30 secondes.
+
+**Root cause identifiée :**
+Next.js App Router maintient un **router cache côté client** (RSC payload cache). Quand l'utilisateur est sur `/auth/login` (non authentifié), le composant `<Link href="/profile">` dans MobileBottomNav et Navbar **précharge automatiquement** `/profile`. Le serveur voit une requête sans session et retourne une redirection vers `/auth/login?redirect=/profile`. Cette réponse est mise en cache dans le router cache.
+
+Après le login email/password, `handleSubmit` appelait `router.replace(redirect)` — une **soft navigation** qui préserve le router cache. L'utilisateur cliquait sur Profile → Next.js servait la réponse en cache (redirection vers `/auth/login`) → la page login voyait l'utilisateur authentifié → `useEffect` appelait `router.replace('/profile')` (encore une soft navigation) → boucle jusqu'à l'expiration du cache (~30 secondes pour les routes `force-dynamic`).
+
+**Pourquoi le login Google ne souffrait pas du même problème :**
+Le callback OAuth (`/auth/callback`) retourne `NextResponse.redirect(destination)` — une **redirection HTTP 302**. Le navigateur effectue une rechargement complet de la page (hard navigation), ce qui vide intégralement le router cache. Toutes les navigations suivantes font de vraies requêtes serveur avec les cookies frais.
+
+**Ce qui a été investigué avant de trouver la cause :**
+1. Rendu serveur de `/profile` → prouvé OK (logs Vercel : GET /profile → 200, ProfileClient rendu).
+2. RLS et absence de ligne de profil → prouvé OK (getServerProfile retourne role=rider).
+3. Navbar/MobileBottomNav href → prouvés corrects (`/profile` dans tous les cas).
+4. Timing des cookies après `signInWithPassword` → les cookies `document.cookie` sont bien écrits avant la navigation.
+5. Logs client (useAuth, Navbar, ProfileClient) ajoutés → ont révélé que `pathname=/auth/login` alors que `user=65b78...` (authentifié), prouvant que la navigation vers `/auth/login` était cliente, pas serveur.
+
+**Décision :**
+Remplacer les deux appels `router.replace(redirect)` dans `app/auth/login/page.tsx` par `window.location.replace(redirect)` :
+- Ligne 39 : dans le `useEffect` qui redirige les utilisateurs déjà authentifiés
+- Ligne 86 : dans `handleSubmit` après `signInWithEmail` réussi
+
+**Pourquoi cette solution et pas une autre :**
+- `window.location.replace()` = hard navigation = rechargement complet = router cache vidé = identique au comportement OAuth.
+- Alternative `router.refresh()` rejetée : ne vide que le cache de la page courante, pas les entrées préchargées pour d'autres routes.
+- Alternative middleware.ts rejetée : résoudrait le problème de refresh de session mais pas le cache de préchargement.
+- Aucune régression : `router` reste utilisé pour Apple Sign In et le mode "no account" (ces flows ne sont pas affectés).
+
+**Conséquences et risques :**
+- Hard navigation = légèrement plus lente qu'une soft nav (rechargement JS), mais acceptable pour un flow de login (event unique, pas répété).
+- Le `useLayoutEffect` / singleton Supabase se réinitialise correctement après le rechargement.
+- Risque : nul sur les autres flows (Apple Sign In, Google OAuth non modifiés).
+
+---
+
 ## ADR-039: Legal pages — approche startup
 
 **Status:** Accepted
