@@ -8,9 +8,11 @@ import type { Profile } from '@/hooks/useProfile'
 import type { UserRole } from '@/lib/supabase/types'
 
 export async function getServerProfile(): Promise<Profile | null> {
+  const t0 = Date.now()
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    console.log(`[getServerProfile] getUser t+${Date.now()-t0}ms user=${user?.id ?? 'null'} error=${userError?.message ?? 'none'}`)
     if (!user) return null
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,15 +22,21 @@ export async function getServerProfile(): Promise<Profile | null> {
       .eq('id', user.id)
       .single()
 
+    console.log(`[getServerProfile] query t+${Date.now()-t0}ms data=${data?.id ?? 'null'} errorCode=${error?.code ?? 'none'} errorMsg=${error?.message ?? 'none'}`)
+
     if (error) {
       // PGRST116 = "The result contains 0 rows" — profile genuinely missing.
       // This is the expected state for a new OAuth user who has not yet
       // completed /auth/select-role. Return null so callers can detect and
       // redirect rather than silently treating them as a rider.
-      if ((error as { code?: string }).code === 'PGRST116') return null
+      if ((error as { code?: string }).code === 'PGRST116') {
+        console.log('[getServerProfile] → null (PGRST116: 0 rows)')
+        return null
+      }
 
       // Any other error (network, RLS, pre-002 migration) — safe JWT fallback.
       // Never promote to shop_owner on error.
+      console.log('[getServerProfile] → fallback profile (non-PGRST116 error)')
       return {
         id: user.id,
         name: (user.user_metadata?.name as string) ?? user.email ?? 'Rider',
@@ -43,8 +51,10 @@ export async function getServerProfile(): Promise<Profile | null> {
       }
     }
 
+    console.log(`[getServerProfile] → profile id=${data.id} role=${data.role}`)
     return data as Profile
-  } catch {
+  } catch (e) {
+    console.log(`[getServerProfile] → null (caught exception: ${e instanceof Error ? e.message : String(e)})`)
     return null
   }
 }
