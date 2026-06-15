@@ -36,8 +36,8 @@ function LoginForm() {
   const [resetError, setResetError]   = useState<string | null>(null)
   const [noAccountMode, setNoAccountMode] = useState(false)
   useEffect(() => {
-    if (!loading && user && !skipAutoRedirect.current) router.replace(redirect)
-  }, [user, loading, router, redirect])
+    if (!loading && user && !skipAutoRedirect.current) window.location.replace(redirect)
+  }, [user, loading, redirect])
 
   const handleAppleSignIn = async () => {
     setError(null)
@@ -83,7 +83,7 @@ function LoginForm() {
       }
     } else {
       trackEvent({ eventType: 'auth_login' })
-      router.replace(redirect)
+      window.location.replace(redirect)
     }
   }
 
