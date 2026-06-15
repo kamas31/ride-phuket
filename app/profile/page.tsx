@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getServerProfile } from '@/app/actions/profile'
 import ProfileClient from './ProfileClient'
 
+export const dynamic = 'force-dynamic'
 export const metadata = { title: 'My Profile' }
 
 export default async function ProfilePage() {
