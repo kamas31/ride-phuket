@@ -6,6 +6,24 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ## 2026-06-15
 
+### Fix: /auth/select-role redirecting to login instead of showing role form
+
+**Files:** `app/auth/select-role/page.tsx` (+1 line)
+
+**Problème root cause :** Même problème que `/profile` : `/auth/select-role/page.tsx` manquait de `export const dynamic = 'force-dynamic'`. Next.js pouvait mettre en cache une version statique rendue sans cookies → `getUser()` = null → redirection vers `/auth/login` baked dans le cache. Les sessions email/password sans profil (ex. : compte Google OAuth auquel un mot de passe a été ajouté via "Forgot Password" avec des identités non liées dans Supabase) étaient redirigées de `/profile` vers `/auth/select-role`, qui les renvoyait silencieusement vers `/auth/login` au lieu d'afficher le formulaire de sélection de rôle.
+
+**Chaîne de redirections identifiée :** `/profile` → `getServerProfile()` retourne null → `/auth/select-role` (statique) → `/auth/login`. L'utilisateur voyait la page de login alors que `getUser()` fonctionnait correctement — la vraie cause était dans la chaîne en aval.
+
+**Preuve clé :** `getAllConversations()` (Messages) utilise le client admin pour les requêtes DB, contournant RLS. `getServerProfile()` (Profile) utilise le client user → RLS appliqué → 0 lignes si l'ID de l'utilisateur email/password ne correspond pas à une ligne de profil existante.
+
+**Fix :** Ajout de `export const dynamic = 'force-dynamic'` dans `app/auth/select-role/page.tsx`. Route passe de `○ (Static)` à `ƒ (Dynamic)`.
+
+**Cause profonde restante à investiguer :** Vérifier dans Supabase Dashboard → Authentication → Users si deux utilisateurs distincts partagent le même email (un Google OAuth, un email/password). Si oui, la session email/password correspond à un user_id sans ligne de profil → `getServerProfile()` retourne null (PGRST116). Solution : lier les identités ou activer "Automatically link identities" dans les settings Supabase Auth.
+
+**Build : OK. Commit : `fb29d5b`.**
+
+---
+
 ### Fix: /profile redirecting authenticated users to login
 
 **Files:** `app/profile/page.tsx` (+1 line)
@@ -16,7 +34,7 @@ Records significant AI-assisted implementation work. Most recent first.
 
 **Fix :** Ajout d'une seule ligne `export const dynamic = 'force-dynamic'` dans `app/profile/page.tsx`. Route passe de `○ (Static)` à `ƒ (Dynamic)` dans le build output.
 
-**Aucun problème rencontré. Build : OK. Commit : `bfff60c`.**
+**Build : OK. Commit : `bfff60c`.**
 
 ---
 
