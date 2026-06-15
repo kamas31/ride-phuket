@@ -138,11 +138,13 @@ export function useAuth(): AuthState {
 
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
+      console.error('[Apple Sign In] raw error:', msg, e)
       // Error code 1001 = user cancelled the native Apple sheet — not a real error
       if (msg.includes('1001') || msg.toLowerCase().includes('cancel')) {
         return { error: 'cancelled' }
       }
-      return { error: 'Apple Sign In failed. Please try again.' }
+      // DEBUG: expose real error for App Store rejection diagnosis — revert before release
+      return { error: `[Debug] ${msg}` }
     }
   }, [])
 
