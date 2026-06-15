@@ -4,6 +4,22 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-15
+
+### Fix: /profile redirecting authenticated users to login
+
+**Files:** `app/profile/page.tsx` (+1 line)
+
+**Problème root cause :** `/profile/page.tsx` manquait de `export const dynamic = 'force-dynamic'`. Next.js ne peut pas détecter statiquement que `cookies()` est appelé transitivement via `createClient()` → `lib/supabase/server.ts`. Sans cette export explicite, Next.js peut produire et mettre en cache une version statique de la page au build time, sans contexte de request ni cookies. Dans ce cas, `getUser()` retourne `null` → la redirection vers `/auth/login` est baked dans le cache → tous les utilisateurs authentifiés qui accèdent à `/profile` reçoivent la redirection, indépendamment de leur session réelle.
+
+**Pourquoi `/messages` fonctionnait :** `app/messages/page.tsx` a `export const dynamic = 'force-dynamic'` (ligne 9), ce qui force un rendu dynamique par request avec les vrais cookies.
+
+**Fix :** Ajout d'une seule ligne `export const dynamic = 'force-dynamic'` dans `app/profile/page.tsx`. Route passe de `○ (Static)` à `ƒ (Dynamic)` dans le build output.
+
+**Aucun problème rencontré. Build : OK. Commit : `bfff60c`.**
+
+---
+
 ## 2026-06-12 (session 2)
 
 ### Chore: remove dev screenshot tooling (pre-launch cleanup)

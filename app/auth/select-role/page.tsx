@@ -4,6 +4,7 @@ import { getServerProfile } from '@/app/actions/profile'
 import SelectRoleClient from './SelectRoleClient'
 import type { UserRole } from '@/lib/supabase/types'
 
+export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Choose Your Role' }
 
 interface Props {
