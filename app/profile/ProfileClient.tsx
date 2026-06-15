@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -24,6 +24,11 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
   const { signOut } = useAuth()
   const router = useRouter()
   const { count: savedCount, hydrated: savedHydrated } = useSaved()
+
+  useEffect(() => {
+    console.log(`[ProfileClient] mounted user=${user.id} email=${user.email} role=${profile?.role ?? 'null'} t=${performance.now().toFixed(0)}ms`)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const [editing, setEditing]     = useState(false)
   const [name, setName]           = useState(profile?.name ?? '')

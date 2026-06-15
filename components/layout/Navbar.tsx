@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LogOut, ChevronDown, ChevronRight, MessageCircle, User, Store, Search, X } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { SITE_NAME } from '@/constants'
 import { useAuth } from '@/hooks/useAuth'
@@ -40,12 +40,20 @@ function NavLink({ href, label, active, isHero, badge }: {
 export default function Navbar() {
   const pathname          = usePathname()
   const router            = useRouter()
-  const { user, signOut } = useAuth()
+  const { user, loading: authLoading, signOut } = useAuth()
   const { profile, isAdmin } = useProfile()
   const [adminPanelVisible, setAdminPanelVisible] = useAdminPanelVisible()
   const unread            = useUnreadCount()
   const unreadReviews     = useUnreadReviewCount()
   const combined          = unread + unreadReviews
+
+  useLayoutEffect(() => {
+    console.log(`[Navbar] render pathname=${pathname} user=${user?.id ?? 'null'} authLoading=${authLoading} t=${performance.now().toFixed(0)}ms`)
+    if (!user && !authLoading) {
+      console.log(`[Navbar] ⚠️ SIGN IN LINK VISIBLE — user=null authLoading=false pathname=${pathname} t=${performance.now().toFixed(0)}ms`)
+    }
+  })
+
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [searchOpen,   setSearchOpen]   = useState(false)
   const [heroProgress, setHeroProgress] = useState(0)
