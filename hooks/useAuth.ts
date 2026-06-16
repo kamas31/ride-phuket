@@ -30,7 +30,6 @@ export function useAuth(): AuthState {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    console.log(`[useAuth] mount t=${performance.now().toFixed(0)}ms`)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!isSupabaseConfigured()) { setLoading(false); return }
 
@@ -40,18 +39,11 @@ export function useAuth(): AuthState {
     // INITIAL_SESSION fires synchronously on subscribe with the current
     // session, eliminating the race between getUser() and later events.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(`[useAuth] onAuthStateChange event=${event} user=${session?.user?.id ?? 'null'} email=${session?.user?.email ?? 'null'} t=${performance.now().toFixed(0)}ms`)
       setUser(session?.user ?? null)
-      if (event === 'INITIAL_SESSION') {
-        console.log(`[useAuth] INITIAL_SESSION → setLoading(false) user=${session?.user?.id ?? 'null'} t=${performance.now().toFixed(0)}ms`)
-        setLoading(false)
-      }
+      if (event === 'INITIAL_SESSION') setLoading(false)
     })
 
-    return () => {
-      console.log(`[useAuth] cleanup — unsubscribe t=${performance.now().toFixed(0)}ms`)
-      subscription.unsubscribe()
-    }
+    return () => subscription.unsubscribe()
   }, [])
 
   const signOut = useCallback(async () => {

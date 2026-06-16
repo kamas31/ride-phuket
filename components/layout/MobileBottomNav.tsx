@@ -3,8 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Map, Heart, MessageCircle, User, Radio, Store } from 'lucide-react'
-import { useLayoutEffect } from 'react'
-import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
 import { useUnreadCount } from '@/hooks/useUnreadCount'
 import { useUnreadReviewCount } from '@/hooks/useUnreadReviewCount'
@@ -43,14 +41,9 @@ const OWNER_NAV: NavItem[] = [
 
 export default function MobileBottomNav() {
   const pathname = usePathname()
-  const { user, loading: authLoading } = useAuth()
   const { profile } = useProfile()
   const unread        = useUnreadCount()
   const unreadReviews = useUnreadReviewCount()
-
-  useLayoutEffect(() => {
-    console.log(`[MobileBottomNav] render pathname=${pathname} user=${user?.id ?? 'null'} authLoading=${authLoading} profile_role=${profile?.role ?? 'null'} t=${performance.now().toFixed(0)}ms`)
-  })
 
   const isOwner = profile?.role === 'shop_owner'
   const navItems = isOwner ? OWNER_NAV : RIDER_NAV
