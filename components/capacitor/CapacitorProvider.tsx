@@ -121,6 +121,51 @@ export function CapacitorProvider({ children }: { children: React.ReactNode }) {
         }
       })
       if (mounted) cleanupFns.push(() => stateHandle.remove())
+
+      // ── 3. Push notifications ─────────────────────────────────────────────
+      //
+      // Listeners are always registered here. Permission is requested separately
+      // in ConversationList (warm-up prompt → native dialog) so we never ask on
+      // first launch.
+      //
+      // On subsequent launches where permission was already granted, we call
+      // register() to refresh the APNS token — tokens can change silently.
+      const { PushNotifications } = await import('@capacitor/push-notifications')
+
+      // Tap handler: fires when the user taps a push notification while the app
+      // was backgrounded or terminated. Navigates to the relevant conversation.
+      const tapHandle = await PushNotifications.addListener(
+        'pushNotificationActionPerformed',
+        ({ notification }) => {
+          if (!mounted) return
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const conversationId = (notification.data as any)?.conversationId as string | undefined
+          if (conversationId) router.push(`/messages/${conversationId}`)
+        },
+      )
+      if (mounted) cleanupFns.push(() => tapHandle.remove())
+
+      // Token registration: fires after PushNotifications.register() succeeds.
+      // Triggered from ConversationList (first prompt) and from here on subsequent
+      // launches. Saves the fresh token to push_tokens via a server action.
+      const regHandle = await PushNotifications.addListener(
+        'registration',
+        async ({ value: token }) => {
+          if (!mounted) return
+          try {
+            const { savePushToken } = await import('@/app/actions/push')
+            await savePushToken(token, 'ios')
+          } catch { /* silent — never surface push token errors to the user */ }
+        },
+      )
+      if (mounted) cleanupFns.push(() => regHandle.remove())
+
+      // If permission was already granted in a prior session, re-register to
+      // keep the stored token current (APNS tokens can change across launches).
+      const currentPerm = await PushNotifications.checkPermissions()
+      if (currentPerm.receive === 'granted' && mounted) {
+        await PushNotifications.register()
+      }
     }
 
     init().catch(() => {})

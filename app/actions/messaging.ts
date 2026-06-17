@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import * as http2 from 'node:http2'
+import { createSign } from 'node:crypto'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -213,6 +215,60 @@ export async function sendMessage(
   }
 }
 
+// ── APNS helpers ─────────────────────────────────────────────────────────────
+
+function buildApnsJwt(teamId: string, keyId: string, privateKey: string): string {
+  const header  = Buffer.from(JSON.stringify({ alg: 'ES256', kid: keyId })).toString('base64url')
+  const now     = Math.floor(Date.now() / 1000)
+  const payload = Buffer.from(JSON.stringify({ iss: teamId, iat: now })).toString('base64url')
+  const input   = `${header}.${payload}`
+  const signer  = createSign('SHA256')
+  signer.update(input)
+  // ES256 requires IEEE P1363 encoding (raw r||s), not the default DER encoding.
+  const sig = signer.sign({ key: privateKey, dsaEncoding: 'ieee-p1363' }, 'base64url')
+  return `${input}.${sig}`
+}
+
+function deliverApns(
+  token: string,
+  apnsPayload: object,
+  jwt: string,
+  host: string,
+  bundleId: string,
+): Promise<void> {
+  return new Promise<void>(resolve => {
+    const serialized = JSON.stringify(apnsPayload)
+    let done = false
+
+    const client = http2.connect(`https://${host}`)
+
+    function finish() {
+      if (done) return
+      done = true
+      try { client.close() } catch { /* ignore */ }
+      resolve()
+    }
+
+    client.on('error', finish)
+
+    const req = client.request({
+      ':method': 'POST',
+      ':path': `/3/device/${token}`,
+      'authorization': `bearer ${jwt}`,
+      'apns-topic': bundleId,
+      'apns-push-type': 'alert',
+      'apns-priority': '10',
+      'content-type': 'application/json',
+      'content-length': Buffer.byteLength(serialized),
+    })
+    req.write(serialized)
+    req.end()
+    req.on('response', finish)
+    req.on('error', finish)
+    setTimeout(finish, 5000)
+  })
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendMessagePush(
   userId: string,
@@ -227,28 +283,33 @@ async function sendMessagePush(
     .from('push_tokens')
     .select('token')
     .eq('user_id', userId)
+    .eq('platform', 'ios')
 
   if (!rows?.length) return
 
-  const valid = (rows as { token: string }[])
-    .map(r => r.token)
-    .filter(t => t.startsWith('ExponentPushToken[') || t.startsWith('ExpoPushToken['))
+  const tokens = (rows as { token: string }[]).map(r => r.token)
+  if (!tokens.length) return
 
-  if (!valid.length) return
+  const teamId   = process.env.APNS_TEAM_ID
+  const keyId    = process.env.APNS_KEY_ID
+  const rawKey   = process.env.APNS_PRIVATE_KEY
+  const bundleId = process.env.APNS_BUNDLE_ID ?? 'com.kohride.app'
+  const prod     = process.env.APNS_PRODUCTION !== 'false'
 
-  const headers: Record<string, string> = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
+  if (!teamId || !keyId || !rawKey) return
+
+  const privateKey = rawKey.replace(/\\n/g, '\n')
+  const host = prod ? 'api.push.apple.com' : 'api.development.push.apple.com'
+  const jwt  = buildApnsJwt(teamId, keyId, privateKey)
+
+  const apnsPayload = {
+    aps:  { alert: { title, body }, sound: 'default', badge: 1 },
+    ...data,
   }
-  if (process.env.EXPO_ACCESS_TOKEN) {
-    headers['Authorization'] = `Bearer ${process.env.EXPO_ACCESS_TOKEN}`
-  }
 
-  await fetch('https://exp.host/--/api/v2/push/send', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(valid.map(to => ({ to, sound: 'default', title, body, data }))),
-  })
+  await Promise.allSettled(
+    tokens.map(token => deliverApns(token, apnsPayload, jwt, host, bundleId)),
+  )
 }
 
 // ── getAllConversations ───────────────────────────────────────────────────────

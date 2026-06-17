@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { MessageCircle, Trash2 } from 'lucide-react'
+import { Bell, MessageCircle, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { deleteConversation } from '@/app/actions/moderation'
 import { cn, getInitials } from '@/lib/utils'
@@ -215,6 +215,40 @@ export default function ConversationList({
       return tb.localeCompare(ta)
     })
   )
+  const [showPushPrompt, setShowPushPrompt] = useState(false)
+
+  // Show the push notification warm-up sheet the first time a user opens Messages.
+  // We only show it on native iOS and only when the permission hasn't been decided yet.
+  useEffect(() => {
+    async function checkPush() {
+      try {
+        const { Capacitor } = await import('@capacitor/core')
+        if (!Capacitor.isNativePlatform()) return
+        if (localStorage.getItem('rp_push_prompted')) return
+        const { PushNotifications } = await import('@capacitor/push-notifications')
+        const status = await PushNotifications.checkPermissions()
+        if (status.receive === 'prompt') setShowPushPrompt(true)
+      } catch { /* silent */ }
+    }
+    checkPush()
+  }, [])
+
+  async function handleEnablePush() {
+    setShowPushPrompt(false)
+    try {
+      localStorage.setItem('rp_push_prompted', '1')
+      const { PushNotifications } = await import('@capacitor/push-notifications')
+      const result = await PushNotifications.requestPermissions()
+      if (result.receive === 'granted') {
+        await PushNotifications.register()
+      }
+    } catch { /* silent */ }
+  }
+
+  function handleDismissPush() {
+    try { localStorage.setItem('rp_push_prompted', '1') } catch { /* silent */ }
+    setShowPushPrompt(false)
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -275,35 +309,62 @@ export default function ConversationList({
     setConversations(prev => prev.filter(c => c.id !== id))
   }
 
-  if (conversations.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center px-8">
-        <div className="w-16 h-16 bg-[#fff4f0] rounded-full flex items-center justify-center mb-5">
-          <MessageCircle className="w-7 h-7 text-[#FF6B35]" strokeWidth={1.5} />
-        </div>
-        <p className="text-[17px] font-bold text-[#0f0f0e] mb-2">No messages yet</p>
-        <p className="text-[14px] text-[#9c9c98] max-w-[28ch] leading-relaxed">
-          Find a scooter and tap &ldquo;Message owner&rdquo; to start a conversation.
-        </p>
-        <Link
-          href="/explore"
-          className="mt-6 px-6 py-3 bg-[#FF6B35] text-white font-bold text-sm rounded-full hover:bg-[#e85d29] transition-colors active:scale-[0.97]"
-        >
-          Browse scooters
-        </Link>
-      </div>
-    )
-  }
-
   return (
-    <div>
-      {conversations.map(conv => (
-        <SwipeableConvoRow
-          key={conv.id}
-          conv={conv}
-          onDelete={handleDelete}
-        />
-      ))}
-    </div>
+    <>
+      {showPushPrompt && (
+        <div className="fixed inset-0 z-[9000] flex items-end">
+          <div className="absolute inset-0 bg-black/20" onClick={handleDismissPush} />
+          <div className="relative w-full bg-white rounded-t-[24px] px-6 pt-6 pb-10 shadow-2xl">
+            <div className="w-12 h-12 bg-[#fff4f0] rounded-[16px] flex items-center justify-center mb-4">
+              <Bell className="w-5 h-5 text-[#FF6B35]" strokeWidth={1.5} />
+            </div>
+            <h2 className="text-[19px] font-bold text-[#0f0f0e] mb-2">Never miss a message</h2>
+            <p className="text-[14px] text-[#5c5c58] leading-relaxed mb-6">
+              Enable notifications to be instantly alerted when a shop replies or a new inquiry comes in.
+            </p>
+            <button
+              onClick={handleEnablePush}
+              className="w-full py-3.5 bg-[#FF6B35] text-white font-bold text-[15px] rounded-full mb-3 active:bg-[#e85d29] transition-colors"
+            >
+              Turn on notifications
+            </button>
+            <button
+              onClick={handleDismissPush}
+              className="w-full py-2.5 text-[#9c9c98] text-[14px] font-medium"
+            >
+              Not now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {conversations.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center px-8">
+          <div className="w-16 h-16 bg-[#fff4f0] rounded-full flex items-center justify-center mb-5">
+            <MessageCircle className="w-7 h-7 text-[#FF6B35]" strokeWidth={1.5} />
+          </div>
+          <p className="text-[17px] font-bold text-[#0f0f0e] mb-2">No messages yet</p>
+          <p className="text-[14px] text-[#9c9c98] max-w-[28ch] leading-relaxed">
+            Find a scooter and tap &ldquo;Message owner&rdquo; to start a conversation.
+          </p>
+          <Link
+            href="/explore"
+            className="mt-6 px-6 py-3 bg-[#FF6B35] text-white font-bold text-sm rounded-full hover:bg-[#e85d29] transition-colors active:scale-[0.97]"
+          >
+            Browse scooters
+          </Link>
+        </div>
+      ) : (
+        <div>
+          {conversations.map(conv => (
+            <SwipeableConvoRow
+              key={conv.id}
+              conv={conv}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      )}
+    </>
   )
 }

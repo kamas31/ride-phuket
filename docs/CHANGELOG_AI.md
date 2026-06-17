@@ -4,6 +4,30 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-17 (session 2)
+
+### Feature: Native push notifications for in-app messages (Phase 2 — Apple Guideline 4.2)
+
+**Fichiers créés :**
+- `supabase/migrations/047_push_tokens_service_role.sql` — `GRANT SELECT ON public.push_tokens TO service_role`
+- `app/actions/push.ts` — server action `savePushToken(token, platform)` avec upsert Supabase scopé utilisateur
+
+**Fichiers modifiés :**
+- `package.json` / `package-lock.json` — ajout `@capacitor/push-notifications@8`
+- `capacitor.config.ts` — ajout `PushNotifications.presentationOptions: ['badge', 'sound', 'alert']`
+- `app/actions/messaging.ts` — suppression Expo (filtre `ExponentPushToken[`, API `exp.host`, `EXPO_ACCESS_TOKEN`). Remplacement par APNS HTTP/2 direct. Ajout `import * as http2 from 'node:http2'` et `import { createSign } from 'node:crypto'`. Ajout helpers `buildApnsJwt()` et `deliverApns()`. `sendMessagePush` filtre `platform = 'ios'`, lit tokens admin, construit JWT ES256, délivre en parallèle via `Promise.allSettled`.
+- `components/capacitor/CapacitorProvider.tsx` — ajout section push (bloc 3). Listeners `pushNotificationActionPerformed` (tap → `router.push('/messages/{conversationId}')`) et `registration` (token → `savePushToken`). Si permission déjà accordée → `PushNotifications.register()` pour rafraîchir le token à chaque lancement.
+- `app/messages/ConversationList.tsx` — warm-up push prompt (bottom sheet orange/blanc). Affiché une seule fois sur iOS natif quand `status.receive === 'prompt'` et `rp_push_prompted` absent. "Turn on notifications" → `requestPermissions()` + `register()`. "Not now" → pose le flag sans demander. Ajout `Bell` lucide-react. Retour unifié via Fragment `<>` incluant le prompt overlay + contenu (empty state ou liste).
+
+**Pourquoi :** Apple Guideline 4.2 — l'app doit avoir une fonctionnalité native réelle. La cause racine du non-fonctionnement des pushes était : (1) code Expo existant filtrait activement les tokens Capacitor ; (2) `GRANT SELECT` manquant sur `push_tokens` pour service_role. Missing a lead because the app did not notify the user is unacceptable (requirement explicite).
+
+**Problèmes rencontrés :**
+1. `push.ts` : erreur TypeScript `No overload matches` sur `supabase.from('push_tokens').upsert(...)` — la table n'est pas dans les types Supabase générés. Fix : `(supabase as any).from('push_tokens')` (pattern identique à `messaging.ts`).
+
+**Build : OK. TypeScript : OK. Commit : en attente d'approbation.**
+
+---
+
 ## 2026-06-17
 
 ### Feature: Native geolocation on Explore map (Phase 1 — Apple Guideline 4.2)

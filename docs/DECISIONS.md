@@ -820,6 +820,55 @@ Aligner le comportement desktop sur le mobile :
 
 ---
 
+## ADR-044: Native push notifications — direct APNS HTTP/2, no Expo, warm-up prompt in Messages
+
+**Status:** Accepted  
+**Date:** 2026-06-17
+
+**Problème :**
+L'app ne notifiait pas les utilisateurs quand un nouveau message arrivait. `sendMessagePush` dans `app/actions/messaging.ts` existait déjà mais était entièrement non-fonctionnel : il filtrait les tokens avec `t.startsWith('ExponentPushToken[')` et appelait `https://exp.host/--/api/v2/push/send` (Expo Push Service). Or, Capacitor génère des tokens APNS bruts (chaînes hex 64 caractères) — le filtre Expo rejetait activement 100% des tokens natifs. Résultat : aucun push depuis le lancement, silencieusement.
+
+Problème secondaire : la table `push_tokens` (migration 019) avait été créée sans `GRANT SELECT TO service_role`. Le client admin (service_role) utilisé dans `sendMessagePush` lisait 0 lignes silencieusement.
+
+Problème de permission : demander la permission de notification au premier lancement réduit drastiquement le taux d'acceptation (l'utilisateur n'a pas encore de contexte).
+
+**Ce qui existait avant et pourquoi ça échouait :**
+1. `sendMessagePush` avec filtre `ExponentPushToken[` : Expo est un framework différent de Capacitor. Leurs formats de tokens sont incompatibles. Capacitor enregistre les tokens directement auprès d'APNS — format hex brut, jamais enveloppé dans le préfixe Expo.
+2. Migration 019 : `CREATE TABLE push_tokens` sans `GRANT SELECT ON push_tokens TO service_role`. Les autres tables (comme `bookings`, migration 009) avaient ce grant. Son absence rendait la lecture admin silencieusement vide.
+3. Aucun mécanisme de demande de permission : `@capacitor/push-notifications` n'était pas installé ; aucun appel à `requestPermissions()` ou `register()` dans le codebase.
+
+**Décision :**
+1. **Backend (messaging.ts)** : Suppression complète du code Expo. Remplacement par APNS HTTP/2 direct via `node:http2` et `node:crypto` (built-ins Node.js — zéro nouvelle dépendance npm). JWT ES256 signé avec la clé p8 Apple. Livraison directe à `api.push.apple.com`. Sandbox configuré via `APNS_PRODUCTION=false`.
+2. **Token registration (CapacitorProvider.tsx)** : Listeners `registration` et `pushNotificationActionPerformed` enregistrés sur chaque lancement. Si permission déjà accordée : appel `register()` pour rafraîchir le token (les tokens APNS peuvent changer silencieusement).
+3. **Permission UX (ConversationList.tsx)** : Warm-up sheet custom (bottom sheet orange/blanc) montré uniquement : sur plateforme native, si `status.receive === 'prompt'`, si la clé localStorage `rp_push_prompted` est absente. Une fois le warm-up vu, `rp_push_prompted=1` est posé — la demande native n'est jamais répétée. La permission native est demandée uniquement sur "Turn on notifications".
+4. **Token save (push.ts)** : Server action `savePushToken` — client Supabase scopé à l'utilisateur (RLS permet l'upsert sur ses propres tokens).
+5. **Migration 047** : `GRANT SELECT ON public.push_tokens TO service_role`.
+6. **capacitor.config.ts** : `PushNotifications.presentationOptions: ['badge', 'sound', 'alert']` pour les notifications foreground.
+
+**Pourquoi APNS direct et pas un service tiers :**
+- Expo Push Service : incompatible avec Capacitor (format token différent, validé par l'investigation du bug existant).
+- Firebase FCM : ajouterait une dépendance lourde + configuration Xcode + Google Services plist pour un usage iOS uniquement.
+- `node:http2` + `node:crypto` : disponibles dans Node.js 18+ sans installation, dans le contexte server action Vercel. Pas de latence de relay, pas de coût additionnel, contrôle total sur les headers APNS.
+
+**Payload APNS et navigation tap :**
+```json
+{
+  "aps": { "alert": { "title": "Koh Ride", "body": "..." }, "sound": "default", "badge": 1 },
+  "conversationId": "uuid"
+}
+```
+Le `conversationId` est exposé dans `notification.data` par le plugin Capacitor. Le tap handler navigue vers `/messages/{conversationId}` — identique pour rider et shop owner (route unifiée confirmée dans `ConversationList.tsx:131`).
+
+**Conséquences et risques :**
+- **Secrets requis** : `APNS_TEAM_ID`, `APNS_KEY_ID`, `APNS_PRIVATE_KEY` (clé p8), `APNS_BUNDLE_ID`, `APNS_PRODUCTION` doivent être configurés dans Vercel. Sans eux, `sendMessagePush` retourne silencieusement (guard `if (!teamId || !keyId || !rawKey) return`).
+- **JWT APNS** : expire après 60 minutes. Un nouveau JWT est généré à chaque `sendMessage` — pas de cache. OK pour le volume actuel.
+- **iOS seulement** : tokens filtrés par `platform = 'ios'`. Android reste non-supporté (pas de Google Services).
+- **Xcode requis** : l'onglet "Push Notifications" capability doit être ajouté dans Xcode (Mac) + `npx cap sync ios`.
+- **Token badge** : badge fixé à 1 (pas de comptage des non-lus). Acceptable pour le MVP — le badge n'est pas effacé automatiquement mais disparaît quand l'utilisateur ouvre l'app.
+- **`rp_push_prompted`** : si un utilisateur vide son localStorage (rare), le warm-up réapparaît mais `status.receive` sera `'denied'` (s'il avait refusé) → prompt non montré. Comportement correct.
+
+---
+
 ## ADR-033: Sentry — state audit and implementation plan
 
 **Status:** Accepted (audit only — implementation pending)

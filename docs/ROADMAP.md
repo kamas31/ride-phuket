@@ -83,13 +83,21 @@ Last updated: 2026-06-12
 - [x] Apple crash fix: NSCameraUsageDescription + NSPhotoLibraryUsageDescription dans Info.plist
 - [x] Fix: email/password login — hard navigation post-login (router cache Next.js, ADR-042)
 - [x] Native geolocation Explore — @capacitor/geolocation, "Near me", marqueur bleu, tri Haversine (ADR-043)
+- [x] Native push notifications — APNS HTTP/2 direct, warm-up prompt Messages, CapacitorProvider tap handler (ADR-044)
 
 ---
 
 ## IN PROGRESS
 
-- [ ] Apple resubmission (Guideline 4.2): geolocation (Phase 1) done; push notifications (Phase 2) pending
-- [ ] `NSLocationWhenInUseUsageDescription` à ajouter dans Info.plist (Mac) + `npx cap sync ios`
+- [ ] Apple resubmission (Guideline 4.2): Phase 1 (geolocation) + Phase 2 (push) done; awaiting manual Mac steps
+- [ ] **Mac steps required before resubmission:**
+  - Run migration 047 in Supabase Dashboard → SQL Editor
+  - Apple Developer → Keys → create APNS Auth Key (p8), note Key ID + Team ID
+  - Set Vercel env vars: `APNS_TEAM_ID`, `APNS_KEY_ID`, `APNS_PRIVATE_KEY`, `APNS_BUNDLE_ID=com.kohride.app`, `APNS_PRODUCTION=true`
+  - `npx cap sync ios`
+  - Xcode → App target → Signing & Capabilities → + **Push Notifications**
+  - Add `NSLocationWhenInUseUsageDescription` in `ios/App/App/Info.plist`
+  - Archive for TestFlight
 - [ ] Apple Developer account setup
 - [ ] Apple Sign In activation (Apple Dev Console + Supabase config)
 
