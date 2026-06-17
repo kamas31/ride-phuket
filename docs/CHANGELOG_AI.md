@@ -4,6 +4,34 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-17
+
+### Feature: Native geolocation on Explore map (Phase 1 — Apple Guideline 4.2)
+
+**Fichiers modifiés :**
+- `hooks/useGeolocation.ts` — nouveau hook (créé)
+- `components/map/ScooterMap.tsx` — prop `userLocation`, marqueur bleu, flyTo, guard fitBounds
+- `app/explore/ExploreClient.tsx` — bouton "Near me", tri par distance (Haversine), intégration hook
+- `package.json` / `package-lock.json` — ajout `@capacitor/geolocation@8`
+
+**Pourquoi :** Apple a rejeté l'app (Guideline 4.2 — fonctionnalité minimale insuffisante). Phase 1 ajoute la géolocalisation native pour satisfaire l'exigence de fonctionnalité native.
+
+**Ce qui a changé :**
+
+1. **`hooks/useGeolocation.ts`** — hook lazy (ne demande pas au montage). Appelle `Geolocation.requestPermissions()` + `getCurrentPosition()` via `@capacitor/geolocation` sur iOS natif. Sur web, fallback `navigator.geolocation` (wrappé dans une Promise pour que le bloc `finally` fonctionne). Retourne `{ location, loading, error, request }`. Erreurs typées : `'denied' | 'unavailable' | 'timeout' | 'unknown'`.
+
+2. **`ScooterMap.tsx`** — nouvelle prop optionnelle `userLocation?: { lat, lng } | null`. Quand non-nulle : crée un marqueur bleu (`#2563eb`, 20px, bordure blanche) via `mapboxgl.Marker` et appelle `map.flyTo()` vers la position. L'effet `fitBounds` (qui sinon remettrait la vue sur les scooters à chaque changement de filtre) retourne tôt quand `userLocation` est non-nul. Nettoyage correct dans le destructeur du useEffect d'initialisation.
+
+3. **`ExploreClient.tsx`** — bouton "Near me" dans la barre de recherche sticky (icône seule sur mobile, icône + texte sur sm+). Couleur bleue quand la position est active. Clic → `requestLocation()` + `setFilters({ sortBy: 'distance' })`. Fonction `haversineKm()` inline pour le tri. Tri 'distance' dans le `useMemo` `filtered` (guard : seulement si `userLocation` non-nul). Toast d'erreur via `sonner` pour les 4 cas d'erreur. `userLocation` ajouté aux deps du useMemo.
+
+**Problèmes rencontrés :**
+- Le tri 'distance' et `FilterState.sortBy: 'distance'` existaient déjà dans le codebase (`types/index.ts`, `constants/index.ts`, `ExploreFilters.tsx`) — il ne manquait que l'implémentation réelle.
+- La valeur `userLocation` dans le contexte des deps de `filtered` devait être ajoutée explicitement, sinon le tri ne se mettait pas à jour quand la position changeait.
+
+**Build : OK. TypeScript : OK. Commit : en attente d'approbation.**
+
+---
+
 ## 2026-06-16
 
 ### Fix: Email/password login redirige vers /auth/login au lieu de /profile

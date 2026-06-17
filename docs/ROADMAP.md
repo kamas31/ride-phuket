@@ -80,11 +80,16 @@ Last updated: 2026-06-12
 - [x] SEO audit: noindex /contact via route layout (ADR-040)
 - [x] SEO audit: lien /locations dans homepage empty state (ADR-041)
 - [x] Pre-launch: suppression tooling dev screenshots (app/dev/, admin-dev-shops, AdminDevShopsPanel)
+- [x] Apple crash fix: NSCameraUsageDescription + NSPhotoLibraryUsageDescription dans Info.plist
+- [x] Fix: email/password login — hard navigation post-login (router cache Next.js, ADR-042)
+- [x] Native geolocation Explore — @capacitor/geolocation, "Near me", marqueur bleu, tri Haversine (ADR-043)
 
 ---
 
 ## IN PROGRESS
 
+- [ ] Apple resubmission (Guideline 4.2): geolocation (Phase 1) done; push notifications (Phase 2) pending
+- [ ] `NSLocationWhenInUseUsageDescription` à ajouter dans Info.plist (Mac) + `npx cap sync ios`
 - [ ] Apple Developer account setup
 - [ ] Apple Sign In activation (Apple Dev Console + Supabase config)
 

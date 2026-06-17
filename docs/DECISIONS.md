@@ -797,6 +797,29 @@ Aligner le comportement desktop sur le mobile :
 
 ---
 
+## ADR-043: Native geolocation — Capacitor plugin + web fallback, no Mapbox GeolocateControl
+
+**Status:** Accepted  
+**Date:** 2026-06-17
+
+**Problème :** Apple a rejeté l'app (Guideline 4.2 — fonctionnalité minimale insuffisante). L'app chargée dans WKWebView via URL distante (`kohride.com`) n'utilisait aucune API native. La carte Mapbox filtrait par zones nommées (Patong, Kata…) mais ignorait la position GPS réelle de l'utilisateur. Le tri 'distance' dans `FilterState` et `SORT_OPTIONS` existait déjà mais n'était pas implémenté (pas de source de données géolocalisation).
+
+**Alternatives explorées :**
+- **Mapbox `GeolocateControl`** : utilise `navigator.geolocation` (API web) directement dans WKWebView — fonctionne mais déclenche sa propre boîte de permission iOS, distincte et non coordonnée avec le plugin Capacitor. Risque de double demande de permission, pas de contrôle côté code sur l'UX. Écarté.
+- **`navigator.geolocation` seul** : portable web/native, mais les erreurs iOS via WKWebView sont moins fiables que via le plugin natif, et l'UX de permission n'est pas contrôlable. Écarté comme chemin principal.
+
+**Décision :** `@capacitor/geolocation@8` (aligne avec Capacitor 8.x déjà installé) comme chemin principal sur iOS. `navigator.geolocation` comme fallback web. Le hook `useGeolocation` encapsule les deux chemins et expose une API uniforme. Le plugin Capacitor bridgera les appels natifs `CLLocationManager` via WKWebView → binaires iOS → système iOS, satisfaisant Apple qui exige des API natives réelles, pas seulement du JS.
+
+**Pourquoi pas simplement `navigator.geolocation` ?** Apple ne peut pas distinguer un appel `navigator.geolocation` d'une page web standard dans WKWebView vs un vrai usage natif. Le plugin Capacitor appelle `CLLocationManager` en Swift — c'est une API native iOS à part entière, ce qui est l'objectif pour la Guideline 4.2.
+
+**Conséquences :**
+- `NSLocationWhenInUseUsageDescription` doit être ajouté dans `ios/App/App/Info.plist` (fait par le développeur sur Mac, pas dans ce repo Windows).
+- `npx cap sync ios` doit être exécuté sur Mac après `npm install @capacitor/geolocation@8`.
+- Le garde `if (userLocation) return` dans l'effet `fitBounds` de `ScooterMap` empêche la vue de revenir aux limites des scooters quand l'utilisateur est en mode "Near me". Sans ce garde, chaque changement de filtre remettrait la carte à la vue globale Phuket.
+- La permission iOS ne peut être demandée qu'une fois. Si l'utilisateur refuse, le toast d'erreur l'informe d'aller dans Réglages.
+
+---
+
 ## ADR-033: Sentry — state audit and implementation plan
 
 **Status:** Accepted (audit only — implementation pending)

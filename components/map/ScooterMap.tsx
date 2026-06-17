@@ -456,6 +456,7 @@ interface ScooterMapProps {
   onScreenshotPinAdd?: (lat: number, lng: number) => void
   onScreenshotPinDelete?: (id: string) => void
   showPopup?: boolean
+  userLocation?: { lat: number; lng: number } | null
 }
 
 export default function ScooterMap({
@@ -474,6 +475,7 @@ export default function ScooterMap({
   onScreenshotPinAdd,
   onScreenshotPinDelete,
   showPopup = true,
+  userLocation,
 }: ScooterMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<mapboxgl.Map | null>(null)
@@ -525,6 +527,9 @@ export default function ScooterMap({
         }])
       : null
   }, [debugMode])
+
+  // User location marker ref
+  const userLocationMarkerRef = useRef<mapboxgl.Marker | null>(null)
 
   // Screenshot pin refs
   const screenshotMarkersRef = useRef<Map<string, { marker: mapboxgl.Marker; root: Root; container: HTMLDivElement }>>(new Map())
@@ -679,6 +684,8 @@ export default function ScooterMap({
       screenshotMarkersRef.current.clear()
       zoneClusterMarkersRef.current.forEach(({ marker, root }) => { root.unmount(); marker.remove() })
       zoneClusterMarkersRef.current.clear()
+      userLocationMarkerRef.current?.remove()
+      userLocationMarkerRef.current = null
       popupRef.current?.root.unmount()
       popupRef.current?.popup.remove()
       popupRef.current = null
@@ -800,6 +807,7 @@ export default function ScooterMap({
   // ── fitBounds when zone cluster data changes ───────────────────
   useEffect(() => {
     if (!ready || !mapRef.current) return
+    if (userLocation) return  // Near me mode active — don't override the user-location flyTo
     const map = mapRef.current
 
     const coords: Array<[number, number]> = zoneClusters.flatMap(zc => {
@@ -819,7 +827,39 @@ export default function ScooterMap({
       const ne: [number, number] = [Math.max(...lngs) + 0.01, Math.max(...lats) + 0.01]
       map.fitBounds([sw, ne], { padding: { top: 80, bottom: 80, left: 60, right: 60 }, maxZoom: 14, duration: 900 })
     }
-  }, [zoneClusters, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [zoneClusters, ready, userLocation]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── User location marker + flyTo ───────────────────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return
+    const map = mapRef.current
+
+    if (!userLocation) {
+      userLocationMarkerRef.current?.remove()
+      userLocationMarkerRef.current = null
+      return
+    }
+
+    if (!userLocationMarkerRef.current) {
+      const el = document.createElement('div')
+      Object.assign(el.style, {
+        width: '20px', height: '20px',
+        borderRadius: '50%',
+        background: '#2563eb',
+        border: '3px solid white',
+        boxShadow: '0 2px 12px rgba(37,99,235,0.55)',
+        boxSizing: 'border-box',
+        pointerEvents: 'none',
+      })
+      userLocationMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([userLocation.lng, userLocation.lat])
+        .addTo(map)
+    } else {
+      userLocationMarkerRef.current.setLngLat([userLocation.lng, userLocation.lat])
+    }
+
+    map.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 13, duration: 1200 })
+  }, [userLocation, ready]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Popup for selected shop ────────────────────────────────────
   useEffect(() => {

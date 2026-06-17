@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { Search, Map, List, Bike } from 'lucide-react'
+import { Search, Map, List, Bike, Navigation, Loader2 } from 'lucide-react'
 import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ExploreFilters } from '@/components/ride/ExploreFilters'
 import { ImageMetricsOverlay } from '@/components/debug/ImageMetricsOverlay'
@@ -15,7 +15,18 @@ import { createExploreFuse } from '@/lib/fuzzy-search'
 import { getZoneForLocation, getNearestZone } from '@/lib/zones'
 import { useProfile } from '@/hooks/useProfile'
 import { useAdminPanelVisible } from '@/hooks/useAdminPanelVisible'
+import { useGeolocation } from '@/hooks/useGeolocation'
+import { toast } from 'sonner'
 import type { Scooter, FilterState } from '@/types'
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLng = (lng2 - lng1) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
 
 interface ScreenshotPin {
   id: string
@@ -65,6 +76,18 @@ export default function ExploreClient({
   const router = useRouter()
   const { isAdmin, loading: profileLoading } = useProfile()
   const [adminPanelVisible] = useAdminPanelVisible()
+  const { location: userLocation, loading: geoLoading, error: geoError, request: requestLocation } = useGeolocation()
+
+  useEffect(() => {
+    if (!geoError) return
+    const msgs: Record<typeof geoError, string> = {
+      denied:      'Location access denied. Enable it in Settings.',
+      unavailable: 'Location unavailable on this device.',
+      timeout:     'Location request timed out.',
+      unknown:     'Unable to get your location.',
+    }
+    toast.error(msgs[geoError])
+  }, [geoError])
 
   // Calibration tool: only available when ?debugPins=1 AND the current user is an admin.
   // Both conditions must be true — URL param alone is not enough.
@@ -200,6 +223,11 @@ export default function ExploreClient({
     hoverTimer.current = setTimeout(() => setHoveredId(null), 40)
   }, [])
 
+  const handleNearMe = useCallback(() => {
+    requestLocation()
+    setFilters(prev => ({ ...prev, sortBy: 'distance' }))
+  }, [requestLocation])
+
   // ── Screenshot pin handlers ──────────────────────────────────
   const handleScreenshotPinAdd = useCallback((lat: number, lng: number) => {
     setPendingPin({ lat, lng })
@@ -277,8 +305,14 @@ export default function ExploreClient({
     if (filters.sortBy === 'price_asc')  list = [...list].sort((a, b) => a.pricePerDay - b.pricePerDay)
     if (filters.sortBy === 'price_desc') list = [...list].sort((a, b) => b.pricePerDay - a.pricePerDay)
     if (filters.sortBy === 'rating')     list = [...list].sort((a, b) => b.rating - a.rating)
+    if (filters.sortBy === 'distance' && userLocation) {
+      list = [...list].sort((a, b) =>
+        haversineKm(userLocation.lat, userLocation.lng, a.lat, a.lng) -
+        haversineKm(userLocation.lat, userLocation.lng, b.lat, b.lng)
+      )
+    }
     return list
-  }, [filters, fuseMatchIds, initialScooters, mapBounds, shopIdFilter])
+  }, [filters, fuseMatchIds, initialScooters, mapBounds, shopIdFilter, userLocation])
 
   // Keep ref in sync after render so handleSelectFromMap always sees the latest filtered list
   useEffect(() => { filteredRef.current = filtered }, [filtered])
@@ -309,6 +343,27 @@ export default function ExploreClient({
                 className="w-full pl-11 pr-4 py-2.5 bg-[#f8f8f6] border border-[#e8e8e4] rounded-full text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors"
               />
             </div>
+
+            {/* Near me — icon-only on mobile, icon+label on sm+ */}
+            <button
+              onClick={handleNearMe}
+              disabled={geoLoading}
+              className={cn(
+                'flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full border text-sm font-medium transition-colors',
+                userLocation
+                  ? 'bg-[#2563eb] text-white border-[#2563eb]'
+                  : 'bg-white text-[#5c5c58] border-[#e8e8e4] hover:border-[#d0d0cc]',
+                geoLoading && 'opacity-60 cursor-wait',
+              )}
+            >
+              {geoLoading
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+                : <Navigation className="w-3.5 h-3.5 flex-shrink-0" />
+              }
+              <span className="hidden sm:inline whitespace-nowrap">
+                {geoLoading ? 'Locating…' : 'Near me'}
+              </span>
+            </button>
 
             {/* Desktop map toggle — pill, stays in sticky bar */}
             <button
@@ -430,6 +485,7 @@ export default function ExploreClient({
                     screenshotMode={isAdmin && screenshotMode}
                     onScreenshotPinAdd={isAdmin ? handleScreenshotPinAdd : undefined}
                     onScreenshotPinDelete={isAdmin ? handleScreenshotPinDelete : undefined}
+                    userLocation={userLocation}
                   />
                   {(() => {
                     if (!selectedId) return null
@@ -519,6 +575,7 @@ export default function ExploreClient({
                 screenshotMode={isAdmin && screenshotMode}
                 onScreenshotPinAdd={isAdmin ? handleScreenshotPinAdd : undefined}
                 onScreenshotPinDelete={isAdmin ? handleScreenshotPinDelete : undefined}
+                userLocation={userLocation}
               />
               {(() => {
                 if (!selectedId) return null
