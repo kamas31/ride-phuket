@@ -227,8 +227,12 @@ export default function ConversationList({
         if (localStorage.getItem('rp_push_prompted')) return
         const { PushNotifications } = await import('@capacitor/push-notifications')
         const status = await PushNotifications.checkPermissions()
-        if (status.receive === 'prompt') setShowPushPrompt(true)
-      } catch { /* silent */ }
+        console.log('[Push] checkPermissions (ConversationList):', status.receive)
+        if (status.receive === 'prompt') {
+          console.log('[Push] showing warm-up prompt')
+          setShowPushPrompt(true)
+        }
+      } catch (e) { console.error('[Push] checkPush error:', e) }
     }
     checkPush()
   }, [])
@@ -238,11 +242,17 @@ export default function ConversationList({
     try {
       localStorage.setItem('rp_push_prompted', '1')
       const { PushNotifications } = await import('@capacitor/push-notifications')
+      console.log('[Push] calling requestPermissions...')
       const result = await PushNotifications.requestPermissions()
+      console.log('[Push] requestPermissions result:', result.receive)
       if (result.receive === 'granted') {
+        console.log('[Push] calling register()...')
         await PushNotifications.register()
+        console.log('[Push] register() returned (token event fires async)')
+      } else {
+        console.log('[Push] permission not granted — register() skipped')
       }
-    } catch { /* silent */ }
+    } catch (e) { console.error('[Push] handleEnablePush error:', e) }
   }
 
   function handleDismissPush() {

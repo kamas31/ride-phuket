@@ -130,7 +130,9 @@ export function CapacitorProvider({ children }: { children: React.ReactNode }) {
       //
       // On subsequent launches where permission was already granted, we call
       // register() to refresh the APNS token — tokens can change silently.
+      console.log('[Push] init: importing PushNotifications...')
       const { PushNotifications } = await import('@capacitor/push-notifications')
+      console.log('[Push] init: PushNotifications imported')
 
       // Tap handler: fires when the user taps a push notification while the app
       // was backgrounded or terminated. Navigates to the relevant conversation.
@@ -144,6 +146,7 @@ export function CapacitorProvider({ children }: { children: React.ReactNode }) {
         },
       )
       if (mounted) cleanupFns.push(() => tapHandle.remove())
+      console.log('[Push] init: tap listener registered')
 
       // Token registration: fires after PushNotifications.register() succeeds.
       // Triggered from ConversationList (first prompt) and from here on subsequent
@@ -151,20 +154,39 @@ export function CapacitorProvider({ children }: { children: React.ReactNode }) {
       const regHandle = await PushNotifications.addListener(
         'registration',
         async ({ value: token }) => {
-          if (!mounted) return
+          console.log('[Push] registration event fired, prefix:', token.substring(0, 8), 'length:', token.length)
+          if (!mounted) { console.log('[Push] unmounted — skipping savePushToken'); return }
           try {
+            console.log('[Push] calling savePushToken...')
             const { savePushToken } = await import('@/app/actions/push')
             await savePushToken(token, 'ios')
-          } catch { /* silent — never surface push token errors to the user */ }
+            console.log('[Push] savePushToken returned (check Vercel logs for DB result)')
+          } catch (e) { console.error('[Push] savePushToken threw:', e) }
         },
       )
       if (mounted) cleanupFns.push(() => regHandle.remove())
+      console.log('[Push] init: registration listener registered')
+
+      // registrationError: fires if APNS rejects the registration request.
+      // Common causes: Push Notifications capability missing in Xcode,
+      // wrong provisioning profile, or sandbox vs production mismatch.
+      const errHandle = await PushNotifications.addListener(
+        'registrationError',
+        ({ error }) => {
+          console.error('[Push] registrationError:', JSON.stringify(error))
+        },
+      )
+      if (mounted) cleanupFns.push(() => errHandle.remove())
+      console.log('[Push] init: registrationError listener registered')
 
       // If permission was already granted in a prior session, re-register to
       // keep the stored token current (APNS tokens can change across launches).
       const currentPerm = await PushNotifications.checkPermissions()
+      console.log('[Push] init: checkPermissions:', currentPerm.receive)
       if (currentPerm.receive === 'granted' && mounted) {
+        console.log('[Push] init: already granted — calling register() to refresh token')
         await PushNotifications.register()
+        console.log('[Push] init: register() returned')
       }
     }
 
