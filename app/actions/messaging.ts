@@ -236,21 +236,29 @@ function deliverApns(
   host: string,
   bundleId: string,
 ): Promise<void> {
+  const prefix = token.substring(0, 8)
   return new Promise<void>(resolve => {
     const serialized = JSON.stringify(apnsPayload)
     let done = false
 
     const client = http2.connect(`https://${host}`)
 
-    function finish() {
+    function finish(status?: number, body?: string) {
       if (done) return
       done = true
+      if (status !== undefined) {
+        console.log(`[APNS] token:${prefix} status:${status} body:${body ?? '(empty)'}`)
+      }
       try { client.close() } catch { /* ignore */ }
       resolve()
     }
 
-    client.on('error', finish)
+    client.on('error', err => {
+      console.error(`[APNS] client error token:${prefix}:`, err.message)
+      finish()
+    })
 
+    console.log(`[APNS] sending to token:${prefix} host:${host}`)
     const req = client.request({
       ':method': 'POST',
       ':path': `/3/device/${token}`,
@@ -263,9 +271,23 @@ function deliverApns(
     })
     req.write(serialized)
     req.end()
-    req.on('response', finish)
-    req.on('error', finish)
-    setTimeout(finish, 5000)
+
+    req.on('response', headers => {
+      const status = headers[':status'] as number | undefined
+      const chunks: string[] = []
+      req.on('data', (chunk: Buffer) => chunks.push(chunk.toString()))
+      req.on('end', () => finish(status, chunks.join('') || '(empty)'))
+    })
+
+    req.on('error', err => {
+      console.error(`[APNS] req error token:${prefix}:`, err.message)
+      finish()
+    })
+
+    setTimeout(() => {
+      console.error(`[APNS] timeout token:${prefix}`)
+      finish()
+    }, 5000)
   })
 }
 
@@ -278,6 +300,8 @@ async function sendMessagePush(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   admin: any,
 ): Promise<void> {
+  console.log('[sendMessagePush] start — recipientId:', userId)
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: rows } = await (admin as any)
     .from('push_tokens')
@@ -285,9 +309,13 @@ async function sendMessagePush(
     .eq('user_id', userId)
     .eq('platform', 'ios')
 
+  console.log('[sendMessagePush] tokens found:', rows?.length ?? 0)
   if (!rows?.length) return
 
   const tokens = (rows as { token: string }[]).map(r => r.token)
+  tokens.forEach((t, i) =>
+    console.log(`[sendMessagePush] token[${i}] prefix:${t.substring(0, 8)} length:${t.length}`)
+  )
   if (!tokens.length) return
 
   const teamId   = process.env.APNS_TEAM_ID
@@ -296,7 +324,11 @@ async function sendMessagePush(
   const bundleId = process.env.APNS_BUNDLE_ID ?? 'com.kohride.app'
   const prod     = process.env.APNS_PRODUCTION !== 'false'
 
-  if (!teamId || !keyId || !rawKey) return
+  console.log('[sendMessagePush] env — teamId:', !!teamId, 'keyId:', !!keyId, 'rawKey:', !!rawKey, 'bundleId:', bundleId, 'prod:', prod)
+  if (!teamId || !keyId || !rawKey) {
+    console.log('[sendMessagePush] missing APNS env vars — aborting')
+    return
+  }
 
   const privateKey = rawKey.replace(/\\n/g, '\n')
   const host = prod ? 'api.push.apple.com' : 'api.development.push.apple.com'
@@ -307,9 +339,15 @@ async function sendMessagePush(
     ...data,
   }
 
-  await Promise.allSettled(
-    tokens.map(token => deliverApns(token, apnsPayload, jwt, host, bundleId)),
-  )
+  console.log('[sendMessagePush] dispatching to', tokens.length, 'token(s)')
+  try {
+    await Promise.allSettled(
+      tokens.map(token => deliverApns(token, apnsPayload, jwt, host, bundleId)),
+    )
+    console.log('[sendMessagePush] all deliveries settled')
+  } catch (e) {
+    console.error('[sendMessagePush] unexpected exception:', e)
+  }
 }
 
 // ── getAllConversations ───────────────────────────────────────────────────────
