@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Bell, MessageCircle, Trash2 } from 'lucide-react'
+import { pushDebug } from '@/lib/pushDebug'
 import { createClient } from '@/lib/supabase/client'
 import { deleteConversation } from '@/app/actions/moderation'
 import { cn, getInitials } from '@/lib/utils'
@@ -227,32 +228,32 @@ export default function ConversationList({
         if (localStorage.getItem('rp_push_prompted')) return
         const { PushNotifications } = await import('@capacitor/push-notifications')
         const status = await PushNotifications.checkPermissions()
-        console.log('[Push] checkPermissions (ConversationList):', status.receive)
+        pushDebug('cl:checkPermissions', status.receive)
         if (status.receive === 'prompt') {
-          console.log('[Push] showing warm-up prompt')
+          pushDebug('cl:showing-warmup-prompt')
           setShowPushPrompt(true)
         }
-      } catch (e) { console.error('[Push] checkPush error:', e) }
+      } catch (e) { pushDebug('cl:checkPush-error', String(e)) }
     }
     checkPush()
   }, [])
 
   async function handleEnablePush() {
     setShowPushPrompt(false)
+    pushDebug('cl:requestPermissions-calling')
     try {
       localStorage.setItem('rp_push_prompted', '1')
       const { PushNotifications } = await import('@capacitor/push-notifications')
-      console.log('[Push] calling requestPermissions...')
       const result = await PushNotifications.requestPermissions()
-      console.log('[Push] requestPermissions result:', result.receive)
+      pushDebug('cl:requestPermissions-result', result.receive)
       if (result.receive === 'granted') {
-        console.log('[Push] calling register()...')
+        pushDebug('cl:register-calling')
         await PushNotifications.register()
-        console.log('[Push] register() returned (token event fires async)')
+        pushDebug('cl:register-returned')
       } else {
-        console.log('[Push] permission not granted — register() skipped')
+        pushDebug('cl:register-skipped', result.receive)
       }
-    } catch (e) { console.error('[Push] handleEnablePush error:', e) }
+    } catch (e) { pushDebug('cl:handleEnablePush-error', String(e)) }
   }
 
   function handleDismissPush() {
