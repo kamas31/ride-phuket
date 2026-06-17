@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Bell, MessageCircle, Trash2 } from 'lucide-react'
-import { pushDebug } from '@/lib/pushDebug'
 import { createClient } from '@/lib/supabase/client'
 import { deleteConversation } from '@/app/actions/moderation'
 import { cn, getInitials } from '@/lib/utils'
@@ -228,32 +227,24 @@ export default function ConversationList({
         if (localStorage.getItem('rp_push_prompted')) return
         const { PushNotifications } = await import('@capacitor/push-notifications')
         const status = await PushNotifications.checkPermissions()
-        pushDebug('cl:checkPermissions', status.receive)
         if (status.receive === 'prompt') {
-          pushDebug('cl:showing-warmup-prompt')
           setShowPushPrompt(true)
         }
-      } catch (e) { pushDebug('cl:checkPush-error', String(e)) }
+      } catch { /* ignored */ }
     }
     checkPush()
   }, [])
 
   async function handleEnablePush() {
     setShowPushPrompt(false)
-    pushDebug('cl:requestPermissions-calling')
     try {
       localStorage.setItem('rp_push_prompted', '1')
       const { PushNotifications } = await import('@capacitor/push-notifications')
       const result = await PushNotifications.requestPermissions()
-      pushDebug('cl:requestPermissions-result', result.receive)
       if (result.receive === 'granted') {
-        pushDebug('cl:register-calling')
         await PushNotifications.register()
-        pushDebug('cl:register-returned')
-      } else {
-        pushDebug('cl:register-skipped', result.receive)
       }
-    } catch (e) { pushDebug('cl:handleEnablePush-error', String(e)) }
+    } catch { /* ignored */ }
   }
 
   function handleDismissPush() {

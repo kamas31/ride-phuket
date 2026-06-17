@@ -89,15 +89,11 @@ Last updated: 2026-06-12
 
 ## IN PROGRESS
 
-- [ ] Apple resubmission (Guideline 4.2): Phase 1 (geolocation) + Phase 2 (push) done; awaiting manual Mac steps
-- [ ] **Mac steps required before resubmission:**
-  - Run migration 047 in Supabase Dashboard → SQL Editor
-  - Apple Developer → Keys → create APNS Auth Key (p8), note Key ID + Team ID
-  - Set Vercel env vars: `APNS_TEAM_ID`, `APNS_KEY_ID`, `APNS_PRIVATE_KEY`, `APNS_BUNDLE_ID=com.kohride.app`, `APNS_PRODUCTION=true`
+- [ ] Apple resubmission (Guideline 4.2): Phase 1 (geolocation) + Phase 2 (push) **confirmed working end-to-end**; archive needed
+- [ ] **Remaining steps before resubmission:**
+  - Run migration 049 in Supabase Dashboard → SQL Editor (drops debug table `push_debug_log`)
   - `npx cap sync ios`
-  - Xcode → App target → Signing & Capabilities → + **Push Notifications**
-  - Add `NSLocationWhenInUseUsageDescription` in `ios/App/App/Info.plist`
-  - Archive for TestFlight
+  - Archive for TestFlight then App Store
 - [ ] Apple Developer account setup
 - [ ] Apple Sign In activation (Apple Dev Console + Supabase config)
 

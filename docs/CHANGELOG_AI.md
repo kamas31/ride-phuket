@@ -4,6 +4,29 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-17 (session 3)
+
+### Cleanup: suppression instrumentation debug push notifications
+
+Push notifications fonctionnelles en production (APNS accepte, token enregistré, notification reçue). Suppression de tout le code de diagnostic temporaire ajouté pour déboguer le problème.
+
+**Fichiers modifiés :**
+- `app/actions/messaging.ts` — suppression de tous les `console.log` de diagnostic dans `sendMessagePush` (recipientId, token count, token prefixes, env vars log, dispatch count, settled log). Dans `deliverApns` : suppression du `console.log` info "sending to", suppression de `const prefix` (n'était utilisé que pour les logs), changement du log de status pour ne logger **que les erreurs** (`status !== 200`) avec `console.error`. Le `try/catch` autour de `Promise.allSettled` supprimé car `allSettled` ne peut pas throw.
+- `components/capacitor/CapacitorProvider.tsx` — suppression de l'import `pushDebug`, suppression des 15+ appels `pushDebug(...)` à travers `init()`. Listener `registrationError` conservé avec `console.error('[APNS] registration error:', ...)` à la place du pushDebug. `init().catch(e => pushDebug(...))` → `init().catch(() => {})`.
+- `app/messages/ConversationList.tsx` — suppression de l'import `pushDebug`, suppression de 8 appels `pushDebug(...)` dans `checkPush()` et `handleEnablePush()`. Blocs `catch (e)` → `catch { /* ignored */ }`.
+
+**Fichiers créés :**
+- `supabase/migrations/049_drop_push_debug_log.sql` — `DROP TABLE IF EXISTS push_debug_log`
+
+**Fichiers supprimés :**
+- `lib/pushDebug.ts` — plus de références dans la codebase
+
+**Pourquoi :** Le flux push iOS fonctionne entièrement : token APNS enregistré, `sendMessagePush` trouve le token, APNS accepte la requête, notification reçue sur iPhone (app ouverte, arrière-plan et fermée). Le code de diagnostic n'est plus utile et alourdirait les logs de production.
+
+**Problèmes rencontrés :** Aucun.
+
+---
+
 ## 2026-06-17 (session 2)
 
 ### Feature: Native push notifications for in-app messages (Phase 2 — Apple Guideline 4.2)

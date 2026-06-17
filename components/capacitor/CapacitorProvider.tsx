@@ -15,7 +15,6 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { pushDebug } from '@/lib/pushDebug'
 
 export function CapacitorProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -25,21 +24,14 @@ export function CapacitorProvider({ children }: { children: React.ReactNode }) {
     const cleanupFns: Array<() => void> = []
 
     async function init() {
-      pushDebug('init:start')
-
       // Dynamic import keeps Capacitor out of the web JS bundle entirely.
       const { Capacitor } = await import('@capacitor/core')
-      if (!mounted || !Capacitor.isNativePlatform()) {
-        pushDebug('init:not-native-or-unmounted')
-        return
-      }
-      pushDebug('init:is-native')
+      if (!mounted || !Capacitor.isNativePlatform()) return
 
       // Mark <html> so CSS can scope native-only rules to .native
       document.documentElement.classList.add('native')
 
       const { App } = await import('@capacitor/app')
-      pushDebug('init:app-imported')
 
       // ── 1. Deep link handler ──────────────────────────────────────────────
       //
@@ -129,7 +121,6 @@ export function CapacitorProvider({ children }: { children: React.ReactNode }) {
         }
       })
       if (mounted) cleanupFns.push(() => stateHandle.remove())
-      pushDebug('init:app-listeners-done')
 
       // ── 3. Push notifications ─────────────────────────────────────────────
       //
@@ -139,9 +130,7 @@ export function CapacitorProvider({ children }: { children: React.ReactNode }) {
       //
       // On subsequent launches where permission was already granted, we call
       // register() to refresh the APNS token — tokens can change silently.
-      pushDebug('init:push-importing')
       const { PushNotifications } = await import('@capacitor/push-notifications')
-      pushDebug('init:push-imported')
 
       // Tap handler: fires when the user taps a push notification while the app
       // was backgrounded or terminated. Navigates to the relevant conversation.
@@ -162,18 +151,14 @@ export function CapacitorProvider({ children }: { children: React.ReactNode }) {
       const regHandle = await PushNotifications.addListener(
         'registration',
         async ({ value: token }) => {
-          pushDebug('registration:fired', `prefix:${token.substring(0, 8)} len:${token.length}`)
-          if (!mounted) { pushDebug('registration:unmounted'); return }
+          if (!mounted) return
           try {
-            pushDebug('registration:calling-savePushToken')
             const { savePushToken } = await import('@/app/actions/push')
             await savePushToken(token, 'ios')
-            pushDebug('registration:savePushToken-returned')
-          } catch (e) { pushDebug('registration:savePushToken-threw', String(e)) }
+          } catch { /* silent — token save failure must not affect the UI */ }
         },
       )
       if (mounted) cleanupFns.push(() => regHandle.remove())
-      pushDebug('init:reg-listener-ready')
 
       // registrationError: fires if APNS rejects the registration request.
       // Common causes: Push Notifications capability missing in Xcode,
@@ -181,30 +166,21 @@ export function CapacitorProvider({ children }: { children: React.ReactNode }) {
       const errHandle = await PushNotifications.addListener(
         'registrationError',
         ({ error }) => {
-          pushDebug('registrationError:fired', JSON.stringify(error))
+          console.error('[APNS] registration error:', JSON.stringify(error))
         },
       )
       if (mounted) cleanupFns.push(() => errHandle.remove())
-      pushDebug('init:error-listener-ready')
 
       // If permission was already granted in a prior session, re-register to
       // keep the stored token current (APNS tokens can change across launches).
       const currentPerm = await PushNotifications.checkPermissions()
-      pushDebug('init:checkPermissions', currentPerm.receive)
 
       if (currentPerm.receive === 'granted' && mounted) {
-        pushDebug('init:register-calling')
         await PushNotifications.register()
-        pushDebug('init:register-returned')
-      } else {
-        pushDebug('init:register-skipped', `receive=${currentPerm.receive} mounted=${mounted}`)
       }
     }
 
-    // Surface init() errors to the debug log instead of silently discarding them.
-    // An error thrown anywhere in init() (e.g. in the App listeners section)
-    // would previously skip all push notification setup with no trace at all.
-    init().catch(e => pushDebug('init:error', String(e)))
+    init().catch(() => {})
 
     return () => {
       mounted = false
