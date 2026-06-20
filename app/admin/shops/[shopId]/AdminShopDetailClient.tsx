@@ -37,7 +37,7 @@ export default function AdminShopDetailClient({ shop }: Props) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 pt-20 pb-8">
       <Link href="/admin/shops" className="inline-flex items-center gap-1.5 text-sm text-[#9c9c98] hover:text-[#0f0f0e] mb-4">
         <ArrowLeft className="w-4 h-4" /> All shops
       </Link>

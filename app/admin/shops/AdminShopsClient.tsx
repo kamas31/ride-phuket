@@ -55,7 +55,7 @@ export default function AdminShopsClient({ shops }: Props) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 pt-20 pb-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-[#0f0f0e]">Admin · Shops</h1>
         <button
