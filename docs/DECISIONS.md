@@ -916,3 +916,44 @@ App loads `https://kohride.com` via remote URL mode. `@sentry/nextjs` runs in WK
 4. Add `Sentry.captureException(e)` in catch blocks of critical server actions: `partner.ts`, `messaging.ts`, `booking-actions.ts`, `auth.ts`
 5. Add `Sentry.setTag('platform', isNative ? 'ios_native' : 'web')` in `CapacitorProvider`
 6. Post-launch: add `@sentry/capacitor` for native iOS crash reporting
+
+---
+
+## ADR-045: Admin-created unclaimed shops — Phase 1 (no owner account required)
+
+**Status:** Accepted  
+**Date:** 2026-06-20
+
+**Problème :**
+Les petits opérateurs de location de scooters contactés via Facebook n'acceptaient pas de créer un compte avant que leur boutique soit en ligne — friction d'onboarding trop élevée. Le modèle existant exigeait qu'un `shop_owner` authentifié crée lui-même sa boutique (`createShop()` dans `partner.ts`), avec `owner_id` toujours égal à `auth.uid()`.
+
+Un audit préalable (lecture seule, même session) a confirmé que :
+- `shops.owner_id` était déjà nullable depuis le schéma initial (`schema.sql`) — aucune contrainte `NOT NULL` n'a jamais existé.
+- Une politique RLS latente (`migration 003`) autorisait déjà `owner_id IS NULL` à l'INSERT pour n'importe quel utilisateur authentifié — jamais exploitée par le code applicatif, mais un vrai trou de sécurité dès que les boutiques non réclamées deviennent une fonctionnalité réelle.
+- **Chaque** action serveur de mutation boutique/scooter (`scooter-create.ts`, `scooter-update.ts`, `scooter-delete.ts`, `shop-update.ts`, `reviews.ts`, `inquiry-actions.ts`, `booking-actions.ts`) fait un contrôle strict `if (shop.owner_id !== userId) return Unauthorized` — sans aucun bypass admin. Un admin ne pouvait donc rien créer/modifier pour une boutique qu'il ne possède pas, et personne ne pouvait agir sur une boutique avec `owner_id = NULL`.
+- `is_admin` n'est jamais référencé dans une politique RLS — toute l'autorisation admin du projet passe exclusivement par la couche applicative (client `service_role` après vérification `profiles.is_admin`), pattern déjà utilisé par `adminSetShopOverrides`, `adminSetNewListingBadge`.
+- L'affichage public (Explore, page boutique, page scooter) et le contact WhatsApp/téléphone ne filtrent jamais sur `owner_id` — une boutique sans propriétaire avec `active = true` s'affiche déjà normalement.
+- La messagerie in-app (`getOrCreateConversation`, `getOrCreateShopConversation`) exige un `owner_id` non nul et retournait une erreur brute sinon.
+
+**Ce qui a été essayé/écarté :**
+Implémenter directement le flow d'invitation/claim de propriétaire en même temps que la création admin a été écarté — hors scope explicite de la Phase 1, et risquait d'introduire des tokens/emails non testés avant d'avoir validé le modèle de base (boutique sans propriétaire, visible publiquement, gérable par un admin).
+
+**Décision :**
+1. **Schéma (migration 050)** : ajout de `shops.owner_status` (`'unclaimed' | 'invited' | 'claimed'`, défaut `'claimed'` — backfill automatique des lignes existantes), `invited_owner_email`, `invited_at`, `claimed_at`, `created_by_admin_id`. `owner_id` reste inchangé (déjà nullable).
+2. **RLS durcie (migration 050)** : la policy INSERT `shops` est remplacée — `WITH CHECK (owner_id = auth.uid())` uniquement. Le bypass `OR owner_id IS NULL` est supprimé ; la création de boutique non réclamée passe désormais exclusivement par `adminCreateShop()` via le client `service_role` (qui contourne RLS), jamais par un INSERT authentifié direct.
+3. **Nouvelle action admin** : `app/actions/admin-create-shop.ts` — vérifie `is_admin` puis insère avec `owner_id = NULL`, `owner_status = 'unclaimed'`, `created_by_admin_id`.
+4. **Nouveau helper** : `isAdminUser(admin, userId)` ajouté à `lib/supabase/admin.ts` — centralise le lookup `profiles.is_admin` déjà dupliqué dans plusieurs admin actions, réutilisé partout où ce changement ajoute un bypass admin.
+5. **Bypass admin minimal** : `scooter-create.ts`, `scooter-update.ts`, `scooter-delete.ts` — la condition devient `if (owner_id !== userId && !isAdmin) return Unauthorized`. Le comportement existant pour les propriétaires reste strictement identique (premier branch inchangé) ; `shop-update.ts` et les autres actions n'ont **pas** été touchées (hors scope Phase 1 — pas de besoin de modifier les infos boutique après création admin pour l'instant).
+6. **UI admin minimale** : nouvelle section `/admin/shops` (liste + formulaire de création), `/admin/shops/[shopId]` (détail + liste scooters + suppression), `/admin/shops/[shopId]/scooters/new` et `.../scooters/[scooterId]/edit` — ces deux dernières réutilisent directement `NewScooterForm` et `EditScooterForm` existants (aucune duplication de formulaire), car l'autorisation est déjà gérée côté server action. Pages gardées côté serveur avec redirect si `!is_admin` (pas de flash de contenu).
+7. **Messagerie — fallback gracieux** : `getOrCreateConversation` et `getOrCreateShopConversation` renvoient désormais un message lisible ("This shop is not on chat yet — please use WhatsApp or phone to contact them.") au lieu de `'Shop owner not found.'` / `'owner_not_found'` quand `owner_id` est NULL. Aucune branche de code consommatrice (`MessageOwnerButton`, `ShopChatButton`, `ShopQuickQuestions`) ne fait de pattern-matching sur l'ancien texte d'erreur — changement sans risque de régression.
+
+**Pourquoi cette solution et pas une autre :**
+- Pas de nouvelle colonne `NOT NULL` ni de contrainte changée sur `owner_id` — strictement additif, zéro risque sur les boutiques existantes.
+- Réutilisation du pattern d'autorisation déjà éprouvé dans le projet (`service_role` + vérif `is_admin` applicative) plutôt que d'introduire une politique RLS basée sur `is_admin` — cohérent avec l'architecture existante, pas de nouvelle catégorie de risque RLS.
+- Réutilisation des formulaires `NewScooterForm`/`EditScooterForm` existants pour l'UI admin plutôt que de dupliquer — l'autorisation vit déjà dans la server action, pas dans le formulaire.
+
+**Conséquences et risques :**
+- **Pas de flow d'invitation/claim** : `owner_status` peut passer à `'invited'`/`'claimed'` via colonnes prêtes, mais aucune action ne le fait encore (Phase 2, hors scope).
+- ~~`shop-update.ts` non modifié~~ — **résolu le même jour** : `updateShop()` étend désormais la même condition (`owner_id !== userId && !isAdmin`) que les actions scooter. Un admin peut éditer une boutique non réclamée (nom, téléphone, adresse, etc.) après création. Changement d'une seule condition, aucune dépendance supplémentaire (le write passait déjà par `service_role`, aucune policy RLS à toucher) — voir audit dans la session du même jour avant implémentation.
+- **Pas de lien de navigation vers `/admin/shops`** dans l'UI existante (Navbar/Profile) — accès par URL directe uniquement, cohérent avec le pattern existant des outils admin (`?debugPins=1`).
+- **Messagerie in-app indisponible pour les boutiques non réclamées** — WhatsApp/téléphone restent le seul canal de contact, conforme à la demande explicite de ne pas construire de solution de messagerie complète en Phase 1.

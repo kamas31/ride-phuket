@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient, isAdminUser } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import type { MileageRange } from '@/types'
 import { getZoneForLocation } from '@/lib/zones'
@@ -71,7 +71,9 @@ export async function updateScooter(
       .single()
 
     if (fetchErr || !scooterRow) return { success: false, error: 'Scooter not found.', errorCode: 'NOT_FOUND' }
-    if (scooterRow.shops?.owner_id !== user.id) return { success: false, error: 'You do not own this scooter.', errorCode: 'UNAUTHORIZED' }
+    if (scooterRow.shops?.owner_id !== user.id && !(await isAdminUser(admin, user.id))) {
+      return { success: false, error: 'You do not own this scooter.', errorCode: 'UNAUTHORIZED' }
+    }
 
     // Update
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

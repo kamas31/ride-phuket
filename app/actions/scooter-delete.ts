@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient, isAdminUser } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
 export interface DeleteScooterResult {
@@ -29,7 +29,9 @@ export async function deleteScooter(scooterId: string): Promise<DeleteScooterRes
       .single()
 
     if (fetchErr || !scooterRow) return { success: false, error: 'Scooter not found.' }
-    if (scooterRow.shops?.owner_id !== user.id) return { success: false, error: 'You do not own this scooter.' }
+    if (scooterRow.shops?.owner_id !== user.id && !(await isAdminUser(admin, user.id))) {
+      return { success: false, error: 'You do not own this scooter.' }
+    }
 
     // ── Check for active/confirmed bookings ────────────────────────
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

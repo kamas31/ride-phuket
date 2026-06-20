@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient, isAdminUser } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { getZoneForLocation } from '@/lib/zones'
 
@@ -101,7 +101,7 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
       if (!shop) {
         return { success: false, error: 'Shop not found.', errorCode: 'SHOP_NOT_FOUND' }
       }
-      if (shop.owner_id !== userId) {
+      if (shop.owner_id !== userId && !(await isAdminUser(admin, userId))) {
         return { success: false, error: 'You do not own this shop.', errorCode: 'UNAUTHORIZED' }
       }
     } catch (e) {

@@ -24,7 +24,10 @@ export async function getOrCreateShopConversation(
     .eq('id', shopId)
     .single() as { data: { owner_id: string | null } | null }
 
-  if (!shopRow?.owner_id) return { error: 'owner_not_found' }
+  // Unclaimed shop (no owner account yet, Phase 1 admin-created shops) —
+  // in-app chat has no one to deliver to. WhatsApp/phone remain available
+  // on the listing page as the primary contact channel.
+  if (!shopRow?.owner_id) return { error: 'This shop is not on chat yet — please use WhatsApp or phone to contact them.' }
   const ownerId = shopRow.owner_id
   if (ownerId === user.id) return { error: 'own_listing' }
 

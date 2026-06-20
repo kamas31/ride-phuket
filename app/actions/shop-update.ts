@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient, isAdminUser } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import type { OpeningHoursSchedule } from '@/types'
 
@@ -58,7 +58,9 @@ export async function updateShop(
       .single()
 
     if (fetchErr || !shopRow) return { success: false, error: 'Shop not found.', errorCode: 'NOT_FOUND' }
-    if (shopRow.owner_id !== user.id) return { success: false, error: 'Unauthorized.', errorCode: 'UNAUTHORIZED' }
+    if (shopRow.owner_id !== user.id && !(await isAdminUser(admin, user.id))) {
+      return { success: false, error: 'Unauthorized.', errorCode: 'UNAUTHORIZED' }
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error: updateErr } = await (admin as any)

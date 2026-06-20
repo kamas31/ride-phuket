@@ -79,7 +79,10 @@ export async function getOrCreateConversation(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ownerId = (scooter as any).shops?.owner_id as string | undefined
-  if (!ownerId) return { error: 'Shop owner not found.' }
+  // Unclaimed shop (no owner account yet, Phase 1 admin-created shops) —
+  // in-app chat has no one to deliver to. WhatsApp/phone remain available
+  // on the listing page as the primary contact channel.
+  if (!ownerId) return { error: 'This shop is not on chat yet — please use WhatsApp or phone to contact them.' }
   if (ownerId === user.id) return { error: 'own_listing' }
 
   // One conversation per rider↔shop pair — find by (client_id, owner_id)

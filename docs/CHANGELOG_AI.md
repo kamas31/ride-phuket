@@ -4,6 +4,52 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-20
+
+### Feature: Admin-created unclaimed shops — Phase 1 (ADR-045)
+
+Preceded by a read-only audit (same session) of the ownership model, RLS, and every code path that assumes `shop.owner_id` is non-null and equal to the caller. See ADR-045 for full reasoning.
+
+**Fichiers créés :**
+- `supabase/migrations/050_shop_owner_status.sql` — colonnes `owner_status` (`unclaimed|invited|claimed`, défaut `claimed`), `invited_owner_email`, `invited_at`, `claimed_at`, `created_by_admin_id` sur `shops`. Durcissement de la policy RLS INSERT `shops` : suppression du bypass `owner_id IS NULL` pour les utilisateurs authentifiés.
+- `app/actions/admin-create-shop.ts` — `adminCreateShop(payload)`, vérifie `is_admin` puis insère via `service_role` avec `owner_id = NULL`, `owner_status = 'unclaimed'`.
+- `app/actions/admin-shops.ts` — `adminListShops()`, `adminGetShopDetail(shopId)`, lecture admin-only pour l'UI.
+- `app/admin/shops/page.tsx` + `AdminShopsClient.tsx` — liste des boutiques (nom, statut owner, actif) + formulaire de création de boutique non réclamée.
+- `app/admin/shops/[shopId]/page.tsx` + `AdminShopDetailClient.tsx` — détail boutique + liste scooters + suppression.
+- `app/admin/shops/[shopId]/scooters/new/page.tsx` — réutilise `NewScooterForm` existant.
+- `app/admin/shops/[shopId]/scooters/[scooterId]/edit/page.tsx` — réutilise `EditScooterForm` existant, fetch via client admin (pas `getScooterById`, qui est RLS-scopé et bloquerait un scooter `available=false` pour un non-propriétaire).
+
+**Fichiers modifiés :**
+- `lib/supabase/admin.ts` — ajout `isAdminUser(admin, userId)`, centralise le lookup `profiles.is_admin` déjà dupliqué dans `adminSetShopOverrides`/`adminSetNewListingBadge`.
+- `app/actions/scooter-create.ts`, `scooter-update.ts`, `scooter-delete.ts` — condition d'autorisation étendue de `owner_id !== userId` à `owner_id !== userId && !isAdmin`. Comportement propriétaire existant strictement inchangé (premier branch identique).
+- `app/actions/messaging.ts` (`getOrCreateConversation`) et `app/actions/shop-conversation.ts` (`getOrCreateShopConversation`) — message d'erreur remplacé par un fallback lisible quand `owner_id` est NULL ("This shop is not on chat yet — please use WhatsApp or phone to contact them.") au lieu de `'Shop owner not found.'` / `'owner_not_found'`.
+
+**Pourquoi :** Onboarder des opérateurs Facebook sans exiger un compte immédiat. `owner_id` était déjà nullable (jamais de contrainte `NOT NULL`) mais chaque action de mutation boutique/scooter bloquait sans bypass admin — un admin ne pouvait littéralement rien créer/modifier pour une boutique qu'il ne possède pas.
+
+**Problèmes rencontrés :**
+1. La policy RLS INSERT `shops` de la migration 003 autorisait déjà `owner_id IS NULL` pour tout utilisateur authentifié — jamais exploité par l'app, mais un vrai trou de sécurité à fermer avant que les boutiques non réclamées deviennent une fonctionnalité réelle. Fermé dans la même migration.
+2. `getScooterById` (utilisé par la page d'édition propriétaire) est RLS-scopé et aurait bloqué l'admin sur un scooter `available=false`. Évité en écrivant un fetch admin dédié dans la page d'édition admin plutôt que de réutiliser ce helper.
+3. Les composants consommateurs de `getOrCreateShopConversation`/`getOrCreateConversation` (`MessageOwnerButton`, `ShopChatButton`, `ShopQuickQuestions`) traitent déjà toute erreur autre que `sign_in_required`/`own_listing` comme un no-op générique (WhatsApp en fallback) — le changement de texte d'erreur ne casse aucune logique de branchement.
+
+**Build : OK (Next.js 16.2.4, Turbopack, 62 routes incluant les 4 nouvelles routes admin). TypeScript : OK (`tsc --noEmit` clean). Lint : 14 erreurs / 72 warnings préexistants, tous dans des fichiers non touchés par ce changement (vérifié via `git status --short`) — zéro nouveau problème introduit.**
+
+**Hors scope Phase 1 (volontairement non implémenté) :** invitation email, claim token, lien automatique propriétaire, lien de navigation admin dans la Navbar/Profile.
+
+---
+
+### Follow-up (même jour) : admin peut éditer `shop-update.ts`
+
+Avant commit, audit demandé sur `shop-update.ts` pour déterminer si l'extension admin pouvait être incluse en Phase 1 sans risque.
+
+**Audit :** autorisation = un seul check `owner_id !== userId`, structurellement identique au pattern scooter avant le bypass admin. Le write passe déjà par le client `service_role` (RLS jamais impliqué). Validation et `revalidatePath()` ne dépendent pas de `owner_id`. Conclusion : changement simple et sûr, aucune dépendance supplémentaire.
+
+**Fichier modifié :**
+- `app/actions/shop-update.ts` — condition étendue de `owner_id !== userId` à `owner_id !== userId && !isAdmin`, exactement le même pattern que `scooter-create.ts`/`scooter-update.ts`/`scooter-delete.ts`. Comportement propriétaire inchangé.
+
+**Build : OK. TypeScript : OK.**
+
+---
+
 ## 2026-06-17 (session 3)
 
 ### Cleanup: suppression instrumentation debug push notifications
