@@ -4,6 +4,33 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-21 (session 4)
+
+### Fix: urgent location consistency — Kathu still missing from 2 more dropdowns, scooter edit showed stale location (ADR-048)
+
+**Pourquoi :** admin testing after ADR-047 found Kathu still absent from the shop edit "Main Area" dropdown, an apparent map-pin/Main-Area desync, and the scooter edit page showing a stale `scooter.location` ("Thalang") under a "Same as your shop — always matches" label while the shop was actually "Patong"/"Kathu". Flagged urgent/production-risk by the user.
+
+**Root causes :**
+- `app/partner/shop/ShopSettingsClient.tsx` had its own hardcoded `SHOP_LOCATIONS` array (a 4th, previously undiscovered duplicate of the zone list) feeding the "Main Area" `<select>` — missing Kathu. ADR-047's audit had incorrectly assumed this component already consumed `PHUKET_ZONES` generically for this dropdown (it only did so for "Delivery Zones").
+- `app/partner/CreateShopForm.tsx` (owner self-signup form) had a 5th duplicate `LOCATIONS` array, same problem.
+- The "Main Area stayed Patong" symptom was a side effect of #1: a controlled `<select>` whose value doesn't match any rendered `<option>` visually falls back to the first option in most browsers — the underlying saved value was fine once Kathu became a valid option, no sync-logic bug existed.
+- `EditScooterForm.tsx` displayed `scooter.location` (the DB value as of the scooter's last save) instead of the shop's current location — misleading given the "always matches" copy, since the server-side resync (ADR-046) only runs on scooter save, not on read.
+
+**Fichiers modifiés :**
+- `app/partner/shop/ShopSettingsClient.tsx` — removed `SHOP_LOCATIONS`, dropdown now renders `PHUKET_ZONES`; added a hint clarifying the dropdown/map-pin relationship.
+- `app/partner/CreateShopForm.tsx` — removed `LOCATIONS`, zone buttons now render `PHUKET_ZONES`.
+- `app/partner/scooters/[id]/edit/EditScooterForm.tsx` — new `shopLocation` prop replaces `scooter.location` in the read-only display and summary row.
+- `app/partner/scooters/[id]/edit/page.tsx`, `app/admin/shops/[shopId]/scooters/[scooterId]/edit/page.tsx` — pass `shop.location` as `shopLocation`.
+- `docs/DECISIONS.md` — ADR-048.
+
+**Problèmes rencontrés :** none beyond the duplicate-list discovery itself; no server action or schema changes needed since `scooter-update.ts` already resyncs location from the shop on every scooter save (ADR-046) and no other code reads `scooters.location` for zone-sensitive logic except via that same column, which self-corrects on next save.
+
+**TypeScript/build :** `npx tsc --noEmit` clean. `npm run build` succeeded — 64 static pages, Kathu OG images present. 2 pre-existing ESLint errors (`EditScooterForm.tsx:52`, `ShopSettingsClient.tsx:747`) confirmed via `git blame` to predate this session — left untouched, out of scope.
+
+**Risques restants :** scooters not re-saved since their shop's last zone change keep a stale `scooters.location` DB value until next save (no bulk migration performed, per explicit instruction) — display-level fix means the UI never shows it as misleadingly "matching," and Explore/zone filtering self-corrects on the next scooter save.
+
+---
+
 ## 2026-06-21 (session 3)
 
 ### Feature: Kathu added as official supported zone (ADR-047)

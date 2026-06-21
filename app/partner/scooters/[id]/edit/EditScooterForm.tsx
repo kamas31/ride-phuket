@@ -31,12 +31,13 @@ interface EditScooterFormProps {
   scooter: Scooter
   shopId: string
   shopName: string
+  shopLocation: string
 }
 
 type SaveState = 'idle' | 'uploading' | 'saving' | 'saved' | 'error'
 type Step = 1 | 2 | 3
 
-export default function EditScooterForm({ scooter, shopId, shopName }: EditScooterFormProps) {
+export default function EditScooterForm({ scooter, shopId, shopName, shopLocation }: EditScooterFormProps) {
   const [step, setStep]           = useState<Step>(1)
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [error, setError]         = useState<string | null>(null)
@@ -353,7 +354,7 @@ export default function EditScooterForm({ scooter, shopId, shopName }: EditScoot
                 <div>
                   <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Location</label>
                   <div className="w-full px-3 py-3 bg-[#f0f0ec] border border-[#e8e8e4] rounded-[12px] text-sm text-[#5c5c58]">
-                    {scooter.location}
+                    {shopLocation}
                   </div>
                   <p className="text-[10px] text-[#9c9c98] mt-1">Same as your shop — always matches.</p>
                 </div>
@@ -605,7 +606,7 @@ export default function EditScooterForm({ scooter, shopId, shopName }: EditScoot
                   ['Category', form.category],
                   ['Photos',   `${totalImages} photo${totalImages !== 1 ? 's' : ''}`],
                   ['Shop',     shopName],
-                  ['Location', scooter.location],
+                  ['Location', shopLocation],
                 ].map(([label, val]) => (
                   <div key={label} className="flex justify-between">
                     <span className="text-[#9c9c98]">{label}</span>

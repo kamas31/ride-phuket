@@ -30,12 +30,6 @@ const PinPickerMap = dynamic(() => import('@/components/map/PinPickerMap'), {
 
 // ── Constants ──────────────────────────────────────────────────
 
-const SHOP_LOCATIONS = [
-  'Patong', 'Kata', 'Karon', 'Rawai', 'Phuket Town', 'Bang Tao',
-  'Kamala', 'Surin', 'Chalong', 'Nai Harn', 'Cherng Talay',
-  'Kata Noi', 'Mai Khao', 'Thalang', 'Cape Panwa', 'Ko Sirey',
-]
-
 const DAYS: { key: keyof OpeningHoursSchedule; label: string }[] = [
   { key: 'monday',    label: 'Monday' },
   { key: 'tuesday',   label: 'Tuesday' },
@@ -671,10 +665,13 @@ export default function ShopSettingsClient({
               }}
               className="w-full px-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35] transition-colors"
             >
-              {SHOP_LOCATIONS.map(loc => (
-                <option key={loc} value={loc}>{loc}</option>
+              {PHUKET_ZONES.map(zone => (
+                <option key={zone.key} value={zone.name}>{zone.name}</option>
               ))}
             </select>
+            <p className="text-[10px] text-[#9c9c98] mt-1">
+              Picking an area moves the map pin to its center. Dragging the pin instead snaps Main Area to the nearest zone.
+            </p>
           </div>
 
           <Field

@@ -38,5 +38,12 @@ export default async function AdminEditScooterPage({ params }: PageProps) {
 
   const scooter = normalizeScooter(row)
 
-  return <EditScooterForm scooter={scooter} shopId={shop.id} shopName={shop.name} />
+  return (
+    <EditScooterForm
+      scooter={scooter}
+      shopId={shop.id}
+      shopName={shop.name}
+      shopLocation={shop.location}
+    />
+  )
 }

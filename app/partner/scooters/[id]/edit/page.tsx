@@ -31,5 +31,12 @@ export default async function EditScooterPage({ params }: EditScooterPageProps) 
 
   if (!scooter || scooter.shopId !== profile.shop_id) notFound()
 
-  return <EditScooterForm scooter={scooter} shopId={profile.shop_id} shopName={shop?.name ?? ''} />
+  return (
+    <EditScooterForm
+      scooter={scooter}
+      shopId={profile.shop_id}
+      shopName={shop?.name ?? ''}
+      shopLocation={shop?.location ?? scooter.location}
+    />
+  )
 }

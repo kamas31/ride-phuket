@@ -3,12 +3,7 @@
 import { useState } from 'react'
 import { Building2, MapPin, Phone, FileText, ArrowRight, Check, AlertCircle } from 'lucide-react'
 import { createShop } from '@/app/actions/partner'
-
-const LOCATIONS = [
-  'Patong', 'Kata', 'Karon', 'Rawai', 'Phuket Town', 'Bang Tao',
-  'Kamala', 'Surin', 'Chalong', 'Nai Harn', 'Cherng Talay',
-  'Kata Noi', 'Mai Khao', 'Thalang', 'Cape Panwa', 'Ko Sirey',
-]
+import { PHUKET_ZONES } from '@/lib/zones'
 
 // Client-side timeout: if the Server Action takes > 15s → abort
 const CLIENT_TIMEOUT_MS = 15_000
@@ -124,20 +119,20 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
                 Main Area <span className="text-[#ef4444]">*</span>
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {LOCATIONS.map(loc => (
+                {PHUKET_ZONES.map(zone => (
                   <button
-                    key={loc}
+                    key={zone.key}
                     type="button"
                     disabled={submitting}
-                    onClick={() => setForm(f => ({ ...f, location: loc }))}
+                    onClick={() => setForm(f => ({ ...f, location: zone.name }))}
                     className={`py-2.5 px-3 rounded-[10px] text-sm font-medium border transition-all text-center disabled:opacity-60 ${
-                      form.location === loc
+                      form.location === zone.name
                         ? 'border-[#FF6B35] bg-[#fff4f0] text-[#FF6B35]'
                         : 'border-[#e8e8e4] bg-[#f8f8f6] text-[#5c5c58] hover:border-[#d0d0cc]'
                     }`}
                   >
-                    {form.location === loc && <Check className="w-3 h-3 inline mr-1 -mt-0.5" />}
-                    {loc}
+                    {form.location === zone.name && <Check className="w-3 h-3 inline mr-1 -mt-0.5" />}
+                    {zone.name}
                   </button>
                 ))}
               </div>

@@ -1028,3 +1028,38 @@ Ajout de "Kathu" aux trois listes canoniques, suivant exactement le même format
 - Le centre de zone (lat/lng) est une approximation raisonnable, pas calibrée visuellement sur Mapbox comme les 16 autres zones (calibrées à la main historiquement). L'outil de calibration existant (`?debugPins=1` dans `ScooterMap.tsx`) permet un ajustement visuel ultérieur si nécessaire — non bloquant.
 - La copie marketing de `/phuket/kathu` (description, points forts, attractions) a été rédigée de façon conservatrice, limitée à des faits géographiques/culturels largement établis (Kathu Waterfall, proximité de Patong) — aucune affirmation spécifique sur l'inventaire ou les prix qui ne soit déjà gérée dynamiquement par `getLiveAreas()`.
 - La boutique de test déjà créée avec `location = "Kathu"` (ADR-046) résout maintenant correctement une zone — `getZoneForLocation('Kathu')` retourne désormais la nouvelle entrée. Aucune action manuelle supplémentaire n'est requise pour cette boutique : ses scooters résoudront automatiquement la zone Kathu sur Explore dès le prochain rendu.
+
+---
+
+## ADR-048: Correction — 2 listes de zones dupliquées supplémentaires trouvées + affichage scooter périmé
+
+**Status:** Accepted
+**Date:** 2026-06-21
+
+**Problème :**
+Tests admin post-ADR-047 : (1) Kathu absent du dropdown "Main Area" en édition boutique, (2) déplacer le pin carte ne semblait pas mettre à jour Main Area de façon fiable, (3) l'édition scooter affiche "Same as your shop" mais montre une valeur périmée (`scooter.location` enregistrée à la création, ex. "Thalang", alors que la boutique est maintenant "Kathu").
+
+**Audit — correction d'une erreur dans ADR-047 :**
+ADR-047 affirmait que `ShopSettingsClient.tsx` consommait `PHUKET_ZONES` génériquement pour son sélecteur de zone boutique. C'était **faux** — l'audit ADR-047 a confondu l'usage de `PHUKET_ZONES` pour les "Delivery Zones" (correct) avec le dropdown "Main Area", qui utilisait en réalité un **4e tableau codé en dur** (`SHOP_LOCATIONS`, local au composant) sans Kathu. Un **5e tableau dupliqué** (`LOCATIONS`, local à `CreateShopForm.tsx` — formulaire d'inscription self-service propriétaire) avait le même problème. Ni l'un ni l'autre n'avait été détecté lors de l'audit ADR-047 car la recherche initiale n'avait inspecté que les 3 fichiers de constantes partagées, pas les composants clients eux-mêmes.
+
+Root cause #1 (Kathu absent du dropdown) : `SHOP_LOCATIONS`/`LOCATIONS` codés en dur, jamais mis à jour avec les 3 listes canoniques.
+
+Root cause #2 (pin carte vs Main Area) : en réalité déjà cohérent dans le code — le dropdown met à jour `lat/lng` vers le centre de zone (`getZoneForLocation`), et faire glisser le pin met à jour `location` vers la zone la plus proche (`getNearestZone`). Le symptôme observé ("Main Area reste Patong") venait du bug #1 : Kathu n'étant pas une `<option>` valide du `<select>`, un `<select>` contrôlé dont la valeur ne correspond à aucune option retombe visuellement sur la première option (`Patong`) dans la plupart des navigateurs, même si l'état React sous-jacent contenait correctement `"Kathu"`. Une fois Kathu ajouté comme option valide, ce symptôme disparaît sans changement de logique de synchronisation.
+
+Root cause #3 (affichage scooter périmé) : `EditScooterForm.tsx` affichait `scooter.location` (valeur DB persistée à la dernière sauvegarde du scooter) au lieu de la valeur courante de la boutique. Le mécanisme de resynchronisation côté serveur (ADR-046, dans `scooter-update.ts`) ne se déclenche qu'à la sauvegarde du scooter — donc tout scooter non resauvegardé après un changement de zone boutique affiche une valeur obsolète, alors que le texte "Same as your shop — always matches" affirme à tort une synchronisation permanente.
+
+**Décision :**
+1. `ShopSettingsClient.tsx` : suppression de `SHOP_LOCATIONS`, le dropdown "Main Area" utilise désormais directement `PHUKET_ZONES` (déjà importé pour les Delivery Zones). Ajout d'un texte d'aide clarifiant la relation pin/zone.
+2. `CreateShopForm.tsx` : suppression de `LOCATIONS`, les boutons de sélection de zone utilisent désormais `PHUKET_ZONES`.
+3. `EditScooterForm.tsx` : nouvelle prop `shopLocation` (valeur boutique en direct, passée depuis la page serveur) remplace `scooter.location` pour l'affichage en lecture seule et le résumé. Les deux pages consommatrices (`app/partner/scooters/[id]/edit/page.tsx`, `app/admin/shops/[shopId]/scooters/[scooterId]/edit/page.tsx`) passent désormais `shop.location` au composant.
+4. Scooters existants déjà périmés en base : pas de migration en masse. Conformément à ADR-046, `scooter-update.ts` réécrit déjà `location` depuis la boutique à chaque sauvegarde — et l'affichage lit maintenant la valeur boutique en direct, donc l'UI ne ment plus même avant toute resauvegarde.
+
+**Pourquoi cette solution et pas une autre :**
+- Élimine la classe d'erreur (encore) au lieu de corriger un symptôme : remplacer les 2 tableaux dupliqués restants par la même source canonique (`PHUKET_ZONES`) déjà utilisée par `AdminShopsClient.tsx` et `partner.ts`/`admin-create-shop.ts`, au lieu d'ajouter Kathu à chacun individuellement.
+- Pas de migration de données : conforme à la contrainte explicite "ne pas faire de migration en masse à moins que ce soit clairement nécessaire" — la resynchronisation à la sauvegarde (déjà en place) plus la lecture en direct côté affichage suffisent.
+- Aucun changement de comportement de synchronisation pin↔zone : ce mécanisme existant n'était pas cassé, seulement masqué par le bug du dropdown.
+
+**Conséquences et risques :**
+- Avec `PHUKET_ZONES` comme unique source pour ces 2 formulaires, toute future zone ajoutée à `lib/zones.ts` apparaîtra automatiquement dans les dropdowns boutique (propriétaire et admin) — réduit le risque de récidive de ce bug.
+- Tout scooter dont la boutique a changé de zone depuis sa dernière sauvegarde aura encore `scooters.location` périmé en base jusqu'à la prochaine sauvegarde de ce scooter — n'affecte que des usages internes (aucun usage public identifié lit `scooters.location` directement pour le filtrage de zone ; le filtre Explore/zone utilise la même colonne mais elle est resynchronisée à chaque sauvegarde scooter, donc en pratique tout scooter créé ou modifié après le changement de zone boutique est déjà correct).
+- `npx tsc --noEmit` et `npm run build` passent sans erreur (64 pages statiques générées, y compris Kathu). 2 erreurs ESLint pré-existantes restent dans `EditScooterForm.tsx:52` et `ShopSettingsClient.tsx:747` — confirmées via `git blame` comme antérieures à cette session, hors scope.
