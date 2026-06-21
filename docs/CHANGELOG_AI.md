@@ -4,6 +4,27 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-21 (session 8)
+
+### Feature: Phase 2A — admin manual shop claim by owner email (ADR-052)
+
+**Pourquoi :** Phase 1 lets admins create unclaimed shops, but there was no way to link one to a real account once its owner signs up. Explicit scope: admin-only, manual, by email — no invite emails or claim tokens (later phase).
+
+**Audit :** `profiles` has no `email` column (lives in `auth.users` only); no `UNIQUE` constraint on `shops.owner_id`/`profiles.shop_id` anywhere in the schema — conflict checks must happen in app code; no existing RPC/transaction pattern for multi-table writes — the only precedent (`createShop()` in `partner.ts`) does two sequential writes and treats the second (profile link) as non-fatal on failure, leaving a possible half-linked state.
+
+**Fichiers modifiés :**
+- `supabase/migrations/051_find_profile_by_email.sql` — new SECURITY DEFINER SQL function resolving a profile id from an email via `auth.users`, same pattern as `check_email_registered` (migration 025). **Not yet applied — needs to be run manually**, per this project's usual migration workflow.
+- `app/actions/admin-shops.ts` — new `adminClaimShopByEmail(shopId, email)`: admin-gated, validates the shop isn't already claimed, resolves the account by email via the new RPC, rejects self-linking and accounts that already own a shop (checked both via `profiles.shop_id` and defensively via `shops.owner_id`, since neither is DB-constrained), then writes `shops` (owner_id/owner_status/claimed_at/invited_owner_email) followed by `profiles` (shop_id/role). Also extended `AdminShopDetail`/`adminGetShopDetail` with an `ownerEmail` field resolved via `admin.auth.admin.getUserById()`.
+- `app/admin/shops/[shopId]/AdminShopDetailClient.tsx` — new `ClaimShopSection`: email input + "Claim shop for this owner" button when unclaimed, read-only "Claimed by {email}" banner otherwise.
+
+**Problèmes rencontrés :** unlike `createShop()`'s precedent, a failed second write here can't be left non-fatal — claiming activates dashboard access, shop editing, and in-app messaging immediately, so a half-applied claim would be actively misleading. Implemented an explicit rollback of the shop claim if the profile link fails, returning a distinct `ROLLBACK_FAILED` error (rather than a false success) if even the rollback fails.
+
+**TypeScript/build :** `npx tsc --noEmit` clean. `npm run build` succeeded. `eslint` clean on both changed files.
+
+**Risques restants :** no true DB transaction — a narrow window exists between the two writes; mitigated by the rollback-on-failure logic, not eliminated. Migration 051 must be applied before this feature works.
+
+---
+
 ## 2026-06-21 (session 7)
 
 ### Fix: Explore/cards/map still showed stale scooter location after shop moved to Kathu (ADR-051)

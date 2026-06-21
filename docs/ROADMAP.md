@@ -85,6 +85,7 @@ Last updated: 2026-06-12
 - [x] Native geolocation Explore — @capacitor/geolocation, "Near me", marqueur bleu, tri Haversine (ADR-043)
 - [x] Native push notifications — APNS HTTP/2 direct, warm-up prompt Messages, CapacitorProvider tap handler (ADR-044)
 - [x] Admin-created unclaimed shops — Phase 1: migration 050, adminCreateShop, scooter admin bypass, /admin/shops UI, messaging fallback (ADR-045)
+- [x] Admin manual shop claim by owner email — Phase 2A: migration 051, adminClaimShopByEmail, ClaimShopSection UI (ADR-052)
 
 ---
 
@@ -98,7 +99,8 @@ Last updated: 2026-06-12
 - [ ] Apple Developer account setup
 - [ ] Apple Sign In activation (Apple Dev Console + Supabase config)
 - [ ] Run migration 050 in Supabase Dashboard → SQL Editor (admin-created unclaimed shops, ADR-045)
-- [ ] Unclaimed shops Phase 2 (not started): owner invite email, claim token, claim flow
+- [ ] Run migration 051 in Supabase Dashboard → SQL Editor (`find_profile_id_by_email`, required for Phase 2A claim to work, ADR-052)
+- [ ] Unclaimed shops Phase 2B (not started): owner invite email, claim token, self-serve claim flow
 
 ---
 

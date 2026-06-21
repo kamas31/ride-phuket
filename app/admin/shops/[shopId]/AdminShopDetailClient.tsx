@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Pencil, Plus, Trash2, Link2, Check } from 'lucide-react'
 import { deleteScooter } from '@/app/actions/scooter-delete'
+import { adminClaimShopByEmail } from '@/app/actions/admin-shops'
 import { formatPrice, cn } from '@/lib/utils'
 import type { AdminShopDetail } from '@/app/actions/admin-shops'
 
@@ -15,6 +17,73 @@ const STATUS_STYLES: Record<string, string> = {
   unclaimed: 'bg-[#fff4f0] text-[#FF6B35]',
   invited:   'bg-[#fff8e1] text-[#b8860b]',
   claimed:   'bg-[#eefbf1] text-[#1d9e5d]',
+}
+
+function ClaimShopSection({ shop }: { shop: AdminShopDetail }) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [email, setEmail] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [claimed, setClaimed] = useState(shop.ownerStatus === 'claimed')
+  const [ownerEmail, setOwnerEmail] = useState(shop.ownerEmail)
+
+  if (claimed) {
+    return (
+      <div className="bg-[#eefbf1] border border-[#d4f3df] rounded-[16px] p-4 mb-6 flex items-center gap-2.5">
+        <Check className="w-4 h-4 text-[#1d9e5d] flex-shrink-0" />
+        <p className="text-[13px] text-[#0f0f0e]">
+          Claimed{ownerEmail ? <> by <span className="font-semibold">{ownerEmail}</span></> : null}
+        </p>
+      </div>
+    )
+  }
+
+  function handleClaim() {
+    setError(null)
+    const trimmed = email.trim()
+    if (!trimmed) { setError('Enter the owner’s account email.'); return }
+
+    startTransition(async () => {
+      const result = await adminClaimShopByEmail(shop.id, trimmed)
+      if (!result.success) {
+        setError(result.error ?? 'Failed to claim shop.')
+        return
+      }
+      setClaimed(true)
+      setOwnerEmail(trimmed)
+      router.refresh()
+    })
+  }
+
+  return (
+    <div className="bg-white border border-[#f0f0ec] rounded-[16px] p-5 mb-6">
+      <div className="flex items-center gap-2 mb-1">
+        <Link2 className="w-4 h-4 text-[#FF6B35]" />
+        <h2 className="text-sm font-bold text-[#0f0f0e]">Link owner account</h2>
+      </div>
+      <p className="text-[12px] text-[#9c9c98] mb-3">
+        Link this shop to an existing Koh Ride account by email. The account must already exist — this does not send an invite.
+      </p>
+      <div className="flex gap-2">
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="owner@example.com"
+          disabled={isPending}
+          className="flex-1 bg-[#f5f5f0] text-[#0f0f0e] text-sm rounded-[10px] px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#FF6B35] placeholder:text-[#9c9c98] disabled:opacity-60"
+        />
+        <button
+          onClick={handleClaim}
+          disabled={isPending}
+          className="px-4 py-2.5 bg-[#0f0f0e] text-white text-sm font-bold rounded-[10px] hover:bg-[#2a2a28] transition-colors disabled:opacity-50 flex-shrink-0"
+        >
+          {isPending ? 'Linking…' : 'Claim shop for this owner'}
+        </button>
+      </div>
+      {error && <p className="text-[13px] text-red-600 mt-2">{error}</p>}
+    </div>
+  )
 }
 
 export default function AdminShopDetailClient({ shop }: Props) {
@@ -67,6 +136,8 @@ export default function AdminShopDetailClient({ shop }: Props) {
           <Pencil className="w-3.5 h-3.5" /> Edit shop
         </Link>
       </div>
+
+      <ClaimShopSection shop={shop} />
 
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-bold text-[#0f0f0e]">Scooters ({scooters.length})</h2>

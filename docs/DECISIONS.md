@@ -1155,3 +1155,43 @@ Malgré ADR-049 (resync à la sauvegarde boutique), Explore (liste, cartes, cart
 - Si une future boutique change de zone DB sans jamais resauvegarder via `updateShop()` (improbable, mais possible via un accès direct à la base), `scooters.location` resterait périmé en base — sans impact utilisateur grâce à ADR-051 (l'affichage prend toujours le dessus côté boutique), mais à corriger si un jour un export ou rapport lit `scooters.location` directement sans jointure boutique.
 - `npx tsc --noEmit`, `npm run build` et `eslint lib/normalize/normalize-scooter.ts` passent sans erreur.
 - Scripts d'audit/réparation (`scripts/_tmp-*.mjs`) étaient temporaires, exécutés une fois en local avec le service role, puis supprimés — non committés.
+
+---
+
+## ADR-052: Phase 2A — admin lie manuellement un compte existant à une boutique non revendiquée
+
+**Status:** Accepted
+**Date:** 2026-06-21
+
+**Problème :**
+Phase 1 (ADR-045) permet à un admin de créer/gérer des boutiques sans propriétaire (`owner_status = 'unclaimed'`), mais aucun mécanisme n'existe encore pour qu'un admin relie cette boutique à un compte réel une fois que son propriétaire s'inscrit sur Koh Ride. Demande explicite : flux manuel admin-only par email, sans invitation automatique ni token de claim (reportés à une phase future).
+
+**Audit :**
+- `profiles` n'a pas de colonne `email` — l'email vit uniquement dans `auth.users` (`profiles.id` référence `auth.users.id` en FK). Toute résolution "boutique → compte par email" doit donc lire `auth.users`, pas `profiles`.
+- `role` n'accepte que `'rider'` / `'shop_owner'` (`admin` est un booléen séparé `is_admin`, pas une valeur de `role` — migration 041 a annulé une tentative antérieure d'ajouter `'admin'` comme valeur de rôle).
+- Aucune contrainte `UNIQUE` sur `shops.owner_id` ni `profiles.shop_id` — rien n'empêche en base qu'un profil référence une boutique pendant qu'une autre boutique a aussi son `owner_id`. Toute invariance "un compte ne peut posséder qu'une boutique" doit être appliquée en code, pas en DB.
+- Aucune fonction RPC ni pattern de transaction multi-tables existant dans le projet. Le seul précédent d'écriture liée `shops` + `profiles` (`createShop()` dans `partner.ts`) le fait via deux appels séquentiels avec gestion d'erreur **non bloquante** sur le second (`profiles`) — si l'update du profil échoue, la fonction retourne quand même un succès, laissant la boutique créée mais non reliée.
+- Pas de précédent pour chercher un profil par email ; le plus proche est la fonction `check_email_registered(p_email)` (migration 025, SECURITY DEFINER sur `auth.users`), mais elle renvoie un booléen, pas un id.
+
+**Décision :**
+1. Migration 051 (`find_profile_id_by_email`) : nouvelle fonction SQL SECURITY DEFINER, même pattern que `check_email_registered`, renvoie l'`id` (= `profiles.id`) correspondant à un email, ou `NULL`. Pas de `GRANT` à `anon`/`authenticated` — appelée uniquement via le client `service_role` depuis une server action déjà admin-gated.
+2. Nouvelle server action `adminClaimShopByEmail(shopId, email)` dans `app/actions/admin-shops.ts` :
+   - Authentification + `isAdminUser()` avant toute lecture/écriture.
+   - Rejette si la boutique n'existe pas, est déjà `owner_id` non-null ou `owner_status = 'claimed'`.
+   - Résout le compte cible par email via la RPC ; rejette si aucun compte, ou si l'admin tente de se lier sa propre boutique par erreur.
+   - Rejette si `profiles.shop_id` du compte cible est déjà renseigné, **et** vérifie défensivement qu'aucune autre ligne `shops` n'a déjà `owner_id` = ce compte (protection contre une dérive `shop_id`/`owner_id` non détectée par la première vérification, puisqu'aucune contrainte DB ne la garantit).
+   - Écrit `shops` (owner_id, owner_status='claimed', claimed_at, invited_owner_email) **puis** `profiles` (shop_id, role='shop_owner'), dans cet ordre.
+3. Stratégie de cohérence sans transaction réelle : contrairement à `createShop()`, l'échec du second write (`profiles`) ici est **fatal** — la fonction retente immédiatement un rollback explicite de l'écriture `shops` (remise à `unclaimed`/`owner_id = null`). Si le rollback lui-même échoue, retourne une erreur `ROLLBACK_FAILED` explicite plutôt que de prétendre un succès, et logue le cas pour intervention manuelle.
+4. UI (`AdminShopDetailClient.tsx`) : nouvelle section `ClaimShopSection` — formulaire email + bouton si `ownerStatus !== 'claimed'` ; sinon bandeau lecture seule "Claimed by {email}" (email résolu via `admin.auth.admin.getUserById()` dans `adminGetShopDetail`, nouveau champ `ownerEmail` sur `AdminShopDetail`).
+
+**Pourquoi cette solution et pas une autre :**
+- Réutilise le pattern SECURITY DEFINER déjà établi (migration 025) plutôt que d'introduire une nouvelle façon d'accéder à `auth.users`.
+- Diverge intentionnellement du précédent "non-fatal" de `createShop()` : ce dernier lie une boutique flambant neuve qu'aucun autre flux ne dépend encore ; ici, le claim active immédiatement l'accès dashboard, l'édition boutique et la messagerie in-app pour un compte existant — un état à moitié appliqué serait silencieusement dangereux (boutique marquée "claimed" sans propriétaire réellement capable d'y accéder, ou compte marqué `shop_owner` sans boutique). Rollback explicite plutôt que log-and-continue.
+- Vérifications de conflit en code applicatif (pas en DB) car aucune contrainte `UNIQUE` n'existe et qu'en ajouter une sortirait du cadre minimal demandé (pas de migration de schéma au-delà de la fonction de lookup).
+
+**Conséquences et risques :**
+- Pas de vraie transaction DB : entre l'écriture `shops` et l'écriture `profiles`, il existe une fenêtre où la boutique est `claimed` mais le profil pas encore lié. Risque résiduel mais minimal (deux appels Postgres séquentiels sur le même service, latence de l'ordre de la dizaine de ms) ; en cas d'échec du second appel, rollback automatique immédiat.
+- Si le rollback lui-même échoue (panne réseau/DB entre les deux appels), la boutique reste `claimed` sans profil lié — erreur explicite retournée (`ROLLBACK_FAILED`) avec instruction de vérification manuelle, pas de fausse confirmation de succès.
+- `find_profile_id_by_email` (migration 051) n'est pas encore appliquée en base — **migration à exécuter manuellement par l'utilisateur** avant que le claim ne fonctionne (suit le flux établi du projet où l'utilisateur applique les migrations lui-même).
+- `npx tsc --noEmit` et `npm run build` passent sans erreur ; `eslint` propre sur tous les fichiers modifiés.
+- Hors scope (explicitement demandé pour une phase ultérieure) : invitation email automatique, token de claim, claim self-service par le propriétaire, multi-boutiques par propriétaire.
