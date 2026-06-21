@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient, isAdminUser } from '@/lib/supabase/admin'
 import type { Profile } from '@/hooks/useProfile'
 import type { UserRole } from '@/lib/supabase/types'
 
@@ -303,6 +303,31 @@ export async function getFullShopForOwner(): Promise<FullShopRow | null> {
       .from('shops')
       .select('id,name,slug,description,logo_url,cover_image,mobile_banner,gallery,phone,whatsapp,line_id,telegram,instagram,website,location,address,lat,lng,google_maps_link,delivery_zones,opening_hours,verified,active,plan_type,location_visibility,show_opening_hours')
       .eq('owner_id', user.id)
+      .single()
+
+    if (error) return null
+    return data as FullShopRow
+  } catch {
+    return null
+  }
+}
+
+// Admin-only: fetches the full editable shop row by ID (no owner_id filter),
+// so an admin can edit a shop they don't own, including unclaimed shops.
+export async function getFullShopForAdmin(shopId: string): Promise<FullShopRow | null> {
+  try {
+    const userClient = await createClient()
+    const { data: { user } } = await userClient.auth.getUser()
+    if (!user) return null
+
+    const admin = createAdminClient()
+    if (!(await isAdminUser(admin, user.id))) return null
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (admin as any)
+      .from('shops')
+      .select('id,name,slug,description,logo_url,cover_image,mobile_banner,gallery,phone,whatsapp,line_id,telegram,instagram,website,location,address,lat,lng,google_maps_link,delivery_zones,opening_hours,verified,active,plan_type,location_visibility,show_opening_hours')
+      .eq('id', shopId)
       .single()
 
     if (error) return null

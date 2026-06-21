@@ -4,6 +4,35 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-21
+
+### Feature: Admin shop edit UI (ADR-045 follow-up)
+
+Admins could create unclaimed shops and manage their scooters (Phase 1), but had no UI to edit the shop's own details (name, contact, location, branding) after creation, or to toggle public visibility.
+
+**Audit before implementing :** `ShopSettingsClient.tsx` (owner-facing, `/partner/shop`) already covers every field the task asked for — name, description, phone, WhatsApp, Line/Telegram/Instagram/website, location/address/coordinates, Google Maps link, delivery zones, location visibility, opening hours, logo, cover banner, mobile banner, gallery — and already calls `updateShop()`, which already supports the admin bypass added in the previous session. `FullShopRow` already includes `active`. Reusing this component end-to-end was the lowest-risk option, instead of building a second parallel shop form.
+
+**Fichiers modifiés :**
+- `app/actions/shop-update.ts` — ajout de `active?: boolean` à `UpdateShopPayload`, écrit uniquement si fourni (`payload.active !== undefined`) pour ne jamais affecter un appelant existant qui ne l'envoie pas.
+- `app/actions/profile.ts` — ajout de `getFullShopForAdmin(shopId)` : même requête que `getFullShopForOwner`/`getFullShopForOwner` mais via le client `service_role` après vérification `is_admin`, sans filtre `owner_id` — permet de récupérer une boutique qu'on ne possède pas, y compris non réclamée.
+- `app/partner/shop/ShopSettingsClient.tsx` — ajout de props optionnelles `isAdmin`, `backHref`, `backLabel`, `redirectTo` (toutes avec une valeur par défaut identique au comportement existant — zéro changement pour le flow propriétaire). Ajout du champ `active` à l'état du formulaire (round-trip systématique, donc neutre pour les propriétaires qui n'ont pas de contrôle pour le changer). Nouvelle section "Visibility" affichée uniquement quand `isAdmin` — toggle `active` réutilisant le composant `Toggle` déjà présent dans le fichier.
+- `app/admin/shops/[shopId]/AdminShopDetailClient.tsx` — ajout d'un lien "Edit shop" + badge "Inactive" quand `!shop.active`.
+
+**Fichiers créés :**
+- `app/admin/shops/[shopId]/edit/page.tsx` — vérifie `is_admin` côté serveur (redirect sinon), charge la boutique via `getFullShopForAdmin`, rend `ShopSettingsClient` avec `isAdmin` + navigation admin (`backHref`/`redirectTo` vers `/admin/shops/[shopId]`).
+
+**Pourquoi :** Sans cette UI, un admin pouvait créer une boutique non réclamée mais ne pouvait plus jamais corriger une coquille dans le téléphone/WhatsApp/adresse, ni la rendre publique/invisible à la demande.
+
+**Vérifications :**
+- `active = false` est déjà filtré côté public — `lib/supabase/queries.ts` fait `.eq('active', true)` à 3 endroits, en plus de la policy RLS `USING (active = true)` — donc le toggle admin masque immédiatement la boutique sans code supplémentaire.
+- Upload logo/bannière (bucket `scooter-images`) — même bucket et même mécanisme client-side que l'upload d'images scooter déjà utilisé par un admin en Phase 1 (`NewScooterForm`/`EditScooterForm`) sans problème signalé — pas de risque nouveau.
+
+**Build : OK. TypeScript : OK.**
+
+**Hors scope (volontairement non implémenté) :** invite/claim propriétaire, plans payants, refonte du dashboard.
+
+---
+
 ## 2026-06-20
 
 ### Feature: Admin-created unclaimed shops — Phase 1 (ADR-045)

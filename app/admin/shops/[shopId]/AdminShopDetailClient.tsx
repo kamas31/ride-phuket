@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react'
 import { deleteScooter } from '@/app/actions/scooter-delete'
 import { formatPrice, cn } from '@/lib/utils'
 import type { AdminShopDetail } from '@/app/actions/admin-shops'
@@ -44,14 +44,29 @@ export default function AdminShopDetailClient({ shop }: Props) {
 
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-xl font-bold text-[#0f0f0e]">{shop.name}</h1>
-        <span className={cn(
-          'text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full',
-          STATUS_STYLES[shop.ownerStatus] ?? STATUS_STYLES.claimed,
-        )}>
-          {shop.ownerStatus}
-        </span>
+        <div className="flex items-center gap-2">
+          {!shop.active && (
+            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-[#f5f5f0] text-[#9c9c98]">
+              Inactive
+            </span>
+          )}
+          <span className={cn(
+            'text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full',
+            STATUS_STYLES[shop.ownerStatus] ?? STATUS_STYLES.claimed,
+          )}>
+            {shop.ownerStatus}
+          </span>
+        </div>
       </div>
-      <p className="text-sm text-[#9c9c98] mb-6">{shop.location}</p>
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-sm text-[#9c9c98]">{shop.location}</p>
+        <Link
+          href={`/admin/shops/${shop.id}/edit`}
+          className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#FF6B35] hover:underline"
+        >
+          <Pencil className="w-3.5 h-3.5" /> Edit shop
+        </Link>
+      </div>
 
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-bold text-[#0f0f0e]">Scooters ({scooters.length})</h2>

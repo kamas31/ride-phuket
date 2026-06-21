@@ -425,11 +425,22 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 interface ShopSettingsClientProps {
   shop: FullShopRow
+  // Admin-only extras — all default to the existing owner-facing behavior.
+  isAdmin?: boolean
+  backHref?: string
+  backLabel?: string
+  redirectTo?: string
 }
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
-export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
+export default function ShopSettingsClient({
+  shop,
+  isAdmin = false,
+  backHref = '/partner/dashboard',
+  backLabel = 'Dashboard',
+  redirectTo = '/partner/dashboard',
+}: ShopSettingsClientProps) {
   const router                    = useRouter()
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [error, setError]         = useState<string | null>(null)
@@ -463,6 +474,8 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
     // Hours
     hours: parseHours(shop.opening_hours),
     showOpeningHours: shop.show_opening_hours ?? true,
+    // Visibility — admin-only control, round-tripped unchanged for owners
+    active: shop.active ?? true,
   })
 
   const set = useCallback(
@@ -520,13 +533,14 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
         coverImage:     form.coverImage || null,
         mobileBanner:   form.mobileBanner || null,
         gallery:        form.galleryUrls,
+        active:         form.active,
       })
 
       clearTimeout(timeout)
 
       if (result.success) {
         setSaveState('saved')
-        router.push('/partner/dashboard')
+        router.push(redirectTo)
       } else {
         setError(result.error ?? 'Failed to save.')
         setSaveState('error')
@@ -546,13 +560,13 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
       <div className="sticky top-16 z-20 bg-white border-b border-[#e8e8e4]">
         <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link
-            href="/partner/dashboard"
+            href={backHref}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-[#FF6B35] text-white hover:bg-[#e85d29] transition-all active:scale-95"
           >
             <ArrowLeft className="w-4 h-4" />
-            Dashboard
+            {backLabel}
           </Link>
-          <h1 className="font-bold text-sm text-[#0f0f0e]">Shop Settings</h1>
+          <h1 className="font-bold text-sm text-[#0f0f0e]">{isAdmin ? 'Admin · Edit Shop' : 'Shop Settings'}</h1>
           <button
             form="shop-form"
             type="submit"
@@ -918,6 +932,21 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
 
         </Section>
 
+        {/* ── 6. Visibility (admin-only) ── */}
+        {isAdmin && (
+          <Section title="Visibility">
+            <div className="flex items-center justify-between py-0.5">
+              <div>
+                <p className="text-sm font-semibold text-[#0f0f0e]">Shop active</p>
+                <p className="text-[11px] text-[#9c9c98] mt-0.5">
+                  Active shops appear publicly on Explore and shop pages. Inactive shops are hidden.
+                </p>
+              </div>
+              <Toggle on={form.active} onChange={v => set('active', v)} />
+            </div>
+          </Section>
+        )}
+
         {/* Error */}
         {(saveState === 'error' || error) && (
           <div className="flex items-start gap-2 px-4 py-3 bg-[#fef2f2] border border-[#fecaca] rounded-[12px]">
@@ -929,7 +958,7 @@ export default function ShopSettingsClient({ shop }: ShopSettingsClientProps) {
         {/* Bottom save */}
         <div className="flex gap-3 pb-10">
           <Link
-            href="/partner/dashboard"
+            href={backHref}
             className="px-6 py-4 rounded-full border border-[#e8e8e4] text-sm font-semibold text-[#5c5c58] hover:bg-[#f8f8f6] transition-colors"
           >
             Cancel

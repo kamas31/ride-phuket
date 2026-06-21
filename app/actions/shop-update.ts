@@ -27,6 +27,7 @@ export interface UpdateShopPayload {
   mobileBanner?: string | null
   gallery?: string[]
   locationVisibility?: 'exact' | 'approximate'
+  active?: boolean
 }
 
 export interface UpdateShopResult {
@@ -87,6 +88,7 @@ export async function updateShop(
         mobile_banner:        payload.mobileBanner ?? null,
         gallery:              payload.gallery ?? [],
         location_visibility:  payload.locationVisibility ?? 'exact',
+        ...(payload.active !== undefined ? { active: payload.active } : {}),
         updated_at:           new Date().toISOString(),
       })
       .eq('id', shopId)
