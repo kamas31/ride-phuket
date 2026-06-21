@@ -958,3 +958,73 @@ Implémenter directement le flow d'invitation/claim de propriétaire en même te
 - ~~Pas d'UI d'édition admin~~ — **résolu le 2026-06-21** : `/admin/shops/[shopId]/edit` réutilise directement `ShopSettingsClient.tsx` (le formulaire propriétaire existant) via des props additives (`isAdmin`, `backHref`, `redirectTo`, toutes avec une valeur par défaut identique au comportement propriétaire — zéro changement pour le flow existant). Ajout du champ `active` (toggle visibilité publique, admin-only) à `UpdateShopPayload`, écrit uniquement si fourni.
 - **Pas de lien de navigation vers `/admin/shops`** dans l'UI existante (Navbar/Profile) — accès par URL directe uniquement, cohérent avec le pattern existant des outils admin (`?debugPins=1`).
 - **Messagerie in-app indisponible pour les boutiques non réclamées** — WhatsApp/téléphone restent le seul canal de contact, conforme à la demande explicite de ne pas construire de solution de messagerie complète en Phase 1.
+
+---
+
+## ADR-046: Scooter location is derived from the shop — no separate scooter location field
+
+**Status:** Accepted  
+**Date:** 2026-06-21
+
+**Problème :**
+En testant le flow d'onboarding admin (ADR-045), une boutique a été créée avec `location = "Kathu"`. En ajoutant un scooter à cette boutique, le formulaire de création de scooter demande une localisation **séparée** via un `<select>` — et "Kathu" n'y figure pas, bloquant la création cohérente d'un scooter pour cette boutique.
+
+**Audit :**
+- `scooters.location` et `shops.location` sont deux colonnes `text` indépendantes, sans contrainte de cohérence entre elles en base.
+- Les listes de valeurs utilisées dans les formulaires sont des **copies dupliquées et désynchronisées** d'un même référentiel : `lib/zones.ts` (`PHUKET_ZONES`, 16 zones canoniques) → `ShopSettingsClient.tsx` avait sa propre constante `SHOP_LOCATIONS` (16 noms recopiés à la main) → `NewScooterForm.tsx`/`EditScooterForm.tsx` avaient chacun leur propre constante `LOCATIONS` (les mêmes 16 noms recopiés une 3e et 4e fois). Aucune de ces listes — y compris `PHUKET_ZONES` lui-même — ne contient "Kathu".
+- **Cause racine exacte** : le formulaire de création de boutique admin (`AdminShopsClient.tsx`, ADR-045) utilisait un `<input>` texte libre pour la localisation, sans contrainte vers la liste canonique. C'est la seule raison pour laquelle "Kathu" a pu être saisi pour la boutique — nulle part ailleurs dans l'app (formulaire propriétaire, formulaires scooter) la saisie n'est libre.
+- `scooters.location` n'est imposé ni par le schéma (colonne nullable, sans `CHECK`), ni par aucune validation serveur — seul le `<select required>` HTML du formulaire contraignait la saisie côté UI. `scooter-create.ts` retombe sur `'Phuket'` si absent.
+- Filtrage public : `getScooters()` (`lib/supabase/queries.ts`) filtre directement sur `scooters.location` (`.ilike`). Mais `ExploreClient.tsx` (ligne ~281) a déjà une logique de repli `getZoneForLocation(s.location) ?? getZoneForLocation(s.shop?.location ?? '') ?? getNearestZone(...)` — c'est-à-dire que le code traitait déjà implicitement `shop.location` comme source de vérité secondaire quand `scooter.location` ne résout aucune zone connue. La règle métier demandée (le scooter appartient à la boutique, donc se situe où la boutique se situe) est donc déjà cohérente avec une intention présente dans le code, simplement jamais appliquée à la source (écriture), seulement en lecture de repli.
+
+**Décision :**
+1. `scooter-create.ts` / `scooter-update.ts` : `location`, `lat`, `lng` du scooter sont désormais **toujours dérivés de la boutique** (`shops.location/lat/lng`, lus dans la même requête qui vérifie déjà la propriété/l'admin), jamais de l'input utilisateur. Le payload `CreateScooterPayload`/`UpdateScooterPayload` n'a plus de champ `location` du tout.
+2. `NewScooterForm.tsx` / `EditScooterForm.tsx` : le `<select>` éditable est remplacé par un encart lecture-seule affichant la localisation de la boutique ("Same as your shop — always matches."). Les constantes `LOCATIONS` dupliquées sont supprimées des deux fichiers.
+3. **Cause racine corrigée** : `AdminShopsClient.tsx` — l'`<input>` texte libre pour la localisation de la boutique est remplacé par un `<select>` peuplé directement depuis `PHUKET_ZONES` (la liste canonique de `lib/zones.ts`, plutôt qu'une 5e copie dupliquée). Un admin ne peut désormais plus créer une boutique avec une localisation hors du référentiel commun.
+
+**Pourquoi cette solution et pas une autre :**
+- Ne pas simplement ajouter "Kathu" à un dropdown — ça aurait masqué le vrai problème (deux modèles de localisation incohérents) sans le résoudre pour la prochaine zone manquante.
+- Dériver côté serveur plutôt que côté client — élimine la classe de bug entièrement (aucune UI ne peut plus jamais désynchroniser scooter et boutique), au lieu de la rendre simplement moins probable.
+- Réutiliser `PHUKET_ZONES` comme unique source plutôt que dupliquer une 5e liste — réduit la duplication existante (4 copies) au lieu de l'aggraver.
+
+**Conséquences et risques :**
+- Toute boutique déjà créée avec une localisation hors `PHUKET_ZONES` (ex. la boutique "Kathu" de test) reste en l'état tant qu'un admin ne la modifie pas via `/admin/shops/[shopId]/edit` (qui utilise déjà un `<select>` contraint) — ses scooters hériteront de "Kathu" jusqu'à la correction, et n'apparaîtront sous aucun filtre de zone spécifique sur Explore (uniquement sous "All locations"), car `getZoneForLocation('Kathu')` ne résout aucune zone. Pas une régression introduite par ce changement — situation déjà existante, désormais cohérente entre boutique et scooters au lieu d'être incohérente.
+- ~~Ajouter "Kathu" comme zone réelle (coordonnées, rayon, page SEO) est une décision produit distincte, volontairement hors scope de ce correctif.~~ — **résolu le 2026-06-21, ADR-047** : Kathu est maintenant une zone officielle.
+- `scooters.location`/`lat`/`lng` se resynchronisent automatiquement avec la boutique à chaque édition de scooter — si une boutique change de zone, ses scooters existants ne se mettent à jour qu'au prochain edit individuel (pas de backfill rétroactif en masse, jugé inutile pour le volume actuel).
+
+---
+
+## ADR-047: Kathu added as an official supported zone
+
+**Status:** Accepted  
+**Date:** 2026-06-21
+
+**Problème :**
+ADR-046 a révélé que "Kathu" n'existe dans aucune des listes de zones du projet. Décision business : Kathu est une zone Phuket importante et doit devenir une zone officielle de premier rang, pas un contournement.
+
+**Audit (avant implémentation) :**
+Le projet a en réalité **trois listes canoniques de zones dupliquées**, déjà maintenues manuellement en synchronisation pour les 16 zones existantes — ce n'est pas une dette introduite ici, c'est l'architecture préexistante :
+1. `lib/zones.ts` → `PHUKET_ZONES` (`key/name/lat/lng/radiusKm`) — consommé génériquement (`.map/.find/.forEach`, jamais de nom codé en dur) par `ExploreClient.tsx` (filtre de zone, repli Near Me), `ScooterMap.tsx` (dropdown pin-picker, cercles de zone, clustering, outil de calibration `?debugPins=1`), `ShopSettingsClient.tsx`/`AdminShopsClient.tsx` (sélecteurs de localisation boutique), `partner.ts`/`admin-create-shop.ts` (dérivation lat/lng), `normalize-shop.ts`.
+2. `constants/areas.ts` → `AREAS` (`slug/name/label/description/longDescription/highlights/nearbyAttractions/priceFrom`) — consommé par `app/phuket/[area]/page.tsx` (`generateStaticParams` + métadonnées + JSON-LD, **toutes les zones sont toujours générées statiquement**, indépendamment de l'inventaire), `opengraph-image.tsx`, `app/sitemap.ts` (**toutes les zones incluses sans condition**), `lib/live-areas.ts` (filtre vers les zones avec inventaire réel, pour les cartes homepage/footer uniquement), `Footer.tsx`, `app/locations/page.tsx`.
+3. `constants/index.ts` → `LOCATIONS` (`id/label`) — consommé uniquement par `components/ride/ExploreFilters.tsx` (pastilles de filtre de localisation dans la modale Explore).
+- **Near Me** utilise une distance Haversine brute sur `scooter.lat/lng` — totalement indépendant des noms de zone. Fonctionne automatiquement pour Kathu dès que la zone existe dans `PHUKET_ZONES` (donc dès que `getZoneForLocation('Kathu')` résout des coordonnées).
+- Aucune contrainte `CHECK` ou RLS ne limite `shops.location`/`scooters.location` à une liste fixe — colonnes texte libres. Aucune migration nécessaire.
+- Aucune collision de sous-chaîne : "kathu" ne contient et n'est contenu dans aucune clé/nom de zone existant (vérifié explicitement, le code a déjà un garde-fou similaire pour "kata noi" vs "kata").
+- Les pages SEO `/phuket/[area]` gèrent déjà gracieusement l'absence d'inventaire (`priceRange`/`hasOfferCatalog` omis si `areaScooters.length === 0`) — une page Kathu à zéro scooter ne casse rien.
+
+**Conclusion de l'audit :** aucune complexité ou risque inattendu. Changement purement additif sur les 3 tableaux de données existants, zéro changement de logique.
+
+**Décision :**
+Ajout de "Kathu" aux trois listes canoniques, suivant exactement le même format que les 16 zones existantes :
+1. `lib/zones.ts` — `{ key: 'kathu', name: 'Kathu', lat: 7.9106, lng: 98.3382, radiusKm: 2.0 }` (coordonnées approximatives du centre du district, même niveau de précision que les zones existantes — le commentaire du fichier indique déjà que ces coordonnées sont "manually calibrated for visual alignment", pas des centroïdes géodésiques exacts).
+2. `constants/areas.ts` — entrée `AreaMeta` complète pour `slug: 'kathu'` (description, longDescription, highlights, nearbyAttractions, `priceFrom: 250` — valeur par défaut identique à la majorité des zones existantes ; les vrais prix viennent toujours de `getLiveAreas()` en lecture).
+3. `constants/index.ts` — `{ id: 'kathu', label: 'Kathu' }` dans `LOCATIONS`.
+
+**Pourquoi cette solution et pas une autre :**
+- Respecte la contrainte explicite "ne pas dupliquer les listes de zones" en n'ajoutant Kathu qu'aux 3 listes déjà existantes, sans en créer une 4e.
+- Respecte "pas de refactor" — aucune tentative de fusionner les 3 systèmes en un seul (ce qui serait un changement architectural plus large et plus risqué) ; ADR-047 ajoute des données, ADR-046 avait déjà résolu le problème de cohérence scooter↔boutique séparément.
+- Tout le reste du système (Explore, Near Me, SEO, sitemap, structured data, recherche) consomme déjà ces listes de façon générique — aucune ligne de logique modifiée nulle part en dehors des 3 fichiers de données.
+
+**Conséquences et risques :**
+- Le centre de zone (lat/lng) est une approximation raisonnable, pas calibrée visuellement sur Mapbox comme les 16 autres zones (calibrées à la main historiquement). L'outil de calibration existant (`?debugPins=1` dans `ScooterMap.tsx`) permet un ajustement visuel ultérieur si nécessaire — non bloquant.
+- La copie marketing de `/phuket/kathu` (description, points forts, attractions) a été rédigée de façon conservatrice, limitée à des faits géographiques/culturels largement établis (Kathu Waterfall, proximité de Patong) — aucune affirmation spécifique sur l'inventaire ou les prix qui ne soit déjà gérée dynamiquement par `getLiveAreas()`.
+- La boutique de test déjà créée avec `location = "Kathu"` (ADR-046) résout maintenant correctement une zone — `getZoneForLocation('Kathu')` retourne désormais la nouvelle entrée. Aucune action manuelle supplémentaire n'est requise pour cette boutique : ses scooters résoudront automatiquement la zone Kathu sur Explore dès le prochain rendu.

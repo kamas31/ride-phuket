@@ -4,6 +4,52 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-21 (session 3)
+
+### Feature: Kathu added as official supported zone (ADR-047)
+
+Business decision following ADR-046's audit: Kathu becomes a first-class Koh Ride zone, not a workaround.
+
+**Audit before implementing :** the project has 3 separate, manually-duplicated canonical zone lists (`PHUKET_ZONES` in `lib/zones.ts`, `AREAS` in `constants/areas.ts`, `LOCATIONS` in `constants/index.ts`) — pre-existing architecture, all 16 existing zones already kept in sync across them by hand. Every consumer (Explore filters, Near Me, map, SEO pages, sitemap, structured data, shop/scooter location pickers) iterates these arrays generically — none hardcode zone names in logic. Near Me uses raw Haversine distance on lat/lng, independent of zone names. SEO pages already handle zero-inventory areas gracefully. No DB constraint limits location to a fixed list. No substring-collision risk with "kathu" against any existing zone key. Conclusion: pure additive change, no STOP condition triggered.
+
+**Fichiers modifiés :**
+- `lib/zones.ts` — added `{ key: 'kathu', name: 'Kathu', lat: 7.9106, lng: 98.3382, radiusKm: 2.0 }` to `PHUKET_ZONES`.
+- `constants/areas.ts` — added a full `AreaMeta` entry for `slug: 'kathu'` (description, longDescription, highlights, nearbyAttractions, `priceFrom: 250`).
+- `constants/index.ts` — added `{ id: 'kathu', label: 'Kathu' }` to `LOCATIONS`.
+
+**Pourquoi :** decided as an official zone expansion, not a one-off fix — every system that already consumes these 3 arrays picks up Kathu automatically with zero logic changes.
+
+**Validation :** `tsc --noEmit` clean. `npm run build` succeeded — static page count went from 62 → 64 (`/phuket/kathu` + its `opengraph-image`), confirmed present in `.next/server/app/phuket/kathu/`. `eslint` clean on all 3 changed files.
+
+**Problèmes rencontrés :** Aucun.
+
+**Risques :** centre de zone approximé (pas calibré visuellement sur Mapbox comme les zones historiques) — ajustable plus tard via l'outil `?debugPins=1` déjà existant, non bloquant.
+
+---
+
+## 2026-06-21 (session 2)
+
+### Fix: scooter location is now derived from the shop (ADR-046)
+
+Testing the admin unclaimed-shops flow (ADR-045) surfaced a real bug: a shop created with location "Kathu" couldn't have scooters added, because the scooter form's location dropdown doesn't include Kathu — exposing that scooter and shop locations were two independently-typed, duplicated lists that could diverge.
+
+**Root cause :** `AdminShopsClient.tsx`'s shop-creation form used a free-text `<input>` for location instead of the canonical zone list used everywhere else — that's the only place "Kathu" could be entered at all in this app.
+
+**Fichiers modifiés :**
+- `app/actions/scooter-create.ts` / `scooter-update.ts` — `location`, `lat`, `lng` are now always read from the shop row (already fetched for the ownership/admin check) and written to the scooter; never from user input. Removed `location` from both payload interfaces, removed the now-unused `getZoneForLocation` import.
+- `app/partner/scooters/new/NewScooterForm.tsx` / `app/partner/scooters/[id]/edit/EditScooterForm.tsx` — replaced the editable location `<select>` with a read-only display ("Same as your shop — always matches."). Removed the duplicated `LOCATIONS` constant from both files.
+- `app/admin/shops/AdminShopsClient.tsx` — replaced the free-text location `<input>` with a `<select>` sourced directly from `PHUKET_ZONES` (`lib/zones.ts`), closing the actual root cause instead of just the symptom.
+
+**Pourquoi :** "A scooter belongs to a shop, therefore it is located where the shop is located" — explicit business rule. Fixing only the scooter dropdown (adding Kathu to it) would have left the underlying two-list inconsistency in place for the next missing zone.
+
+**Problèmes rencontrés :** Aucun — `tsc --noEmit` et `npm run build` étaient déjà propres après les changements ; le seul lint flag rencontré (`EditScooterForm.tsx:51`, `prefer-as-const`) est confirmé pré-existant (commit 2026-06-05, via `git blame`), non introduit par ce changement.
+
+**Build : OK. TypeScript : OK.**
+
+**Follow-up (non automatique) :** la boutique de test "Kathu" doit être corrigée manuellement via `/admin/shops/[shopId]/edit` (sélectionner une zone valide) pour que ses scooters résolvent une zone Explore — pas un blocage, juste un signalement visuel absent tant que non corrigé.
+
+---
+
 ## 2026-06-21
 
 ### Feature: Admin shop edit UI (ADR-045 follow-up)

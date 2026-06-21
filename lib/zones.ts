@@ -40,6 +40,8 @@ export const PHUKET_ZONES: PhuketZone[] = [
   { key: 'thalang',      name: 'Thalang',      lat: 8.0316, lng: 98.3335, radiusKm: 2.5 },
   { key: 'cape panwa',   name: 'Cape Panwa',   lat: 7.8070, lng: 98.4052, radiusKm: 2.0 },
   { key: 'ko sirey',     name: 'Ko Sirey',     lat: 7.8870, lng: 98.4270, radiusKm: 1.5 },
+  // ── Added 2026-06-21 (ADR-047): official zone expansion ─────────────────
+  { key: 'kathu',        name: 'Kathu',        lat: 7.9106, lng: 98.3382, radiusKm: 2.0 },
 ]
 
 /** Find the nearest zone to a lat/lng coordinate (squared Euclidean — sufficient at Phuket scale) */

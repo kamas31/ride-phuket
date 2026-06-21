@@ -170,6 +170,16 @@ export const AREAS: AreaMeta[] = [
     nearbyAttractions: ['Sea Gypsy Village', 'Ko Sirey Temple', 'Phuket Town (10 min)', 'Ao Yon Beach (20 min)', 'Rawai (25 min)'],
     priceFrom: 230,
   },
+  {
+    slug: 'kathu',
+    name: 'Kathu',
+    label: 'Kathu',
+    description: 'Rent a scooter in Kathu, Phuket. Central location minutes from Patong from ฿250/day.',
+    longDescription: 'Kathu sits inland between Patong and Phuket Town, home to the scenic Kathu Waterfall and a quieter, more local pace than the nearby beach strip. A scooter here puts Patong\'s nightlife, Phuket Town\'s old quarter, and the island\'s interior all within easy reach.',
+    highlights: ['Central, inland location', 'Near Kathu Waterfall', 'Minutes from Patong'],
+    nearbyAttractions: ['Kathu Waterfall', 'Patong Beach (10 min)', 'Phuket Town (20 min)', 'Bangla Road (10 min)'],
+    priceFrom: 250,
+  },
 ]
 
 export function getArea(slug: string): AreaMeta | undefined {

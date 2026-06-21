@@ -26,6 +26,7 @@ export const LOCATIONS = [
   { id: 'thalang',      label: 'Thalang'       },
   { id: 'cape-panwa',   label: 'Cape Panwa'    },
   { id: 'ko-sirey',     label: 'Ko Sirey'      },
+  { id: 'kathu',        label: 'Kathu'         },
 ] as const
 
 export const PRICE_RANGE = { min: 150, max: 2000 }
