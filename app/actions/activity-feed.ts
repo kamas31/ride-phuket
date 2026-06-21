@@ -1,6 +1,7 @@
 'use server'
 
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient, isAdminUser } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 export type FeedIcon =
   | 'whatsapp'
@@ -41,7 +42,23 @@ function relativeTime(isoString: string): string {
 }
 
 export async function getActivityFeed(shopId: string): Promise<ActivityFeedItem[]> {
+  const userClient = await createClient()
+  const { data: { user } } = await userClient.auth.getUser()
+  if (!user) return []
+
   const admin = createAdminClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: shopRow } = await (admin as any)
+    .from('shops')
+    .select('owner_id')
+    .eq('id', shopId)
+    .single()
+
+  if (!shopRow || (shopRow.owner_id !== user.id && !(await isAdminUser(admin, user.id)))) {
+    return []
+  }
+
   const since = new Date(Date.now() - 7 * 86_400_000).toISOString()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

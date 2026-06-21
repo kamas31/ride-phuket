@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-06-21
+Last updated: 2026-06-21 (session 10)
 
 ---
 
@@ -100,7 +100,8 @@ Last updated: 2026-06-21
 - [ ] Apple Developer account setup
 - [ ] Apple Sign In activation (Apple Dev Console + Supabase config)
 - [ ] Run migration 050 in Supabase Dashboard → SQL Editor (admin-created unclaimed shops, ADR-045)
-- [ ] Run migration 051 in Supabase Dashboard → SQL Editor (`find_profile_id_by_email`, required for Phase 2A claim to work, ADR-052)
+- [ ] Run migration 051 in Supabase Dashboard → SQL Editor (`find_profile_id_by_email`, required for Phase 2A claim to work, ADR-052; now also includes the P1-2 REVOKE EXECUTE fix, ADR-054)
+- [ ] Run migration 052 in Supabase Dashboard → SQL Editor (profiles privilege-escalation protection trigger, P0-1/P0-2, ADR-054)
 - [ ] Unclaimed shops Phase 2B (not started): owner invite email, claim token, self-serve claim flow
 
 ---

@@ -4,6 +4,30 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-21 (session 10)
+
+### Security: remediation of P0-1, P0-2, P1-1, P1-2 from full security audit (ADR-054)
+
+**Why it was needed:** A full read-only security audit found `public.profiles` had no protection against a client directly setting `is_admin`/`shop_id` on itself (RLS gates rows, not columns), two analytics server actions with zero ownership checks, and an admin-only RPC executable by anyone due to Postgres's default PUBLIC execute grant. This session fixes exactly those four findings — explicitly scoped, no other audit findings touched.
+
+**What changed:**
+- New `supabase/migrations/052_protect_profile_privileged_columns.sql` — `BEFORE INSERT OR UPDATE` trigger on `public.profiles` that reverts `is_admin`/`shop_id` to their safe/previous value for any writer that isn't `service_role`.
+- `supabase/migrations/051_find_profile_by_email.sql` (edited in place, not yet applied) — added `REVOKE EXECUTE ... FROM PUBLIC, anon, authenticated` + `GRANT EXECUTE ... TO service_role` for `find_profile_id_by_email`.
+- `app/actions/shop-analytics.ts` — `getShopAnalytics()` now requires `auth.getUser()` and verifies the caller is the shop's owner or an admin before querying, returning the existing `empty` fallback otherwise.
+- `app/actions/activity-feed.ts` — `getActivityFeed()` gets the identical ownership check, returning `[]` otherwise.
+
+**Problems encountered:**
+- The audit subagent's original explanation of the RPC over-permissioning (P1-2) attributed it to migration 003's blanket grant timing — re-verified directly and found the real mechanism is Postgres's default PUBLIC-execute-grant on newly created functions, unrelated to migration 003.
+- A column-level `REVOKE UPDATE (is_admin, shop_id)` was considered for P0-1/P0-2 first but rejected — it would hard-fail any UPDATE statement that happens to include those columns unchanged, which is riskier than necessary given the explicit "do not lock owners out" requirement.
+
+**How they were solved:**
+- Used a silently-reverting trigger instead of a hard REVOKE so legitimate writes are never blocked, only the two privileged columns are ever overridden.
+- Confirmed via exhaustive grep that the only two `profiles.is_admin`/`shop_id` write call-sites in the codebase (`createShop()`, `adminClaimShopByEmail()`) already use the service_role admin client, and that the signup trigger never sets those columns either — so the new trigger changes behavior for zero existing legitimate flow.
+- `npx tsc --noEmit` and `npm run build` both pass clean.
+- Migrations 051 (edited) and 052 (new) are **not yet applied** — must be run manually in Supabase Dashboard → SQL Editor, per this project's established workflow.
+
+---
+
 ## 2026-06-21 (session 9)
 
 ### Feature: SEO V1.1 — model landing pages + robots.txt fix (ADR-053)

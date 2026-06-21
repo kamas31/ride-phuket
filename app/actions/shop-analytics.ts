@@ -1,6 +1,7 @@
 'use server'
 
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient, isAdminUser } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 export interface ScooterAnalyticsBreakdown {
   scooterId:   string
@@ -30,7 +31,23 @@ export async function getShopAnalytics(shopId: string, days = 0): Promise<ShopAn
   }
 
   try {
-    const admin  = createAdminClient()
+    const userClient = await createClient()
+    const { data: { user } } = await userClient.auth.getUser()
+    if (!user) return empty
+
+    const admin = createAdminClient()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: shopRow } = await (admin as any)
+      .from('shops')
+      .select('owner_id')
+      .eq('id', shopId)
+      .single()
+
+    if (!shopRow || (shopRow.owner_id !== user.id && !(await isAdminUser(admin, user.id)))) {
+      return empty
+    }
+
     const cutoff = days > 0
       ? new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
       : null
