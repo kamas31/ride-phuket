@@ -2,7 +2,7 @@ import { test, expect } from '../fixtures'
 import { gotoAndWait } from '../helpers/navigation'
 import { assertNoHydrationErrors } from '../helpers/console-watcher'
 
-const MODELS = ['pcx', 'nmax', 'adv']
+const MODELS = ['pcx', 'nmax', 'adv', 'xadv', 'forza', 'xmax', 'click', 'lead']
 
 test.describe('Model Pages (/models/[slug])', () => {
   for (const slug of MODELS) {
@@ -72,5 +72,28 @@ test.describe('Model Pages (/models/[slug])', () => {
     const body = await page.textContent('body') ?? ''
     expect(body).toContain('ADV 160')
     expect(body).toContain('ADV 350')
+  })
+
+  test('ADV and X-ADV pages do not cross-contaminate inventory', async ({ page }) => {
+    // Real DB has both "ADV" and "XADV" as distinct model values — the exact-match
+    // filter must keep them separate. A regression here would show "XADV" scooter
+    // names bleeding into the /models/adv listing grid, or vice versa.
+    await gotoAndWait(page, '/models/adv')
+    const advBody = await page.textContent('body') ?? ''
+    expect(advBody).not.toContain('XADV')
+
+    await gotoAndWait(page, '/models/xadv')
+    const xadvBody = await page.textContent('body') ?? ''
+    expect(xadvBody.toLowerCase()).toContain('x-adv')
+  })
+
+  test('XMAX and Lead pages render real listings despite casing variants in the DB', async ({ page }) => {
+    await gotoAndWait(page, '/models/xmax')
+    const xmaxCards = await page.locator('a[href*="/scooter/"]').count()
+    expect(xmaxCards).toBeGreaterThan(0)
+
+    await gotoAndWait(page, '/models/lead')
+    const leadCards = await page.locator('a[href*="/scooter/"]').count()
+    expect(leadCards).toBeGreaterThan(0)
   })
 })

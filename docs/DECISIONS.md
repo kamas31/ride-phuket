@@ -1261,3 +1261,34 @@ For P0-1/P0-2, a column-level `REVOKE UPDATE (is_admin, shop_id) ON public.profi
 - Scope was deliberately limited to P0-1, P0-2, P1-1, P1-2 only, per explicit instruction. **Not touched, audit-only, no changes this phase:** P1-3 (scooter-images storage policies), P1-4 (`verified` flag), and all P2/P3 findings from the original audit remain open.
 - `npx tsc --noEmit` and `npm run build` both pass clean with these changes.
 - If a future legitimate flow needs to write `is_admin`/`shop_id` from a non-service_role context, it will silently no-op rather than error — anyone adding such a flow must be aware of this trigger and route the write through the admin client instead.
+
+---
+
+## ADR-055: SEO V1.2 — extend model pages to XADV, Forza, XMAX, Click, Lead
+
+**Status:** Accepted
+**Date:** 2026-06-21
+
+**What was the problem?**
+SEO V1.1 (ADR-053) shipped /models/[slug] infrastructure for only 3 of the 12 distinct real model values already live in the scooters table: PCX, NMAX, ADV. Five more real, currently-rented models (XADV, FORZA, XMAX, CLICK, LEAD) had inventory but no dedicated SEO page, same volatile-listing-only problem ADR-053 already solved for the first three.
+
+**What was tried first and why it failed?**
+Nothing was tried and discarded here — the V1.1 infrastructure (constants/models.ts, app/models/[slug]/page.tsx, getScooters({ model }), lib/live-models.ts, lib/schema/model-page.ts) was built generically enough that extending it required no architecture change. The only investigation needed was re-verifying live DB data before writing copy, per the same discipline ADR-053 established: queried scooters directly (19 rows) and confirmed exact model values (XADV, FORZA, XMAX/Xmax, CLICK, LEAD/Lead) and inventory counts (XADV 2/2 available, FORZA 1/1, XMAX 1/2, CLICK 1/1, LEAD 3/3 available) before adding any entries.
+
+**What decision was made?**
+1. Added 5 new ModelMeta entries to constants/models.ts (xadv, forza, xmax, click, lead) — same shape as the existing 3, no interface changes.
+2. No changes to app/models/[slug]/page.tsx, lib/live-models.ts, lib/schema/model-page.ts, lib/supabase/queries.ts, or app/sitemap.ts — all already iterate generically over the MODELS array and required zero modification.
+3. components/layout/Footer.tsx — capped the "Popular Models" column to a new POPULAR_MODEL_SLUGS allowlist (pcx, nmax, adv only), mirroring the existing POPULAR_SLUGS pattern already used for locations in the same file, instead of letting the column grow to 8 entries.
+4. Cross-links (relatedModelSlugs) wired by genuine category adjacency rather than arbitrary order: X-ADV<->ADV (same family, X-ADV is the upgrade), Forza<->XMAX (both maxi-scooters), Click<->Lead (both small commuters), Lead/Click also link back to PCX as the natural next step up. Existing PCX/NMAX/ADV relatedModelSlugs were left untouched to avoid altering already-shipped, already-tested page output.
+5. tests/e2e/model-pages.spec.ts — extended the generic MODELS slug array to all 8 slugs, and added two new targeted tests: one asserting /models/adv never renders "XADV" text (collision regression guard) and /models/xadv does render "X-ADV", and one confirming /models/xmax and /models/lead render real listing cards despite the DBs casing inconsistencies (Xmax/XMAX, Lead/LEAD).
+
+**Why this solution and not another?**
+- Reused the existing exact-match (no-wildcard) ilike filter from ADR-053 rather than adding any new matching logic — the live cross-collision matrix (every target model string checked as a substring of every other distinct DB model value) found zero new collision risks, so there was nothing to fix in the filter itself.
+- Capped the footer column instead of letting it grow unbounded, because an 8-row footer column was judged to hurt usability for marginal internal-linking benefit at this inventory size — the explicit instruction also asked to keep it clean rather than overcrowd it.
+- Did not touch existing PCX/NMAX/ADV relatedModelSlugs, even though XADV could arguably belong in ADVs list too, to keep this change strictly additive and avoid re-testing already-verified content for no required reason.
+
+**What are the consequences or risks?**
+- FORZA, XMAX, and CLICK each currently have exactly 1 live available listing — thin inventory. Copy was written feature/use-case-focused (not "wide selection" claims) specifically to avoid overstating availability, consistent with the projects content-quality bar.
+- Same casing-variance caveat as NMAX in ADR-053 applies to XMAX (Xmax/XMAX) and LEAD (Lead/LEAD) — already handled correctly by the existing exact-match ilike, no new risk introduced.
+- No /models hub page still exists (same gap noted in ADR-053) — with 8 models now live, this gap is more visible; flagged again in docs/ROADMAP.md.
+- npx tsc --noEmit and npm run build both pass clean (72 routes generated, up from 67). 28/28 Playwright tests pass (tests/e2e/model-pages.spec.ts expanded to 8 models plus 2 new collision/casing tests, tests/e2e/area-pages.spec.ts re-run in full as a regression check). Manually verified via curl against a live dev server: XADV shows 2 real listings, FORZA/XMAX/CLICK show 1 each, LEAD shows 3 — all matching DB counts exactly; sitemap.xml lists all 8 model routes; homepage footer links to exactly 3 models (pcx/nmax/adv), confirmed by counting actual href="/models/..." links rather than incidental model-name text elsewhere on the page.

@@ -4,6 +4,31 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-21 (session 11)
+
+### Feature: SEO V1.2 — extend model pages to XADV, Forza, XMAX, Click, Lead (ADR-055)
+
+**Why it was needed:** SEO V1.1 (ADR-053) built generic `/models/[slug]` infrastructure but only populated 3 of the 12 distinct real `model` values already live in the `scooters` table. Five more real, currently-rented models had inventory but no dedicated page — same volatile-`/scooter/[id]`-only problem V1.1 already solved for PCX/NMAX/ADV.
+
+**What changed:**
+- `constants/models.ts` — added 5 entries (xadv, forza, xmax, click, lead), same `ModelMeta` shape as the existing 3. No interface or architecture changes.
+- `components/layout/Footer.tsx` — capped "Popular Models" to a new `POPULAR_MODEL_SLUGS` allowlist (pcx, nmax, adv only) instead of letting it grow to 8 entries, mirroring the existing `POPULAR_SLUGS` pattern already used for locations.
+- `tests/e2e/model-pages.spec.ts` — extended the generic slug array to all 8 models; added 2 new tests: a collision regression guard (`/models/adv` must never render "XADV"; `/models/xadv` must render "X-ADV") and a casing-variance check (XMAX/Lead pages render real cards despite `Xmax`/`XMAX` and `Lead`/`LEAD` casing variants in the DB).
+- No changes needed to `app/models/[slug]/page.tsx`, `lib/live-models.ts`, `lib/schema/model-page.ts`, `lib/supabase/queries.ts`, or `app/sitemap.ts` — all already iterate generically over `MODELS`.
+
+**Problems encountered:**
+- Mid-session, running `npm run build` immediately before starting `next dev` left a stale Turbopack cache that 404'd *every* route, including completely unrelated, untouched ones (`/phuket/patong`) — initially looked like a regression from this session's changes. Confirmed it wasn't: an unrelated existing route 404'ing too was the giveaway. `rm -rf .next` and a clean restart fixed it; not a code issue.
+
+**How they were solved:**
+- Before writing any copy, queried the live `scooters` table directly (19 rows) and ran a full cross-collision matrix (every target model string checked as a substring of every other distinct DB model value) — confirmed zero new collision risks, so the existing exact-match `ilike` filter from ADR-053 needed no changes.
+- Cross-links (`relatedModelSlugs`) wired by genuine category adjacency (X-ADV↔ADV, Forza↔XMAX as maxi-scooters, Click↔Lead as small commuters) rather than arbitrary order. Existing PCX/NMAX/ADV `relatedModelSlugs` left untouched to avoid re-testing already-shipped content.
+
+**Verification:** `npx tsc --noEmit` clean. `npm run build` succeeded — 72 routes (up from 67, +5 static params on `/models/[slug]`). `npm run lint` — 0 new issues. 28/28 Playwright tests passed (expanded `model-pages.spec.ts` plus full `area-pages.spec.ts` regression re-run). Manually verified via curl against a live dev server: XADV shows 2 real listings, FORZA/XMAX/CLICK show 1 each, LEAD shows 3 — all matching DB counts exactly. `sitemap.xml` lists all 8 model routes. Homepage footer links to exactly 3 models (confirmed by counting actual `href="/models/..."` links, not incidental model-name text elsewhere on the page, e.g. a featured-scooter card named "Yamaha Xmax").
+
+**Risks remaining:** FORZA/XMAX/CLICK each have exactly 1 live listing — thin inventory, copy written feature-focused rather than claiming wide selection. No `/models` hub page exists yet; with 8 models now live this gap is more visible (tracked in `docs/ROADMAP.md`).
+
+---
+
 ## 2026-06-21 (session 10)
 
 ### Security: remediation of P0-1, P0-2, P1-1, P1-2 from full security audit (ADR-054)

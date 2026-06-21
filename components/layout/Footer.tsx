@@ -6,6 +6,9 @@ import { MODELS } from '@/constants/models'
 
 const POPULAR_SLUGS = ['patong', 'kata', 'karon', 'rawai', 'bang-tao', 'phuket-town']
 
+// Tier-1 models only — keeps the footer column short as more models are added to MODELS.
+const POPULAR_MODEL_SLUGS = ['pcx', 'nmax', 'adv']
+
 const STATIC_SECTIONS = {
   Discover: [
     { href: '/explore',    label: 'Explore Scooters' },
@@ -29,6 +32,10 @@ export default function Footer() {
     .filter(a => POPULAR_SLUGS.includes(a.slug))
     .sort((a, b) => POPULAR_SLUGS.indexOf(a.slug) - POPULAR_SLUGS.indexOf(b.slug))
     .map(area => ({ href: `/phuket/${area.slug}`, label: area.label }))
+
+  const popularModels = MODELS
+    .filter(m => POPULAR_MODEL_SLUGS.includes(m.slug))
+    .sort((a, b) => POPULAR_MODEL_SLUGS.indexOf(a.slug) - POPULAR_MODEL_SLUGS.indexOf(b.slug))
 
   return (
     <footer className="bg-[#0f0f0e] text-white">
@@ -99,7 +106,7 @@ export default function Footer() {
               Popular Models
             </h4>
             <ul className="space-y-3">
-              {MODELS.map(model => (
+              {popularModels.map(model => (
                 <li key={model.slug}>
                   <Link href={`/models/${model.slug}`} className="text-sm text-[#9c9c98] hover:text-white transition-colors">
                     {model.name}
