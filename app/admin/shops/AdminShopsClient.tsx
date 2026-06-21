@@ -80,7 +80,7 @@ export default function AdminShopsClient({ shops }: Props) {
               <option key={zone.key} value={zone.name}>{zone.name}</option>
             ))}
           </select>
-          <input className={inputCls} placeholder="Phone *" value={form.phone}
+          <input className={inputCls} placeholder="Phone (optional — riders can message in-app)" value={form.phone}
             onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
           <input className={inputCls} placeholder="WhatsApp number" value={form.whatsapp}
             onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))} />

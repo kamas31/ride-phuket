@@ -8,7 +8,7 @@ import { getZoneForLocation } from '@/lib/zones'
 export interface CreateShopPayload {
   shopName: string
   location: string
-  phone: string
+  phone?: string
   address?: string
   description?: string
 }
@@ -44,7 +44,6 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
     // ── 1. Validate payload ──────────────────────────────────
     if (!payload.shopName?.trim()) return { success: false, error: 'Shop name is required.', errorCode: 'VALIDATION' }
     if (!payload.location?.trim()) return { success: false, error: 'Location is required.', errorCode: 'VALIDATION' }
-    if (!payload.phone?.trim())    return { success: false, error: 'Phone number is required.', errorCode: 'VALIDATION' }
 
     // ── 2. Get current user ──────────────────────────────────
     let userId: string
@@ -118,7 +117,7 @@ export async function createShop(payload: CreateShopPayload): Promise<CreateShop
             location:    payload.location,
             lat:         getZoneForLocation(payload.location || '')?.lat ?? null,
             lng:         getZoneForLocation(payload.location || '')?.lng ?? null,
-            phone:       payload.phone.trim(),
+            phone:       payload.phone?.trim() || '',
             address:     payload.address?.trim() || '',
             description: payload.description?.trim() || '',
             verified:    true,

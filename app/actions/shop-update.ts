@@ -8,7 +8,7 @@ import type { OpeningHoursSchedule } from '@/types'
 export interface UpdateShopPayload {
   name: string
   description: string
-  phone: string
+  phone?: string
   location?: string
   whatsapp?: string
   lineId?: string
@@ -43,7 +43,6 @@ export async function updateShop(
   try {
     if (!shopId) return { success: false, error: 'Shop ID missing.', errorCode: 'VALIDATION' }
     if (!payload.name?.trim()) return { success: false, error: 'Shop name is required.', errorCode: 'VALIDATION' }
-    if (!payload.phone?.trim()) return { success: false, error: 'Phone number is required.', errorCode: 'VALIDATION' }
 
     const userClient = await createClient()
     const { data: { user }, error: authErr } = await userClient.auth.getUser()
@@ -69,7 +68,7 @@ export async function updateShop(
       .update({
         name:             payload.name.trim(),
         description:      payload.description?.trim() || '',
-        phone:            payload.phone.trim(),
+        phone:            payload.phone?.trim() || '',
         ...(payload.location ? { location: payload.location } : {}),
         whatsapp:         payload.whatsapp?.trim() || null,
         line_id:          payload.lineId?.trim() || null,

@@ -1094,3 +1094,34 @@ Dans `updateShop()`, après la mise à jour réussie de `shops`, si `payload.loc
 - Une boutique avec beaucoup de scooters déclenche un `UPDATE` multi-lignes à chaque changement de zone — volumétrie actuelle du projet (marketplace local, pas des milliers de scooters par boutique) rend ce coût négligeable.
 - Si l'update `scooters` échoue (erreur réseau/DB), l'update `shops` reste déjà commité — la boutique affichera la nouvelle zone, mais ses scooters resteront périmés jusqu'à la prochaine sauvegarde boutique ou scooter ; l'erreur est loguée (`console.error`) mais ne fait pas échouer la requête globale (cohérent avec ADR-046 : la prochaine sauvegarde scooter individuelle corrige aussi ce cas).
 - `npx tsc --noEmit` et `npm run build` passent sans erreur ; `eslint app/actions/shop-update.ts` propre.
+
+---
+
+## ADR-050: Numéro de téléphone optionnel à la création et à l'édition de boutique — repli sur la messagerie in-app
+
+**Status:** Accepted
+**Date:** 2026-06-21
+
+**Problème :**
+Le téléphone était obligatoire pour créer une boutique, à la fois pour le flux self-service propriétaire (`CreateShopForm.tsx`) et pour le flux admin (`AdminShopsClient.tsx`), bloquant l'onboarding d'opérateurs qui n'ont pas encore communiqué de numéro. Demande explicite : rendre le téléphone optionnel partout (création + cohérence en édition), et afficher un CTA de contact in-app à la place quand il est absent.
+
+**Audit :**
+- Validation obligatoire trouvée à 4 endroits : `app/actions/partner.ts` (`createShop`), `app/actions/admin-create-shop.ts` (`adminCreateShop`), `app/actions/shop-update.ts` (`updateShop`), plus les contraintes UI correspondantes dans `CreateShopForm.tsx` et `ShopSettingsClient.tsx` (`AdminShopsClient.tsx` n'avait qu'un placeholder "Phone *" trompeur, pas de blocage réel).
+- DB (`supabase/migrations/017_production_hardening.sql`) : `shops.phone` est `NOT NULL DEFAULT ''` — accepte déjà une chaîne vide, donc aucune migration nécessaire.
+- CTA de contact déjà robustes sans changement : la page boutique (`app/shop/[slug]/page.tsx`) affiche `ShopChatButton`/`ShopQuickQuestions` (chat in-app, via `getOrCreateShopConversation`) **sans condition** sur phone/whatsapp ; la page scooter (`app/scooter/[id]/page.tsx`) affiche `MessageOwnerButton` (via `getOrCreateConversation`) **sans condition** également. Seul `app/contact/page.tsx` (page d'atterrissage pré-réservation) retombait sur un lien "Browse other scooters" au lieu d'un contact in-app quand ni WhatsApp ni téléphone n'étaient renseignés.
+- Edge case identifié : une boutique admin **non revendiquée** (`owner_id IS NULL`) n'a pas accès au chat in-app — `getOrCreateShopConversation` retourne une erreur explicite pour ce cas (`shop-conversation.ts`). Si un admin crée une boutique non revendiquée sans téléphone ni WhatsApp, elle se retrouve sans aucun canal de contact fonctionnel. Pas bloqué ici (la demande couvre explicitement le flux admin), mais signalé comme risque ci-dessous plutôt que silencieusement ignoré.
+
+**Décision :**
+1. Téléphone passe en optionnel (`phone?: string`) dans les payloads et validations de `partner.ts`, `admin-create-shop.ts`, `shop-update.ts` — la valeur stockée reste `''` si absente (cohérent avec la colonne `NOT NULL DEFAULT ''`).
+2. UI : suppression des astérisques/`required`/conditions de bouton désactivé sur le champ téléphone dans `CreateShopForm.tsx`, `ShopSettingsClient.tsx`, `AdminShopsClient.tsx` ; ajout d'un texte d'aide indiquant que le contact reste possible via la messagerie in-app.
+3. `app/contact/page.tsx` : remplacement du repli "Browse other scooters" par `MessageOwnerButton` (réutilisation du composant existant, même mécanisme que la page scooter) quand ni WhatsApp ni téléphone ne sont disponibles.
+4. Édition de boutique (`shop-update.ts`/`ShopSettingsClient.tsx`) alignée sur la même règle, même si la demande portait explicitement sur la création — sans ce changement, une boutique créée sans téléphone aurait été bloquée à la première sauvegarde d'édition (incohérence immédiate avec l'objectif).
+
+**Pourquoi cette solution et pas une autre :**
+- Réutilise l'infrastructure de messagerie in-app déjà présente et déjà inconditionnelle sur les pages boutique/scooter (`ShopChatButton`, `MessageOwnerButton`) plutôt que d'inventer un nouveau composant de repli.
+- Pas de nouvelle contrainte bloquante ajoutée pour les boutiques non revendiquées sans aucun contact — respecte la demande explicite incluant le flux admin, au prix d'un risque documenté plutôt que d'une règle non demandée.
+- Aucune migration DB : la colonne accepte déjà `''`, conforme à la contrainte « pas de changement de schéma ».
+
+**Conséquences et risques :**
+- Une boutique admin non revendiquée, créée sans téléphone ni WhatsApp, n'a aucun canal de contact fonctionnel jusqu'à sa revendication (le chat in-app refuse les boutiques `owner_id IS NULL`). Recommandation opérationnelle (non implémentée, hors scope demandé) : encourager les admins à renseigner au moins un canal pour ce cas précis.
+- `npx tsc --noEmit` et `npm run build` passent sans erreur. `eslint` propre sur tous les fichiers modifiés sauf une erreur pré-existante déjà documentée (`ShopSettingsClient.tsx:747`, antérieure à cette session).

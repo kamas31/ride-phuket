@@ -29,7 +29,6 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
     // Client-side validation (duplicate of server, but fast)
     if (!form.shopName.trim()) { setError('Shop name is required.'); return }
     if (!form.location)        { setError('Please select your area.'); return }
-    if (!form.phone.trim())    { setError('Phone number is required.'); return }
 
     setError(null)
     setSubmitting(true)
@@ -141,7 +140,7 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
             {/* Phone */}
             <div>
               <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">
-                WhatsApp / Phone <span className="text-[#ef4444]">*</span>
+                WhatsApp / Phone <span className="font-normal normal-case text-[#9c9c98]">(optional)</span>
               </label>
               <div className="relative">
                 <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9c9c98]" />
@@ -150,11 +149,13 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
                   value={form.phone}
                   onChange={update('phone')}
                   placeholder="+66 8X XXX XXXX"
-                  required
                   disabled={submitting}
                   className="w-full pl-10 pr-4 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35] focus:bg-white transition-colors disabled:opacity-60"
                 />
               </div>
+              <p className="text-[10px] text-[#9c9c98] mt-1">
+                No phone yet? Riders can still reach you through in-app messaging.
+              </p>
             </div>
 
             {/* Address */}
@@ -204,7 +205,7 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
             {/* Submit */}
             <button
               type="submit"
-              disabled={submitting || !form.shopName || !form.location || !form.phone}
+              disabled={submitting || !form.shopName || !form.location}
               className="w-full flex items-center justify-center gap-2 py-4 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-all text-base disabled:opacity-40 shadow-[0_4px_20px_rgba(255,107,53,0.35)]"
             >
               {submitting ? (

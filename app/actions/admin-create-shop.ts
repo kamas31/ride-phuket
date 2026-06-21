@@ -8,7 +8,7 @@ import { getZoneForLocation } from '@/lib/zones'
 export interface AdminCreateShopPayload {
   name: string
   location: string
-  phone: string
+  phone?: string
   whatsapp?: string
   address?: string
   description?: string
@@ -30,7 +30,6 @@ export async function adminCreateShop(payload: AdminCreateShopPayload): Promise<
   try {
     if (!payload.name?.trim())     return { success: false, error: 'Shop name is required.', errorCode: 'VALIDATION' }
     if (!payload.location?.trim()) return { success: false, error: 'Location is required.', errorCode: 'VALIDATION' }
-    if (!payload.phone?.trim())    return { success: false, error: 'Phone number is required.', errorCode: 'VALIDATION' }
 
     const userClient = await createClient()
     const { data: { user }, error: authErr } = await userClient.auth.getUser()
@@ -61,7 +60,7 @@ export async function adminCreateShop(payload: AdminCreateShopPayload): Promise<
         location:            payload.location,
         lat:                 zone?.lat ?? null,
         lng:                 zone?.lng ?? null,
-        phone:               payload.phone.trim(),
+        phone:               payload.phone?.trim() || '',
         whatsapp:            payload.whatsapp?.trim() || null,
         address:             payload.address?.trim() || '',
         description:         payload.description?.trim() || '',

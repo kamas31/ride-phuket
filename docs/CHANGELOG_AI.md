@@ -4,6 +4,26 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-21 (session 6)
+
+### Feature: phone number optional at shop creation/edit, in-app messaging as fallback CTA (ADR-050)
+
+**Pourquoi :** phone was mandatory to create a shop (owner self-serve and admin flows), blocking onboarding of operators who haven't shared a number yet. User asked to make it optional everywhere a shop is created, with the existing in-app "contact" CTA used instead when phone is missing.
+
+**Audit :** found 3 server-side blocking checks (`partner.ts::createShop`, `admin-create-shop.ts::adminCreateShop`, `shop-update.ts::updateShop`) plus matching UI requirements in `CreateShopForm.tsx` and `ShopSettingsClient.tsx` (`AdminShopsClient.tsx` only had a misleading "Phone *" placeholder, no real block). DB column `shops.phone` is already `NOT NULL DEFAULT ''`, so no migration needed. The shop page (`ShopChatButton`/`ShopQuickQuestions`) and scooter page (`MessageOwnerButton`) already render in-app contact CTAs unconditionally — only `app/contact/page.tsx` fell back to "Browse other scooters" instead of in-app messaging when no phone/WhatsApp existed.
+
+**Fichiers modifiés :**
+- `app/actions/partner.ts`, `app/actions/admin-create-shop.ts`, `app/actions/shop-update.ts` — `phone` made optional in payload types, validation checks removed, falls back to `''` on insert/update.
+- `app/partner/CreateShopForm.tsx`, `app/partner/shop/ShopSettingsClient.tsx`, `app/admin/shops/AdminShopsClient.tsx` — removed `required`/asterisks/disabled-on-phone conditions, added "optional — in-app messaging works too" hint text.
+- `app/contact/page.tsx` — replaced the "Browse other scooters" fallback with `MessageOwnerButton` (reused from the scooter page) when neither WhatsApp nor phone is set.
+- `docs/DECISIONS.md` — ADR-050.
+
+**Problèmes rencontrés :** shop *edit* also required phone — left untouched, this would have meant a shop created phone-less couldn't save any other edit afterward, contradicting the goal. Relaxed for consistency even though the request named only creation. Also flagged but did not block: an unclaimed admin-created shop with neither phone nor WhatsApp has no working contact channel at all, since in-app chat for unclaimed shops is explicitly disabled in `shop-conversation.ts` — documented as a risk rather than adding an unrequested guard.
+
+**TypeScript/build :** `npx tsc --noEmit` clean. `npm run build` succeeded. `eslint` clean on every changed file except the pre-existing `ShopSettingsClient.tsx:747` error (documented in ADR-048, predates this session).
+
+---
+
 ## 2026-06-21 (session 5)
 
 ### Fix: resync scooters.location/lat/lng when shop location changes (ADR-049)

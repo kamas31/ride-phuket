@@ -7,6 +7,7 @@ import { ArrowLeft, MessageCircle, Phone, MapPin, Check, Search } from 'lucide-r
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import { getScooterAction } from '@/app/actions/scooter'
 import { formatPrice, getScooterCover } from '@/lib/utils'
+import { MessageOwnerButton } from '@/app/scooter/[id]/MessageOwnerButton'
 import type { Scooter } from '@/types'
 
 function ContactShopContent() {
@@ -135,12 +136,7 @@ function ContactShopContent() {
             </a>
           )}
           {!waUrl && !shop?.phone && (
-            <Link
-              href="/explore"
-              className="flex items-center justify-center gap-2.5 w-full py-4 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-colors text-base"
-            >
-              Browse other scooters
-            </Link>
+            <MessageOwnerButton scooterId={scooter!.id} scooterName={scooter!.name} />
           )}
           <p className="text-center text-xs text-[#9c9c98] pt-1">
             No platform fees · Direct local contact · Arrange rental directly with the shop

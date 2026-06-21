@@ -494,7 +494,6 @@ export default function ShopSettingsClient({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name.trim()) { setError('Shop name is required.'); return }
-    if (!form.phone.trim()) { setError('Phone number is required.'); return }
 
     setError(null)
     setSaveState('saving')
@@ -609,9 +608,10 @@ export default function ShopSettingsClient({
         <Section title="Contact & Social">
           <div className="grid grid-cols-2 gap-3">
             <Field
-              label="Phone" required value={form.phone}
+              label="Phone" value={form.phone}
               onChange={v => set('phone', v)} placeholder="+66 81 234 5678"
               prefix={<Phone className="w-3.5 h-3.5" />}
+              hint="Optional — riders can still message you in-app."
             />
             <Field
               label="WhatsApp" value={form.whatsapp}
