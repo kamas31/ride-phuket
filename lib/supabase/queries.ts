@@ -19,6 +19,7 @@ export async function getScooters(filters?: {
   location?: string
   category?: string
   available?: boolean
+  model?: string
 }): Promise<Scooter[]> {
   if (!isConfigured()) return []
 
@@ -36,6 +37,11 @@ export async function getScooters(filters?: {
   }
   if (filters?.category && filters.category !== 'all') {
     query = query.eq('category', filters.category)
+  }
+  if (filters?.model) {
+    // Exact case-insensitive match (no % wildcards) — real data has both "ADV" and
+    // "XADV" rows; a substring ilike('%ADV%') would wrongly match XADV too.
+    query = query.ilike('model', filters.model)
   }
 
   const { data, error } = await query

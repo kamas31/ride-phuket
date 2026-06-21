@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { AREAS } from '@/constants/areas'
+import { MODELS } from '@/constants/models'
 import { SITE_URL } from '@/constants'
 import { getScooters, getShopSlugs } from '@/lib/supabase/queries'
 
@@ -19,6 +20,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const areaRoutes: MetadataRoute.Sitemap = AREAS.map(a => ({
     url: `${SITE_URL}/phuket/${a.slug}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.85,
+  }))
+
+  const modelRoutes: MetadataRoute.Sitemap = MODELS.map(m => ({
+    url: `${SITE_URL}/models/${m.slug}`,
     lastModified: now,
     changeFrequency: 'weekly' as const,
     priority: 0.85,
@@ -52,5 +60,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // DB unavailable — emit no scooter URLs rather than mock ones
   }
 
-  return [...staticRoutes, ...areaRoutes, ...shopRoutes, ...scooterRoutes]
+  return [...staticRoutes, ...areaRoutes, ...modelRoutes, ...shopRoutes, ...scooterRoutes]
 }

@@ -4,6 +4,39 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-21 (session 9)
+
+### Feature: SEO V1.1 — model landing pages + robots.txt fix (ADR-053)
+
+**Why it was needed:** External SEO audit (`seo-agent/` project: `SEO_AUDIT.md`, `TECHNICAL_SEO.md`, `SEO_OPPORTUNITIES.md`, `V2_IMPLEMENTATION_PLAN.md`) found a Critical robots.txt bug blocking `/contact-us` from indexing, and a confirmed zero-page gap for high commercial-intent model searches (PCX/NMAX/ADV rental Phuket) — the only competing internal page was the volatile `/scooter/[id]` listing.
+
+**What changed:**
+- `app/robots.ts` — `'/contact'` → `'/contact/'` so the disallow rule scopes to the private `/contact/[id]` thread route only, no longer prefix-matching the public `/contact-us` page.
+- `lib/supabase/queries.ts` — `getScooters()` gained an optional `model?: string` filter, matched with exact (no-wildcard) case-insensitive `ilike`.
+- New `constants/models.ts` — static copy for 3 models (pcx, nmax, adv): name, brand, description, FAQ, related-model links, plus an ADV-only `subModels` field for live 160/350 split.
+- New `lib/live-models.ts` — real min/max day-price across live-filtered inventory, mirrors `lib/live-areas.ts`.
+- New `lib/schema/model-page.ts` — shared `Product`+`AggregateOffer`+`BreadcrumbList`+`FAQPage` JSON-LD builder used by all 3 pages.
+- New `app/models/[slug]/page.tsx` — one dynamic route (`generateStaticParams` over the 3 models), architecture copied from `app/phuket/[area]/page.tsx`: hero, "why choose this model," live scooter grid (or empty state), live price range, shop list, "where to rent" (areas with live inventory), reciprocal model cross-links, FAQ, CTA. ADV page additionally renders a live-computed "ADV 160 vs ADV 350" section.
+- `app/sitemap.ts` — added the 3 `/models/[slug]` routes (same pattern as `areaRoutes`).
+- `components/layout/Footer.tsx` — new "Popular Models" column (grid widened 6→7 columns to fit it).
+- New `tests/e2e/model-pages.spec.ts` — loads without crash (all 3 slugs), renders model name, shows scooters-or-empty-state, unknown slug → 404 not 500, scooter cards clickable, link back to `/explore`, PCX↔NMAX reciprocal link, ADV 160/350 section renders.
+
+**Problems encountered:**
+- The DB's `model` column has inconsistent casing (`"NMAX"` vs `"Nmax"`) **and** a separate `"XADV"` model that contains `"ADV"` as a substring — a naive `ilike('%ADV%')` filter would have wrongly matched X-ADV (Honda X-ADV 750) listings on the ADV page. Caught by querying the live `scooters` table directly before writing any filter code, per the SEO plan's own flagged risk.
+- The original brief's breadcrumb pattern was "Home → Models → PCX," but no `/models` hub page exists in this round's scope — using it would have put a dead link in `BreadcrumbList` JSON-LD.
+- `npm run dev` defaults to port 3000 but `playwright.config.ts` expects `localhost:3001` — pre-existing test-infra mismatch, unrelated to this change. Worked around locally with `PORT=3001 npm run dev` for verification; not modified since it's out of this session's scope.
+
+**How they were solved:**
+- Exact-match (no wildcard) `ilike` instead of substring matching — verified against real data this correctly separates "ADV" from "XADV" and still catches NMAX casing variants.
+- Breadcrumb shortened to 2 levels (Home → Model name) instead of the 3-level brief suggestion.
+- ADV's "160 vs 350" copy is computed live from real listing names via regex (`/160/`, `/350/`) every request rather than hand-written from a one-time count, so it can't go stale as inventory changes — live data showed 1 live ADV 350 and 0 ADV 160 at verification time.
+
+**Verification:** `npx tsc --noEmit` clean. `npm run lint` — 0 new errors/warnings (14 errors / 72 warnings present, all pre-existing in unrelated files, confirmed by grepping full lint output for the changed file names). `npm run build` succeeded, all existing routes (including `/phuket/[area]`, `/sitemap.xml`, `/robots.txt`) still generate correctly alongside the new `/models/[slug]` route. 21/21 Playwright tests passed: full existing `tests/e2e/area-pages.spec.ts` suite (regression check — no existing behavior broken) plus the new `tests/e2e/model-pages.spec.ts`, run against a real dev server with live DB data. Manually verified via curl: `/robots.txt` no longer blocks `/contact-us`, `/sitemap.xml` includes all 3 model routes, `/models/pcx` renders 4 real listing links, `/models/nmax` renders 1, `/models/adv`'s JSON-LD shows real `lowPrice`/`highPrice`/`offerCount` (600/600/1) matching the single live ADV 350 listing, and the 160-vs-350 section correctly shows "No live listings" for 160 and "1 live listing" for 350.
+
+**Risks remaining:** Only PCX/NMAX/ADV are covered (Tier 1, as scoped) — Lead, Tmax, Xmax, XADV, Click, Forza have no page yet. No alias-mapping layer for model name variants (e.g. a future `"Honda PCX 160"` value in the `model` column itself, as opposed to the `name` field) — not needed for current live data, flagged in ADR-053 for Tier 2.
+
+---
+
 ## 2026-06-21 (session 8)
 
 ### Feature: Phase 2A — admin manual shop claim by owner email (ADR-052)

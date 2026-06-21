@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { SITE_NAME } from '@/constants'
 import { AREAS } from '@/constants/areas'
+import { MODELS } from '@/constants/models'
 
 const POPULAR_SLUGS = ['patong', 'kata', 'karon', 'rawai', 'bang-tao', 'phuket-town']
 
@@ -32,7 +33,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#0f0f0e] text-white">
       <div className="max-w-6xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-7 gap-10">
 
           {/* Brand */}
           <div className="md:col-span-2">
@@ -89,6 +90,22 @@ export default function Footer() {
                   <ChevronRight className="w-3.5 h-3.5" />
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          {/* Popular Models */}
+          <div>
+            <h4 className="text-xs font-semibold text-[#9c9c98] uppercase tracking-widest mb-4">
+              Popular Models
+            </h4>
+            <ul className="space-y-3">
+              {MODELS.map(model => (
+                <li key={model.slug}>
+                  <Link href={`/models/${model.slug}`} className="text-sm text-[#9c9c98] hover:text-white transition-colors">
+                    {model.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

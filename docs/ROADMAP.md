@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-06-12
+Last updated: 2026-06-21
 
 ---
 
@@ -86,6 +86,7 @@ Last updated: 2026-06-12
 - [x] Native push notifications — APNS HTTP/2 direct, warm-up prompt Messages, CapacitorProvider tap handler (ADR-044)
 - [x] Admin-created unclaimed shops — Phase 1: migration 050, adminCreateShop, scooter admin bypass, /admin/shops UI, messaging fallback (ADR-045)
 - [x] Admin manual shop claim by owner email — Phase 2A: migration 051, adminClaimShopByEmail, ClaimShopSection UI (ADR-052)
+- [x] SEO V1.1: robots.txt `/contact-us` indexing fix + model landing pages `/models/pcx`, `/models/nmax`, `/models/adv` (ADR-053)
 
 ---
 
@@ -121,6 +122,12 @@ Last updated: 2026-06-12
 - [ ] Grow scooter inventory
 - [ ] SEO growth (more scooters, shops, reviews, backlinks)
 - [ ] Shop reviews system
+- [ ] SEO V1.1 follow-ups (not in this round's scope, see ADR-053):
+  - [ ] Tier 2 model pages (XMAX, ADV 160/350 split) once volume justifies it
+  - [ ] Alias-mapping for model name variants if shop owners start entering inconsistent `model` values beyond current casing-only variance
+  - [ ] `/models` hub/index page once 3-4+ model pages exist (unblocks a real 3-level breadcrumb)
+  - [ ] `/explore` model filter chips + `CollectionPage`/`ItemList` schema
+  - [ ] Commercial pages (airport, monthly, no-deposit) — blocked on shop-owner validation (airport) and fill-rate decisions (monthly/no-deposit), see `seo-agent/V2_IMPLEMENTATION_PLAN.md`
 
 ---
 
