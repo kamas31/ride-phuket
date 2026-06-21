@@ -4,6 +4,31 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-21 (session 12)
+
+### Feature: Structured brand/model/engine-size selection for scooter forms (ADR-056)
+
+**Why it was needed:** Free-text brand/model/engine inputs on the partner scooter create/edit forms produced exactly the data drift the SEO model pages (ADR-053/055) are sensitive to — casing variants (`Nmax`/`NMAX`, `Lead`/`LEAD`), an engine-size formatting split (`"160"` vs `"160cc"` for the same real PCX 160), and one genuine brand/model mismatch (`brand="Honda"` on a row named "Yamaha Xmax 300cc"). A three-stage plan (full audit → engine-size addendum → taxonomy expansion) was reviewed and approved before any code was written.
+
+**What changed:**
+- New `constants/scooter-brands-models.ts` — brand → model → engine-size taxonomy (Honda, Yamaha, Kawasaki, Suzuki, Vespa, BMW, Royal Enfield, Other), each model carrying real allowed engine sizes and an auto-select default when only one size is legitimate. Exports `getBrand()`, `getModel()`, `normalizeEngineDigits()`, and `resolveBrandModelEngine()` (maps an existing scooter's raw strings onto the taxonomy for edit-mode pre-fill, "Other" fallback preserves anything unrecognized).
+- `app/partner/scooters/new/NewScooterForm.tsx` and `app/partner/scooters/[id]/edit/EditScooterForm.tsx` — replaced the free-text Model input and free-text Engine input with cascading selects (Brand → Model → Engine size), each level falling back to a free-text "custom" field when "Other" is chosen. Brand change resets model+engine; model change resets engine and auto-fills it when the model has exactly one real size.
+- No changes to `app/admin/shops/[shopId]/scooters/*` — confirmed it imports both form components directly, inherits the new dropdowns automatically.
+- **No schema changes, no migrations.** Submission still writes plain strings into the existing `brand`/`model`/`specs.engine` columns — just cleaner ones.
+
+**Problems encountered:**
+- Caught a real bug during implementation, before it shipped: the engine-size select's "Other / Custom" option, when chosen on a *known* model (e.g. picking "Other" from PCX's engine list instead of 150/160), didn't initially route submission to the free-text override — it would have written the literal string `"Other"` into `specs.engine`. Fixed by separating "which UI to render" (`usingCustomEngine`) from "which value to submit" (`engineIsCustomValue`) into two distinct booleans, since they diverge in exactly that one case.
+
+**How they were solved:**
+- Verified `resolveBrandModelEngine()` directly against every real DB row's exact brand/model/engine triplet (via a one-off `node --experimental-strip-types` script, not committed) before trusting it for edit-mode pre-fill — confirmed it cleanly normalizes the two `"...cc"`-suffixed legacy rows (PCX `"160cc"` → `160`, TMAX `"560cc"` → `560`) and correctly surfaces the Honda/XMAX brand-mismatch row as `model="Other"` with `"XMAX"` preserved in the custom field, rather than crashing, misrepresenting it, or silently auto-correcting it without review.
+- Confirmed zero SEO files were touched at all (`git status` shows only the two form components + the new constants file) and re-ran the full `tests/e2e/model-pages.spec.ts` (28 tests) + `tests/e2e/area-pages.spec.ts` suites as an explicit regression check — both fully pass.
+
+**Verification:** `npx tsc --noEmit` clean. `npm run build` succeeded (72 routes, unchanged count — this change adds no routes). `npm run lint` — 0 new issues (same 86 pre-existing problems as the established baseline; the one error landing in `EditScooterForm.tsx` this run is on line 51, untouched pre-existing code unrelated to this change, confirmed by exact total-count match before/after). 28/28 Playwright tests passed on the SEO regression suite. No new Playwright coverage was added for the partner/admin scooter forms themselves — they're behind shop-owner auth with no existing test fixture for that flow (confirmed via search).
+
+**Risks remaining:** Several taxonomy brands/models (Royal Enfield, BMW, Kawasaki, Vespa, TMAX, Aerox, Fazzio, Ténéré 700) have zero current inventory — clean dropdown options only, no SEO page implied or auto-created. Authenticated Playwright coverage for the scooter forms is a flagged follow-up, not done this round.
+
+---
+
 ## 2026-06-21 (session 11)
 
 ### Feature: SEO V1.2 — extend model pages to XADV, Forza, XMAX, Click, Lead (ADR-055)

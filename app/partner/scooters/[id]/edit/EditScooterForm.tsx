@@ -12,8 +12,7 @@ import { updateScooter } from '@/app/actions/scooter-update'
 import { ImageUploader, type ProcessedImage } from '@/components/ride/ImageUploader'
 import { cn, formatPrice } from '@/lib/utils'
 import type { Scooter, MileageRange } from '@/types'
-
-const BRANDS    = ['Honda', 'Yamaha', 'Vespa', 'Kawasaki', 'Suzuki', 'Other']
+import { SCOOTER_BRANDS, OTHER, getBrand, getModel, resolveBrandModelEngine } from '@/constants/scooter-brands-models'
 const SCOOTER_FEATURES = ['Smart key / keyless', 'LED lights', 'Traction control', 'ABS brakes', 'USB charging']
 const ACCESSORIES = ['Back rest', 'Top case', 'Crash bar', 'Windshield / Wind visor', 'Electric windshield', 'Phone charger', 'Phone holder']
 const CURRENT_YEAR = new Date().getFullYear()
@@ -52,13 +51,21 @@ export default function EditScooterForm({ scooter, shopId, shopName, shopLocatio
     : '' as ''
   const initialFeatures = scooter.features.filter(f => !f.startsWith('Seat storage: '))
 
+  // Resolve the existing scooter's raw brand/model/engine strings against the taxonomy once
+  // at mount — anything unrecognized (legacy casing, free-text models) falls back to the
+  // "Other" branch with the original value preserved, never silently dropped.
+  const resolvedBME = resolveBrandModelEngine(scooter.brand, scooter.model, scooter.specs.engine)
+
   const [form, setForm] = useState({
     name:                scooter.name,
-    brand:               scooter.brand,
-    model:               scooter.model,
+    brand:               resolvedBME.brand,
+    brandCustom:         resolvedBME.brandCustom,
+    model:               resolvedBME.model,
+    modelCustom:         resolvedBME.modelCustom,
     year:                scooter.year,
     category:            scooter.category,
-    engine:              scooter.specs.engine !== 'N/A' ? scooter.specs.engine : '',
+    engine:              resolvedBME.engine,
+    engineCustom:        resolvedBME.engineCustom,
     pricePerDay:         String(scooter.pricePerDay),
     pricePerWeek:        scooter.pricePerWeek ? String(scooter.pricePerWeek) : '',
     pricePerMonth:       scooter.pricePerMonth ? String(scooter.pricePerMonth) : '',
@@ -81,6 +88,25 @@ export default function EditScooterForm({ scooter, shopId, shopName, shopLocatio
   })
 
   const set = useCallback((k: keyof typeof form, v: unknown) => setForm(f => ({ ...f, [k]: v })), [])
+
+  // Brand change resets model + engine — the model list and engine options both depend on brand.
+  const setBrand = (v: string) =>
+    setForm(f => ({ ...f, brand: v, brandCustom: '', model: '', modelCustom: '', engine: '', engineCustom: '' }))
+
+  // Model change resets engine, auto-selecting the model's single engine size if it has only one.
+  const setModel = (v: string) => {
+    const modelOpt = getModel(form.brand, v)
+    setForm(f => ({ ...f, model: v, modelCustom: '', engine: modelOpt?.defaultEngine ?? '', engineCustom: '' }))
+  }
+
+  const currentBrandOption = form.brand !== OTHER ? getBrand(form.brand) : undefined
+  const currentModelOption = currentBrandOption ? getModel(form.brand, form.model) : undefined
+  const usingCustomModel   = form.brand === OTHER || form.model === OTHER
+  // Controls select-vs-free-text for the Engine field itself (no known model → no engine list).
+  const usingCustomEngine  = usingCustomModel || !currentModelOption
+  // Controls which value submission reads — also true when a known model's select has
+  // "Other / Custom" explicitly picked (form.engine === OTHER), which usingCustomEngine alone misses.
+  const engineIsCustomValue = usingCustomEngine || form.engine === OTHER
 
   const toggleFeature = (f: string) =>
     setForm(prev => ({
@@ -143,10 +169,17 @@ export default function EditScooterForm({ scooter, shopId, shopName, shopLocatio
       const allFeatures = [...form.features]
       if (form.seatStorage) allFeatures.push(`Seat storage: ${form.seatStorage}`)
 
+      // Resolve the brand/model/engine cascade into the plain strings the existing
+      // brand/model/specs.engine columns expect — "Other" branches fall back to the
+      // free-text custom fields, never to a sentinel value.
+      const finalBrand  = form.brand === OTHER ? (form.brandCustom.trim() || 'Other') : form.brand
+      const finalModel  = usingCustomModel    ? (form.modelCustom.trim()  || form.name) : (currentModelOption?.value ?? form.name)
+      const finalEngine = engineIsCustomValue ? (form.engineCustom.trim() || 'N/A')      : (form.engine || 'N/A')
+
       const result = await updateScooter(scooter.id, {
         name:              form.name,
-        brand:             form.brand,
-        model:             form.model || form.name,
+        brand:             finalBrand,
+        model:             finalModel,
         year:              Number(form.year),
         category:          form.category,
         images:            allImages,
@@ -161,7 +194,7 @@ export default function EditScooterForm({ scooter, shopId, shopName, shopLocatio
         minRentalDays:     form.minRentalDays,
         features:          allFeatures,
         specs: {
-          engine:       form.engine || 'N/A',
+          engine:       finalEngine,
           power:        scooter.specs.power        || 'N/A',
           fuelCapacity: scooter.specs.fuelCapacity || 'N/A',
           consumption:  scooter.specs.consumption  || 'N/A',
@@ -319,15 +352,36 @@ export default function EditScooterForm({ scooter, shopId, shopName, shopLocatio
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Brand</label>
-                  <select value={form.brand} onChange={e => set('brand', e.target.value)} className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]">
-                    {BRANDS.map(b => <option key={b}>{b}</option>)}
+                  <select value={form.brand} onChange={e => setBrand(e.target.value)} className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]">
+                    {SCOOTER_BRANDS.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Model</label>
-                  <input type="text" value={form.model} onChange={e => set('model', e.target.value)} className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]" />
+                  {form.brand === OTHER ? (
+                    <input type="text" value={form.modelCustom} onChange={e => set('modelCustom', e.target.value)} placeholder="e.g. Click 125i" className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35]" />
+                  ) : (
+                    <select value={form.model} onChange={e => setModel(e.target.value)} className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]">
+                      <option value="" disabled>Select a model</option>
+                      {currentBrandOption?.models.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                    </select>
+                  )}
                 </div>
               </div>
+
+              {form.brand === OTHER && (
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Brand (custom)</label>
+                  <input type="text" value={form.brandCustom} onChange={e => set('brandCustom', e.target.value)} placeholder="e.g. Royal Alloy" className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35]" />
+                </div>
+              )}
+
+              {form.brand !== OTHER && form.model === OTHER && (
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Model (custom)</label>
+                  <input type="text" value={form.modelCustom} onChange={e => set('modelCustom', e.target.value)} placeholder="e.g. Click 125i" className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35]" />
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -359,11 +413,26 @@ export default function EditScooterForm({ scooter, shopId, shopName, shopLocatio
                   <p className="text-[10px] text-[#9c9c98] mt-1">Same as your shop — always matches.</p>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Engine</label>
-                  <input type="text" value={form.engine} onChange={e => set('engine', e.target.value)} placeholder="125cc"
-                    className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35]" />
+                  <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Engine size</label>
+                  {usingCustomEngine ? (
+                    <input type="text" value={form.engineCustom} onChange={e => set('engineCustom', e.target.value)} placeholder="e.g. 125 or Electric"
+                      className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35]" />
+                  ) : (
+                    <select value={form.engine} onChange={e => set('engine', e.target.value)} className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]">
+                      <option value="" disabled>Select engine size</option>
+                      {currentModelOption?.engineSizes.map(es => <option key={es.value} value={es.value}>{es.label}</option>)}
+                      <option value={OTHER}>Other / Custom</option>
+                    </select>
+                  )}
                 </div>
               </div>
+
+              {!usingCustomEngine && form.engine === OTHER && (
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Engine size (custom)</label>
+                  <input type="text" value={form.engineCustom} onChange={e => set('engineCustom', e.target.value)} placeholder="e.g. 125 or Electric" className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm placeholder:text-[#9c9c98] focus:outline-none focus:border-[#FF6B35]" />
+                </div>
+              )}
             </div>
 
             {/* Availability — edit-only */}

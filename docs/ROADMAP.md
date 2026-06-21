@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-06-21 (session 11)
+Last updated: 2026-06-21 (session 12)
 
 ---
 
@@ -88,6 +88,7 @@ Last updated: 2026-06-21 (session 11)
 - [x] Admin manual shop claim by owner email — Phase 2A: migration 051, adminClaimShopByEmail, ClaimShopSection UI (ADR-052)
 - [x] SEO V1.1: robots.txt `/contact-us` indexing fix + model landing pages `/models/pcx`, `/models/nmax`, `/models/adv` (ADR-053)
 - [x] SEO V1.2: extended model pages to `/models/xadv`, `/models/forza`, `/models/xmax`, `/models/click`, `/models/lead` (ADR-055)
+- [x] Structured brand → model → engine-size dropdowns on scooter create/edit forms (ADR-056)
 
 ---
 
@@ -126,10 +127,14 @@ Last updated: 2026-06-21 (session 11)
 - [ ] Shop reviews system
 - [ ] SEO V1.1/V1.2 follow-ups (not in either round's scope, see ADR-053/ADR-055):
   - [ ] `/models` hub/index page — 8 model pages now live with no index linking them together; unblocks a real 3-level breadcrumb (Home → Models → X)
-  - [ ] Alias-mapping for model name variants if shop owners start entering inconsistent `model` values beyond current casing-only variance
   - [ ] `/explore` model filter chips + `CollectionPage`/`ItemList` schema
   - [ ] ADV 160/350 sub-page split once volume justifies it (currently absorbed into `/models/adv`)
   - [ ] Commercial pages (airport, monthly, no-deposit) — blocked on shop-owner validation (airport) and fill-rate decisions (monthly/no-deposit), see `seo-agent/V2_IMPLEMENTATION_PLAN.md`
+- [ ] Structured brand/model taxonomy follow-ups (not in this round's scope, see ADR-056):
+  - [ ] Historical data cleanup — re-case the pre-existing lowercase brand/model rows and the two `"...cc"`-suffixed engine rows not yet re-saved through the new dropdowns (mostly happens automatically as shop owners re-save listings, per ADR-056)
+  - [ ] Manually review and correct the one `brand="Honda"`/`model="XMAX"` data-entry error found in the audit (real model is a Yamaha XMAX)
+  - [ ] Authenticated Playwright coverage for `NewScooterForm`/`EditScooterForm` (no test fixture exists yet for the shop-owner auth flow)
+  - [ ] Revisit `model_normalized`/`model_slug` columns only if free-text "Other" entries accumulate enough volume to justify the migration risk
 
 ---
 
