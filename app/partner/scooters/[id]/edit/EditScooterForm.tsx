@@ -14,11 +14,6 @@ import { cn, formatPrice } from '@/lib/utils'
 import type { Scooter, MileageRange } from '@/types'
 
 const BRANDS    = ['Honda', 'Yamaha', 'Vespa', 'Kawasaki', 'Suzuki', 'Other']
-const LOCATIONS = [
-  'Patong', 'Kata', 'Karon', 'Rawai', 'Phuket Town', 'Bang Tao',
-  'Kamala', 'Surin', 'Chalong', 'Nai Harn', 'Cherng Talay',
-  'Kata Noi', 'Mai Khao', 'Thalang', 'Cape Panwa', 'Ko Sirey',
-]
 const SCOOTER_FEATURES = ['Smart key / keyless', 'LED lights', 'Traction control', 'ABS brakes', 'USB charging']
 const ACCESSORIES = ['Back rest', 'Top case', 'Crash bar', 'Windshield / Wind visor', 'Electric windshield', 'Phone charger', 'Phone holder']
 const CURRENT_YEAR = new Date().getFullYear()
@@ -66,7 +61,6 @@ export default function EditScooterForm({ scooter, shopId, shopName }: EditScoot
     pricePerDay:         String(scooter.pricePerDay),
     pricePerWeek:        scooter.pricePerWeek ? String(scooter.pricePerWeek) : '',
     pricePerMonth:       scooter.pricePerMonth ? String(scooter.pricePerMonth) : '',
-    location:            scooter.location,
     deliveryAvailable:   scooter.deliveryAvailable,
     deliveryFee:         String(scooter.deliveryFee),
     helmetIncluded:      scooter.helmetIncluded,
@@ -159,7 +153,6 @@ export default function EditScooterForm({ scooter, shopId, shopName }: EditScoot
         pricePerDay:       Number(form.pricePerDay),
         pricePerWeek:      form.pricePerWeek  ? Number(form.pricePerWeek)  : undefined,
         pricePerMonth:     form.pricePerMonth ? Number(form.pricePerMonth) : undefined,
-        location:          form.location,
         deliveryAvailable: form.deliveryAvailable,
         deliveryFee:       Number(form.deliveryFee) || 0,
         helmetIncluded:    form.helmetIncluded,
@@ -359,9 +352,10 @@ export default function EditScooterForm({ scooter, shopId, shopName }: EditScoot
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Location</label>
-                  <select value={form.location} onChange={e => set('location', e.target.value)} className="w-full px-3 py-3 bg-[#f8f8f6] border border-[#e8e8e4] rounded-[12px] text-sm focus:outline-none focus:border-[#FF6B35]">
-                    {LOCATIONS.map(l => <option key={l}>{l}</option>)}
-                  </select>
+                  <div className="w-full px-3 py-3 bg-[#f0f0ec] border border-[#e8e8e4] rounded-[12px] text-sm text-[#5c5c58]">
+                    {scooter.location}
+                  </div>
+                  <p className="text-[10px] text-[#9c9c98] mt-1">Same as your shop — always matches.</p>
                 </div>
                 <div>
                   <label className="block text-[10px] font-semibold text-[#9c9c98] uppercase tracking-wider mb-1.5">Engine</label>
@@ -611,7 +605,7 @@ export default function EditScooterForm({ scooter, shopId, shopName }: EditScoot
                   ['Category', form.category],
                   ['Photos',   `${totalImages} photo${totalImages !== 1 ? 's' : ''}`],
                   ['Shop',     shopName],
-                  ['Location', form.location],
+                  ['Location', scooter.location],
                 ].map(([label, val]) => (
                   <div key={label} className="flex justify-between">
                     <span className="text-[#9c9c98]">{label}</span>

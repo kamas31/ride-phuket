@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient, isAdminUser } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import type { MileageRange } from '@/types'
-import { getZoneForLocation } from '@/lib/zones'
 
 export interface UpdateScooterPayload {
   name: string
@@ -17,7 +16,6 @@ export interface UpdateScooterPayload {
   pricePerDay: number
   pricePerWeek?: number
   pricePerMonth?: number
-  location: string
   deliveryAvailable: boolean
   deliveryFee: number
   helmetIncluded: boolean
@@ -63,10 +61,12 @@ export async function updateScooter(
     const admin = createAdminClient()
 
     // Verify ownership: scooter → shop → owner_id === user.id
+    // Also fetches the shop's current location — a scooter is always
+    // located where its shop is, there is no separate scooter location input.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: scooterRow, error: fetchErr } = await (admin as any)
       .from('scooters')
-      .select('id, shop_id, shops(owner_id)')
+      .select('id, shop_id, shops(owner_id,location,lat,lng)')
       .eq('id', scooterId)
       .single()
 
@@ -90,9 +90,9 @@ export async function updateScooter(
         price_per_day:      payload.pricePerDay,
         price_per_week:     payload.pricePerWeek ?? null,
         price_per_month:    payload.pricePerMonth ?? null,
-        location:           payload.location,
-        lat:                getZoneForLocation(payload.location || '')?.lat ?? null,
-        lng:                getZoneForLocation(payload.location || '')?.lng ?? null,
+        location:           scooterRow.shops?.location || 'Phuket',
+        lat:                scooterRow.shops?.lat ?? null,
+        lng:                scooterRow.shops?.lng ?? null,
         delivery_available: payload.deliveryAvailable,
         delivery_fee:       payload.deliveryFee,
         helmet_included:    payload.helmetIncluded,

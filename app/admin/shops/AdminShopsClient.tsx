@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { adminCreateShop } from '@/app/actions/admin-create-shop'
 import type { AdminShopListItem } from '@/app/actions/admin-shops'
+import { PHUKET_ZONES } from '@/lib/zones'
 import { cn } from '@/lib/utils'
 
 interface Props {
@@ -25,7 +26,7 @@ export default function AdminShopsClient({ shops }: Props) {
   const [list, setList] = useState(shops)
 
   const [form, setForm] = useState({
-    name: '', location: '', phone: '', whatsapp: '', address: '', description: '',
+    name: '', location: PHUKET_ZONES[0].name, phone: '', whatsapp: '', address: '', description: '',
   })
 
   function handleCreate() {
@@ -73,8 +74,12 @@ export default function AdminShopsClient({ shops }: Props) {
           </p>
           <input className={inputCls} placeholder="Shop name *" value={form.name}
             onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-          <input className={inputCls} placeholder="Location / area *" value={form.location}
-            onChange={e => setForm(f => ({ ...f, location: e.target.value }))} />
+          <select className={inputCls} value={form.location}
+            onChange={e => setForm(f => ({ ...f, location: e.target.value }))}>
+            {PHUKET_ZONES.map(zone => (
+              <option key={zone.key} value={zone.name}>{zone.name}</option>
+            ))}
+          </select>
           <input className={inputCls} placeholder="Phone *" value={form.phone}
             onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
           <input className={inputCls} placeholder="WhatsApp number" value={form.whatsapp}

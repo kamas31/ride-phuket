@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, isAdminUser } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { getZoneForLocation } from '@/lib/zones'
 
 export interface CreateScooterPayload {
   shopId: string
@@ -17,7 +16,6 @@ export interface CreateScooterPayload {
   pricePerDay: number
   pricePerWeek?: number
   pricePerMonth?: number
-  location: string
   deliveryAvailable: boolean
   deliveryFee: number
   helmetIncluded: boolean
@@ -90,17 +88,22 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
       return { success: false, error: 'Server config error.', errorCode: 'ADMIN_INIT' }
     }
 
-    // ── 4. Verify shop ownership ──────────────────────────────
+    // ── 4. Verify shop ownership, fetch shop location ──────────
+    // A scooter belongs to a shop, so it is always located where the shop
+    // is — there is no separate scooter location input. This also avoids
+    // the scooter location dropdown ever being out of sync with (or missing
+    // an option present in) the shop's own location.
+    let shop: { id: string; owner_id: string | null; location: string; lat: number | null; lng: number | null }
     try {
       const shopResult = await withTimeout(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (admin as any).from('shops').select('id,owner_id').eq('id', payload.shopId).single(),
+        (admin as any).from('shops').select('id,owner_id,location,lat,lng').eq('id', payload.shopId).single(),
         8000, 'verify-shop'
       )
-      const shop = shopResult.data
-      if (!shop) {
+      if (!shopResult.data) {
         return { success: false, error: 'Shop not found.', errorCode: 'SHOP_NOT_FOUND' }
       }
+      shop = shopResult.data
       if (shop.owner_id !== userId && !(await isAdminUser(admin, userId))) {
         return { success: false, error: 'You do not own this shop.', errorCode: 'UNAUTHORIZED' }
       }
@@ -123,9 +126,9 @@ export async function createScooter(payload: CreateScooterPayload): Promise<Crea
       price_per_day:      Number(payload.pricePerDay),
       price_per_week:     payload.pricePerWeek ? Number(payload.pricePerWeek) : null,
       price_per_month:    payload.pricePerMonth ? Number(payload.pricePerMonth) : null,
-      location:           payload.location || 'Phuket',
-      lat:                getZoneForLocation(payload.location || '')?.lat ?? null,
-      lng:                getZoneForLocation(payload.location || '')?.lng ?? null,
+      location:           shop.location || 'Phuket',
+      lat:                shop.lat ?? null,
+      lng:                shop.lng ?? null,
       delivery_available: Boolean(payload.deliveryAvailable),
       delivery_fee:       Number(payload.deliveryFee) || 0,
       helmet_included:    Boolean(payload.helmetIncluded),
