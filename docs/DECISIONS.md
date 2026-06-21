@@ -1063,3 +1063,34 @@ Root cause #3 (affichage scooter périmé) : `EditScooterForm.tsx` affichait `sc
 - Avec `PHUKET_ZONES` comme unique source pour ces 2 formulaires, toute future zone ajoutée à `lib/zones.ts` apparaîtra automatiquement dans les dropdowns boutique (propriétaire et admin) — réduit le risque de récidive de ce bug.
 - Tout scooter dont la boutique a changé de zone depuis sa dernière sauvegarde aura encore `scooters.location` périmé en base jusqu'à la prochaine sauvegarde de ce scooter — n'affecte que des usages internes (aucun usage public identifié lit `scooters.location` directement pour le filtrage de zone ; le filtre Explore/zone utilise la même colonne mais elle est resynchronisée à chaque sauvegarde scooter, donc en pratique tout scooter créé ou modifié après le changement de zone boutique est déjà correct).
 - `npx tsc --noEmit` et `npm run build` passent sans erreur (64 pages statiques générées, y compris Kathu). 2 erreurs ESLint pré-existantes restent dans `EditScooterForm.tsx:52` et `ShopSettingsClient.tsx:747` — confirmées via `git blame` comme antérieures à cette session, hors scope.
+
+---
+
+## ADR-049: Resync scooters.location/lat/lng quand la boutique change de zone
+
+**Status:** Accepted
+**Date:** 2026-06-21
+
+**Problème :**
+Après ADR-048, l'édition boutique et l'édition scooter affichent correctement Kathu, mais Explore (liste, cartes, carte/map, filtre de zone) continue d'afficher "Thalang" pour les scooters d'une boutique repassée à "Kathu". Les scooters existants ont un `scooters.location` figé en base, jamais mis à jour rétroactivement.
+
+**Audit :**
+- `app/actions/shop-update.ts` (`updateShop()`) ne touchait que la table `shops` — aucune propagation vers `scooters`.
+- `ScooterCard.tsx:141` affiche `scooter.location` directement, sans repli vers `shop.location`.
+- `ExploreClient.tsx:281` et `ScooterMap.tsx:202` résolvent la zone via `getZoneForLocation(s.location)` **en priorité** sur `s.shop?.location` — comme "Thalang" est lui-même une zone valide, le repli vers la boutique ne se déclenche jamais : le filtre de zone et le clustering carte font confiance à la valeur scooter périmée.
+- `lib/normalize/normalize-scooter.ts` priorise déjà `shops.lat/lng` sur `scooter.lat/lng` pour les coordonnées (donc la position du point sur la carte était déjà correcte une fois la boutique déplacée) — mais le **texte** de zone affiché/filtré ne suit pas cette même priorité nulle part.
+- `scooter-create.ts`/`scooter-update.ts` (ADR-046) ne dérivent `scooters.location` depuis la boutique qu'à la sauvegarde du **scooter** — jamais déclenché par une sauvegarde **boutique**.
+
+**Décision :**
+Dans `updateShop()`, après la mise à jour réussie de `shops`, si `payload.location` est fourni et diffère de l'ancienne valeur (`shopRow.location`, récupérée avant l'update), propager immédiatement à tous les scooters de cette boutique : `update scooters set location = payload.location, lat = payload.lat, lng = payload.lng where shop_id = shopId`. `lat`/`lng` ne sont écrasés que s'ils sont non-null dans le payload.
+
+**Pourquoi cette solution et pas une autre :**
+- Source unique de vérité appliquée au niveau donnée, pas au niveau affichage : corrige Explore, ScooterCard, ScooterMap, le filtre de zone et tout futur consommateur de `scooters.location` en un seul point, sans toucher à la logique de chacun des 4+ composants qui lisent cette colonne.
+- `updateShop()` est le seul chemin d'écriture partagé par le flux propriétaire (`ShopSettingsClient.tsx`) et le flux admin (même composant, `isAdmin` prop) — un seul changement couvre les deux sans dupliquer la logique de resync.
+- Pas de migration en masse : la résolution se fait à la prochaine sauvegarde de la boutique concernée, exactement comme demandé ("no risky global bulk migration required"). Combiné à ADR-046 (resync à la sauvegarde scooter), toute boutique ou scooter resauvegardé est désormais cohérent.
+- Garde conditionnelle (`payload.location !== shopRow.location`) évite une écriture `scooters` inutile à chaque sauvegarde boutique où la zone n'a pas changé.
+
+**Conséquences et risques :**
+- Une boutique avec beaucoup de scooters déclenche un `UPDATE` multi-lignes à chaque changement de zone — volumétrie actuelle du projet (marketplace local, pas des milliers de scooters par boutique) rend ce coût négligeable.
+- Si l'update `scooters` échoue (erreur réseau/DB), l'update `shops` reste déjà commité — la boutique affichera la nouvelle zone, mais ses scooters resteront périmés jusqu'à la prochaine sauvegarde boutique ou scooter ; l'erreur est loguée (`console.error`) mais ne fait pas échouer la requête globale (cohérent avec ADR-046 : la prochaine sauvegarde scooter individuelle corrige aussi ce cas).
+- `npx tsc --noEmit` et `npm run build` passent sans erreur ; `eslint app/actions/shop-update.ts` propre.

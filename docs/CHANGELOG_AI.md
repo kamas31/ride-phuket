@@ -4,6 +4,26 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-21 (session 5)
+
+### Fix: resync scooters.location/lat/lng when shop location changes (ADR-049)
+
+**Pourquoi :** after ADR-048, shop edit and scooter edit both correctly showed Kathu, but Explore (list, cards, map, zone filter) kept showing existing scooters as "Thalang". Existing `scooters.location` rows were never touched by a shop save — only by a scooter's own save (ADR-046).
+
+**Root cause :** `updateShop()` in `app/actions/shop-update.ts` only wrote to the `shops` table. `ScooterCard.tsx` displays `scooter.location` with no shop fallback; `ExploreClient.tsx`/`ScooterMap.tsx` resolve zone via `getZoneForLocation(s.location)` *before* falling back to `s.shop?.location` — since "Thalang" itself resolves to a real zone, that fallback never triggers, so stale scooter data wins over the shop. Coordinates (`lat`/`lng`) were already shop-prioritized in `normalize-scooter.ts`, but the zone *text* used for display/filtering was not.
+
+**Fichiers modifiés :**
+- `app/actions/shop-update.ts` — `updateShop()` now selects `shopRow.location` before updating, and after a successful shop update, if `payload.location` differs from the previous value, runs `update scooters set location, lat, lng where shop_id = shopId` for every scooter owned by that shop. `lat`/`lng` only overwritten when non-null in the payload.
+- `docs/DECISIONS.md` — ADR-049.
+
+**Problèmes rencontrés :** none — single shared write path (`updateShop()`) already covers both the owner flow (`ShopSettingsClient.tsx`) and the admin flow (same component, `isAdmin` prop), so one change fixes both without duplicating logic.
+
+**TypeScript/build :** `npx tsc --noEmit` clean. `npm run build` succeeded. `npx eslint app/actions/shop-update.ts` clean.
+
+**Risques restants :** if the scooter resync update fails after the shop update already committed, the shop shows the new zone while its scooters stay stale until the next shop or scooter save — error is logged, doesn't fail the overall request, and self-heals on the next save either way (consistent with ADR-046).
+
+---
+
 ## 2026-06-21 (session 4)
 
 ### Fix: urgent location consistency — Kathu still missing from 2 more dropdowns, scooter edit showed stale location (ADR-048)

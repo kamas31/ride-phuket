@@ -54,7 +54,7 @@ export async function updateShop(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: shopRow, error: fetchErr } = await (admin as any)
       .from('shops')
-      .select('id, owner_id, slug')
+      .select('id, owner_id, slug, location')
       .eq('id', shopId)
       .single()
 
@@ -96,6 +96,24 @@ export async function updateShop(
     if (updateErr) {
       console.error('[updateShop] DB error:', updateErr.message)
       return { success: false, error: updateErr.message, errorCode: updateErr.code }
+    }
+
+    // Shop location is the source of truth — when it changes, resync every
+    // scooter belonging to this shop so Explore/cards/map never contradict it.
+    if (payload.location && payload.location !== shopRow.location) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: resyncErr } = await (admin as any)
+        .from('scooters')
+        .update({
+          location: payload.location,
+          ...(payload.lat != null ? { lat: payload.lat } : {}),
+          ...(payload.lng != null ? { lng: payload.lng } : {}),
+        })
+        .eq('shop_id', shopId)
+
+      if (resyncErr) {
+        console.error('[updateShop] scooter resync error:', resyncErr.message)
+      }
     }
 
     revalidatePath('/partner/dashboard')
