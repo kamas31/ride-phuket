@@ -1125,3 +1125,33 @@ Le téléphone était obligatoire pour créer une boutique, à la fois pour le f
 **Conséquences et risques :**
 - Une boutique admin non revendiquée, créée sans téléphone ni WhatsApp, n'a aucun canal de contact fonctionnel jusqu'à sa revendication (le chat in-app refuse les boutiques `owner_id IS NULL`). Recommandation opérationnelle (non implémentée, hors scope demandé) : encourager les admins à renseigner au moins un canal pour ce cas précis.
 - `npx tsc --noEmit` et `npm run build` passent sans erreur. `eslint` propre sur tous les fichiers modifiés sauf une erreur pré-existante déjà documentée (`ShopSettingsClient.tsx:747`, antérieure à cette session).
+
+---
+
+## ADR-051: scooter.location normalisé depuis shop.location à la lecture — repli d'ADR-049 pour les données déjà périmées
+
+**Status:** Accepted
+**Date:** 2026-06-21
+
+**Problème :**
+Malgré ADR-049 (resync à la sauvegarde boutique), Explore (liste, cartes, carte, filtre de zone) affichait toujours "Thalang" pour une boutique passée à "Kathu". Boutique confirmée à jour (`shops.location = 'Kathu'`, `lat/lng` corrects), mais ses 3 scooters avaient encore `location = 'Thalang'` et `lat/lng` de Thalang en base.
+
+**Audit (lecture directe en base via le client service_role) :**
+- Boutique `5ed39c0f-dfbe-4b07-a176-8720e6ffff19` ("Даниил Ивлев") : `location = 'Kathu'`, `updated_at = 2026-06-21T14:27`. Ses 3 scooters : `location = 'Thalang'`, `lat/lng` de Thalang, `updated_at` entre 09:33 et 09:38 — **antérieur** à la dernière sauvegarde boutique.
+- Cause précise : la boutique avait déjà été changée à "Kathu" **avant** le déploiement d'ADR-049. Les sauvegardes boutique suivantes n'ont pas re-déclenché le resync car la condition d'ADR-049 (`payload.location !== shopRow.location`) ne se déclenche que sur un changement réel — une boutique déjà à "Kathu" resauvegardée sans toucher à la zone ne propage plus rien. ADR-049 corrige toute *future* transition de zone, mais pas l'état figé avant son déploiement.
+- Recherche globale (10 scooters, toutes boutiques) : seuls ces 3 scooters, sur cette seule boutique, présentaient une incohérence `scooter.location ≠ shop.location` — confirme que le problème est isolé à cette boutique de test, pas une corruption généralisée.
+- Root cause secondaire, plus profonde qu'ADR-049 : `lib/normalize/normalize-scooter.ts` retournait `location: row.location ?? ''` — la valeur scooter brute, sans aucun repli vers `row.shops?.location`. Tous les consommateurs publics (`ScooterCard.tsx`, le filtre de zone d'`ExploreClient.tsx`, le clustering de `ScooterMap.tsx`) lisent ce champ normalisé en confiance ; une seule colonne périmée en base se propageait silencieusement partout, sans qu'aucun de ces composants n'ait de défaut individuel. `lat`/`lng` étaient déjà protégés par une priorité similaire (`row.shops?.lat || row.lat`, ADR-046) — seul le champ texte `location` ne l'était pas.
+
+**Décision :**
+1. `lib/normalize/normalize-scooter.ts` : `location: row.shops?.location || row.location || ''` — même pattern de priorité « boutique avant scooter » déjà utilisé pour `lat`/`lng`. Corrige tous les consommateurs en un seul point (`ScooterCard`, filtre de zone, clustering carte, pages scooter/contact), sans toucher à leur logique individuelle.
+2. Réparation ciblée des données déjà périmées : `UPDATE scooters SET location = shops.location, lat = shops.lat, lng = shops.lng WHERE shop_id = '5ed39c0f-dfbe-4b07-a176-8720e6ffff19'` (exécutée via le client `service_role`, script jetable, supprimé après usage). Recherche globale préalable confirmant qu'aucune autre boutique n'a de scooters incohérents — la réparation reste strictement ciblée sur la boutique concernée, pas une migration globale.
+
+**Pourquoi cette solution et pas une autre :**
+- Corrige la classe d'erreur à la racine (priorité boutique-sur-scooter appliquée à la lecture, comme `lat`/`lng` l'étaient déjà) plutôt que de rajouter un repli dans chaque composant consommateur — cohérent avec la stratégie déjà choisie en ADR-048/049.
+- La réparation de données reste ciblée par `shop_id`, pas une `UPDATE` globale sans condition — conforme à la contrainte explicite, et justifiée par l'audit global qui montre qu'aucune autre ligne n'est concernée.
+- N'annule pas ADR-049 : le resync à la sauvegarde boutique reste nécessaire pour que `scooters.location` en base ne reste pas durablement faux (ADR-051 corrige l'affichage immédiatement, ADR-049 maintient la cohérence des données dans le temps).
+
+**Conséquences et risques :**
+- Si une future boutique change de zone DB sans jamais resauvegarder via `updateShop()` (improbable, mais possible via un accès direct à la base), `scooters.location` resterait périmé en base — sans impact utilisateur grâce à ADR-051 (l'affichage prend toujours le dessus côté boutique), mais à corriger si un jour un export ou rapport lit `scooters.location` directement sans jointure boutique.
+- `npx tsc --noEmit`, `npm run build` et `eslint lib/normalize/normalize-scooter.ts` passent sans erreur.
+- Scripts d'audit/réparation (`scripts/_tmp-*.mjs`) étaient temporaires, exécutés une fois en local avec le service role, puis supprimés — non committés.

@@ -4,6 +4,27 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-21 (session 7)
+
+### Fix: Explore/cards/map still showed stale scooter location after shop moved to Kathu (ADR-051)
+
+**Pourquoi :** despite ADR-049's resync-on-shop-save, Explore (list, cards, map, zone filter) still showed "Thalang" for a shop already confirmed as "Kathu" on its own page and in admin edit.
+
+**Root cause :** direct DB read (service_role client, ad-hoc script) confirmed the shop (`5ed39c0f-…`) was at `location = 'Kathu'` since 14:27, but its 3 scooters still had `location = 'Thalang'` from 09:33–09:38 — *before* ADR-049 shipped. ADR-049 only resyncs on a shop save where location actually *changes*; a shop already at "Kathu" being resaved doesn't re-trigger it, so pre-existing stale rows from before the fix never healed. Deeper cause: `lib/normalize/normalize-scooter.ts` read `location: row.location ?? ''` straight from the scooter row with no shop fallback — unlike `lat`/`lng`, which already prioritized `shops.lat/lng` (ADR-046). Every public consumer (`ScooterCard.tsx`, `ExploreClient.tsx`'s zone filter, `ScooterMap.tsx`'s clustering) trusted this one normalized field.
+
+**Audit :** queried all 10 scooters in the DB joined to their shop — only these 3, all under this one shop, had `scooter.location !== shop.location`. Confirmed the repair could stay strictly scoped to this shop, not a global migration.
+
+**Fichiers modifiés :**
+- `lib/normalize/normalize-scooter.ts` — `location: row.shops?.location || row.location || ''`, same shop-first priority pattern already used for `lat`/`lng`. Fixes every consumer in one place.
+- Data repair (not a tracked file): one-time `UPDATE scooters SET location, lat, lng FROM shops WHERE shop_id = '5ed39c0f-…'` run via a temporary Node script using the service-role client, then deleted — not committed.
+- `docs/DECISIONS.md` — ADR-051.
+
+**Problèmes rencontrés :** none — read-only audit first confirmed the exact scope (1 shop, 3 scooters) before any write, so the repair could be scoped with certainty rather than guessed.
+
+**TypeScript/build :** `npx tsc --noEmit` clean. `npm run build` succeeded. `eslint lib/normalize/normalize-scooter.ts` clean.
+
+---
+
 ## 2026-06-21 (session 6)
 
 ### Feature: phone number optional at shop creation/edit, in-app messaging as fallback CTA (ADR-050)

@@ -100,7 +100,9 @@ export function normalizeScooter(row: any): Scooter {
     pricePerWeek: row.price_per_week != null ? Number(row.price_per_week) : undefined,
     pricePerMonth: row.price_per_month != null ? Number(row.price_per_month) : undefined,
     currency: 'THB',
-    location: row.location ?? '',
+    // Shop location is the source of truth (ADR-046/049) — prefer it over the
+    // scooter's own row so stale data never outranks a more recent shop move.
+    location: row.shops?.location || row.location || '',
     lat,
     lng,
     available: Boolean(row.available),
