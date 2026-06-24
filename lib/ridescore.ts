@@ -240,3 +240,40 @@ export function sortByRecommended(scooters: Scooter[]): Scooter[] {
     return computeRideScoreProxy(b) - computeRideScoreProxy(a)
   })
 }
+
+// Deterministic seeded PRNG (Lehmer/Park-Miller). Given the same seed it
+// always produces the same sequence — used so the default Explore shuffle
+// is stable within a session (one seed generated per page load) without
+// depending on Math.random() during the sort itself.
+function seededRandom(seed: number): () => number {
+  let s = seed % 2147483647
+  if (s <= 0) s += 2147483646
+  return () => {
+    s = (s * 48271) % 2147483647
+    return (s - 1) / 2147483646
+  }
+}
+
+/**
+ * Default Explore ordering (no active filters/search/sort): admin-pinned
+ * scooters (explore_position) stay on top, ascending by position, exactly
+ * as in sortByRecommended(). Everyone else is shuffled with a seeded PRNG
+ * instead of ranked by computeRideScoreProxy(), so the same handful of
+ * high-scoring listings don't always appear first. Pass a fresh seed per
+ * page session (e.g. generated once via useState) to keep the order stable
+ * while the user browses, but different across visits.
+ */
+export function shuffleUnpinned(scooters: Scooter[], seed: number): Scooter[] {
+  const pinned = scooters
+    .filter(s => s.explorePosition != null)
+    .sort((a, b) => (a.explorePosition as number) - (b.explorePosition as number))
+  const unpinned = scooters.filter(s => s.explorePosition == null)
+
+  const rand = seededRandom(seed)
+  const shuffled = [...unpinned]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return [...pinned, ...shuffled]
+}

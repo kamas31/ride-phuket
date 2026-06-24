@@ -4,6 +4,27 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-24 (session 13)
+
+### Feature: randomize default Explore order (ADR-057)
+
+**Why it was needed:** The default (unfiltered) Explore order was pinned scooters → `computeRideScoreProxy()` descending → `created_at DESC` tie-break. At current inventory/analytics volume the proxy score barely differentiates listings, so the same scooters kept showing up first regardless of search/filter activity — not because they were "the best," just because of marginal score/recency differences. Requested fix: randomize the truly-default landing view only, leave every filtered/searched/non-recommended-sort case untouched.
+
+**What changed:**
+- `lib/ridescore.ts` — new `shuffleUnpinned(scooters, seed)`: keeps `explore_position`-pinned scooters on top exactly as `sortByRecommended()` does, Fisher-Yates-shuffles the rest using a new seeded Lehmer/Park-Miller PRNG helper (`seededRandom()`), not raw `Math.random()`.
+- `app/explore/ExploreClient.tsx` — one integer `randomSeed` generated via `useState(() => ...)` on mount (stable for the session, new on every refresh/revisit). Inside the `filtered` useMemo's `sortBy === 'recommended'` branch, an `isDefaultView` check (every filter at its default, no search, no `shopIdFilter`, no `mapBounds`) routes to `shuffleUnpinned(list, randomSeed)`; any active filter/search still uses the existing `sortByRecommended(list)`.
+
+**Problems encountered:**
+- A naive `Math.random()` call inside the sort comparator would make `Array.prototype.sort` non-deterministic per comparison (undefined behavior across engines, and would reshuffle on every re-render since the memo re-runs on unrelated state changes). Avoided by generating one seed per mount and feeding it into a pure, deterministic shuffle function instead.
+- Detecting "no filters active" can't use reference equality against `DEFAULT_FILTERS` since `setFilters` always creates a new object — solved with an explicit field-by-field comparison (`isDefaultView`).
+
+**How they were solved:**
+- Verified via `npx tsc --noEmit` (clean) and `npm run build` (clean, 72 routes unchanged).
+- Confirmed `explore_position` pinning behavior is identical in both the new shuffle path and the existing score-based path — `adminSetExplorePosition` and the admin pinning workflow needed zero changes.
+- Confirmed Near Me (`sortBy: 'distance'`), price/rating sort, location filter, and search all bypass `isDefaultView` entirely (any one of them being active routes back to the pre-existing `sortByRecommended()` logic), so none of those flows are affected.
+
+---
+
 ## 2026-06-21 (session 12)
 
 ### Feature: Structured brand/model/engine-size selection for scooter forms (ADR-056)
