@@ -215,7 +215,7 @@ export default async function ModelPage({ params }: PageProps) {
           </div>
           {scooters.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {scooters.slice(0, 8).map(scooter => (
+              {scooters.map(scooter => (
                 <ScooterCard key={scooter.id} scooter={scooter} />
               ))}
             </div>
