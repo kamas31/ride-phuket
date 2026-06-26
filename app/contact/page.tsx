@@ -81,7 +81,8 @@ function ContactShopContent() {
             src={getScooterCover(scooter!)}
             alt={scooter!.name}
             className="w-20 h-16 rounded-[12px] flex-shrink-0"
-            sizes="80px"
+            width={80}
+            height={64}
           />
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-[#0f0f0e] truncate text-[15px]">{scooter!.name}</h3>

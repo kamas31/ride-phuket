@@ -430,7 +430,8 @@ export default function DashboardClient({
                         src={s.images?.[0]}
                         alt={s.name}
                         className="w-full h-full object-cover"
-                        sizes="44px"
+                        width={44}
+                        height={44}
                       />
                     </div>
                   ))}

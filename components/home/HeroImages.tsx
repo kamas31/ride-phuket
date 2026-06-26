@@ -64,12 +64,14 @@ export function HeroImages() {
         className="absolute inset-0 pointer-events-none"
         style={{ willChange: 'transform, opacity, filter' }}
       >
-        {/* Mobile hero image */}
+        {/* Mobile hero image — fetchPriority (not priority/preload) keeps the
+            CSS-hidden desktop variant from being fetched too; see Next.js docs
+            "Theming images" / fetchPriority guidance for this exact pattern. */}
         <Image
           src="/heromobilemodif.png"
           alt="Explore Phuket on a scooter"
           fill
-          priority
+          fetchPriority="high"
           className="object-cover object-center md:hidden"
           sizes="100vw"
         />
@@ -78,7 +80,7 @@ export function HeroImages() {
           src="/heromodif.png"
           alt="Explore Phuket on a scooter"
           fill
-          priority
+          fetchPriority="high"
           className="object-cover object-center hidden md:block"
           sizes="100vw"
         />

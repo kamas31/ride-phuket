@@ -25,7 +25,15 @@ interface ScooterImageProps {
   priority?: boolean         // above-the-fold: skip lazy loading
   hover?: boolean            // scale on group-hover — parent needs `group`
   objectFit?: 'cover' | 'contain'  // cover = fills frame, contain = full scooter visible
-  sizes?: string             // Next.js responsive sizes hint
+  sizes?: string             // Next.js responsive sizes hint (ignored when width/height set)
+  // Fixed-pixel thumbnails only (e.g. small avatar/list thumbnails that never
+  // resize across breakpoints): pass both to swap from `fill` to an explicit
+  // width/height Image, which makes Next.js generate only [w, w*2] srcset
+  // candidates instead of the full responsive width range. Must match the
+  // container's actual rendered size exactly — do not use on responsive
+  // (breakpoint-varying) thumbnails.
+  width?: number
+  height?: number
   children?: React.ReactNode // badges, arrows, counters on top of image
 }
 
@@ -38,8 +46,11 @@ export function ScooterImage({
   hover     = false,
   objectFit = 'cover',
   sizes     = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
+  width,
+  height,
   children,
 }: ScooterImageProps) {
+  const isFixedSize = typeof width === 'number' && typeof height === 'number'
   const [loaded, setLoaded] = useState(priority) // priority images skip shimmer
 
   const handleLoad = useCallback(() => {
@@ -48,6 +59,16 @@ export function ScooterImage({
       window.dispatchEvent(new CustomEvent('scooter-img-load'))
     }
   }, [])
+
+  const imageClassName = cn(
+    objectFit === 'contain' ? 'object-contain' : 'object-cover',
+    hover && 'group-hover:scale-[1.03] transition-transform duration-700 ease-out',
+    'transition-opacity duration-300',
+    loaded ? 'opacity-100' : 'opacity-0',
+    // Fixed-size Image isn't `fill`, so it needs the same absolute-stretch
+    // behavior applied manually to render identically to the fill variant.
+    isFixedSize && 'absolute inset-0 w-full h-full',
+  )
 
   return (
     <div className={cn('relative overflow-hidden bg-[#f3f3ef]', className)}>
@@ -63,22 +84,40 @@ export function ScooterImage({
             />
           )}
 
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            className={cn(
-              objectFit === 'contain' ? 'object-contain' : 'object-cover',
-              hover && 'group-hover:scale-[1.03] transition-transform duration-700 ease-out',
-              'transition-opacity duration-300',
-              loaded ? 'opacity-100' : 'opacity-0',
-            )}
-            sizes={sizes}
-            priority={priority}
-            placeholder="blur"
-            blurDataURL={BLUR_DATA_URL}
-            onLoad={handleLoad}
-          />
+          {/* fetchPriority (not priority/preload) so that when two ScooterImage
+              instances are mounted simultaneously and CSS-hidden (e.g. the
+              shop desktop/mobile banner), only the visible one is fetched —
+              priority/preload would force-load both. */}
+          {isFixedSize ? (
+            // Explicit width/height (no `sizes`) instead of `fill` — Next.js
+            // then generates only [w, w*2] srcset candidates instead of the
+            // full responsive width range, since the rendered size never
+            // changes across breakpoints. Visually identical: imageClassName
+            // still stretches it to fill this wrapper exactly like `fill` would.
+            <Image
+              src={src}
+              alt={alt}
+              width={width}
+              height={height}
+              className={imageClassName}
+              fetchPriority={priority ? 'high' : undefined}
+              placeholder="blur"
+              blurDataURL={BLUR_DATA_URL}
+              onLoad={handleLoad}
+            />
+          ) : (
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              className={imageClassName}
+              sizes={sizes}
+              fetchPriority={priority ? 'high' : undefined}
+              placeholder="blur"
+              blurDataURL={BLUR_DATA_URL}
+              onLoad={handleLoad}
+            />
+          )}
         </>
       ) : (
         // Premium warm-sand fallback — consistent everywhere

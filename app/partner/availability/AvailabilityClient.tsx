@@ -121,7 +121,8 @@ export default function AvailabilityClient({
                       src={scooter.images?.[0]}
                       alt={scooter.name}
                       className="w-[72px] h-[60px] rounded-[10px] flex-shrink-0"
-                      sizes="72px"
+                      width={72}
+                      height={60}
                     />
 
                     {/* Info */}

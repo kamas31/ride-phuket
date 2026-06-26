@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
     ],
+    minimumCacheTTL: 86400,
   },
   experimental: {
     optimizePackageImports: ['lucide-react'],

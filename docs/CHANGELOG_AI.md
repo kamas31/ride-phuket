@@ -4,6 +4,28 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-24 (session 14)
+
+### Fix: Image Optimization remediation — 4 approved fixes (ADR-058)
+
+**Why it was needed:** A prior read-only audit traced Vercel's ~3,858/5,000 Image Transformations usage to concrete code-level causes. The user approved exactly 4 fixes to implement: hero double-fetch, shop-banner double-fetch, small fixed-thumbnail candidate-width bloat, and a too-short cache TTL.
+
+**What changed:**
+- `components/home/HeroImages.tsx` — both hero `<Image>`s switched from `priority` to `fetchPriority="high"`, per this installed Next.js version's own documented fix for CSS-hidden dual images (priority/preload would force-load both; fetchPriority+default-lazy fetches only the visible one).
+- `components/ride/ScooterImage.tsx` — same `priority` → `fetchPriority` swap (fixes the shop banner, which renders two `ScooterImage` instances for desktop/mobile). Also added optional `width`/`height` props: when both are passed, the component renders `<Image width height>` instead of `<Image fill sizes>`, routing Next's width-candidate algorithm into a 2-candidate (`[w, w*2]`) srcset instead of the full 15-value default range, while keeping identical visual output via `absolute inset-0 w-full h-full` on the swapped-in `<Image>`.
+- `app/partner/dashboard/DashboardClient.tsx`, `app/partner/availability/AvailabilityClient.tsx`, `app/partner/bookings/BookingsClient.tsx`, `app/contact/page.tsx` — the 4 genuinely fixed-pixel (non-breakpoint-varying) `ScooterImage` thumbnails now pass `width`/`height` instead of `sizes`.
+- `next.config.ts` — `images.minimumCacheTTL: 86400` (24h, up from the 14400s/4h framework default).
+
+**Problems encountered:**
+- `AGENTS.md` warns this Next.js version (16.2.4) differs from training data — verified directly against `node_modules/next/dist` rather than assuming: confirmed `priority` is deprecated in v16 in favor of `preload`/`fetchPriority`, confirmed the installed `getWidths()` algorithm's exact branching logic, and confirmed `fill`+`width`/`height` together throws (`E96`/`E115`), which is why the width/height fix needed a conditional branch in `ScooterImage` rather than just adding both props.
+- One dashboard listing thumbnail (`DashboardClient.tsx`, second `ScooterImage` usage) has a real `sm:` breakpoint size change (72×62 → 80×68) — left untouched on `fill`+`sizes` rather than forced into the new fixed-width path, since a single width/height pair can't represent two breakpoint sizes without a visual tradeoff.
+
+**How they were solved:**
+- Read the Next.js docs bundled with this exact installed version (`node_modules/next/dist/docs/.../image.md`) instead of relying on general knowledge — it documents the exact "two CSS-hidden images, only one should fetch" scenario almost verbatim (their light/dark theme example) with the `fetchPriority` solution.
+- `npx tsc --noEmit` and `npm run build` both pass clean (72 routes, unchanged). Manually verified via a temporary local dev server: `/` and `/shop/french-bike-l5vh` both return 200, both hero/banner `<Image>` tags still present in the HTML (CSS-hidden, not removed) as expected.
+
+---
+
 ## 2026-06-24 (session 13)
 
 ### Feature: randomize default Explore order (ADR-057)

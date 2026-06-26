@@ -180,7 +180,8 @@ export default function BookingsClient({ bookings: initial, shopId }: BookingsCl
                     src={scooterCover || undefined}
                     alt={booking.scooters?.name ?? ''}
                     className="w-16 h-12 rounded-[10px] flex-shrink-0"
-                    sizes="64px"
+                    width={64}
+                    height={48}
                   />
                   {/* Scooter + rider info */}
                   <div className="flex-1 min-w-0">
