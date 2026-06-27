@@ -3,8 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import * as http2 from 'node:http2'
-import { createSign } from 'node:crypto'
+import { ApnsClient, ApnsError, Notification, Host } from 'apns2'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -219,79 +218,50 @@ export async function sendMessage(
 }
 
 // ── APNS helpers ─────────────────────────────────────────────────────────────
+// Transport: apns2 (HTTP/2 client built on undici). keepAlive is left off so
+// each delivery opens one connection and closes it — matching the previous
+// connect/send/close-per-call lifecycle, just without a hand-rolled
+// node:http2 client or manual JWT signing (apns2 handles both internally
+// from the same APNS_* env vars).
 
-function buildApnsJwt(teamId: string, keyId: string, privateKey: string): string {
-  const header  = Buffer.from(JSON.stringify({ alg: 'ES256', kid: keyId })).toString('base64url')
-  const now     = Math.floor(Date.now() / 1000)
-  const payload = Buffer.from(JSON.stringify({ iss: teamId, iat: now })).toString('base64url')
-  const input   = `${header}.${payload}`
-  const signer  = createSign('SHA256')
-  signer.update(input)
-  // ES256 requires IEEE P1363 encoding (raw r||s), not the default DER encoding.
-  const sig = signer.sign({ key: privateKey, dsaEncoding: 'ieee-p1363' }, 'base64url')
-  return `${input}.${sig}`
+type ApnsPushOptions = {
+  alert?: { title: string; body: string }
+  badge?: number
+  sound?: string
+  data?: Record<string, string>
 }
 
-function deliverApns(
+async function deliverApns(
+  client: ApnsClient,
   token: string,
-  apnsPayload: object,
-  jwt: string,
-  host: string,
-  bundleId: string,
+  options: ApnsPushOptions,
 ): Promise<void> {
-  return new Promise<void>(resolve => {
-    const serialized = JSON.stringify(apnsPayload)
-    let done = false
-
-    const client = http2.connect(`https://${host}`)
-
-    function finish(status?: number, body?: string) {
-      if (done) return
-      done = true
-      if (status !== undefined && status !== 200) {
-        console.error(`[APNS] delivery failed status:${status} body:${body ?? '(empty)'}`)
-      }
-      try { client.close() } catch { /* ignore */ }
-      resolve()
+  const notification = new Notification(token, options)
+  const tokenPrefix = token.slice(0, 8)
+  try {
+    await client.send(notification)
+    console.log(`[APNS] delivered token:${tokenPrefix}…`)
+  } catch (err) {
+    if (err instanceof ApnsError) {
+      console.error(`[APNS] rejected token:${tokenPrefix}… status:${err.statusCode} reason:${err.reason}`)
+    } else {
+      const message = err instanceof Error ? err.message : String(err)
+      const kind = /timeout/i.test(message) ? 'timeout' : 'transport error'
+      console.error(`[APNS] ${kind} token:${tokenPrefix}… ${message}`)
     }
-
-    client.on('error', err => { console.error('[APNS] client error:', err.message); finish() })
-
-    const req = client.request({
-      ':method': 'POST',
-      ':path': `/3/device/${token}`,
-      'authorization': `bearer ${jwt}`,
-      'apns-topic': bundleId,
-      'apns-push-type': 'alert',
-      'apns-priority': '10',
-      'content-type': 'application/json',
-      'content-length': Buffer.byteLength(serialized),
-    })
-    req.write(serialized)
-    req.end()
-
-    req.on('response', headers => {
-      const status = headers[':status'] as number | undefined
-      const chunks: string[] = []
-      req.on('data', (chunk: Buffer) => chunks.push(chunk.toString()))
-      req.on('end', () => finish(status, chunks.join('') || '(empty)'))
-    })
-
-    req.on('error', err => { console.error('[APNS] req error:', err.message); finish() })
-
-    setTimeout(() => { console.error('[APNS] timeout'); finish() }, 5000)
-  })
+  }
 }
 
 // Resolves everything needed to deliver an APNs push to a user's iOS
-// device(s): registered tokens + signed JWT + host/bundle. Returns null if
+// device(s): registered tokens + a configured client. Returns null if
 // there's nothing to deliver to (no token, or APNs not configured) — every
-// caller must treat null as a safe no-op, never an error.
+// caller must treat null as a safe no-op, never an error. Callers own the
+// returned client and must close() it once delivery finishes.
 async function resolveApnsDelivery(
   userId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   admin: any,
-): Promise<{ tokens: string[]; jwt: string; host: string; bundleId: string } | null> {
+): Promise<{ tokens: string[]; client: ApnsClient } | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: rows } = await (admin as any)
     .from('push_tokens')
@@ -310,14 +280,21 @@ async function resolveApnsDelivery(
   if (!teamId || !keyId || !rawKey) return null
 
   const privateKey = rawKey.replace(/\\n/g, '\n')
-  const host = prod ? 'api.push.apple.com' : 'api.development.push.apple.com'
-  const jwt  = buildApnsJwt(teamId, keyId, privateKey)
+  const host = prod ? Host.production : Host.development
+
+  const client = new ApnsClient({
+    team: teamId,
+    keyId,
+    signingKey: privateKey,
+    defaultTopic: bundleId,
+    host,
+    requestTimeout: 5000,
+    keepAlive: false,
+  })
 
   return {
     tokens: (rows as { token: string }[]).map(r => r.token),
-    jwt,
-    host,
-    bundleId,
+    client,
   }
 }
 
@@ -367,14 +344,15 @@ async function sendMessagePush(
   // badge in sync with the user's actual unread messages on every new push.
   const badge = await getUnreadMessageCount(userId, admin)
 
-  const apnsPayload = {
-    aps:  { alert: { title, body }, sound: 'default', badge },
-    ...data,
+  try {
+    await Promise.allSettled(
+      delivery.tokens.map(token =>
+        deliverApns(delivery.client, token, { alert: { title, body }, sound: 'default', badge, data }),
+      ),
+    )
+  } finally {
+    await delivery.client.close().catch(() => { /* ignore */ })
   }
-
-  await Promise.allSettled(
-    delivery.tokens.map(token => deliverApns(token, apnsPayload, delivery.jwt, delivery.host, delivery.bundleId)),
-  )
 }
 
 // Silent badge-only update — no alert, no sound, just the icon number.
@@ -393,11 +371,14 @@ async function sendBadgeRefreshPush(
     if (!delivery) return
 
     const badge = await getUnreadMessageCount(userId, admin)
-    const apnsPayload = { aps: { badge } }
 
-    await Promise.allSettled(
-      delivery.tokens.map(token => deliverApns(token, apnsPayload, delivery.jwt, delivery.host, delivery.bundleId)),
-    )
+    try {
+      await Promise.allSettled(
+        delivery.tokens.map(token => deliverApns(delivery.client, token, { badge })),
+      )
+    } finally {
+      await delivery.client.close().catch(() => { /* ignore */ })
+    }
   } catch {
     // Silent — a badge-refresh failure must never surface to the reader.
   }
