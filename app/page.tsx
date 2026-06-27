@@ -6,6 +6,8 @@ import { getScooters } from '@/lib/supabase/queries'
 import { computeLiveAreas } from '@/lib/live-areas'
 import { cn, formatPrice } from '@/lib/utils'
 import { HeroImages } from '@/components/home/HeroImages'
+import { TrackView } from '@/components/analytics/TrackView'
+import { CtaLink } from '@/components/analytics/CtaLink'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/constants'
 
 export const revalidate = 60
@@ -79,6 +81,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
+      <TrackView posthogEvent="homepage_viewed" />
     <div className="flex flex-col">
       {/* ── HERO ── */}
       <section
@@ -103,8 +106,10 @@ export default async function HomePage() {
               Find your perfect scooter in Phuket.
             </p>
           </div>
-          <Link
+          <CtaLink
             href="/explore"
+            posthogEvent="hero_cta_clicked"
+            posthogProperties={{ cta: 'explore_scooters', layout: 'mobile' }}
             className="flex items-center justify-center gap-2 w-auto mx-auto px-8 py-[8px] rounded-full text-white text-[14px] font-bold tracking-wide
                        bg-[#FF6B35] hover:bg-[#e85d29]
                        shadow-[0_4px_28px_rgba(255,107,53,0.5),0_2px_8px_rgba(0,0,0,0.3)]
@@ -113,7 +118,7 @@ export default async function HomePage() {
           >
             Explore Scooters
             <ArrowRight className="w-4 h-4" />
-          </Link>
+          </CtaLink>
         </div>
 
         {/* ── DESKTOP LAYOUT ── */}
@@ -133,8 +138,10 @@ export default async function HomePage() {
             </p>
 
             <div className="flex flex-row gap-3">
-              <Link
+              <CtaLink
                 href="/explore"
+                posthogEvent="hero_cta_clicked"
+                posthogProperties={{ cta: 'explore_scooters', layout: 'desktop' }}
                 className="flex items-center justify-center gap-2.5 px-9 py-[15px] bg-[#FF6B35] text-white text-[15px] font-bold rounded-full
                            shadow-[0_4px_28px_rgba(255,107,53,0.5),0_2px_8px_rgba(0,0,0,0.3)]
                            hover:bg-[#e85d29] hover:shadow-[0_8px_40px_rgba(255,107,53,0.6)]
@@ -143,7 +150,7 @@ export default async function HomePage() {
               >
                 Explore Scooters
                 <ArrowRight className="w-5 h-5" />
-              </Link>
+              </CtaLink>
               <Link
                 href="/locations"
                 className="flex items-center justify-center gap-2 px-7 py-[15px] rounded-full text-[15px] font-semibold text-white
@@ -388,13 +395,15 @@ export default async function HomePage() {
               Browse local scooters, chat directly with shops in the app — the simplest way to rent in Phuket.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
+              <CtaLink
                 href="/explore"
+                posthogEvent="cta_clicked"
+                posthogProperties={{ cta: 'final_find_my_scooter' }}
                 className="flex items-center gap-2 px-8 py-4 bg-[#FF6B35] text-white text-base font-bold rounded-full hover:bg-[#e85d29] transition-all shadow-lg hover:scale-[1.02] active:scale-[0.98]"
               >
                 Find My Scooter
                 <ArrowRight className="w-5 h-5" />
-              </Link>
+              </CtaLink>
               <Link
                 href="/faq"
                 className="text-sm font-medium text-white/50 hover:text-white/80 transition-colors"

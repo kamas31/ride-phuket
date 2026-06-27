@@ -3,6 +3,7 @@ import { ChevronRight } from 'lucide-react'
 import { SITE_NAME } from '@/constants'
 import { AREAS } from '@/constants/areas'
 import { MODELS } from '@/constants/models'
+import { CtaLink } from '@/components/analytics/CtaLink'
 
 const POPULAR_SLUGS = ['patong', 'kata', 'karon', 'rawai', 'bang-tao', 'phuket-town']
 
@@ -124,9 +125,14 @@ export default function Footer() {
             <ul className="space-y-3">
               {STATIC_SECTIONS.Partners.map(link => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-[#9c9c98] hover:text-white transition-colors">
+                  <CtaLink
+                    href={link.href}
+                    posthogEvent="partner_cta_clicked"
+                    posthogProperties={{ location: 'footer' }}
+                    className="text-sm text-[#9c9c98] hover:text-white transition-colors"
+                  >
                     {link.label}
-                  </Link>
+                  </CtaLink>
                 </li>
               ))}
             </ul>

@@ -1,6 +1,7 @@
 'use client'
 
 import { trackEvent } from '@/lib/analytics'
+import { captureEvent } from '@/lib/posthog'
 
 interface WhatsAppButtonProps {
   href: string
@@ -16,7 +17,10 @@ export function WhatsAppButton({ href, shopId, scooterId, className, children }:
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={() => trackEvent({ eventType: 'whatsapp_click', shopId, scooterId })}
+      onClick={() => {
+        trackEvent({ eventType: 'whatsapp_click', shopId, scooterId })
+        captureEvent('whatsapp_clicked', { shop_id: shopId, scooter_id: scooterId })
+      }}
       className={className}
     >
       {children}

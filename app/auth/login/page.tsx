@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { MapPin, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { trackEvent } from '@/lib/analytics'
+import { captureEvent } from '@/lib/posthog'
 import { isNative, isIOS } from '@/lib/platform'
 import { SITE_NAME } from '@/constants'
 import { emailExists } from '@/app/actions/auth'
@@ -58,6 +59,7 @@ function LoginForm() {
     }
 
     trackEvent({ eventType: 'auth_login' })
+    captureEvent('login_completed', { provider: 'apple' })
 
     if (result.isNewUser) {
       router.push('/auth/select-role')
@@ -83,6 +85,7 @@ function LoginForm() {
       }
     } else {
       trackEvent({ eventType: 'auth_login' })
+      captureEvent('login_completed', { provider: 'email' })
       window.location.replace(redirect)
     }
   }

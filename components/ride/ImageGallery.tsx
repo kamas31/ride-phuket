@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { captureEvent } from '@/lib/posthog'
 
 interface ImageGalleryProps {
   images: string[]
@@ -18,6 +19,13 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
   const coverIdx = coverImage ? Math.max(0, images.indexOf(coverImage)) : 0
   const [active, setActive] = useState(coverIdx)
   const hasMultiple = images.length > 1
+
+  // PostHog-only — fires on every swipe/arrow/dot/thumbnail change, skipping the initial mount.
+  const galleryTouched = useRef(false)
+  useEffect(() => {
+    if (!galleryTouched.current) { galleryTouched.current = true; return }
+    captureEvent('gallery_image_changed', { image_index: active, image_count: images.length })
+  }, [active, images.length])
 
   // Adapts container to the loaded image's natural aspect ratio.
   // Clamped: min 0.75 (3:4 portrait) to max 1.6 (16:10 landscape).

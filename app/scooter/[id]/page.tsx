@@ -19,6 +19,7 @@ import { WhatsAppButton } from './WhatsAppButton'
 import { SaveButton } from '@/components/ride/SaveButton'
 import { getPublicInquiries } from '@/app/actions/inquiry-actions'
 import { TrackView } from '@/components/analytics/TrackView'
+import { scooterProperties } from '@/lib/posthog'
 import { AdminBadgeControl } from '@/components/admin/AdminBadgeControl'
 import { OpeningHoursDropdown } from '@/components/shop/OpeningHoursDropdown'
 
@@ -198,7 +199,15 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       )}
-      <TrackView eventType="scooter_view" shopId={shop.id} scooterId={scooter.id} metadata={{ scooterName: scooter.name }} />
+      <TrackView
+        eventType="scooter_view"
+        shopId={shop.id}
+        scooterId={scooter.id}
+        metadata={{ scooterName: scooter.name }}
+        posthogEvent="scooter_viewed"
+        posthogProperties={scooterProperties(scooter)}
+        registerAsSessionProperties
+      />
       <AdminBadgeControl scooterId={scooter.id} initial={scooter.showNewListingBadge} initialPosition={scooter.explorePosition} />
 
       {/* Breadcrumb nav */}

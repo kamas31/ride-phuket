@@ -22,6 +22,7 @@ import {
 import { computeConversionRate, getConversionInsight } from '@/lib/lead-analytics'
 import { rankScootersByHotScore, getHotStatusLabel } from '@/lib/hot-scooters'
 import { TrackView } from '@/components/analytics/TrackView'
+import { shopProperties } from '@/lib/posthog'
 import { AvatarUploader } from '@/components/shared/AvatarUploader'
 import type { Profile } from '@/hooks/useProfile'
 import type { ShopAnalytics } from '@/app/actions/shop-analytics'
@@ -119,7 +120,12 @@ export default function DashboardClient({
 
   return (
     <div className="min-h-screen bg-[#f5f4f2]">
-      <TrackView eventType="partner_dashboard" shopId={shop?.id} />
+      <TrackView
+        eventType="partner_dashboard"
+        shopId={shop?.id}
+        posthogEvent="partner_dashboard_opened"
+        posthogProperties={shop ? shopProperties(shop) : undefined}
+      />
 
       {/* ─────────────────────────────────────────────────────────────────────
           HERO — Shop identity & at-a-glance status

@@ -17,5 +17,12 @@ export default async function NewScooterPage() {
   const shop = await getShopForOwner()
   if (!shop) redirect('/partner')
 
-  return <NewScooterForm shopId={shop.id} shopName={shop.name} shopLocation={shop.location} />
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { count } = await (supabase as any)
+    .from('scooters')
+    .select('id', { count: 'exact', head: true })
+    .eq('shop_id', shop.id)
+  const isFirstListing = (count ?? 0) === 0
+
+  return <NewScooterForm shopId={shop.id} shopName={shop.name} shopLocation={shop.location} isFirstListing={isFirstListing} />
 }

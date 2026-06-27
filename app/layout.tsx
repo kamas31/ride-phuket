@@ -7,6 +7,7 @@ import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import MobileBottomNav from '@/components/layout/MobileBottomNav'
 import { CapacitorProvider } from '@/components/capacitor/CapacitorProvider'
+import { PostHogProvider } from '@/components/analytics/PostHogProvider'
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from '@/constants'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -78,13 +79,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased">
         <CapacitorProvider>
-          <Navbar />
-          <main className="min-h-screen pt-safe pb-[calc(3.25rem+env(safe-area-inset-bottom,0px))] md:pb-0">
-            {children}
-          </main>
-          <Footer />
-          <MobileBottomNav />
-          <Toaster position="bottom-center" richColors />
+          <PostHogProvider>
+            <Navbar />
+            <main className="min-h-screen pt-safe pb-[calc(3.25rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+              {children}
+            </main>
+            <Footer />
+            <MobileBottomNav />
+            <Toaster position="bottom-center" richColors />
+          </PostHogProvider>
         </CapacitorProvider>
       </body>
     </html>

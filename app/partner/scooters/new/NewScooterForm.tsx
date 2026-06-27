@@ -10,6 +10,7 @@ import { createScooter } from '@/app/actions/scooter-create'
 import { ImageUploader, type ProcessedImage } from '@/components/ride/ImageUploader'
 import { cn, formatPrice } from '@/lib/utils'
 import { SCOOTER_BRANDS, OTHER, getBrand, getModel } from '@/constants/scooter-brands-models'
+import { captureEvent } from '@/lib/posthog'
 
 const SCOOTER_FEATURES = [
   'Smart key / keyless',
@@ -38,11 +39,12 @@ interface NewScooterFormProps {
   shopId: string
   shopName: string
   shopLocation: string
+  isFirstListing?: boolean
 }
 
 type Step = 1 | 2 | 3
 
-export default function NewScooterForm({ shopId, shopName, shopLocation }: NewScooterFormProps) {
+export default function NewScooterForm({ shopId, shopName, shopLocation, isFirstListing }: NewScooterFormProps) {
   const [step, setStep]             = useState<Step>(1)
   const [submitting, setSubmitting] = useState(false)
   const [uploadingImages, setUploadingImages] = useState(false)
@@ -190,6 +192,7 @@ export default function NewScooterForm({ shopId, shopName, shopLocation }: NewSc
 
       clearTimeout(timeoutId)
       if (result.success) {
+        if (isFirstListing) captureEvent('first_listing_published', { shop_id: shopId })
         window.location.href = '/partner/dashboard'
       } else {
         setError(result.error ?? 'Failed to add scooter.')

@@ -7,6 +7,7 @@ import { MapPin, Mail, Lock, Eye, EyeOff, ArrowLeft, User, Check } from 'lucide-
 import { useAuth } from '@/hooks/useAuth'
 import { completeOAuthProfile } from '@/app/actions/profile'
 import { trackEvent } from '@/lib/analytics'
+import { captureEvent } from '@/lib/posthog'
 import { isNative, isIOS } from '@/lib/platform'
 import { SITE_NAME } from '@/constants'
 import type { UserRole } from '@/lib/supabase/types'
@@ -80,6 +81,7 @@ function SignupForm() {
       setSubmitting(false)
     } else {
       trackEvent({ eventType: 'auth_signup', metadata: { role } })
+      captureEvent('signup_completed', { role, provider: 'email' })
       setSuccess(true)
     }
   }
@@ -104,6 +106,7 @@ function SignupForm() {
     if (result.error) { setError(result.error); return }
 
     trackEvent({ eventType: 'auth_signup', metadata: { role: selectedRole, provider: 'apple' } })
+    captureEvent('signup_completed', { role: selectedRole, provider: 'apple' })
 
     if (result.isNewUser) {
       // Role was already chosen in Step 1 — complete profile directly,

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { MessageCircle } from 'lucide-react'
 import { getOrCreateConversation } from '@/app/actions/messaging'
 import { trackEvent } from '@/lib/analytics'
+import { captureEvent } from '@/lib/posthog'
 import { cn } from '@/lib/utils'
 
 interface MessageOwnerButtonProps {
@@ -42,6 +43,7 @@ export function MessageOwnerButton({
       }
 
       trackEvent({ eventType: 'conversation_started', scooterId })
+      captureEvent('conversation_started', { scooter_id: scooterId })
       const url = result.contextScooterId
         ? `/messages/${result.conversationId}` +
           `?contextScooterId=${encodeURIComponent(result.contextScooterId)}` +

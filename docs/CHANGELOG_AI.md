@@ -4,6 +4,28 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-27 (session 15)
+
+### Feature: PostHog product/marketing analytics implementation (ADR-059)
+
+**Why it was needed:** Five prior read-only rounds (audit, architecture proposal, architecture validation, product-analytics-lead review, TikTok-attribution-realism correction) had settled the target PostHog architecture. This session implemented it, under an explicit non-negotiable constraint that production stability outranks analytics: zero visible frontend change, fire-and-forget/never-blocking, web-only (no Capacitor/iOS files), and the existing Supabase business-analytics system left completely untouched and undependent.
+
+**What changed:**
+- New: `lib/posthog.ts` (PostHog wrapper — init, `captureEvent`, `identifyUser`, `resetAnalytics`, `registerSuperProperties`/`registerSessionProperties`, `PostHogEventName` taxonomy, `scooterProperties()`/`shopProperties()` context builders, `syncSessionRecordingForRoute()`), `lib/attribution.ts` (UTM/gclid/fbclid/ttclid/referrer capture, first-touch in `localStorage`, last-touch in `sessionStorage`), `components/analytics/PostHogProvider.tsx` (root-mounted lifecycle: init, attribution, platform/auth super properties, identify/reset, route-based session-recording toggling), `components/analytics/CtaLink.tsx` (thin `next/link` wrapper that fires a PostHog event on click — needed because Server Components can't pass inline handlers to Client Component props).
+- Modified: `app/layout.tsx` (mounts `PostHogProvider` inside `CapacitorProvider`); `components/analytics/TrackView.tsx` (`eventType` made optional, added `posthogEvent`/`posthogProperties`/`registerAsSessionProperties`); dual-dispatch added next to every existing `trackEvent(...)` call in `app/scooter/[id]/page.tsx`, `app/shop/[slug]/page.tsx`, `app/partner/dashboard/DashboardClient.tsx`, `app/scooter/[id]/WhatsAppButton.tsx`, `app/scooter/[id]/MessageOwnerButton.tsx`, `components/ride/QuickContact.tsx`, `app/auth/login/page.tsx`, `app/auth/signup/page.tsx`; new PostHog-only events added in `app/explore/ExploreClient.tsx` (`explore_viewed`, `search_performed`, `filter_used`), `app/page.tsx` + `components/layout/Footer.tsx` (`homepage_viewed`, `hero_cta_clicked`, `cta_clicked`, `partner_cta_clicked` via `CtaLink`), `components/ride/ImageGallery.tsx` (`gallery_image_changed`), `app/partner/CreateShopForm.tsx` (`shop_creation_started`/`completed`), `app/partner/scooters/new/page.tsx` + `NewScooterForm.tsx` (`first_listing_published`, gated on a new shop-scoped scooter `count` query). `package.json` — `posthog-js` dependency.
+- `.env.example` already had `NEXT_PUBLIC_POSTHOG_KEY`/`NEXT_PUBLIC_POSTHOG_HOST` placeholders from an earlier session; not present in `.env.local`, so PostHog correctly no-ops in the current dev environment (by design — confirms the silent-no-op safety path actually works, not just in theory).
+
+**Problems encountered:**
+- `tsc --noEmit` failed: `urlBlocklist` (used to exclude PII-bearing routes like `/messages`/`/profile`/`/partner/dashboard` from session replay) doesn't exist on the client-side `SessionRecordingOptions` type in the installed `posthog-js` version — it's part of `SessionRecordingRemoteConfig`, a project-dashboard-controlled remote config, not an `init()` option.
+- `posthog.startSessionRecording()` calling on an already-blocked initial pathname (cold landing directly on e.g. `/messages`) has a narrow first-paint window where recording is on before the blocklist check runs.
+
+**How they were solved:**
+- Replaced the declarative `urlBlocklist` with an imperative `syncSessionRecordingForRoute(pathname)` helper in `lib/posthog.ts`, using the SDK's public `posthog.stopSessionRecording()`/`startSessionRecording()` (guarded by `sessionRecordingStarted()` so calls are idempotent). Wired in two places: inside `initPostHog`'s `loaded` callback (covers cold landings, runs as early as the SDK allows) and from `PostHogProvider`'s `usePathname()`-keyed effect (covers every client-side route change).
+- The remaining first-paint window was accepted as a v1 limitation and documented as a future improvement in ADR-059 rather than engineering around it — `before_send` interception or a future SDK version's client-side `urlBlocklist` support would close it.
+- Verified with `npx tsc --noEmit` (clean) and `npm run build` (72 routes, unchanged, clean compile). Smoke-tested the actual new build on port 3001 (the developer's own dev server was already running on 3000, left untouched) — `/`, `/explore`, `/auth/login`, a real scooter detail page, and a real shop page all returned 200 with no server-log errors. Confirmed via `git status` that no `ios/`, `Info.plist`, `capacitor.config.ts`, or other native file was touched.
+
+---
+
 ## 2026-06-24 (session 14)
 
 ### Fix: Image Optimization remediation — 4 approved fixes (ADR-058)

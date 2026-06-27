@@ -11,6 +11,7 @@ import { ImageMetricsOverlay } from '@/components/debug/ImageMetricsOverlay'
 import { cn } from '@/lib/utils'
 import { sortByRecommended, shuffleUnpinned } from '@/lib/ridescore'
 import { trackEvent } from '@/lib/analytics'
+import { captureEvent } from '@/lib/posthog'
 import { createExploreFuse } from '@/lib/fuzzy-search'
 import { getZoneForLocation, getNearestZone } from '@/lib/zones'
 import { useProfile } from '@/hooks/useProfile'
@@ -352,6 +353,32 @@ export default function ExploreClient({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered.length === 0, debouncedSearch, filters.category, filters.location])
 
+  // PostHog-only — page view, once per mount.
+  useEffect(() => {
+    captureEvent('explore_viewed')
+  }, [])
+
+  // PostHog-only — fires for non-empty, debounced search queries.
+  useEffect(() => {
+    if (debouncedSearch) captureEvent('search_performed', { query: debouncedSearch, results_count: filtered.length })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch])
+
+  // PostHog-only — fires when a filter changes from its default, skipping initial mount.
+  const filtersTouched = useRef(false)
+  useEffect(() => {
+    if (!filtersTouched.current) { filtersTouched.current = true; return }
+    captureEvent('filter_used', {
+      category: filters.category,
+      location: filters.location,
+      sort_by: filters.sortBy,
+      delivery_now: filters.deliveryNow,
+      helmet_included: filters.helmetIncluded,
+      deposit_protected: filters.depositProtected,
+      no_passport: filters.noPassport,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.category, filters.location, filters.sortBy, filters.deliveryNow, filters.helmetIncluded, filters.depositProtected, filters.noPassport])
 
   return (
     <div className="min-h-screen bg-white pt-16">

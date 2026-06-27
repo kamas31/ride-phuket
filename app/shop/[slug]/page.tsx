@@ -12,6 +12,7 @@ import { ScooterCard } from '@/components/ride/ScooterCard'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import { TrustBadge } from '@/components/ride/TrustBadge'
 import { TrackView } from '@/components/analytics/TrackView'
+import { shopProperties } from '@/lib/posthog'
 import { ShopChatButton } from '@/components/shop/ShopChatButton'
 import { ShopQuickQuestions } from '@/components/shop/ShopQuickQuestions'
 import { ShopAboutSection } from '@/components/shop/ShopAboutSection'
@@ -193,7 +194,12 @@ export default async function ShopPage({ params }: ShopPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <TrackView eventType="shop_view" shopId={shop.id} />
+      <TrackView
+        eventType="shop_view"
+        shopId={shop.id}
+        posthogEvent="shop_viewed"
+        posthogProperties={shopProperties(shop)}
+      />
 
       {/* ── Breadcrumb ── */}
       <div className="sticky top-16 z-20 bg-white/90 backdrop-blur-md border-b border-[#e8e8e4]">

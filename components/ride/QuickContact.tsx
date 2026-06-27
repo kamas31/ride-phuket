@@ -4,6 +4,7 @@ import { MessageCircle, Phone, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { buildWAUrl, WA_LABELS, type WATemplate, type WAContext } from '@/lib/whatsapp'
 import { trackEvent } from '@/lib/analytics'
+import { captureEvent } from '@/lib/posthog'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QuickContact — WhatsApp-first contact module
@@ -70,7 +71,10 @@ export function QuickContact({
           href={buildWAUrl(whatsapp, 'general_inquiry', ctx)}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => trackEvent({ eventType: 'whatsapp_click', shopId, scooterId, metadata: ctx.scooterName ? { scooterName: ctx.scooterName } : {} })}
+          onClick={() => {
+            trackEvent({ eventType: 'whatsapp_click', shopId, scooterId, metadata: ctx.scooterName ? { scooterName: ctx.scooterName } : {} })
+            captureEvent('whatsapp_clicked', { shop_id: shopId, scooter_id: scooterId })
+          }}
           className="flex items-center justify-center gap-2 w-full py-3 bg-[#f0fdf4] border border-[#22c55e]/20 text-[#16a34a] font-bold text-sm rounded-full hover:bg-[#dcfce7] transition-colors active:scale-[0.98]"
         >
           <MessageCircle className="w-4 h-4" />
@@ -82,7 +86,10 @@ export function QuickContact({
       {!whatsapp && phone && variant !== 'chips_only' && (
         <a
           href={`tel:${phone}`}
-          onClick={() => trackEvent({ eventType: 'phone_click', shopId, scooterId })}
+          onClick={() => {
+            trackEvent({ eventType: 'phone_click', shopId, scooterId })
+            captureEvent('phone_clicked', { shop_id: shopId, scooter_id: scooterId })
+          }}
           className="flex items-center justify-center gap-2 w-full py-3 border border-[#e8e8e4] text-[#5c5c58] font-semibold text-sm rounded-full hover:bg-[#f8f8f6] transition-colors"
         >
           <Phone className="w-4 h-4" />
@@ -103,7 +110,10 @@ export function QuickContact({
                 href={buildWAUrl(whatsapp, q, ctx)}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => trackEvent({ eventType: 'whatsapp_click', shopId, scooterId, metadata: { template: q, ...(ctx.scooterName ? { scooterName: ctx.scooterName } : {}) } })}
+                onClick={() => {
+                  trackEvent({ eventType: 'whatsapp_click', shopId, scooterId, metadata: { template: q, ...(ctx.scooterName ? { scooterName: ctx.scooterName } : {}) } })
+                  captureEvent('whatsapp_clicked', { shop_id: shopId, scooter_id: scooterId, template: q })
+                }}
                 className="px-3 py-1.5 bg-[#f8f8f6] border border-[#e8e8e4] text-[11px] font-medium text-[#5c5c58] rounded-full hover:border-[#FF6B35]/40 hover:text-[#FF6B35] hover:bg-[#fff4f0] transition-colors active:scale-[0.97]"
               >
                 {WA_LABELS[q]}

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Building2, MapPin, Phone, FileText, ArrowRight, Check, AlertCircle } from 'lucide-react'
 import { createShop } from '@/app/actions/partner'
 import { PHUKET_ZONES } from '@/lib/zones'
+import { captureEvent } from '@/lib/posthog'
 
 // Client-side timeout: if the Server Action takes > 15s → abort
 const CLIENT_TIMEOUT_MS = 15_000
@@ -18,6 +19,10 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
     address: '',
     description: '',
   })
+
+  useEffect(() => {
+    captureEvent('shop_creation_started')
+  }, [])
 
   const update = (k: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -51,6 +56,7 @@ export default function CreateShopForm({ userName }: { userName?: string }) {
       clearTimeout(timeoutId)
 
       if (result.success) {
+        captureEvent('shop_creation_completed', { location: form.location })
         // Hard navigation — forces fresh server render with updated profile.shop_id
         window.location.href = '/partner/dashboard'
       } else {

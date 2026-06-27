@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-06-21 (session 12)
+Last updated: 2026-06-27 (session 15)
 
 ---
 
@@ -89,6 +89,7 @@ Last updated: 2026-06-21 (session 12)
 - [x] SEO V1.1: robots.txt `/contact-us` indexing fix + model landing pages `/models/pcx`, `/models/nmax`, `/models/adv` (ADR-053)
 - [x] SEO V1.2: extended model pages to `/models/xadv`, `/models/forza`, `/models/xmax`, `/models/click`, `/models/lead` (ADR-055)
 - [x] Structured brand → model → engine-size dropdowns on scooter create/edit forms (ADR-056)
+- [x] PostHog product/marketing analytics — full implementation: wrapper, attribution, session replay/heatmaps/feature-flag scaffolding, dual-dispatch event taxonomy, zero frontend/Capacitor changes (ADR-059)
 
 ---
 
@@ -112,6 +113,7 @@ Last updated: 2026-06-21 (session 12)
 
 - [ ] **Sentry: set env vars** in Vercel (DSN, AUTH_TOKEN, ORG, PROJECT) — score goes 2.5→7/10 instantly
 - [ ] **Sentry: create `instrumentation-client.ts`** + add `Sentry.setUser()` in useAuth
+- [ ] **PostHog: set `NEXT_PUBLIC_POSTHOG_KEY`/`NEXT_PUBLIC_POSTHOG_HOST` env vars** in Vercel — code ships silently no-op'd until set (ADR-059)
 - [ ] Physical iPhone testing (TestFlight)
 - [ ] Verify Supabase "Link accounts to existing user" setting
 - [ ] TestFlight distribution
@@ -145,6 +147,10 @@ Last updated: 2026-06-21 (session 12)
 - [ ] French/Russian localization (v1.2+)
 - [ ] PromptPay integration
 - [ ] Stripe integration
-- [ ] PostHog analytics
 - [ ] Real Mapbox (currently implemented)
 - [ ] WhatsApp Business API notifications
+- [ ] PostHog follow-ups (not in ADR-059's scope, future improvements):
+  - [ ] Close the narrow first-paint session-recording window on cold landings on a blocked route (`before_send` interception or future SDK client-side `urlBlocklist` support)
+  - [ ] Add a TTL/clear mechanism for scooter/shop session properties so they can't tag an unrelated event if a user navigates away before the next page re-registers context
+  - [ ] Use feature flags for actual experiments (scaffolding is live, no flags created yet)
+  - [ ] Build founder-facing PostHog dashboards/cohorts now that events are flowing
