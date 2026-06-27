@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-06-28 (session 16)
+Last updated: 2026-06-28 (session 17)
 
 ---
 
@@ -91,6 +91,7 @@ Last updated: 2026-06-28 (session 16)
 - [x] Structured brand → model → engine-size dropdowns on scooter create/edit forms (ADR-056)
 - [x] PostHog product/marketing analytics — full implementation: wrapper, attribution, session replay/heatmaps/feature-flag scaffolding, dual-dispatch event taxonomy, zero frontend/Capacitor changes (ADR-059)
 - [x] iOS push notification delivery fix — production logs proved 100% APNs timeout rate on the raw `node:http2` transport; replaced with the `apns2` library in `app/actions/messaging.ts` (same env vars, same connect/send/close lifecycle), temporary diagnostic endpoint deleted (ADR-060)
+- [x] iOS push permission prompt fix — `rp_push_prompted` localStorage flag could permanently block `requestPermissions()` after an app delete/reinstall (remote-URL WKWebView storage can survive uninstall); `checkPush()` in `ConversationList.tsx` now trusts live OS permission state first (ADR-061)
 
 ---
 
@@ -114,6 +115,7 @@ Last updated: 2026-06-28 (session 16)
 
 - [ ] **Verify the `apns2` transport fix in production** — watch the new structured `[APNS]` logs (success/rejected/timeout/transport-error) after the next real push to confirm the timeout issue is actually resolved, not just transport-swapped (ADR-060)
 - [ ] **Remove `APNS_DEBUG_SECRET` from Vercel's dashboard env vars** if it was ever added during the diagnostic phase — it has zero code consumers now (ADR-060)
+- [ ] **Device-test the push permission prompt fix on a real delete/reinstall cycle** — confirm the prompt now appears and Settings → Koh Ride → Notifications gets created (ADR-061); on a Mac session, also verify Xcode's Push Notifications capability/`aps-environment` entitlement are configured (unverifiable from this repo since `ios/` isn't checked in)
 - [ ] **Sentry: set env vars** in Vercel (DSN, AUTH_TOKEN, ORG, PROJECT) — score goes 2.5→7/10 instantly
 - [ ] **Sentry: create `instrumentation-client.ts`** + add `Sentry.setUser()` in useAuth
 - [ ] **PostHog: set `NEXT_PUBLIC_POSTHOG_KEY`/`NEXT_PUBLIC_POSTHOG_HOST` env vars** in Vercel — code ships silently no-op'd until set (ADR-059)

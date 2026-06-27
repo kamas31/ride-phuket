@@ -4,6 +4,23 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-28 (session 17)
+
+### Fix: iOS push permission prompt trusts real OS state over `rp_push_prompted` (ADR-061)
+
+**Why it was needed:** After the ADR-060 APNs transport fix, the user reported that on iOS, deleting and reinstalling the app left no notification permission prompt and no Notifications section in Settings → Koh Ride at all. A read-only audit traced this to `app/messages/ConversationList.tsx`'s `checkPush()` effect returning early whenever `localStorage.getItem('rp_push_prompted')` was set, *before* ever checking the real OS permission state — and identified that Capacitor's remote-URL mode (`server.url: 'https://kohride.com'`) exposes the app to iOS's origin-keyed WKWebView storage, which can survive an app delete/reinstall, leaving a stale `rp_push_prompted = '1'` from a prior install.
+
+**What changed:**
+- `app/messages/ConversationList.tsx` — removed the `if (localStorage.getItem('rp_push_prompted')) return` early-return in the `checkPush()` effect. The effect now always calls `PushNotifications.checkPermissions()` first when on native iOS, and shows the warm-up sheet whenever the result is `'prompt'` — regardless of the localStorage flag. `'granted'`/`'denied'` still suppress the sheet. The `localStorage.setItem(...)` writes in `handleEnablePush()`/`handleDismissPush()` were left unchanged.
+
+**Problems encountered:**
+- None — a single, small (8 insertions / 2 deletions), well-scoped change; `tsc`/`build` passed clean on the first attempt.
+
+**How they were solved:**
+- N/A. Validated via `npx tsc --noEmit` (clean) and `npm run build` (all 47 routes unchanged). Confirmed via `git diff --stat` that no Capacitor/iOS/native file, `app/actions/messaging.ts`, or `app/actions/push.ts` was touched — diff is exactly the one file. Committed (`db0e126`) and pushed to `main` after explicit user approval.
+
+---
+
 ## 2026-06-28 (session 16)
 
 ### Fix: APNs transport replaced with `apns2`; diagnostic endpoint removed (ADR-060)
