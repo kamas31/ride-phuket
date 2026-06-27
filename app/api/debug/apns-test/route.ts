@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient, isAdminUser } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { ApnsClient, Notification, ApnsError } from 'apns2'
 
 // ── TEMPORARY ISOLATED DIAGNOSTIC — NOT part of production push delivery ──
@@ -13,9 +13,11 @@ import { ApnsClient, Notification, ApnsError } from 'apns2'
 // the same env vars and the same push_tokens lookup pattern, by design, so
 // the comparison is apples-to-apples on everything except the transport.
 //
-// Nothing in the app calls this automatically. Manual GET only, admin-gated,
-// and only ever sends to the CALLER's own registered iOS token(s) — never
-// to another user's device.
+// Nothing in the app calls this automatically. Manual GET only, requires
+// only an authenticated session (no admin requirement), and only ever sends
+// to the CALLER's own registered iOS token(s) — there is no userId
+// parameter anywhere in this route, so it is structurally impossible to
+// target another user's device.
 //
 // Delete this route entirely once the experiment concludes either way.
 
@@ -39,9 +41,6 @@ export async function GET() {
   }
 
   const admin = createAdminClient()
-  if (!(await isAdminUser(admin, user.id))) {
-    return NextResponse.json({ ok: false, error: 'Admin access required' }, { status: 403 })
-  }
 
   // Reuse the existing push-token lookup pattern — caller's own iOS tokens only.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
