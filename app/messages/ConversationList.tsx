@@ -218,13 +218,19 @@ export default function ConversationList({
   const [showPushPrompt, setShowPushPrompt] = useState(false)
 
   // Show the push notification warm-up sheet the first time a user opens Messages.
-  // We only show it on native iOS and only when the permission hasn't been decided yet.
+  // We only show it on native iOS, and the real OS permission state is the source
+  // of truth — rp_push_prompted alone must never permanently block the sheet.
+  // Capacitor runs in remote-URL mode (WKWebView loads kohride.com directly), and
+  // that origin's localStorage can survive an app delete/reinstall, leaving a
+  // stale "already prompted" flag even though iOS itself is still in the
+  // "prompt" state (i.e. requestPermissions() was never actually called on this
+  // install). So while the OS state is still "prompt", we always show the sheet;
+  // rp_push_prompted only matters once the OS has already decided (granted/denied).
   useEffect(() => {
     async function checkPush() {
       try {
         const { Capacitor } = await import('@capacitor/core')
         if (!Capacitor.isNativePlatform()) return
-        if (localStorage.getItem('rp_push_prompted')) return
         const { PushNotifications } = await import('@capacitor/push-notifications')
         const status = await PushNotifications.checkPermissions()
         if (status.receive === 'prompt') {
