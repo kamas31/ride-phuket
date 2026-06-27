@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-06-27 (session 15)
+Last updated: 2026-06-28 (session 16)
 
 ---
 
@@ -90,6 +90,7 @@ Last updated: 2026-06-27 (session 15)
 - [x] SEO V1.2: extended model pages to `/models/xadv`, `/models/forza`, `/models/xmax`, `/models/click`, `/models/lead` (ADR-055)
 - [x] Structured brand → model → engine-size dropdowns on scooter create/edit forms (ADR-056)
 - [x] PostHog product/marketing analytics — full implementation: wrapper, attribution, session replay/heatmaps/feature-flag scaffolding, dual-dispatch event taxonomy, zero frontend/Capacitor changes (ADR-059)
+- [x] iOS push notification delivery fix — production logs proved 100% APNs timeout rate on the raw `node:http2` transport; replaced with the `apns2` library in `app/actions/messaging.ts` (same env vars, same connect/send/close lifecycle), temporary diagnostic endpoint deleted (ADR-060)
 
 ---
 
@@ -111,6 +112,8 @@ Last updated: 2026-06-27 (session 15)
 
 ## NEXT (pre-launch)
 
+- [ ] **Verify the `apns2` transport fix in production** — watch the new structured `[APNS]` logs (success/rejected/timeout/transport-error) after the next real push to confirm the timeout issue is actually resolved, not just transport-swapped (ADR-060)
+- [ ] **Remove `APNS_DEBUG_SECRET` from Vercel's dashboard env vars** if it was ever added during the diagnostic phase — it has zero code consumers now (ADR-060)
 - [ ] **Sentry: set env vars** in Vercel (DSN, AUTH_TOKEN, ORG, PROJECT) — score goes 2.5→7/10 instantly
 - [ ] **Sentry: create `instrumentation-client.ts`** + add `Sentry.setUser()` in useAuth
 - [ ] **PostHog: set `NEXT_PUBLIC_POSTHOG_KEY`/`NEXT_PUBLIC_POSTHOG_HOST` env vars** in Vercel — code ships silently no-op'd until set (ADR-059)

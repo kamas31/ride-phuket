@@ -4,6 +4,28 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-28 (session 16)
+
+### Fix: APNs transport replaced with `apns2`; diagnostic endpoint removed (ADR-060)
+
+**Why it was needed:** A read-only production log investigation found a 100% timeout rate (9/9 logged attempts over 30 days) on the hand-rolled `node:http2` APNs client in `app/actions/messaging.ts`, immediately after a confirmed-successful token registration. A separate regression investigation confirmed the connection logic hadn't changed since the one previously-verified-working window, ruling out a code regression — the conclusion was that the raw `http2.connect()` transport itself is unreliable from Vercel's serverless runtime. A temporary diagnostic endpoint (`app/api/debug/apns-test/route.ts`) was built across several sessions to validate `apns2` as a replacement before touching the real send path; this session implemented the permanent fix and removed all diagnostic code, per explicit instruction that "the production codebase should contain ZERO diagnostic leftovers."
+
+**What changed:**
+- Deleted: `app/api/debug/apns-test/route.ts` and the now-empty `app/api/debug/` directory — all admin/session/secret auth variants and the `APNS_DEBUG_SECRET` reference are gone.
+- Modified: `app/actions/messaging.ts` — removed `buildApnsJwt()` (manual ES256 JWT signing via `createSign`) and the raw `node:http2`-based `deliverApns()`. `resolveApnsDelivery()` now builds an `ApnsClient` from the `apns2` package (`team`/`keyId`/`signingKey`/`defaultTopic`/`host` via `apns2`'s `Host.production`/`Host.development`, `requestTimeout: 5000`, `keepAlive: false` to preserve the original one-connection-per-call lifecycle) instead of returning a raw JWT string. `deliverApns()` now builds an `apns2` `Notification` and calls `client.send()`, classifying failures into `ApnsError` (logs `.statusCode`/`.reason`) vs. generic transport/timeout errors — all logging is token-prefix-only (`token.slice(0, 8)`), never full token/key/JWT. `sendMessagePush()`/`sendBadgeRefreshPush()` close the `ApnsClient` in a `finally` after each delivery batch. Same env vars reused exactly: `APNS_TEAM_ID`, `APNS_KEY_ID`, `APNS_PRIVATE_KEY`, `APNS_BUNDLE_ID`, `APNS_PRODUCTION`.
+- No dependency change — `apns2@^12.2.0` was already added to `package.json`/`package-lock.json` during the earlier diagnostic-endpoint work and now becomes the real transport.
+
+**Problems encountered:**
+- After deleting the diagnostic route, `npx tsc --noEmit` failed with a stale `.next/types/validator.ts` entry still importing the now-deleted `app/api/debug/apns-test/route.ts` — a leftover Next.js type-generation cache artifact, not a real error.
+- Needed to confirm the `apns2` payload shape exactly matches the original raw payload (`{aps: {...}, ...data}`) so the Capacitor tap-handler's `notification.data.conversationId` read keeps working with no native-side changes.
+
+**How they were solved:**
+- Cleared the `.next` build cache (`rm -rf .next`) and reran `tsc --noEmit`, which then passed clean.
+- Read the compiled `apns2` source directly (`node_modules/apns2/dist/notifications/notification.js`) and confirmed `options.data` keys are spread at the top level of the built payload, matching the original shape — no changes needed on the data-passing side.
+- Validated via `npx tsc --noEmit` (clean) and `npm run build` (`/api/debug/apns-test` absent from the route manifest, all other 71 routes unchanged, clean compile). Confirmed via targeted `git diff --stat` against `capacitor.config.ts`, `ios/`, `*.swift`, `*.plist`, `package.json`, `next.config.ts`, `vercel.json` that none were touched — diff scope is exactly `app/actions/messaging.ts` (modified) + `app/api/debug/apns-test/route.ts` (deleted). Committed (`af7b1f2`) and pushed to `main` after explicit user approval.
+
+---
+
 ## 2026-06-27 (session 15)
 
 ### Feature: PostHog product/marketing analytics implementation (ADR-059)
