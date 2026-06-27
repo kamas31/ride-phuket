@@ -283,7 +283,75 @@ function deliverApns(
   })
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// Resolves everything needed to deliver an APNs push to a user's iOS
+// device(s): registered tokens + signed JWT + host/bundle. Returns null if
+// there's nothing to deliver to (no token, or APNs not configured) — every
+// caller must treat null as a safe no-op, never an error.
+async function resolveApnsDelivery(
+  userId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  admin: any,
+): Promise<{ tokens: string[]; jwt: string; host: string; bundleId: string } | null> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rows } = await (admin as any)
+    .from('push_tokens')
+    .select('token')
+    .eq('user_id', userId)
+    .eq('platform', 'ios')
+
+  if (!rows?.length) return null
+
+  const teamId   = process.env.APNS_TEAM_ID
+  const keyId    = process.env.APNS_KEY_ID
+  const rawKey   = process.env.APNS_PRIVATE_KEY
+  const bundleId = process.env.APNS_BUNDLE_ID ?? 'com.kohride.app'
+  const prod     = process.env.APNS_PRODUCTION !== 'false'
+
+  if (!teamId || !keyId || !rawKey) return null
+
+  const privateKey = rawKey.replace(/\\n/g, '\n')
+  const host = prod ? 'api.push.apple.com' : 'api.development.push.apple.com'
+  const jwt  = buildApnsJwt(teamId, keyId, privateKey)
+
+  return {
+    tokens: (rows as { token: string }[]).map(r => r.token),
+    jwt,
+    host,
+    bundleId,
+  }
+}
+
+// Total unread message count for a user, across every conversation they're
+// part of (client or owner side) — same definition used by the in-app
+// red-dot badge (useUnreadCount) and getUnreadCount below. Single source of
+// truth so the iOS icon badge can never drift from what the app itself shows.
+async function getUnreadMessageCount(
+  userId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  admin: any,
+): Promise<number> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: convos } = await (admin as any)
+    .from('conversations')
+    .select('id')
+    .or(`client_id.eq.${userId},owner_id.eq.${userId}`)
+
+  if (!convos?.length) return 0
+
+  const ids = convos.map((c: { id: string }) => c.id)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { count } = await (admin as any)
+    .from('messages')
+    .select('id', { count: 'exact', head: true })
+    .in('conversation_id', ids)
+    .eq('type', 'message')
+    .or(`sender_id.neq.${userId},sender_id.is.null`)
+    .is('read_at', null)
+
+  return count ?? 0
+}
+
 async function sendMessagePush(
   userId: string,
   title: string,
@@ -292,37 +360,47 @@ async function sendMessagePush(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   admin: any,
 ): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rows } = await (admin as any)
-    .from('push_tokens')
-    .select('token')
-    .eq('user_id', userId)
-    .eq('platform', 'ios')
+  const delivery = await resolveApnsDelivery(userId, admin)
+  if (!delivery) return
 
-  if (!rows?.length) return
-
-  const tokens = (rows as { token: string }[]).map(r => r.token)
-
-  const teamId   = process.env.APNS_TEAM_ID
-  const keyId    = process.env.APNS_KEY_ID
-  const rawKey   = process.env.APNS_PRIVATE_KEY
-  const bundleId = process.env.APNS_BUNDLE_ID ?? 'com.kohride.app'
-  const prod     = process.env.APNS_PRODUCTION !== 'false'
-
-  if (!teamId || !keyId || !rawKey) return
-
-  const privateKey = rawKey.replace(/\\n/g, '\n')
-  const host = prod ? 'api.push.apple.com' : 'api.development.push.apple.com'
-  const jwt  = buildApnsJwt(teamId, keyId, privateKey)
+  // Real unread count, not a hardcoded placeholder — keeps the iOS icon
+  // badge in sync with the user's actual unread messages on every new push.
+  const badge = await getUnreadMessageCount(userId, admin)
 
   const apnsPayload = {
-    aps:  { alert: { title, body }, sound: 'default', badge: 1 },
+    aps:  { alert: { title, body }, sound: 'default', badge },
     ...data,
   }
 
   await Promise.allSettled(
-    tokens.map(token => deliverApns(token, apnsPayload, jwt, host, bundleId)),
+    delivery.tokens.map(token => deliverApns(token, apnsPayload, delivery.jwt, delivery.host, delivery.bundleId)),
   )
+}
+
+// Silent badge-only update — no alert, no sound, just the icon number.
+// Fired after a user reads messages so the badge clears (or drops to the
+// remaining count) without waiting for the next inbound message to refresh
+// it. Apple's APNs accepts an `aps` payload with only `badge` set as a
+// standard alert-type push; the device updates the icon with no visible
+// banner since there is no `alert`/`sound` key present.
+async function sendBadgeRefreshPush(
+  userId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  admin: any,
+): Promise<void> {
+  try {
+    const delivery = await resolveApnsDelivery(userId, admin)
+    if (!delivery) return
+
+    const badge = await getUnreadMessageCount(userId, admin)
+    const apnsPayload = { aps: { badge } }
+
+    await Promise.allSettled(
+      delivery.tokens.map(token => deliverApns(token, apnsPayload, delivery.jwt, delivery.host, delivery.bundleId)),
+    )
+  } catch {
+    // Silent — a badge-refresh failure must never surface to the reader.
+  }
 }
 
 // ── getAllConversations ───────────────────────────────────────────────────────
@@ -546,6 +624,14 @@ export async function markMessagesRead(conversationId: string): Promise<void> {
     .eq('conversation_id', conversationId)
     .or(`sender_id.neq.${user.id},sender_id.is.null`)
     .is('read_at', null)
+
+  // iOS icon badge refresh — fire-and-forget, never lets a push failure
+  // affect the read receipt above (which has already completed by this point).
+  try {
+    await sendBadgeRefreshPush(user.id, admin)
+  } catch {
+    // Silent — reading messages must always succeed regardless of push state.
+  }
 }
 
 // ── getUnreadCount ────────────────────────────────────────────────────────────
@@ -556,27 +642,7 @@ export async function getUnreadCount(): Promise<number> {
   if (!user) return 0
 
   const admin = createAdminClient()
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: convos } = await (admin as any)
-    .from('conversations')
-    .select('id')
-    .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
-
-  if (!convos?.length) return 0
-
-  const ids = convos.map((c: { id: string }) => c.id)
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { count } = await (admin as any)
-    .from('messages')
-    .select('id', { count: 'exact', head: true })
-    .in('conversation_id', ids)
-    .eq('type', 'message')
-    .or(`sender_id.neq.${user.id},sender_id.is.null`)
-    .is('read_at', null)
-
-  return count ?? 0
+  return getUnreadMessageCount(user.id, admin)
 }
 
 // ── insertContextSwitch ───────────────────────────────────────────────────────
