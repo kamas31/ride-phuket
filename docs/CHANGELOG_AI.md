@@ -4,6 +4,27 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-29 (session 19)
+
+### Feature: "Which Scooter Should You Rent in Phuket?" quiz + recommendation engine (ADR-063)
+
+**Why it was needed:** Riders with no specific model in mind had no guided way to choose between 9 very different scooters. Requested as a new premium landing page (`/which-scooter`) that improves UX/conversions/internal-linking/SEO and funnels users to the existing `/models/[slug]` pages.
+
+**What changed:**
+- New: `constants/scooter-categories.ts` (6 `CategoryProfile`s + `MODEL_CATEGORY` slug→category map + `UNCATEGORIZED_MODEL_SLUGS` safety export), `lib/recommend-scooter.ts` (`recommendScooters()` — generic category scoring, no per-model branching, live-inventory tiebreaker for shared categories), `components/which-scooter/ScooterQuiz.tsx` (`'use client'` 5-step wizard + results view), `app/which-scooter/page.tsx` (hero, quiz mount, comparison table, popular models, FAQ, full metadata/canonical/OG/Twitter/JSON-LD).
+- Modified: `app/page.tsx` (new teaser section between "How It Works" and "Featured Scooters" — the homepage has no section literally called "Popular Models," this was the closest placement), `app/sitemap.ts` (added `/which-scooter`).
+- QA pass (separate user request, same session): ran the engine against 10 representative rider profiles via a dry-run script. Found `sporty_155` (NMAX)'s `minExperience: 'some'` wrongly buried NMAX behind PCX for a style-conscious beginner — fixed to `'beginner'` (NMAX isn't actually harder to ride than PCX, the difference is styling not skill). Verified the fix changes only that one profile's outcome, zero regressions elsewhere. Also added a "Recommended because you selected: …" line to the result card, reusing the questionnaire's own option-label arrays (no duplicated copy).
+
+**Problems encountered:**
+- `npx tsx` hung for 2+ minutes trying to execute a quick logic-sanity script with path-alias imports (no `tsx`/`ts-node` installed in this project, and `@/` aliases don't resolve under plain Node).
+- No unit-test runner is wired up for plain `lib/` logic in this project (Playwright covers e2e only).
+
+**How they were solved:**
+- Killed the hung `tsx` process and instead wrote a self-contained Node script in the scratchpad directory that mirrors the real scoring formula verbatim (no imports/aliases) to validate both the recommendation engine's output and the NMAX category fix across 10 profiles — clearly labeled as a dry-run equivalence check, not an import of the shipped file.
+- Validated the actual shipped code via `npx tsc --noEmit` (clean) and `npm run build` (74 routes, up from 73), plus a live smoke test on a separate port (3001) confirming the homepage section, canonical tag, and both JSON-LD blocks render correctly server-side. Committed (`09a799b`) and pushed to `main` after explicit user approval.
+
+---
+
 ## 2026-06-29 (session 18)
 
 ### Feature: Yamaha TMAX model page; X-ADV + TMAX added to footer Popular Models (ADR-062)
