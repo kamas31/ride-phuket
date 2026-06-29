@@ -24,6 +24,22 @@ function isConfigured(): boolean {
   )
 }
 
+// ── Internal accounts ───────────────────────────────────────────────────────
+// Team/test accounts get a Person property `internal: true` instead of being
+// silently dropped, so they can be excluded via a saved cohort/filter inside
+// PostHog without ever touching real event volume. The email itself is only
+// ever used here, locally, to compute the boolean below — it is never sent
+// to PostHog (see identifyUser's no-PII rule).
+const INTERNAL_EMAILS = new Set([
+  'newformstudiofr@gmail.com',
+  'kohridetest@gmail.com',
+  'islandridephuket@gmail.com',
+])
+
+function isInternalEmail(email?: string | null): boolean {
+  return Boolean(email) && INTERNAL_EMAILS.has(email!.toLowerCase())
+}
+
 // ── Event taxonomy ──────────────────────────────────────────────────────────
 // PostHog's own taxonomy — deliberately named/scoped differently from
 // lib/analytics.ts's EventType. Keep this list to events with a real,
@@ -169,12 +185,18 @@ export function registerSuperProperties(properties: Record<string, unknown>): vo
 /**
  * Identify an authenticated user. Pass ONLY the internal Supabase UUID as
  * the distinct ID and non-PII properties — never email, phone, WhatsApp
- * number, or message content.
+ * number, or message content. `email` is accepted solely to compute the
+ * `internal` Person property below — it is never itself forwarded to
+ * PostHog.
  */
-export function identifyUser(userId: string, properties?: Record<string, unknown>): void {
+export function identifyUser(
+  userId: string,
+  properties?: Record<string, unknown>,
+  email?: string | null,
+): void {
   if (typeof window === 'undefined' || !initialized) return
   try {
-    posthog.identify(userId, properties)
+    posthog.identify(userId, { ...properties, internal: isInternalEmail(email) })
   } catch {
     // Silent.
   }

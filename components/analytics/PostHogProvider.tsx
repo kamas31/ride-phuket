@@ -13,11 +13,13 @@
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { useProfile } from '@/hooks/useProfile'
+import { useAuth } from '@/hooks/useAuth'
 import { initPostHog, identifyUser, resetAnalytics, registerSuperProperties, syncSessionRecordingForRoute } from '@/lib/posthog'
 import { captureAttribution, getAttributionProperties } from '@/lib/attribution'
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const { profile, loading } = useProfile()
+  const { user } = useAuth()
   const pathname = usePathname()
   // undefined = not yet resolved this app load; null = resolved as anonymous.
   const prevProfileId = useRef<string | null | undefined>(undefined)
@@ -59,7 +61,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     if (currentId === prevProfileId.current) return
 
     if (currentId) {
-      identifyUser(currentId, { role: profile?.role, is_admin: profile?.is_admin })
+      identifyUser(currentId, { role: profile?.role, is_admin: profile?.is_admin }, user?.email)
       registerSuperProperties({ auth_state: 'authenticated', role: profile?.role })
     } else {
       if (prevProfileId.current) resetAnalytics()
