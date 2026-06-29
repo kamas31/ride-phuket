@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-06-28 (session 17)
+Last updated: 2026-06-29 (session 18)
 
 ---
 
@@ -92,6 +92,7 @@ Last updated: 2026-06-28 (session 17)
 - [x] PostHog product/marketing analytics — full implementation: wrapper, attribution, session replay/heatmaps/feature-flag scaffolding, dual-dispatch event taxonomy, zero frontend/Capacitor changes (ADR-059)
 - [x] iOS push notification delivery fix — production logs proved 100% APNs timeout rate on the raw `node:http2` transport; replaced with the `apns2` library in `app/actions/messaging.ts` (same env vars, same connect/send/close lifecycle), temporary diagnostic endpoint deleted (ADR-060)
 - [x] iOS push permission prompt fix — `rp_push_prompted` localStorage flag could permanently block `requestPermissions()` after an app delete/reinstall (remote-URL WKWebView storage can survive uninstall); `checkPush()` in `ConversationList.tsx` now trusts live OS permission state first (ADR-061)
+- [x] SEO V1.3: Yamaha TMAX model page (`/models/tmax`), X-ADV + TMAX added to footer Popular Models (ADR-062)
 
 ---
 
@@ -133,7 +134,7 @@ Last updated: 2026-06-28 (session 17)
 - [ ] SEO growth (more scooters, shops, reviews, backlinks)
 - [ ] Shop reviews system
 - [ ] SEO V1.1/V1.2 follow-ups (not in either round's scope, see ADR-053/ADR-055):
-  - [ ] `/models` hub/index page — 8 model pages now live with no index linking them together; unblocks a real 3-level breadcrumb (Home → Models → X)
+  - [ ] `/models` hub/index page — 9 model pages now live with no index linking them together; unblocks a real 3-level breadcrumb (Home → Models → X)
   - [ ] `/explore` model filter chips + `CollectionPage`/`ItemList` schema
   - [ ] ADV 160/350 sub-page split once volume justifies it (currently absorbed into `/models/adv`)
   - [ ] Commercial pages (airport, monthly, no-deposit) — blocked on shop-owner validation (airport) and fill-rate decisions (monthly/no-deposit), see `seo-agent/V2_IMPLEMENTATION_PLAN.md`

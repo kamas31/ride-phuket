@@ -1475,3 +1475,32 @@ In the `checkPush()` effect, removed the `if (localStorage.getItem('rp_push_prom
 - Does not change or remove the underlying WKWebView storage-persistence behavior for the `kohride.com` origin — it routes around the symptom by trusting OS state, it doesn't fix the storage quirk itself. Any other code that relies on `localStorage` surviving across reinstalls (or assumes it doesn't) should account for this.
 - Still cannot verify from this repo whether Xcode's Push Notifications capability/`aps-environment` entitlement is correctly configured (`ios/` absent from this checkout) — if missing, this fix gets the prompt showing and granted, but `registrationError` (already logged in `CapacitorProvider.tsx`) would still fire on actual token registration.
 - Validated via `npx tsc --noEmit` (clean) and `npm run build` (all 47 routes unchanged, clean compile). Confirmed via `git diff --stat` that no `capacitor.config.ts`, `ios/`, `app/actions/messaging.ts`, or `app/actions/push.ts` file was touched — diff is exactly `app/messages/ConversationList.tsx`.
+
+---
+
+## ADR-062: SEO V1.3 — add Yamaha TMAX model page; raise footer's Popular Models cap to 5
+
+**Status:** Accepted
+**Date:** 2026-06-29
+
+**What was the problem?**
+A real, currently-rented model (Yamaha TMAX, 530cc/560cc, already selectable in `constants/scooter-brands-models.ts` and present in live `scooters` rows) had no dedicated SEO model page, same gap ADR-053/ADR-055 already closed for PCX/NMAX/ADV and XADV/Forza/XMAX/Click/Lead respectively. Separately, the footer's "Popular Models" column needed to surface X-ADV (already shipped as a page since ADR-055) and the new TMAX page, which meant revisiting the 3-slug cap ADR-055 deliberately introduced.
+
+**What was tried first and why it failed?**
+N/A — this was a direct, scoped implementation request; no alternative approach was evaluated or rejected.
+
+**What decision was made?**
+1. Added one new `ModelMeta` entry to `constants/models.ts` (`slug: 'tmax'`, `modelQuery: 'TMAX'`, `name: 'Yamaha TMAX'`) — same shape as all existing entries, no interface changes, placed at the end of the array.
+2. No changes to `app/models/[slug]/page.tsx`, `lib/live-models.ts`, `lib/schema/model-page.ts`, `lib/supabase/queries.ts`, or `app/sitemap.ts` — confirmed (again) that all of these iterate generically over the `MODELS` array and required zero modification, exactly as documented in ADR-055.
+3. `components/layout/Footer.tsx` — `POPULAR_MODEL_SLUGS` extended from `['pcx', 'nmax', 'adv']` to `['pcx', 'nmax', 'adv', 'xadv', 'tmax']`, explicitly raising the cap ADR-055 had set at 3. This is a deliberate revision of that earlier tradeoff, made at explicit user request this session — ADR-055 itself was not reopened or edited, since it accurately documents the reasoning that was correct *at the time*.
+4. `relatedModelSlugs: ['xmax', 'forza']` set for TMAX (genuine category adjacency — all three are maxi-scooters), mirroring ADR-055's approach. Existing models' `relatedModelSlugs` (including XMAX's and Forza's, which could arguably now reference TMAX back) were left untouched, per explicit instruction to change nothing else and to keep X-ADV's existing entry completely unmodified.
+
+**Why this solution and not another?**
+- Reused the existing exact-match (no-wildcard) `ilike('model', filters.model)` filter — confirmed `'TMAX'` cannot collide with `'XMAX'` or any other model string under this matching, no new collision-matrix work was needed since the filter is substring-safe by construction (ADR-053/055).
+- Raised the footer cap rather than introducing a second, separate "more models" list or pagination — the simplest change that satisfies the explicit two-model request without adding new UI surface area.
+- Did not touch PCX/NMAX/ADV/X-ADV's existing `ModelMeta` entries or any other file that already iterates `MODELS` generically — kept the diff to exactly 2 files / 22 insertions / 1 deletion, matching the "no unrelated refactor" constraint.
+
+**What are the consequences or risks?**
+- The footer's Popular Models column now lists 5 entries instead of 3 — the original ADR-055 concern ("an 8-row footer column was judged to hurt usability") was reconsidered at this size and accepted; if more models are added later, the cap question will need revisiting again rather than letting it grow unbounded by default.
+- TMAX inventory is currently thin in production (single real listing observed) — copy was written feature/use-case-focused (performance, experienced-rider positioning) rather than "wide selection" claims, consistent with the project's existing content-quality bar for thin-inventory model pages (same approach as Forza/XMAX/Click in ADR-055).
+- Validated via `npx tsc --noEmit` (clean) and `npm run build` (73 routes, up from 72 — the new `/models/tmax` static param under the existing dynamic route — all other routes unchanged). No Capacitor/iOS file touched.

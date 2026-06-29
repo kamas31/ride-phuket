@@ -4,6 +4,25 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-29 (session 18)
+
+### Feature: Yamaha TMAX model page; X-ADV + TMAX added to footer Popular Models (ADR-062)
+
+**Why it was needed:** TMAX is a real, currently-rented model with no dedicated SEO page yet (same gap ADR-053/055 closed for the other 8 models). Separately, the footer's "Popular Models" column needed to surface X-ADV (already live since ADR-055 but never added to the footer) alongside the new TMAX page.
+
+**What changed:**
+- `constants/models.ts` — added one new `ModelMeta` entry (`slug: 'tmax'`, `modelQuery: 'TMAX'`, `name: 'Yamaha TMAX'`, full description/FAQ/whyChooseIt copy, `relatedModelSlugs: ['xmax', 'forza']`). No other entry modified.
+- `components/layout/Footer.tsx` — `POPULAR_MODEL_SLUGS` extended from `['pcx', 'nmax', 'adv']` to `['pcx', 'nmax', 'adv', 'xadv', 'tmax']`. No other footer line touched.
+- No new page file, no route changes, no SEO-plumbing changes — `/models/tmax`, its metadata/canonical/JSON-LD, and its `sitemap.xml` entry are all generated automatically by the existing generic `MODELS`-array-driven infrastructure (`app/models/[slug]/page.tsx`, `app/sitemap.ts`, `lib/schema/model-page.ts`, `lib/live-models.ts`) — confirmed none of these needed any modification.
+
+**Problems encountered:**
+- None. Confirmed `'TMAX'` already exists as a selectable model in `constants/scooter-brands-models.ts` (used by the shop-owner create/edit form) and that real listings already use it, so the new page shows live inventory immediately rather than an empty state.
+
+**How they were solved:**
+- N/A. Validated via `npx tsc --noEmit` (clean) and `npm run build` (73 routes, up from 72 — only the new `/models/tmax` static param, all other routes unchanged). Confirmed via `git diff --stat` that the diff is exactly the 2 files above (22 insertions / 1 deletion) — no Capacitor/iOS file, no other model entry, no other footer section touched. Committed (`a812c70`) and pushed to `main` after explicit user approval.
+
+---
+
 ## 2026-06-28 (session 17)
 
 ### Fix: iOS push permission prompt trusts real OS state over `rp_push_prompted` (ADR-061)
