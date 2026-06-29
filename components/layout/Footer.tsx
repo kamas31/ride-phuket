@@ -8,7 +8,7 @@ import { CtaLink } from '@/components/analytics/CtaLink'
 const POPULAR_SLUGS = ['patong', 'kata', 'karon', 'rawai', 'bang-tao', 'phuket-town']
 
 // Tier-1 models only — keeps the footer column short as more models are added to MODELS.
-const POPULAR_MODEL_SLUGS = ['pcx', 'nmax', 'adv']
+const POPULAR_MODEL_SLUGS = ['pcx', 'nmax', 'adv', 'xadv', 'tmax']
 
 const STATIC_SECTIONS = {
   Discover: [

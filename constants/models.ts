@@ -199,6 +199,27 @@ export const MODELS: ModelMeta[] = [
     ],
     relatedModelSlugs: ['click', 'pcx'],
   },
+  {
+    slug: 'tmax',
+    modelQuery: 'TMAX',
+    name: 'Yamaha TMAX',
+    label: 'TMAX',
+    brand: 'Yamaha',
+    description: 'Rent a Yamaha TMAX in Phuket. Compare real listings from local shops by area and price, then message the shop directly.',
+    longDescription: 'The Yamaha TMAX is the most powerful maxi-scooter commonly available to rent in Phuket — built for experienced riders who want serious performance, sharp handling, and motorcycle-level presence in a fully automatic package.',
+    whyChooseIt: [
+      'Most powerful maxi-scooter commonly available to rent in Phuket',
+      'Sharp, motorcycle-like handling despite being fully automatic',
+      'Strong on hill roads and longer routes around the island',
+      'Suited to experienced riders who want more performance than a standard maxi-scooter',
+    ],
+    faq: [
+      { question: 'Is the Yamaha TMAX a good choice for beginners?', answer: 'No — the TMAX is one of the largest and most powerful automatic scooters available, so it suits experienced riders rather than those new to scooters or motorcycles.' },
+      { question: 'What license do I need for a TMAX in Phuket?', answer: 'A valid motorcycle license is required, the same as any scooter rental in Thailand — check the engine size against your license class with the shop directly before booking, since the TMAX is a larger-displacement bike.' },
+      { question: 'How does the TMAX compare to the XMAX or Forza?', answer: 'The TMAX is larger, more powerful, and more expensive than both — positioned as the top-tier maxi-scooter option, while the XMAX and Forza are closer in size and price to each other.' },
+    ],
+    relatedModelSlugs: ['xmax', 'forza'],
+  },
 ]
 
 export function getModel(slug: string): ModelMeta | undefined {
