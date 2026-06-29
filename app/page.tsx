@@ -253,6 +253,28 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── WHICH SCOOTER QUIZ TEASER ── */}
+      <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+        <div className="bg-[#f8f8f6] border border-[#e8e8e4] rounded-[28px] px-6 py-10 md:px-14 md:py-14 text-center">
+          <p className="text-[11px] font-semibold text-[#FF6B35] uppercase tracking-[0.22em] mb-4">Not Sure Yet?</p>
+          <h2 className="text-[26px] md:text-[38px] font-bold text-[#0f0f0e] leading-tight tracking-tight mb-4">
+            Which Scooter Is Right For You?
+          </h2>
+          <p className="text-[#5c5c58] text-[15px] md:text-[16px] max-w-[46ch] mx-auto leading-relaxed mb-7">
+            Not sure whether to choose a PCX, NMAX, ADV or another scooter?
+            Answer a few quick questions and discover the best scooter for your trip.
+          </p>
+          <CtaLink
+            href="/which-scooter"
+            posthogEvent="cta_clicked"
+            posthogProperties={{ cta: 'which_scooter_quiz', placement: 'homepage' }}
+            className="inline-flex items-center gap-2 px-7 py-4 bg-[#FF6B35] text-white font-bold rounded-full hover:bg-[#e85d29] transition-all shadow-lg text-[15px]"
+          >
+            Find My Perfect Scooter
+            <ArrowRight className="w-5 h-5" />
+          </CtaLink>
+        </div>
+      </section>
 
       {/* ── FEATURED SCOOTERS ── */}
       <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
