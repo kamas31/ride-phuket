@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-06-29 (session 19)
+Last updated: 2026-06-29 (session 20)
 
 ---
 
@@ -93,7 +93,7 @@ Last updated: 2026-06-29 (session 19)
 - [x] iOS push notification delivery fix — production logs proved 100% APNs timeout rate on the raw `node:http2` transport; replaced with the `apns2` library in `app/actions/messaging.ts` (same env vars, same connect/send/close lifecycle), temporary diagnostic endpoint deleted (ADR-060)
 - [x] iOS push permission prompt fix — `rp_push_prompted` localStorage flag could permanently block `requestPermissions()` after an app delete/reinstall (remote-URL WKWebView storage can survive uninstall); `checkPush()` in `ConversationList.tsx` now trusts live OS permission state first (ADR-061)
 - [x] SEO V1.3: Yamaha TMAX model page (`/models/tmax`), X-ADV + TMAX added to footer Popular Models (ADR-062)
-- [x] "Which Scooter Should You Rent?" quiz (`/which-scooter`) — category-based recommendation engine, homepage teaser section, QA-verified against 10 rider profiles (ADR-063)
+- [x] "Which Scooter Should You Rent?" quiz (`/which-scooter`) — category-based recommendation engine, homepage teaser section, QA-verified against 10 rider profiles (ADR-063) — **postponed and removed from the codebase 2026-06-29, see ADR-063-addendum; fully recoverable from commit `09a799b`**
 
 ---
 
@@ -161,7 +161,4 @@ Last updated: 2026-06-29 (session 19)
   - [ ] Add a TTL/clear mechanism for scooter/shop session properties so they can't tag an unrelated event if a user navigates away before the next page re-registers context
   - [ ] Use feature flags for actual experiments (scaffolding is live, no flags created yet)
   - [ ] Build founder-facing PostHog dashboards/cohorts now that events are flowing
-- [ ] "Which Scooter?" quiz follow-ups (not in ADR-063's scope, future improvements):
-  - [ ] Track quiz-completion and recommendation-click PostHog events once the page has real traffic
-  - [ ] Personalize the alternates' explanation text the same way the best-match card now does
-  - [ ] Link `/which-scooter` from the footer once it has proven traffic (currently only linked from the homepage teaser)
+- [ ] "Which Scooter?" quiz — **postponed, removed from codebase** (ADR-063-addendum). To revive: restore from commit `09a799b` (`app/which-scooter/`, `components/which-scooter/`, `constants/scooter-categories.ts`, `lib/recommend-scooter.ts`) plus the QA fix in `c5f04b8`, then re-apply the homepage/sitemap hooks. Future improvements once revived: PostHog quiz-completion/recommendation-click events, personalize the alternates' explanation text, link from the footer once it has proven traffic.

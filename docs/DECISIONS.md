@@ -1538,3 +1538,31 @@ Initial implementation assigned `nmax` to its own `sporty_155` category with `mi
 - Several quiz profiles land on near-ties between two categories (e.g. ADV vs X-ADV at "experienced, hills, mid budget"), resolved by deterministic `CATEGORIES` array order. In every observed tie the winner is the more accessible/cheaper option, which is acceptable and arguably the safer default — but this tie-break is implicit in array ordering, not an explicit rule, and should be kept in mind if `CATEGORIES` is ever reordered.
 - Comparison-table ratings (Beginner/Comfort/Storage/Power/Passenger/Hills/Economy) are class-level approximations from `CategoryProfile`, not per-listing data — acceptable per explicit instruction to reuse existing information rather than build a second scoring system.
 - Validated via `npx tsc --noEmit` (clean), `npm run build` (74 routes, up from 73), and a live smoke test on a separate port confirming the homepage section, canonical tag, and both JSON-LD blocks render correctly. A 10-profile recommendation dry-run (scratchpad script mirroring the real scoring formula) was used for QA since the project has no unit-test runner wired up for plain `lib/` logic — worth keeping in mind if this engine's scoring is tuned again later.
+
+---
+
+## ADR-063-addendum: "Which Scooter?" feature postponed and removed from the codebase (not cancelled)
+
+**Status:** Accepted
+**Date:** 2026-06-29
+
+**What was the problem?**
+After ADR-063 shipped (commits `09a799b` + `c5f04b8`, pushed to `main`), priorities shifted to higher-priority work. The feature itself wasn't wrong or broken — it was deprioritized, and the explicit instruction was to remove all trace of it from the working codebase while keeping the option to revive it later, without creating a new commit (the user wanted to review the reverted state before deciding whether/how to commit it).
+
+**What was tried first and why it failed?**
+N/A — this was a direct, scoped removal request, not a bug fix.
+
+**What decision was made?**
+1. Deleted `app/which-scooter/page.tsx`, `components/which-scooter/ScooterQuiz.tsx`, `constants/scooter-categories.ts`, `lib/recommend-scooter.ts` in full (all 4 were pure additions from ADR-063, confirmed via `git show --stat 09a799b`).
+2. Restored `app/page.tsx` and `app/sitemap.ts` via `git checkout acbf531 -- <file>` (the commit immediately before ADR-063) rather than manually editing out the added lines — confirmed via `git diff acbf531 -- app/page.tsx app/sitemap.ts` returning empty, i.e. byte-identical to the pre-feature state. Both files' only changes in `09a799b` were pure additions (22 and 1 lines respectively, 0 deletions), so this is an exact, lossless revert with no risk of clobbering unrelated changes.
+3. This documentation file, `docs/CHANGELOG_AI.md`, and `docs/ROADMAP.md` were **not** reverted — ADR-063 remains in place as an accurate historical record of a real decision that was actually implemented and QA'd, per the project's own rule to never reopen a documented decision. This addendum was appended instead, left **uncommitted** alongside the code removal, exactly like the code change itself, so the user can review and commit both together when ready.
+
+**Why this solution and not another?**
+- `git checkout <parent-commit> -- <file>` over manual diffing/editing: zero risk of human error reconstructing a 22-line diff by hand, and trivially verifiable (`git diff <parent> -- <file>` must be empty).
+- Kept ADR-063 itself untouched rather than deleting/rewriting it: the feature was genuinely built, QA'd, committed, and pushed — erasing that record would contradict the project's "docs are the source of truth, never reopen a documented decision" rule and would make the existing pushed commits (`09a799b`, `c5f04b8`) on `main`'s history harder to understand later.
+- Left this addendum uncommitted (working-tree only) per explicit instruction not to commit or push — the user retains full control over if/when this removal becomes a real commit.
+
+**What are the consequences or risks?**
+- The feature is **fully recoverable**: `git show 09a799b` (or `git diff acbf531 09a799b`) reproduces the entire implementation exactly, since it's still real commit history on `main` (this addendum only changes the working tree, not git history).
+- If this removal is later committed, the commit message should reference `09a799b`/`c5f04b8` so the connection to the original implementation and this addendum stays traceable.
+- Validated via `npx tsc --noEmit` (clean) and `npm run build` (73 routes, back to the exact pre-feature count, `/which-scooter` confirmed absent from the route manifest). Repo-wide grep for `which-scooter`, `recommend-scooter`, `scooter-categories`, `ScooterQuiz`, `recommendScooters` returns zero matches outside auto-generated `.next/` build artifacts (which were cleared and regenerated clean).

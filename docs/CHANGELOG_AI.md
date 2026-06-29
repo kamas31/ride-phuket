@@ -4,6 +4,25 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-29 (session 20)
+
+### Removal: "Which Scooter?" feature postponed and removed from the codebase (ADR-063-addendum)
+
+**Why it was needed:** The feature (ADR-063, commits `09a799b`/`c5f04b8`) was deprioritized in favor of higher-priority work. Not cancelled — just removed from the working codebase until it's picked back up.
+
+**What changed:**
+- Deleted: `app/which-scooter/page.tsx`, `components/which-scooter/ScooterQuiz.tsx`, `constants/scooter-categories.ts`, `lib/recommend-scooter.ts`.
+- Restored: `app/page.tsx` and `app/sitemap.ts` to their exact pre-feature state via `git checkout acbf531 -- <file>` (the commit immediately before the feature) — confirmed byte-identical via `git diff acbf531 -- <file>` returning empty.
+- `docs/DECISIONS.md` (ADR-063) was deliberately **not** reverted — it's accurate history of a real, implemented, QA'd decision. An addendum was appended instead.
+
+**Problems encountered:**
+- None — both modified files' only prior changes were pure additions (0 deletions in the original feature commit), so a targeted `git checkout` from the parent commit was a clean, lossless, fully verifiable revert.
+
+**How they were solved:**
+- N/A. Validated via `npx tsc --noEmit` (clean) and `npm run build` (73 routes, back to the exact pre-feature count). Repo-wide grep for every feature identifier (`which-scooter`, `recommend-scooter`, `scooter-categories`, `ScooterQuiz`, `recommendScooters`) returns zero matches outside auto-generated `.next/` build artifacts. **Not committed, not pushed** — left as working-tree changes per explicit instruction, alongside this same documentation update.
+
+---
+
 ## 2026-06-29 (session 19)
 
 ### Feature: "Which Scooter Should You Rent in Phuket?" quiz + recommendation engine (ADR-063)
