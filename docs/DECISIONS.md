@@ -1566,3 +1566,31 @@ N/A — this was a direct, scoped removal request, not a bug fix.
 - The feature is **fully recoverable**: `git show 09a799b` (or `git diff acbf531 09a799b`) reproduces the entire implementation exactly, since it's still real commit history on `main` (this addendum only changes the working tree, not git history).
 - If this removal is later committed, the commit message should reference `09a799b`/`c5f04b8` so the connection to the original implementation and this addendum stays traceable.
 - Validated via `npx tsc --noEmit` (clean) and `npm run build` (73 routes, back to the exact pre-feature count, `/which-scooter` confirmed absent from the route manifest). Repo-wide grep for `which-scooter`, `recommend-scooter`, `scooter-categories`, `ScooterQuiz`, `recommendScooters` returns zero matches outside auto-generated `.next/` build artifacts (which were cleared and regenerated clean).
+
+---
+
+## ADR-064: Tag internal/team accounts in PostHog via an `internal` Person property, computed from email but never sending the email itself
+
+**Status:** Accepted
+**Date:** 2026-06-29
+
+**What was the problem?**
+The team wanted to exclude their own test/internal accounts from PostHog analytics (so dashboards reflect real users only) without manually editing Person records inside the PostHog UI every time a new test account is used. The constraint that made this non-trivial: ADR-059 established a strict no-PII rule for the PostHog integration (`identifyUser`'s own docstring: "never email, phone, WhatsApp number, or message content") — so the obvious naive approach (send the email as a Person property and filter on it in PostHog) was not acceptable.
+
+**What was tried first and why it failed?**
+N/A — this was a direct, scoped request with the no-PII constraint identified up front from the existing `identifyUser` docstring, not discovered via a failed attempt.
+
+**What decision was made?**
+1. `lib/posthog.ts` — added a fixed `INTERNAL_EMAILS` allowlist (3 team/test addresses) and a pure `isInternalEmail(email)` helper, local to this module.
+2. `identifyUser(userId, properties?, email?)` gained a new optional third parameter, used *only* to compute `internal: isInternalEmail(email)`, merged into the properties object passed to `posthog.identify()`. The email itself is never included in that object — only the resulting boolean is.
+3. `components/analytics/PostHogProvider.tsx` — added a second `useAuth()` call (already an established pattern in this codebase; 6 other components each independently call this hook) purely to read `user?.email` and pass it through to the existing single `identifyUser()` call site. `distinct_id` (`userId`, the first argument) is completely untouched.
+
+**Why this solution and not another?**
+- Computing the boolean locally and only ever sending the boolean preserves ADR-059's no-PII rule exactly as written, rather than relaxing it for this one case — the team's own emails are exactly the kind of identifying data that rule was written to keep out of PostHog.
+- Kept the allowlist and the matching logic colocated in `lib/posthog.ts` (next to `identifyUser` itself) rather than in the calling component, so there's a single, easy-to-find place to update the email list later without touching the React provider.
+- Reused the existing `useAuth()` hook for the email rather than extending `useProfile()`'s `Profile` type/SQL `select` to include email — smaller blast radius (2 files, both already analytics-related) instead of widening a shared hook's shape for a single internal-tooling use case.
+
+**What are the consequences or risks?**
+- `PostHogProvider` now mounts a second independent Supabase auth listener (one via `useProfile()`'s internal `useAuth()` call, one via its own new direct call) — slightly redundant, but consistent with how every other consumer of `useAuth()` in this codebase already behaves (no shared auth context exists), and negligible cost for a root-mounted, once-per-app-load provider.
+- The allowlist is a hardcoded `Set` in source, not an env var or DB table — intentional for 3 addresses; if the team's internal-account list grows significantly, revisit as a config/env-driven list instead of a code change per addition.
+- Validated via `npx tsc --noEmit` (clean) and `npm run build` (73 routes, unchanged — no UI, no routing, no event-tracking call site touched). Confirmed via `grep` that `identifyUser()` has exactly one call site in the entire codebase, so no other path bypasses this logic.

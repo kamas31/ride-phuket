@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-06-29 (session 20)
+Last updated: 2026-06-29 (session 21)
 
 ---
 
@@ -90,6 +90,7 @@ Last updated: 2026-06-29 (session 20)
 - [x] SEO V1.2: extended model pages to `/models/xadv`, `/models/forza`, `/models/xmax`, `/models/click`, `/models/lead` (ADR-055)
 - [x] Structured brand → model → engine-size dropdowns on scooter create/edit forms (ADR-056)
 - [x] PostHog product/marketing analytics — full implementation: wrapper, attribution, session replay/heatmaps/feature-flag scaffolding, dual-dispatch event taxonomy, zero frontend/Capacitor changes (ADR-059)
+- [x] PostHog: tag internal/team accounts via `internal` Person property (email never sent, only the derived boolean) (ADR-064)
 - [x] iOS push notification delivery fix — production logs proved 100% APNs timeout rate on the raw `node:http2` transport; replaced with the `apns2` library in `app/actions/messaging.ts` (same env vars, same connect/send/close lifecycle), temporary diagnostic endpoint deleted (ADR-060)
 - [x] iOS push permission prompt fix — `rp_push_prompted` localStorage flag could permanently block `requestPermissions()` after an app delete/reinstall (remote-URL WKWebView storage can survive uninstall); `checkPush()` in `ConversationList.tsx` now trusts live OS permission state first (ADR-061)
 - [x] SEO V1.3: Yamaha TMAX model page (`/models/tmax`), X-ADV + TMAX added to footer Popular Models (ADR-062)

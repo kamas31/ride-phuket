@@ -4,6 +4,24 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-06-29 (session 21)
+
+### Feature: Tag internal/team accounts in PostHog (ADR-064)
+
+**Why it was needed:** The team wanted their own test/internal accounts excluded from PostHog analytics automatically, without manually editing Person records inside PostHog each time. ADR-059's existing no-PII rule meant the email itself could never be sent as a Person property — only a derived boolean.
+
+**What changed:**
+- `lib/posthog.ts` — added `INTERNAL_EMAILS` (3-address allowlist) + `isInternalEmail()` helper; `identifyUser()` gained an optional third `email` parameter, used solely to compute `internal: true/false`, merged into the existing properties object passed to `posthog.identify()`. The email itself is never sent.
+- `components/analytics/PostHogProvider.tsx` — added a `useAuth()` call (consistent with 6 other existing call sites of this hook elsewhere in the codebase) to read `user?.email` and pass it through to the one existing `identifyUser()` call site. `distinct_id` is unchanged.
+
+**Problems encountered:**
+- None. `useProfile()` (the hook already in use here) doesn't expose `email` — resolved by reusing the existing `useAuth()` hook directly rather than widening `Profile`'s shape/SQL select for a single internal-tooling need.
+
+**How they were solved:**
+- N/A. Validated via `npx tsc --noEmit` (clean) and `npm run build` (73 routes, unchanged). Confirmed via grep that `identifyUser()` has exactly one call site in the codebase, so the change can't be bypassed. Committed (`300bb23`) and pushed to `main` after explicit user approval.
+
+---
+
 ## 2026-06-29 (session 20)
 
 ### Removal: "Which Scooter?" feature postponed and removed from the codebase (ADR-063-addendum)
