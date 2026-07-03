@@ -520,7 +520,8 @@ export default function DashboardClient({
                         src={scooter.images?.[0]}
                         alt={scooter.name}
                         className="w-[72px] h-[62px] sm:w-20 sm:h-[68px] rounded-[14px] flex-shrink-0"
-                        sizes="80px"
+                        width={80}
+                        height={68}
                       />
 
                       {/* Info */}
