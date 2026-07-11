@@ -226,6 +226,27 @@ export const MODELS: ModelMeta[] = [
     ],
     relatedModelSlugs: ['xmax', 'forza'],
   },
+  {
+    slug: 'grand-filano',
+    modelQuery: 'GRAND_FILANO',
+    name: 'Yamaha Grand Filano',
+    label: 'Grand Filano',
+    brand: 'Yamaha',
+    description: 'Rent a Yamaha Grand Filano in Phuket. Compare real listings from local shops by area and price, then message the shop directly.',
+    longDescription: 'The Yamaha Grand Filano is a compact 125cc automatic scooter, built for easy, everyday riding rather than long highway stints. It comes with a keyless smart key ignition and LED lighting, and its underseat storage is on the smaller side — so it suits a single rider running errands or exploring nearby beaches over a heavier touring setup.',
+    whyChooseIt: [
+      '125cc automatic engine — light and easy to handle in traffic',
+      'Keyless smart key ignition for quick, convenient starts',
+      'LED lighting for better visibility',
+      'Compact size that’s simple to park around town and beach areas',
+    ],
+    faq: [
+      { question: 'Is the Yamaha Grand Filano automatic?', answer: 'Yes — it’s a 125cc automatic scooter with a keyless smart key ignition, so there’s no gear shifting involved.' },
+      { question: 'How much storage does the Grand Filano have?', answer: 'It has underseat storage, though on the smaller side compared to step-through models like the Honda Lead — pack light if you’re planning to store a full-face helmet and bag.' },
+      { question: 'Do I need a license to rent a Grand Filano in Phuket?', answer: 'Yes — a valid motorcycle license (international or Thai) is required to legally rent and ride any scooter in Phuket, including the Grand Filano.' },
+    ],
+    relatedModelSlugs: ['click', 'lead'],
+  },
 ]
 
 export function getModel(slug: string): ModelMeta | undefined {
