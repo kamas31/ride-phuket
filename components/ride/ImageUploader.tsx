@@ -20,11 +20,13 @@ export interface ImageQualityScore {
 
 export interface ProcessedImage {
   id: string
-  previewUrl: string  // Object URL for <img>
-  blob: Blob          // WebP blob ready to upload
-  sizeKb: number
+  previewUrl: string    // Object URL for <img> — backed by cardBlob
+  thumbnailBlob: Blob   // ~320px WebP
+  cardBlob: Blob        // ~800px WebP
+  detailBlob: Blob      // ~1600px WebP
+  sizeKb: number        // detailBlob size, shown in the UI as "the" photo size
   originalName: string
-  isCover: boolean    // explicit cover/hero image (one per scooter)
+  isCover: boolean      // explicit cover/hero image (one per scooter)
   quality: ImageQualityScore
 }
 
@@ -38,11 +40,20 @@ interface ImageUploaderProps {
 
 // ── Image processing pipeline ──────────────────────────────────
 
-const MAX_WIDTH_PX  = 1600
-const MAX_SIZE_KB   = 800
 const MIN_SRC_WIDTH = 400
+// Safety net against multi-thousand-pixel camera/panorama sources overwhelming
+// canvas memory on low-end mobile — well above any real-world listing photo need.
+const MAX_SRC_DIMENSION = 6000
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+
+// Variant spec — the definitive sizes/qualities for the whole app. Widths are
+// upper bounds only: a variant is never upscaled past the source image.
+const VARIANT_SPECS = [
+  { name: 'thumbnail', maxWidth: 320,  quality: 0.70 },
+  { name: 'card',      maxWidth: 800,  quality: 0.75 },
+  { name: 'detail',    maxWidth: 1600, quality: 0.80 },
+] as const
 
 // Hard rejection thresholds
 const BRIGHTNESS_MIN = 35   // 0–255 average luminance
@@ -150,12 +161,52 @@ type ProcessResult =
   | { ok: true; img: ProcessedImage }
   | { ok: false; fileName: string; reason: string }
 
+function isHeicFile(file: File): boolean {
+  return /^image\/hei[cf]$/i.test(file.type) || /\.(heic|heif)$/i.test(file.name)
+}
+
+// Draws one variant directly from the already-decoded source `img` (never
+// from another variant's blob — no re-decode, no cascading quality loss),
+// exports it, then releases the canvas immediately.
+function drawVariant(img: HTMLImageElement, maxWidth: number, quality: number): Promise<Blob | null> {
+  const outW = Math.round(Math.min(img.width, maxWidth))
+  const outH = Math.round(outW * (img.height / img.width))
+  const canvas = document.createElement('canvas')
+  canvas.width  = outW
+  canvas.height = outH
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    canvas.width = 0
+    canvas.height = 0
+    return Promise.resolve(null)
+  }
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, outW, outH)
+
+  return new Promise(resolve => {
+    canvas.toBlob(blob => {
+      // Release canvas memory immediately — never held longer than needed.
+      canvas.width = 0
+      canvas.height = 0
+      resolve(blob)
+    }, 'image/webp', quality)
+  })
+}
+
 // ── Core processing pipeline ───────────────────────────────────
+// Single decode of the source file, then 3 independent WebP encodes
+// (thumbnail/card/detail) drawn straight from that one decoded image.
 
 async function processImageFile(file: File): Promise<ProcessResult> {
   if (!ACCEPTED_TYPES.includes(file.type) && !file.name.match(/\.(jpe?g|png|webp|heic|heif)$/i)) {
     return { ok: false, fileName: file.name, reason: 'Unsupported format. Use JPEG, PNG or WebP.' }
   }
+
+  const heic = isHeicFile(file)
+  const thumbnailSpec = VARIANT_SPECS.find(v => v.name === 'thumbnail')!
+  const cardSpec      = VARIANT_SPECS.find(v => v.name === 'card')!
+  const detailSpec    = VARIANT_SPECS.find(v => v.name === 'detail')!
 
   return new Promise(resolve => {
     const srcUrl = URL.createObjectURL(file)
@@ -163,15 +214,29 @@ async function processImageFile(file: File): Promise<ProcessResult> {
 
     img.onerror = () => {
       URL.revokeObjectURL(srcUrl)
-      resolve({ ok: false, fileName: file.name, reason: 'Could not read image file.' })
+      resolve({
+        ok: false,
+        fileName: file.name,
+        // Never claim a specific browser/OS supports HEIC — just report what
+        // actually happened and give a safe workaround.
+        reason: heic
+          ? 'This browser could not open this HEIC photo. Export it as JPEG from your phone (Settings → Camera → Formats → "Most Compatible") or choose a JPEG/PNG/WebP file instead.'
+          : 'Could not read image file.',
+      })
     }
 
-    img.onload = () => {
+    img.onload = async () => {
       URL.revokeObjectURL(srcUrl)
 
       // ── Minimum size ───────────────────────────────────────
       if (img.width < MIN_SRC_WIDTH || img.height < MIN_SRC_WIDTH / 2) {
         resolve({ ok: false, fileName: file.name, reason: `Image too small (min ${MIN_SRC_WIDTH}px wide). Use a higher quality photo.` })
+        return
+      }
+
+      // ── Excessive dimensions — protects low-end mobile canvas/memory ─
+      if (img.width > MAX_SRC_DIMENSION || img.height > MAX_SRC_DIMENSION) {
+        resolve({ ok: false, fileName: file.name, reason: `Image resolution too high to process (max ${MAX_SRC_DIMENSION}px per side). Please use a smaller photo.` })
         return
       }
 
@@ -182,64 +247,84 @@ async function processImageFile(file: File): Promise<ProcessResult> {
         return
       }
 
-      // ── Output dimensions — preserve original aspect ratio ─
-      const outW = Math.round(Math.min(img.width, MAX_WIDTH_PX))
+      // ── Quality analysis — drawn once on a detail-sized canvas (same
+      // resolution the original single-variant pipeline analyzed at, so
+      // brightness/sharpness thresholds below are unchanged), then that
+      // same canvas is reused as the detail variant export so the detail
+      // size is never drawn twice. ──
+      const outW = Math.round(Math.min(img.width, detailSpec.maxWidth))
       const outH = Math.round(outW * (img.height / img.width))
-
-      // ── Draw (full image, no crop) ─────────────────────────
-      const canvas = document.createElement('canvas')
-      canvas.width  = outW
-      canvas.height = outH
-      const ctx = canvas.getContext('2d')!
+      const analysisCanvas = document.createElement('canvas')
+      analysisCanvas.width  = outW
+      analysisCanvas.height = outH
+      const ctx = analysisCanvas.getContext('2d')
+      if (!ctx) {
+        analysisCanvas.width = 0
+        analysisCanvas.height = 0
+        resolve({ ok: false, fileName: file.name, reason: 'Could not process image.' })
+        return
+      }
       ctx.imageSmoothingEnabled = true
       ctx.imageSmoothingQuality = 'high'
       ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, outW, outH)
 
-      // ── Quality analysis (on processed canvas) ─────────────
       const brightness = computeBrightness(ctx, outW, outH)
       const sharpness  = computeSharpness(ctx, outW, outH)
 
       if (brightness < BRIGHTNESS_MIN) {
+        analysisCanvas.width = 0
+        analysisCanvas.height = 0
         resolve({ ok: false, fileName: file.name, reason: 'Photo too dark — shoot in natural daylight for best results.' })
         return
       }
       if (sharpness < SHARPNESS_MIN) {
+        analysisCanvas.width = 0
+        analysisCanvas.height = 0
         resolve({ ok: false, fileName: file.name, reason: 'Photo too blurry — use a stable surface or better lighting.' })
         return
       }
 
       const quality = computeQualityScore(brightness, sharpness)
 
-      // ── WebP compression (target ≤ 800 KB) ─────────────────
-      const tryExport = (quality: number): Promise<Blob | null> =>
-        new Promise(res => canvas.toBlob(b => res(b), 'image/webp', quality))
+      // ── Export detail from this same canvas, then release it ──
+      const detailBlob = await new Promise<Blob | null>(res =>
+        analysisCanvas.toBlob(b => res(b), 'image/webp', detailSpec.quality)
+      )
+      analysisCanvas.width = 0
+      analysisCanvas.height = 0
 
-      const exportWithFallback = async (): Promise<Blob | null> => {
-        for (const q of [0.88, 0.75, 0.62, 0.50]) {
-          const blob = await tryExport(q)
-          if (blob && blob.size <= MAX_SIZE_KB * 1024) return blob
-          if (blob && q === 0.50) return blob
-        }
-        return null
+      if (!detailBlob) {
+        resolve({ ok: false, fileName: file.name, reason: 'Compression failed. Try a different image.' })
+        return
       }
 
-      exportWithFallback().then(blob => {
-        if (!blob) {
-          resolve({ ok: false, fileName: file.name, reason: 'Compression failed. Try a different image.' })
-          return
-        }
-        resolve({
-          ok: true,
-          img: {
-            id:           crypto.randomUUID(),
-            previewUrl:   URL.createObjectURL(blob),
-            blob,
-            sizeKb:       Math.round(blob.size / 1024),
-            originalName: file.name,
-            isCover:      false,
-            quality,
-          },
-        })
+      // ── card + thumbnail: independent draws from the same decoded
+      // source `img`, one at a time so only one extra canvas is ever
+      // alive at once. ──
+      const cardBlob = await drawVariant(img, cardSpec.maxWidth, cardSpec.quality)
+      if (!cardBlob) {
+        resolve({ ok: false, fileName: file.name, reason: 'Compression failed. Try a different image.' })
+        return
+      }
+      const thumbnailBlob = await drawVariant(img, thumbnailSpec.maxWidth, thumbnailSpec.quality)
+      if (!thumbnailBlob) {
+        resolve({ ok: false, fileName: file.name, reason: 'Compression failed. Try a different image.' })
+        return
+      }
+
+      resolve({
+        ok: true,
+        img: {
+          id:           crypto.randomUUID(),
+          previewUrl:   URL.createObjectURL(cardBlob),
+          thumbnailBlob,
+          cardBlob,
+          detailBlob,
+          sizeKb:       Math.round(detailBlob.size / 1024),
+          originalName: file.name,
+          isCover:      false,
+          quality,
+        },
       })
     }
 
@@ -406,7 +491,7 @@ export function ImageUploader({
                   {dragOver ? 'Drop photos here' : 'Drag & drop or tap to upload'}
                 </p>
                 <p className="text-xs text-[#9c9c98] mt-0.5">
-                  JPEG, PNG, WebP · Original aspect ratio preserved · Max {MAX_SIZE_KB}KB
+                  JPEG, PNG, WebP · Original aspect ratio preserved
                 </p>
               </div>
               <p className="text-xs text-[#5c5c58] mt-1">

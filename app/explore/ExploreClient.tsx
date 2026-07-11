@@ -14,6 +14,7 @@ import { trackEvent } from '@/lib/analytics'
 import { captureEvent } from '@/lib/posthog'
 import { createExploreFuse } from '@/lib/fuzzy-search'
 import { getZoneForLocation, getNearestZone } from '@/lib/zones'
+import { getScooterImageUrl } from '@/lib/scooter-images'
 import { useProfile } from '@/hooks/useProfile'
 import { useAdminPanelVisible } from '@/hooks/useAdminPanelVisible'
 import { useGeolocation } from '@/hooks/useGeolocation'
@@ -549,6 +550,7 @@ export default function ExploreClient({
                     const thumbs = shopScooters
                       .slice(0, 3)
                       .map(s => s.coverImage ?? s.images[0])
+                      .map(url => getScooterImageUrl(url, 'thumbnail'))
                       .filter(Boolean) as string[]
                     return (
                       <div className="absolute bottom-4 right-4 z-20 bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.16)] p-3.5 w-[200px]">
@@ -639,6 +641,7 @@ export default function ExploreClient({
                 const thumbs = shopScooters
                   .slice(0, 3)
                   .map(s => s.coverImage ?? s.images[0])
+                  .map(url => getScooterImageUrl(url, 'thumbnail'))
                   .filter(Boolean) as string[]
                 return (
                   <div className="absolute bottom-24 right-4 z-20 bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.16)] p-3.5 w-[200px]">

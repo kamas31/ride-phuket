@@ -1,0 +1,21 @@
+{
+  // Dedicated tsconfig for *.test.ts files, run via `node --test` (not
+  // bundled by Next.js). Node's native TS execution requires an explicit
+  // ".ts" extension on relative imports — the main tsconfig.json uses
+  // moduleResolution "bundler", which actively rejects that extension
+  // (TS5097). Test files are excluded from the main app typecheck for this
+  // reason, but are NOT left unchecked: this config typechecks them under
+  // the module-resolution mode that matches how they actually execute.
+  //
+  // Run both before considering the project's types clean:
+  //   npm run typecheck        (app code, tsconfig.json)
+  //   npm run typecheck:tests  (test files, this file)
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true
+  },
+  "include": ["**/*.test.ts"],
+  "exclude": ["node_modules"]
+}

@@ -7,6 +7,7 @@ import {
 import { Badge } from '@/components/ui/Badge'
 import { getScooterById } from '@/lib/supabase/queries'
 import { formatPricePerDay, getScooterCover } from '@/lib/utils'
+import { getScooterImageUrl } from '@/lib/scooter-images'
 import { SITE_URL, SITE_NAME } from '@/constants'
 import { getAreaForLocation } from '@/constants/areas'
 import { ImageGallery } from '@/components/ride/ImageGallery'
@@ -35,7 +36,8 @@ export async function generateMetadata({ params }: ScooterPageProps) {
     const { id } = await params
     const scooter = await getScooterById(id)
     if (!scooter) return {}
-    const coverUrl = getScooterCover(scooter)
+    const rawCoverUrl = getScooterCover(scooter)
+    const coverUrl = rawCoverUrl ? getScooterImageUrl(rawCoverUrl, 'detail') : rawCoverUrl
     const price = scooter.pricePerDay > 0 ? formatPricePerDay(scooter.pricePerDay) : null
     const locationLabel = scooter.location
       ? scooter.location.charAt(0).toUpperCase() + scooter.location.slice(1)

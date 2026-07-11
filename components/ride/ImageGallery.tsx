@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { captureEvent } from '@/lib/posthog'
+import { getScooterImageUrl } from '@/lib/scooter-images'
 
 interface ImageGalleryProps {
   images: string[]
@@ -113,12 +114,13 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
           >
             <Image
               key={images[active]}
-              src={images[active]}
+              src={getScooterImageUrl(images[active], 'detail')}
               alt={`${name} — photo ${active + 1}`}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 700px"
               className="object-contain animate-fade-in"
               priority
+              unoptimized
               onLoad={(e) => {
                 const t = e.currentTarget
                 if (t.naturalWidth > 0 && t.naturalHeight > 0) {
@@ -178,7 +180,7 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
           {[prevIdx, nextIdx]
             .filter((idx, pos, arr) => arr.indexOf(idx) === pos && idx !== active)
             .map(idx => (
-              <img key={idx} src={images[idx]} alt="" loading="eager" decoding="async" width="1" height="1" />
+              <img key={idx} src={getScooterImageUrl(images[idx], 'detail')} alt="" loading="eager" decoding="async" width="1" height="1" />
             ))
           }
         </div>
@@ -199,7 +201,7 @@ export function ImageGallery({ images: rawImages, name, coverImage }: ImageGalle
               )}
             >
               <Image
-                src={src}
+                src={getScooterImageUrl(src, 'thumbnail')}
                 alt={`${name} thumbnail ${i + 1}`}
                 fill
                 className="object-cover"

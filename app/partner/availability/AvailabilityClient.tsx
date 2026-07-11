@@ -123,6 +123,7 @@ export default function AvailabilityClient({
                       className="w-[72px] h-[60px] rounded-[10px] flex-shrink-0"
                       width={72}
                       height={60}
+                      variant="thumbnail"
                     />
 
                     {/* Info */}

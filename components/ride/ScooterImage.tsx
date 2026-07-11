@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import Image from 'next/image'
 import { ImageOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getScooterImageUrl, type ScooterImageVariant } from '@/lib/scooter-images'
 
 // ─────────────────────────────────────────────────────────────
 // Cinematic warm-sand blur placeholder — 16×9 SVG gradient
@@ -34,6 +35,12 @@ interface ScooterImageProps {
   // (breakpoint-varying) thumbnails.
   width?: number
   height?: number
+  // Opt-in only: when set, `src` is resolved to that pre-generated Supabase
+  // variant (see lib/scooter-images.ts) and Vercel Image Optimization is
+  // bypassed for it (unoptimized) since the file is already the right size.
+  // Omit entirely for images that still need Vercel optimization (e.g. the
+  // shop banner, which isn't part of the scooter-photo variant pipeline).
+  variant?: ScooterImageVariant
   children?: React.ReactNode // badges, arrows, counters on top of image
 }
 
@@ -48,9 +55,11 @@ export function ScooterImage({
   sizes     = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
   width,
   height,
+  variant,
   children,
 }: ScooterImageProps) {
   const isFixedSize = typeof width === 'number' && typeof height === 'number'
+  const resolvedSrc = src && variant ? getScooterImageUrl(src, variant) : src
   const [loaded, setLoaded] = useState(priority) // priority images skip shimmer
 
   const handleLoad = useCallback(() => {
@@ -73,7 +82,7 @@ export function ScooterImage({
   return (
     <div className={cn('relative overflow-hidden bg-[#f3f3ef]', className)}>
 
-      {src ? (
+      {resolvedSrc ? (
         <>
           {/* Shimmer sweep — GPU-accelerated, fades out as image loads */}
           {!loaded && (
@@ -95,7 +104,7 @@ export function ScooterImage({
             // changes across breakpoints. Visually identical: imageClassName
             // still stretches it to fill this wrapper exactly like `fill` would.
             <Image
-              src={src}
+              src={resolvedSrc!}
               alt={alt}
               width={width}
               height={height}
@@ -104,10 +113,11 @@ export function ScooterImage({
               placeholder="blur"
               blurDataURL={BLUR_DATA_URL}
               onLoad={handleLoad}
+              unoptimized={Boolean(variant)}
             />
           ) : (
             <Image
-              src={src}
+              src={resolvedSrc!}
               alt={alt}
               fill
               className={imageClassName}
@@ -116,6 +126,7 @@ export function ScooterImage({
               placeholder="blur"
               blurDataURL={BLUR_DATA_URL}
               onLoad={handleLoad}
+              unoptimized={Boolean(variant)}
             />
           )}
         </>

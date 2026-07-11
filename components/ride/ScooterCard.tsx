@@ -54,6 +54,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         className="aspect-[4/3]"
         hover
         sizes="(max-width: 640px) 50vw, 33vw"
+        variant="card"
       />
       <div className="p-2.5">
         {/* Fixed height so badge-present xs cards match badge-absent xs cards */}
@@ -115,6 +116,7 @@ export const ScooterCard = memo(function ScooterCard({ scooter, className, compa
         overlay
         hover
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+        variant="card"
       >
         {/* Top-left: badges — horizontal row, max 2 */}
         {visibleBadges.length > 0 && (

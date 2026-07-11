@@ -10,6 +10,8 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { updateScooter } from '@/app/actions/scooter-update'
 import { ImageUploader, type ProcessedImage } from '@/components/ride/ImageUploader'
+import { uploadScooterImageVariants, deleteScooterImageUrls } from '@/lib/upload-scooter-images'
+import { getScooterImageUrl, resolveCoverUrl } from '@/lib/scooter-images'
 import { cn, formatPrice } from '@/lib/utils'
 import type { Scooter, MileageRange } from '@/types'
 import { SCOOTER_BRANDS, OTHER, getBrand, getModel, resolveBrandModelEngine } from '@/constants/scooter-brands-models'
@@ -124,24 +126,25 @@ export default function EditScooterForm({ scooter, shopId, shopName, shopLocatio
     }
   }
 
-  const uploadNewImages = async (): Promise<string[]> => {
-    if (!newImages.length) return []
+  // Same atomic-batch upload as NewScooterForm — see lib/upload-scooter-images.ts.
+  const uploadNewImages = async (): Promise<{ ok: true; urls: string[] } | { ok: false; error: string }> => {
+    if (!newImages.length) return { ok: true, urls: [] }
     const supabase = createClient()
-    const urls: string[] = []
-    for (const img of newImages) {
-      const path = `${shopId}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.webp`
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error: upErr } = await (supabase as any).storage
-        .from('scooter-images')
-        .upload(path, img.blob, { contentType: 'image/webp', upsert: false })
-      if (upErr) { console.error('[upload]', upErr.message); continue }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: urlData } = (supabase as any).storage
-        .from('scooter-images')
-        .getPublicUrl(data.path)
-      urls.push(urlData.publicUrl)
+
+    const results = await Promise.all(
+      newImages.map(img => uploadScooterImageVariants(supabase, shopId, img))
+    )
+
+    const failed = results.find(r => !r.ok)
+    if (failed) {
+      const succeededUrls = results.filter(r => r.ok).map(r => r.detailUrl!)
+      if (succeededUrls.length > 0) {
+        await deleteScooterImageUrls(shopId, succeededUrls)
+      }
+      return { ok: false, error: failed.error ?? 'One or more photos failed to upload.' }
     }
-    return urls
+
+    return { ok: true, urls: results.map(r => r.detailUrl!) }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -158,13 +161,26 @@ export default function EditScooterForm({ scooter, shopId, shopName, shopLocatio
     }, 30_000)
 
     try {
-      const newUrls = await uploadNewImages()
+      const uploadResult = await uploadNewImages()
+      if (!uploadResult.ok) {
+        clearTimeout(timeoutId)
+        setError(uploadResult.error)
+        setSaveState('error')
+        return
+      }
+      const newUrls = uploadResult.urls
       setSaveState('saving')
 
       const allImages    = [...existingImages, ...newUrls]
-      const resolvedCover = coverUrl && allImages.includes(coverUrl)
-        ? coverUrl
-        : allImages[0] ?? null
+      // Combined candidate list (existing + newly-uploaded), each carrying
+      // its own isCover — fixes a pre-existing gap where starring a NEW
+      // photo as cover (via ImageUploader's own star button) was silently
+      // ignored because only `coverUrl` (existing-photo selection) was
+      // consulted here.
+      const resolvedCover = resolveCoverUrl([
+        ...existingImages.map(url => ({ url, isCover: url === coverUrl })),
+        ...newImages.map((img, i) => ({ url: newUrls[i], isCover: img.isCover })),
+      ])
 
       const allFeatures = [...form.features]
       if (form.seatStorage) allFeatures.push(`Seat storage: ${form.seatStorage}`)
@@ -218,7 +234,21 @@ export default function EditScooterForm({ scooter, shopId, shopName, shopLocatio
         setSaveState('saved')
         setTimeout(() => setSaveState('idle'), 2500)
         setNewImages([])
+
+        // DB write confirmed — only now is it safe to delete Storage files
+        // for photos the user removed during this edit. Deleting before the
+        // DB write commits would risk a broken image on a still-live
+        // listing if the save had failed instead.
+        const removedUrls = scooter.images.filter(u => !existingImages.includes(u))
+        if (removedUrls.length > 0) {
+          await deleteScooterImageUrls(shopId, removedUrls)
+        }
       } else {
+        // DB write failed after new-photo uploads already succeeded —
+        // clean up those now-orphaned variant files.
+        if (newUrls.length > 0) {
+          await deleteScooterImageUrls(shopId, newUrls)
+        }
         setError(result.error ?? 'Failed to save changes.')
         setSaveState('error')
       }
@@ -292,7 +322,7 @@ export default function EditScooterForm({ scooter, shopId, shopName, shopLocatio
                           'relative h-20 rounded-[10px] overflow-hidden border-2 transition-all',
                           coverUrl === url ? 'border-[#FF6B35]' : 'border-transparent'
                         )}>
-                          <Image src={url} alt={`Photo ${i + 1}`} fill className="object-cover" unoptimized />
+                          <Image src={getScooterImageUrl(url, 'thumbnail')} alt={`Photo ${i + 1}`} fill className="object-cover" unoptimized />
                           {coverUrl === url && (
                             <div className="absolute bottom-1 left-1 bg-[#FF6B35] text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
                               <Star className="w-2 h-2 fill-white" />Cover

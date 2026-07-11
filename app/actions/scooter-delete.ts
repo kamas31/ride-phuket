@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, isAdminUser } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { getScooterImageStoragePaths } from '@/lib/scooter-images'
 
 export interface DeleteScooterResult {
   success: boolean
@@ -49,17 +50,11 @@ export async function deleteScooter(scooterId: string): Promise<DeleteScooterRes
     // ── Delete storage images ─────────────────────────────────────
     const images: string[] = scooterRow.images ?? []
     if (images.length > 0) {
-      // Extract storage paths from Supabase public URLs
-      // URL format: https://<project>.supabase.co/storage/v1/object/public/scooter-images/<path>
-      const paths = images
-        .map(url => {
-          try {
-            const u = new URL(url)
-            const match = u.pathname.match(/\/object\/public\/scooter-images\/(.+)/)
-            return match ? match[1] : null
-          } catch { return null }
-        })
-        .filter((p): p is string => Boolean(p))
+      // Each URL is either a new-format photo (3 sibling variant paths —
+      // thumbnail/card/detail) or a legacy flat file (1 path). Expanding
+      // via the centralized resolver means every variant gets cleaned up,
+      // not just the canonical `detail` URL stored in `images[]`.
+      const paths = images.flatMap(url => getScooterImageStoragePaths(url) ?? [])
 
       if (paths.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

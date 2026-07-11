@@ -8,6 +8,8 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { createScooter } from '@/app/actions/scooter-create'
 import { ImageUploader, type ProcessedImage } from '@/components/ride/ImageUploader'
+import { uploadScooterImageVariants, deleteScooterImageUrls } from '@/lib/upload-scooter-images'
+import { resolveCoverUrl } from '@/lib/scooter-images'
 import { cn, formatPrice } from '@/lib/utils'
 import { SCOOTER_BRANDS, OTHER, getBrand, getModel } from '@/constants/scooter-brands-models'
 import { captureEvent } from '@/lib/posthog'
@@ -106,35 +108,32 @@ export default function NewScooterForm({ shopId, shopName, shopLocation, isFirst
         : [...prev.features, f],
     }))
 
-  const uploadImages = async (): Promise<string[]> => {
-    if (!images.length) return []
+  // Uploads every photo's 3 variants (thumbnail/card/detail) directly to
+  // Supabase Storage, client-side — no Vercel Function in the data path.
+  // Atomic across the whole batch: if any photo fails, every photo that DID
+  // succeed in this batch is rolled back too, so the caller never has to
+  // reason about a partially-uploaded set of photos.
+  const uploadImages = async (): Promise<{ ok: true; urls: string[] } | { ok: false; error: string }> => {
+    if (!images.length) return { ok: true, urls: [] }
     setUploadingImages(true)
     const supabase = createClient()
-    const urls: string[] = []
 
-    for (const img of images) {
-      const path = `${shopId}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.webp`
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error: upErr } = await (supabase as any).storage
-        .from('scooter-images')
-        .upload(path, img.blob, { contentType: 'image/webp', upsert: false })
-
-      if (upErr) {
-        console.error('[upload]', upErr.message)
-        urls.push('')
-        continue
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: urlData } = (supabase as any).storage
-        .from('scooter-images')
-        .getPublicUrl(data.path)
-
-      urls.push(urlData.publicUrl)
-    }
+    const results = await Promise.all(
+      images.map(img => uploadScooterImageVariants(supabase, shopId, img))
+    )
 
     setUploadingImages(false)
-    return urls
+
+    const failed = results.find(r => !r.ok)
+    if (failed) {
+      const succeededUrls = results.filter(r => r.ok).map(r => r.detailUrl!)
+      if (succeededUrls.length > 0) {
+        await deleteScooterImageUrls(shopId, succeededUrls)
+      }
+      return { ok: false, error: failed.error ?? 'One or more photos failed to upload.' }
+    }
+
+    return { ok: true, urls: results.map(r => r.detailUrl!) }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,10 +150,16 @@ export default function NewScooterForm({ shopId, shopName, shopLocation, isFirst
     }, 30_000)
 
     try {
-      const urls = await uploadImages()
-      const coverIdx   = images.findIndex(img => img.isCover)
-      const coverImage = (coverIdx >= 0 && urls[coverIdx]) ? urls[coverIdx] : (urls[0] ?? null)
-      const validUrls  = urls.filter(Boolean)
+      const uploadResult = await uploadImages()
+      if (!uploadResult.ok) {
+        clearTimeout(timeoutId)
+        setError(uploadResult.error)
+        setSubmitting(false)
+        return
+      }
+      const urls       = uploadResult.urls
+      const coverImage = resolveCoverUrl(images.map((img, i) => ({ url: urls[i], isCover: img.isCover })))
+      const validUrls  = urls
 
       const allFeatures = [...form.features]
       if (form.seatStorage) allFeatures.push(`Seat storage: ${form.seatStorage}`)
@@ -195,6 +200,9 @@ export default function NewScooterForm({ shopId, shopName, shopLocation, isFirst
         if (isFirstListing) captureEvent('first_listing_published', { shop_id: shopId })
         window.location.href = '/partner/dashboard'
       } else {
+        // DB write failed after uploads already succeeded — clean up the
+        // now-orphaned variant files rather than leaving them in Storage.
+        await deleteScooterImageUrls(shopId, urls)
         setError(result.error ?? 'Failed to add scooter.')
         setSubmitting(false)
       }

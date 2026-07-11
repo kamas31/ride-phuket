@@ -83,6 +83,7 @@ function ContactShopContent() {
             className="w-20 h-16 rounded-[12px] flex-shrink-0"
             width={80}
             height={64}
+            variant="thumbnail"
           />
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-[#0f0f0e] truncate text-[15px]">{scooter!.name}</h3>

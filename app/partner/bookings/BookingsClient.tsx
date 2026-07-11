@@ -182,6 +182,7 @@ export default function BookingsClient({ bookings: initial, shopId }: BookingsCl
                     className="w-16 h-12 rounded-[10px] flex-shrink-0"
                     width={64}
                     height={48}
+                    variant="thumbnail"
                   />
                   {/* Scooter + rider info */}
                   <div className="flex-1 min-w-0">
