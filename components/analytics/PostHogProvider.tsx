@@ -17,6 +17,26 @@ import { useAuth } from '@/hooks/useAuth'
 import { initPostHog, identifyUser, resetAnalytics, registerSuperProperties, syncSessionRecordingForRoute } from '@/lib/posthog'
 import { captureAttribution, getAttributionProperties } from '@/lib/attribution'
 
+// Init + attribution + platform super property — run at module scope, NOT
+// inside a useEffect. This module is imported near the app root (see the
+// doc comment above), so this runs during client-bundle script evaluation,
+// before React starts rendering/hydrating the tree — which is before any
+// component's own effects can fire, including TrackView's (it lives deeper
+// in the tree than this provider, and React fires child effects before
+// parent effects on mount, so a useEffect here would NOT reliably win that
+// race). Confirmed live via a diagnostic log: `captureEvent('homepage_viewed', ...)`
+// fired with `initialized=false` while this logic still lived in a
+// useEffect — meaning that event was silently dropped, not just missing
+// first_touch_*. Running at module scope instead means every business event
+// this app ever fires — TrackView's on mount, posthog-js's own automatic
+// first $pageview, everything — is guaranteed to see attribution already
+// registered.
+if (typeof window !== 'undefined') {
+  initPostHog()
+  captureAttribution()
+  registerSuperProperties({ platform: 'web', ...getAttributionProperties() })
+}
+
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const { profile, loading } = useProfile()
   const { user } = useAuth()
@@ -30,22 +50,21 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     syncSessionRecordingForRoute(pathname)
   }, [pathname])
 
-  // Init + attribution + platform/session super properties — once per app load.
+  // Native-platform detection is the only genuinely async part (dynamic
+  // import), so it stays in an effect and is allowed to register late —
+  // `platform` isn't part of the attribution chain, so a brief `web` default
+  // before this resolves on a native app is harmless.
   useEffect(() => {
-    initPostHog()
-    captureAttribution()
-
     let mounted = true
-    async function registerPlatform() {
-      let platform: 'web' | 'ios_capacitor' = 'web'
+    async function detectNativePlatform() {
       try {
         const { Capacitor } = await import('@capacitor/core')
-        if (Capacitor.isNativePlatform()) platform = 'ios_capacitor'
+        if (mounted && Capacitor.isNativePlatform()) {
+          registerSuperProperties({ platform: 'ios_capacitor' })
+        }
       } catch {}
-      if (!mounted) return
-      registerSuperProperties({ platform, ...getAttributionProperties() })
     }
-    registerPlatform()
+    detectNativePlatform()
 
     return () => { mounted = false }
   }, [])

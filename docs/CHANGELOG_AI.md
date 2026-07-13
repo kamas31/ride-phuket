@@ -4,6 +4,44 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
+## 2026-07-13 (session 23)
+
+### Fix: PostHog attribution race condition — first business event of every session could ship without `first_touch_utm_*` (ADR-066)
+
+**Why it was needed:** Following the ADR-065 dashboard fix, the user required proof (from live data, not code reading) that `first_touch_utm_source`/`_medium`/`_campaign`/`_content` reach every business event from the very first pageview. Live HogQL queries found real sessions where a device's `$pageview` had no `first_touch_utm_*` at all while a *later* event in that same session did — a session-internal ordering bug, not the cross-session gap ADR-065 already covered.
+
+**What changed:**
+- `components/analytics/PostHogProvider.tsx` — `initPostHog()`, `captureAttribution()`, and the initial `registerSuperProperties({ platform: 'web', ...getAttributionProperties() })` call moved out of `useEffect` into module-scope code (guarded by `typeof window !== 'undefined'`). The async Capacitor native-platform detection stays in its own `useEffect`, since `platform` isn't part of the attribution chain and registering it slightly later is harmless.
+- No other file changed. `lib/posthog.ts` and `lib/attribution.ts` are byte-identical to before (confirmed via `git diff` showing zero changes) — temporary diagnostic `console.log` lines added to both during investigation were all removed prior to commit.
+
+**Problems encountered:**
+- First fix attempt (splitting the effect so attribution registers synchronously, but still inside `useEffect`) turned out to be insufficient. A temporary diagnostic log proved `captureEvent('homepage_viewed', ...)` could fire with `initialized=false` — i.e. before `PostHogProvider`'s own effect ran at all, because `TrackView` (which fires that event) lives inside `PostHogProvider`'s subtree in `app/layout.tsx`, and React fires child effects before parent effects on mount. No `useEffect`-based fix in the parent could reliably win that race.
+- Extensive Playwright-based live-browser verification was attempted first and turned into a dead end: posthog-js's own bot filter (`navigator.webdriver`), then a suspected `document.visibilityState` gate, then Client Hints (`navigator.userAgentData.brands`) were each ruled out in turn, but no capture request was ever observed reaching the network even from a bare, standalone test page outside the app entirely — concluded to be a Playwright/automation-environment artifact unrelated to the fix. Per explicit instruction, this line of verification was abandoned in favor of code inspection only.
+
+**How they were solved:**
+- Root cause #1 (session-internal timing) found by reading `node_modules/posthog-js/lib/src/posthog-core.js`: the SDK's `loaded` callback runs synchronously inside `init()`, then the automatic first `$pageview` is scheduled via a bare `setTimeout(fn, 1)` — a 1ms macrotask that a `useEffect` awaiting a dynamic `import('@capacitor/core')` reliably lost.
+- Root cause #2 (component-tree ordering) confirmed by reading `app/layout.tsx`'s actual nesting (`<PostHogProvider><Navbar/><main>{children}</main>...`) and applying React's documented child-before-parent effect ordering.
+- Final verification was code inspection only (per instruction): re-read `lib/attribution.ts` to confirm all 4 UTM properties are captured whenever present in the landing URL; grepped all 13 `captureEvent`/`posthog.capture` call sites in the codebase to confirm none run at module scope or before mount; confirmed via `git diff --stat` that only `PostHogProvider.tsx` and docs changed. `npx tsc --noEmit` clean; `npm run lint` shows zero new problems (the pre-existing 14 errors / 73 warnings are in files this change never touched).
+
+### Fix: PostHog dashboard showed "None (no value)" for CHANNEL_TYPE / UTM CAMPAIGN widgets (ADR-065)
+
+**Why it was needed:** TikTok test traffic (`utm_source=tiktok`, `utm_campaign=phuket_test_1`) was visibly present in Session Replay URLs, but the "Koh Ride Growth" dashboard showed "None" for every channel/campaign widget. User required a precise, evidence-based root cause from real data — no general theory — plus a working fix.
+
+**What changed (PostHog workspace only, no code):**
+- Diagnosed via live HogQL queries against the project's real event data (not speculation): `$channel_type` is a Person-scoped computed property that never populates for anonymous visitors under this app's `person_profiles: 'identified_only'` config; native `utm_source`/`utm_campaign` are registered into posthog-js's `sessionPersistence` (confirmed at `node_modules/posthog-js/lib/src/posthog-core.js:1044-1048`), so they vanish the moment a visitor's browser session ends — meaning any lead that converts in a later session than the ad click will always show `None`, which is exactly what real query results showed for every sampled `whatsapp_clicked` event.
+- Fixed 6 dashboard insights (807111) to break down on the codebase's existing durable `first_touch_utm_source`/`first_touch_utm_campaign` super properties (from `lib/attribution.ts` + `PostHogProvider.tsx`) instead of `$channel_type`/native `utm_*`: `4918595`, `4918724`, `4918613`, `4918725`, `4918727`, `4918615`.
+- Created 3 new insights to cover every requested view: "Visitors by utm_campaign" (`4970525`), "WhatsApp clicks by utm_campaign" (`4970526`), "Conversion by campaign" (`4970527`), attached to the dashboard and ordered via `reorder_tiles`.
+
+**Problems encountered:**
+- The scratchpad's PostHog credentials file from the prior session had been deleted during that session's own cleanup — had to re-request the Personal API Key from the user before any live querying could start.
+- Git Bash `/tmp` paths aren't understood by Windows-native `node`/`python3` — had to write intermediate JSON to the session scratchpad directory using explicit `C:/Users/...` paths instead.
+- `reorder_tiles` returned HTTP 405 on `PATCH` (the method used successfully earlier in this project) — this PostHog API version requires `POST` instead; corrected and confirmed the tile order took effect.
+
+**How they were solved:**
+- Root cause confirmed with two independent live-data checks: (1) the exact pageview row showing `utm_source`/`utm_campaign` populated while `$channel_type` was null on that same row: (2) a real, non-test session ("chatgpt.com" referrer) where the analogous property correctly propagated to a later `whatsapp_clicked` event in the *same* session — proving capture works and the failure is specifically the session boundary. Every fix was re-verified live (`?refresh=true`) after applying it: the "Visitors by utm_source" widget now shows `tiktok -> 2` instead of 100% None; "Visitors by utm_campaign" shows `phuket_test_1 -> 7`; the new funnel shows `phuket_test_1`: 7 visitors / 0 leads yet (accurate — the test campaign hasn't converted yet) vs. the organic bucket's 74 visitors / 7 leads. No code changes were required or made; nothing was committed.
+
+---
+
 ## 2026-06-29 (session 21)
 
 ### Feature: Tag internal/team accounts in PostHog (ADR-064)
