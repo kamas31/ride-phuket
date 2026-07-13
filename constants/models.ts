@@ -247,6 +247,28 @@ export const MODELS: ModelMeta[] = [
     ],
     relatedModelSlugs: ['click', 'lead'],
   },
+  {
+    slug: 'cbr-650r',
+    modelQuery: 'CBR 650R',
+    name: 'Honda CBR 650R',
+    label: 'CBR 650R',
+    brand: 'Honda',
+    description: 'Rent a Honda CBR 650R in Phuket. Compare real listings from local shops by area and price, then message the shop directly.',
+    longDescription: 'The Honda CBR 650R is a full-size sport motorcycle — a different category from the automatic scooters that make up most of Phuket’s rental fleet. It’s a manual machine with a 650cc engine, a clutch, and a gearbox, built for experienced riders who want a proper sportbike rather than a twist-and-go commuter scooter. This listing comes equipped with ABS brakes and traction control.',
+    whyChooseIt: [
+      '650cc manual sport motorcycle — a genuine step up from the automatic scooters that dominate Phuket’s rental fleet',
+      'Full clutch and gearbox control, built for experienced motorcycle riders rather than scooter riders',
+      'ABS brakes and traction control included for added safety margin',
+      'A rare find in Phuket — one of the few manual-transmission sport bikes available to rent on the island',
+    ],
+    faq: [
+      { question: 'Is the Honda CBR 650R automatic or manual?', answer: 'Manual — unlike most scooters available to rent in Phuket, the CBR 650R is a full manual sport motorcycle with a clutch and gearbox, suited to experienced motorcycle riders.' },
+      { question: 'What license do I need to rent a CBR 650R in Phuket?', answer: 'A valid motorcycle license is required, as with any rental in Phuket. Given the CBR 650R’s size and manual transmission, it’s intended for riders experienced with geared motorcycles rather than first-time renters — confirm specific requirements with the shop before booking.' },
+      { question: 'Does the Honda CBR 650R come with ABS and traction control?', answer: 'Yes — this listing includes ABS brakes and traction control.' },
+      { question: 'How much does it cost to rent a Honda CBR 650R in Phuket?', answer: 'Pricing varies by shop and rental length. Browse the live listing below for current day, week, and month rates from real shops.' },
+    ],
+    relatedModelSlugs: [],
+  },
 ]
 
 export function getModel(slug: string): ModelMeta | undefined {
