@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { AREAS } from '@/constants/areas'
 import { MODELS } from '@/constants/models'
+import { COMPARE_PAGES } from '@/constants/compare-pages'
 import { SEO_PAGES } from '@/constants/seo-pages'
 import { SITE_URL } from '@/constants'
 import { getScooters, getShopSlugs } from '@/lib/supabase/queries'
@@ -31,6 +32,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: now,
     changeFrequency: 'weekly' as const,
     priority: 0.85,
+  }))
+
+  const compareRoutes: MetadataRoute.Sitemap = COMPARE_PAGES.map(p => ({
+    url: `${SITE_URL}/compare/${p.slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.75,
   }))
 
   const guideRoutes: MetadataRoute.Sitemap = SEO_PAGES.filter(p => p.urlStrategy === 'guide').map(p => ({
@@ -75,5 +83,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // DB unavailable — emit no scooter URLs rather than mock ones
   }
 
-  return [...staticRoutes, ...areaRoutes, ...modelRoutes, ...guideRoutes, ...landingRoutes, ...shopRoutes, ...scooterRoutes]
+  return [...staticRoutes, ...areaRoutes, ...modelRoutes, ...compareRoutes, ...guideRoutes, ...landingRoutes, ...shopRoutes, ...scooterRoutes]
 }
