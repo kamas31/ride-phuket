@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { AREAS } from '@/constants/areas'
 import { MODELS } from '@/constants/models'
+import { SEO_PAGES } from '@/constants/seo-pages'
 import { SITE_URL } from '@/constants'
 import { getScooters, getShopSlugs } from '@/lib/supabase/queries'
 
@@ -32,6 +33,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }))
 
+  const guideRoutes: MetadataRoute.Sitemap = SEO_PAGES.filter(p => p.urlStrategy === 'guide').map(p => ({
+    url: `${SITE_URL}/guides/${p.slug}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.75,
+  }))
+
+  const landingRoutes: MetadataRoute.Sitemap = SEO_PAGES.filter(p => p.urlStrategy === 'landing').map(p => ({
+    url: `${SITE_URL}/${p.slug}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }))
+
   // Shop pages — indexed individually for local SEO
   let shopRoutes: MetadataRoute.Sitemap = []
   try {
@@ -60,5 +75,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // DB unavailable — emit no scooter URLs rather than mock ones
   }
 
-  return [...staticRoutes, ...areaRoutes, ...modelRoutes, ...shopRoutes, ...scooterRoutes]
+  return [...staticRoutes, ...areaRoutes, ...modelRoutes, ...guideRoutes, ...landingRoutes, ...shopRoutes, ...scooterRoutes]
 }

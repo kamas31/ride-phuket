@@ -13,6 +13,7 @@ import { getLiveModelPriceRange } from '@/lib/live-models'
 import { buildModelProductJsonLd, buildModelBreadcrumbJsonLd, buildModelFaqJsonLd } from '@/lib/schema/model-page'
 import { formatPrice } from '@/lib/utils'
 import { SITE_NAME, SITE_URL } from '@/constants'
+import { getRelatedContent } from '@/lib/related-content'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -96,6 +97,8 @@ export default async function ModelPage({ params }: PageProps) {
   const productJsonLd = buildModelProductJsonLd(model, scooters.length, priceRange)
   const breadcrumbJsonLd = buildModelBreadcrumbJsonLd(model)
   const faqJsonLd = buildModelFaqJsonLd(model)
+
+  const related = getRelatedContent({ topicText: model.name, relevantModelSlugs: [model.slug] })
 
   return (
     <>
@@ -346,6 +349,22 @@ export default async function ModelPage({ params }: PageProps) {
             ))}
           </div>
         </section>
+
+        {(related.guides.length > 0 || related.landings.length > 0 || related.compares.length > 0) && (
+          <section className="bg-[#f8f8f6] py-12">
+            <div className="max-w-5xl mx-auto px-4">
+              <h2 className="text-[20px] font-bold text-[#0f0f0e] mb-6">Related guides &amp; comparisons</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {[...related.guides, ...related.landings, ...related.compares].map(link => (
+                  <Link key={link.href} href={link.href} className="flex items-center justify-between px-4 py-3.5 bg-white rounded-[14px] border border-[#e8e8e4] hover:border-[#FF6B35] hover:bg-[#fff4f0] group transition-all">
+                    <p className="font-semibold text-sm text-[#0f0f0e] group-hover:text-[#FF6B35] transition-colors">{link.label}</p>
+                    <ChevronRight className="w-4 h-4 text-[#9c9c98] group-hover:text-[#FF6B35] transition-colors" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* CTA */}
         <section className="max-w-5xl mx-auto px-4 pb-16">
