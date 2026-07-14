@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { MessageCircle } from 'lucide-react'
 import { cn, formatPrice } from '@/lib/utils'
 import { MessageOwnerButton } from '@/app/scooter/[id]/MessageOwnerButton'
+import { WhatsAppButton } from '@/app/scooter/[id]/WhatsAppButton'
 
 interface StickyContactBarProps {
   scooterName: string
@@ -11,8 +13,10 @@ interface StickyContactBarProps {
   period:  'daily' | 'weekly' | 'monthly'
   scooterId:   string
   available?:  boolean
+  shopId:      string
   shopWhatsapp?: string
   shopPhone?:    string
+  isUnclaimed:   boolean
 }
 
 export function StickyContactBar({
@@ -21,7 +25,12 @@ export function StickyContactBar({
   period,
   scooterId,
   available = true,
+  shopId,
+  shopWhatsapp,
+  shopPhone,
+  isUnclaimed,
 }: StickyContactBarProps) {
+  const contactNumber = shopWhatsapp || shopPhone || ''
   const [visible, setVisible]       = useState(false)
   const [portalEl, setPortalEl]     = useState<Element | null>(null)
 
@@ -74,7 +83,21 @@ export function StickyContactBar({
 
           {available ? (
             <div className="flex items-center gap-2 flex-shrink-0">
-              <MessageOwnerButton scooterId={scooterId} scooterName={scooterName} variant="sticky" />
+              {isUnclaimed ? (
+                contactNumber && (
+                  <WhatsAppButton
+                    href={`https://wa.me/${contactNumber.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooterName} on Koh Ride and I'm interested.`)}`}
+                    shopId={shopId}
+                    scooterId={scooterId}
+                    className="flex items-center gap-1.5 px-5 py-3 font-bold text-sm rounded-full bg-[#16a34a] text-white hover:bg-[#15803d] transition-colors active:scale-[0.97]"
+                  >
+                    <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
+                    WhatsApp
+                  </WhatsAppButton>
+                )
+              ) : (
+                <MessageOwnerButton scooterId={scooterId} scooterName={scooterName} variant="sticky" />
+              )}
             </div>
           ) : (
             <span className="px-5 py-3 bg-[#f0f0ec] text-[#9c9c98] font-semibold text-sm rounded-full flex-shrink-0">

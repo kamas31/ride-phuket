@@ -4,7 +4,22 @@ Records significant AI-assisted implementation work. Most recent first.
 
 ---
 
-## 2026-07-13 (session 23)
+## 2026-07-14 (session 24)
+
+### Fix: "Message owner" CTA shown for unclaimed shops with no owner account to receive it
+
+**Why it was needed:** A Supabase audit (`shops.owner_id IS NULL`) found 13 unclaimed shops, 10 of which have a WhatsApp number but no owner account. The scooter page already hid the WhatsApp CTA when a shop had no WhatsApp/phone number (showing "Message owner" alone) — but did the opposite check for unclaimed shops: it always showed "Message owner" (which opens in-app chat) even though there's no owner account behind an unclaimed shop to receive that message.
+
+**What changed:**
+- `app/scooter/[id]/page.tsx` — added `isUnclaimed = !shop.ownerId` (the `Shop` type already exposes `ownerId`, sourced from `shops.owner_id` via `lib/normalize/normalize-shop.ts`); both existing CTA blocks (mobile side-by-side buttons, desktop panel) now wrap `MessageOwnerButton` in `{!isUnclaimed && (...)}`, leaving `WhatsAppButton` as the sole CTA when a shop is unclaimed. `shopId` and `isUnclaimed` are now also passed down to `PricingClient`.
+- `app/scooter/[id]/PricingClient.tsx` — added `shopId`/`isUnclaimed` props, passed straight through to `StickyContactBar`.
+- `components/ride/StickyContactBar.tsx` — previously always rendered `MessageOwnerButton` (its `shopWhatsapp`/`shopPhone` props were accepted but never used — dead props). Now accepts `shopId`/`isUnclaimed`, and when unclaimed, renders a WhatsApp link (reusing `WhatsAppButton`, sticky-styled) instead, using the whatsapp/phone number already being passed in.
+
+**Problems encountered:**
+- The sticky mobile contact bar (`StickyContactBar`) had the identical bug (always "Message owner", regardless of unclaimed status) but wasn't mentioned in the request — found while tracing every CTA on the page for consistency, since leaving it unfixed would have reintroduced the exact same dead-end CTA one component over on the same page.
+
+**How they were solved:**
+- Verified via Supabase REST query (service-role key) that `shops.owner_id`/`shops.whatsapp` matches the app's `Shop.ownerId`/`Shop.whatsapp` fields exactly, so no new data plumbing was needed — only the conditional rendering. `npx tsc --noEmit` clean; `npx eslint` on the 3 changed files shows zero new issues (one pre-existing `react-hooks/set-state-in-effect` error in `StickyContactBar.tsx` was confirmed present before this change too, via `git stash`).
 
 ### Fix: PostHog attribution race condition — first business event of every session could ship without `first_touch_utm_*` (ADR-066)
 

@@ -15,8 +15,10 @@ interface PricingClientProps {
   scooterName:   string
   scooterId:     string
   available:     boolean
+  shopId:        string
   shopWhatsapp?: string | null
   shopPhone?:    string | null
+  isUnclaimed:   boolean
 }
 
 export function PricingClient({
@@ -27,8 +29,10 @@ export function PricingClient({
   scooterName,
   scooterId,
   available,
+  shopId,
   shopWhatsapp,
   shopPhone,
+  isUnclaimed,
 }: PricingClientProps) {
   const [selected, setSelected] = useState<Period>('daily')
 
@@ -115,8 +119,10 @@ export function PricingClient({
         period={selectedOption.period}
         scooterId={scooterId}
         available={available}
+        shopId={shopId}
         shopWhatsapp={shopWhatsapp ?? undefined}
         shopPhone={shopPhone ?? undefined}
+        isUnclaimed={isUnclaimed}
       />
     </>
   )

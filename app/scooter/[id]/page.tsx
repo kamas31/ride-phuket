@@ -81,6 +81,9 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
   if (!shop) notFound()
 
   const contactNumber = shop.whatsapp || shop.phone || ''
+  // Unclaimed shops have no owner account, so in-app chat has no one to receive
+  // it — WhatsApp/phone is the only real contact path for them.
+  const isUnclaimed = !shop.ownerId
 
   // Filter out empty / N/A values — no fake placeholders
   const isValidSpec = (v: string | undefined) =>
@@ -289,16 +292,20 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                 scooterName={scooter.name}
                 scooterId={scooter.id}
                 available={scooter.available}
+                shopId={shop.id}
                 shopWhatsapp={shop.whatsapp}
                 shopPhone={shop.phone}
+                isUnclaimed={isUnclaimed}
               />
             </div>
 
             {/* Quick contact — two side-by-side buttons below pricing */}
             <div className="flex gap-3">
-              <div className="flex-1">
-                <MessageOwnerButton scooterId={scooter.id} scooterName={scooter.name} />
-              </div>
+              {!isUnclaimed && (
+                <div className="flex-1">
+                  <MessageOwnerButton scooterId={scooter.id} scooterName={scooter.name} />
+                </div>
+              )}
               {contactNumber && (
                 <WhatsAppButton
                   href={`https://wa.me/${contactNumber.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
@@ -430,7 +437,9 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
 
               {/* CTAs */}
               <div className="space-y-3">
-                <MessageOwnerButton scooterId={scooter.id} scooterName={scooter.name} />
+                {!isUnclaimed && (
+                  <MessageOwnerButton scooterId={scooter.id} scooterName={scooter.name} />
+                )}
 
                 {contactNumber && (
                   <WhatsAppButton
