@@ -83,6 +83,27 @@ export const SEO_PAGES: SeoPageMeta[] = [
     ],
     filter: { category: 'automatic', requiresMonthlyRate: true },
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'do-i-need-a-license-to-rent-a-scooter-in-phuket',
+    targetQuery: 'do i need a license to rent a scooter in phuket',
+    title: 'Do You Need a License to Rent a Scooter in Phuket?',
+    h1: 'Do You Need a License to Rent a Scooter in Phuket?',
+    description: 'Yes — Thai law requires a motorcycle license or International Driving Permit to legally rent a scooter in Phuket. Here’s what you need to know.',
+    longDescription: 'If you’re planning to rent a scooter in Phuket, the short answer is yes — Thailand requires a valid motorcycle license to ride one legally. That means either a Thai driving license with a motorcycle endorsement, or an International Driving Permit (IDP) carrying the Category A motorcycle class alongside your home country license. Many shops will still hand over the keys without checking, but that doesn’t make it legal, and it can leave you exposed if something goes wrong.',
+    contentSections: [
+      { heading: 'What license do you actually need', body: 'Thai law recognizes two ways to legally ride a scooter: a Thai driving license with a motorcycle category, or a foreign motorcycle license paired with an International Driving Permit (IDP) that carries the Category A endorsement — a car-only IDP does not count. One exception applies: riders holding a national driving license from an ASEAN member country, including Malaysia, Singapore, and the Philippines, can ride without an IDP.' },
+      { heading: 'What happens if you’re stopped without a valid license', body: 'Riding without a valid motorcycle license or IDP is an offense in Thailand and can mean a fine at a police checkpoint. More importantly, most travel and medical insurance policies exclude coverage for accidents that happen while riding without a legally recognized license — so the bigger risk isn’t the fine, it’s being uninsured if you’re hurt.' },
+      { heading: 'How to get ready before you arrive', body: 'An International Driving Permit has to be issued in your home country before you travel — Thailand does not issue them to visitors, so this isn’t something you can sort out after landing in Phuket. Apply through your home country’s motoring authority, confirm the motorcycle category is included, and bring it along with your regular driving license and passport when you pick up your scooter.' },
+    ],
+    highlights: ['A Thai motorcycle license or an International Driving Permit with the Category A motorcycle endorsement is legally required to ride a scooter in Phuket', 'Riders with a national driving license from an ASEAN country can ride without an IDP', 'An IDP must be arranged in your home country before you travel — it can’t be issued in Thailand', 'Riding without a valid license risks a fine and can void your travel insurance if you’re in an accident'],
+    faq: [
+      { question: 'Do I need an International Driving Permit (IDP) to rent a scooter in Phuket?', answer: 'In most cases, yes. Alongside your home country motorcycle license, you need an IDP with the Category A motorcycle endorsement to ride legally in Phuket — a car-only IDP isn’t valid for a scooter. The one exception is riders from ASEAN countries, who can use their national license without an IDP.' },
+      { question: 'What happens if I rent a scooter in Phuket without a license?', answer: 'Shops may still rent to you without checking, but Thai police can fine you at a checkpoint for riding without a valid motorcycle license or IDP — and just as importantly, your travel or medical insurance can refuse to cover an accident if you weren’t legally licensed to ride.' },
+      { question: 'Can I get an International Driving Permit after I arrive in Phuket?', answer: 'No. An IDP has to be issued by your home country’s motoring authority before you travel — Thailand doesn’t issue them to visitors, so this needs to be sorted out before you land.' },
+    ],
+    filter: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
