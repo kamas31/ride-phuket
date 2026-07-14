@@ -62,6 +62,27 @@ export const SEO_PAGES: SeoPageMeta[] = [
     ],
     filter: { category: 'automatic' },
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'monthly-scooter-rental-phuket',
+    targetQuery: 'monthly scooter rental phuket',
+    title: 'Monthly Scooter Rental Phuket | Koh Ride',
+    h1: 'Monthly Scooter Rental in Phuket',
+    description: 'Monthly scooter rental in Phuket: 56 real automatic scooters with a discounted monthly rate from 3,500 THB, across 15 verified shops in 6 areas.',
+    longDescription: 'Planning to stay in Phuket for a month or longer? Koh Ride lists 56 real automatic scooters from 15 verified shops that offer a discounted monthly rental rate, starting from 3,500 THB/month. Every one of them works out cheaper per day than booking short-term, with a typical saving of around 44%. Compare monthly rates across Rawai, Chalong, Patong, Phuket Town, Kathu, and Kata before you book.',
+    contentSections: [
+      { heading: 'How monthly scooter rental pricing works in Phuket', body: 'Shops on Koh Ride set a separate, discounted price for renters staying a full month. Every one of the 56 automatic scooters with a monthly rate here works out cheaper per day than that same shop’s standard daily rate, with savings ranging from 6% to 77% and a median of about 44%. Monthly rental is the better deal for anyone staying in Phuket longer than a couple of weeks.' },
+      { heading: 'Which scooters are available for monthly rental', body: 'Monthly rates are most common on everyday automatics: Honda Click, Honda PCX, Honda XADV, Honda ADV, Yamaha NMAX, and Yamaha AEROX all have real listings with a monthly rate on Koh Ride today. Prices start at 3,500 THB/month for a Yamaha Grand Filano or Honda Click, rising for larger-displacement models like the Honda XADV.' },
+    ],
+    highlights: ['56 real automatic scooters currently offer a discounted monthly rental rate', '15 verified shops across 6 areas of Phuket offer monthly scooter rental', 'Every monthly rate is cheaper per day than the daily rate, with a median saving around 44%', 'Monthly rates start from 3,500 THB, with helmet and insurance included on every listing', '26 of the 56 monthly-rate scooters offer delivery'],
+    faq: [
+      { question: 'How much does monthly scooter rental cost in Phuket?', answer: 'Monthly scooter rental on Koh Ride starts from 3,500 THB/month for models like the Yamaha Grand Filano or Honda Click, rising to around 45,000 THB/month for larger automatics like the Honda XADV. 56 real listings currently offer a monthly rate.' },
+      { question: 'Is monthly scooter rental cheaper than daily rental in Phuket?', answer: 'Yes. Every one of the 56 automatic scooters with a monthly rate on Koh Ride works out cheaper per day than that shop’s standard daily rate, with a typical saving of around 44%.' },
+      { question: 'Which areas of Phuket offer monthly scooter rental?', answer: 'Monthly scooter rental is available from 15 verified shops across 6 areas: Rawai, Chalong, Patong, Phuket Town, Kathu, and Kata.' },
+      { question: 'Does monthly scooter rental in Phuket include a helmet and insurance?', answer: 'Yes. Every monthly-rate scooter listed on Koh Ride includes a helmet and insurance, with no separate add-on fee.' },
+    ],
+    filter: { category: 'automatic', requiresMonthlyRate: true },
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
