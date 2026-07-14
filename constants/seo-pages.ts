@@ -29,6 +29,8 @@ export interface SeoPageMeta {
   slug: string
   /** The real Google query this page was built for — traceability, never rendered as keyword-stuffed anchor text. */
   targetQuery: string
+  /** Recognized synonym/word-order variants that resolve to this SAME page (lib/brain/canonical-query.ts) — never a reason to create a new page, only Brain-awareness + content enrichment. Optional: absent on pages created before this field existed. */
+  alternateQueries?: string[]
   title: string
   h1: string
   description: string
@@ -38,6 +40,9 @@ export interface SeoPageMeta {
   faq: SeoPageFaq[]
   /** Drives which REAL scooters this page lists — never a fabricated list. Optional: a purely informational guide may have none. */
   filter?: SeoPageFilter
+  /** Structural facets for the internal-linking graph (lib/related-content.ts) — real constants/models.ts / constants/areas.ts slugs, never fabricated. Optional: absent on pages created before this field existed. */
+  relevantModelSlugs?: string[]
+  areaSlugs?: string[]
 }
 
 export const SEO_PAGES: SeoPageMeta[] = [
@@ -103,6 +108,30 @@ export const SEO_PAGES: SeoPageMeta[] = [
       { question: 'Can I get an International Driving Permit after I arrive in Phuket?', answer: 'No. An IDP has to be issued by your home country’s motoring authority before you travel — Thailand doesn’t issue them to visitors, so this needs to be sorted out before you land.' },
     ],
     filter: undefined,
+  },
+  {
+    urlStrategy: 'landing',
+    slug: 'scooter-rental-phuket',
+    targetQuery: 'scooter rental phuket',
+    alternateQueries: [],
+    title: 'Scooter Rental Phuket | 65 Real Listings',
+    h1: 'Scooter Rental in Phuket',
+    description: 'Scooter rental in Phuket made simple: 65 real, available automatic scooters across 16 verified shops, from ฿150/day, helmet and insurance included.',
+    longDescription: 'Searching for scooter rental in Phuket? Koh Ride lists 65 real, available automatic scooters from 16 verified shops across all six areas of the island — Rawai, Phuket Town, Chalong, Patong, Kathu, and Kata. Every listing includes a helmet and insurance as standard, prices start from ฿150/day, and you contact each shop directly to book — no OTA markup, no middleman fees.',
+    contentSections: [
+      { heading: 'What’s included with every scooter rental in Phuket on Koh Ride', body: 'All 65 automatic scooters listed here include a helmet and insurance as standard, so there’s no separate add-on fee to negotiate with the shop. 28 of the 65 listings also offer delivery, so the shop can drop the scooter at your hotel or villa instead of you needing to collect it in person.' },
+      { heading: 'Where to rent a scooter across Phuket', body: 'Koh Ride’s 16 verified shops offering scooter rental cover all six areas of Phuket: Rawai (21 listings), Phuket Town (19), Chalong (11), Patong (9), Kathu (3), and Kata (2) — so wherever you’re staying, there’s a real rental option nearby.' },
+    ],
+    highlights: ['65 real automatic scooters available right now, from Honda, Yamaha, and GPX', '16 verified shops across all 6 areas of Phuket: Rawai, Phuket Town, Chalong, Patong, Kathu, and Kata', 'Helmet and insurance included on every single listing, no extra fees', 'Prices from ฿150/day, with 56 scooters also offering a discounted monthly rate', '28 listings offer delivery to your hotel or villa'],
+    faq: [
+      { question: 'How much does scooter rental cost in Phuket?', answer: 'Scooter rental in Phuket on Koh Ride starts from ฿150/day for an automatic scooter, with most everyday models (Honda Click, Honda PCX, Yamaha NMAX) priced between ฿200 and ฿500/day depending on the shop. 65 real listings are available right now, all including helmet and insurance.' },
+      { question: 'Which areas of Phuket have scooter rental shops?', answer: 'Koh Ride’s 16 verified shops offering scooter rental cover all six areas of Phuket: Rawai, Phuket Town, Chalong, Patong, Kathu, and Kata — so you can rent close to wherever you’re staying.' },
+      { question: 'Does scooter rental in Phuket include a helmet and insurance?', answer: 'Yes — every one of the 65 automatic scooters listed on Koh Ride includes a helmet and insurance as standard, with no separate add-on fee.' },
+      { question: 'Can I get a scooter delivered to my hotel in Phuket?', answer: 'Yes — 28 of the 65 available scooter listings on Koh Ride offer delivery, so the shop can drop the scooter off at your hotel or villa instead of you collecting it in person.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['pcx', 'nmax', 'click'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
 ]
 
