@@ -156,6 +156,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: [],
     areaSlugs: [],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'laws-thailand-tourists-scooter',
+    targetQuery: 'laws thailand tourists scooter',
+    alternateQueries: [],
+    title: 'Scooter Laws in Thailand for Tourists',
+    h1: 'Scooter Laws in Thailand for Tourists',
+    description: 'Thailand’s scooter laws for tourists cover license and IDP rules, helmet requirements, insurance, and traffic rules you need before renting in Phuket.',
+    longDescription: 'Every tourist renting a scooter in Thailand is bound by real, enforced laws, not just shop policy — a valid motorcycle license or International Driving Permit, a helmet for every rider and passenger, and Thailand’s compulsory third-party insurance. Koh Ride only lists real automatic scooters with helmet and insurance included as standard, and this page breaks down exactly what these laws mean for tourists riding in Phuket.',
+    contentSections: [
+      { heading: 'License and International Driving Permit (IDP) rules', body: 'Thai law requires a valid motorcycle license to ride any scooter — either a Thai driving license with a motorcycle endorsement, or a foreign motorcycle license paired with an International Driving Permit (IDP) carrying the Category A motorcycle class. A car-only IDP does not count. IDPs are recognized under the 1949 Geneva Road Traffic Convention and are issued by your home country’s motoring authority (AA, AAA, ADAC, RAC, and similar) before you travel — Thailand does not issue them to visitors. One exception: tourists holding a national driving license from an ASEAN country, including Malaysia, Singapore, and the Philippines, can ride without an IDP.' },
+      { heading: 'Helmet law and fines', body: 'Wearing a helmet is compulsory by Thai law for both the rider and any pillion passenger. Police checkpoints — especially in busy tourist areas like Patong and Kata — do issue on-the-spot fines for riding without one, typically around ฿500. Riding without a valid motorcycle license or IDP is a separate offense and can mean a further fine of ฿500–฿1,000 at the same checkpoint.' },
+      { heading: 'Insurance: what’s covered and what voids it', body: 'Thailand’s compulsory third-party insurance (Por Ror Bor) is required on every registered vehicle and should already be included in any legitimate rental — every automatic scooter listed on Koh Ride includes it as standard. It only covers injury to third parties, not damage to the scooter, your own injuries, or theft. Just as importantly, riding without a valid license typically voids this coverage, and can void your personal travel or medical insurance too if you’re in an accident.' },
+      { heading: 'Traffic rules and passport safety every tourist should know', body: 'Thailand drives on the left, the same as the UK, Australia, and Japan. Speed limits are generally 30–50 km/h near beaches and towns, up to 80 km/h on urban roads, and up to 90 km/h on highways, with speed cameras and police patrols active on main routes. If a shop asks for your original passport as a security deposit, that’s technically illegal under Thai law — a cash deposit (typically ฿2,000–฿5,000) or a passport copy is the safer, legal alternative. If you’re in an accident, call the tourist police at 1155 or the regular police at 191 before moving any vehicles.' },
+    ],
+    highlights: ['A Thai motorcycle license or an International Driving Permit with the Category A endorsement is legally required to ride a scooter in Thailand', 'Helmets are compulsory by law for rider and passenger — checkpoint fines apply for going without one', '66 real automatic scooters on Koh Ride include Thailand’s compulsory third-party insurance and a helmet as standard, from ฿150/day', 'Handing over your original passport as a deposit is technically illegal — ask for a cash deposit or passport copy instead', 'Riding without a valid license can void both your Thai insurance and your personal travel insurance'],
+    faq: [
+      { question: 'What laws do tourists need to follow to ride a scooter in Thailand?', answer: 'Tourists need a valid motorcycle license — a Thai license or an International Driving Permit with the Category A motorcycle endorsement — plus a helmet for every rider and passenger, and Thailand’s compulsory third-party insurance, which should already be included in any legitimate rental.' },
+      { question: 'Is it illegal to ride a scooter in Thailand without a helmet?', answer: 'Yes. Helmets are compulsory by law for both the rider and any pillion passenger, and police checkpoints — especially in tourist areas like Patong and Kata — issue on-the-spot fines of around ฿500 for riding without one.' },
+      { question: 'Can tourists rent a scooter in Thailand without an International Driving Permit?', answer: 'Only if they hold a national driving license from an ASEAN country such as Malaysia, Singapore, or the Philippines. Everyone else needs an IDP with the Category A motorcycle class, arranged in their home country before travel — Thailand doesn’t issue IDPs to visitors.' },
+      { question: 'Is it legal for a scooter shop to hold my passport as a deposit in Thailand?', answer: 'No — asking for your original passport as security is technically illegal under Thai law. A cash deposit, typically ฿2,000–฿5,000, or a passport copy, is the safer and legal alternative most shops will accept.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: [],
+    areaSlugs: [],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
