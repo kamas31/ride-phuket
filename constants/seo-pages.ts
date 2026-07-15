@@ -255,6 +255,31 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'helmet-law-thailand-scooter',
+    targetQuery: 'helmet law thailand scooter',
+    alternateQueries: [],
+    title: 'Thailand Helmet Law for Scooter Riders in Phuket',
+    h1: 'Thailand’s Helmet Law for Scooter Riders',
+    description: 'Thailand’s helmet law requires a helmet for every scooter rider and passenger, enforced in Phuket too — and every scooter on Koh Ride already includes one.',
+    longDescription: 'Thailand’s helmet law is simple but real: every rider and passenger on a scooter or motorbike must wear an approved helmet, on every road in the country, including here in Phuket. It isn’t a suggestion — police checkpoints do enforce it, and it applies to visitors exactly the same as Thai residents. The good news is that renting through Koh Ride makes compliance automatic: every one of the 74 available scooters listed today already includes a helmet, with no separate fee, so you’re covered under the law before you even leave the shop.',
+    contentSections: [
+      { heading: 'What Thailand’s helmet law actually requires', body: 'Thailand’s Land Traffic Act requires every rider and every passenger on a scooter or motorbike to wear an approved helmet, on every road in the country — this includes Phuket, not just Bangkok. The law makes no exception for tourists or short-term rentals: if you’re on a scooter, a helmet is legally required, full stop.' },
+      { heading: 'What happens if you’re stopped without one', body: 'Police checkpoints across Phuket, including on routes into Patong, Kata, and Chalong, do check for helmets, and riding without one can mean an on-the-spot fine. Beyond the legal risk, a helmet is also the single most effective piece of safety equipment on a scooter — Phuket’s mix of hills, sudden traffic, and unfamiliar roads makes it worth wearing even where enforcement is light.' },
+      { heading: 'How Koh Ride makes this easy', body: 'Every one of the 74 available scooters listed on Koh Ride already includes a helmet as standard — there’s nothing extra to negotiate with the shop, so you’re compliant with Thailand’s helmet law from the moment you pick up the keys.' },
+    ],
+    highlights: ['Thailand’s helmet law requires an approved helmet for both the rider and any passenger, with no exemption for tourists or short-term rentals', 'All 74 available scooters on Koh Ride — automatic and manual — already include a helmet, so you’re compliant before you even leave the shop', '16 verified shops across Phuket hand over a helmet with every scooter, with no separate fee to negotiate', '66 automatic scooters, the easiest choice for riders new to Thailand’s roads, are available from ฿150/day', '57 of the 66 automatic scooters also offer a discounted monthly rate for longer stays'],
+    faq: [
+      { question: 'Is it actually the law to wear a helmet on a scooter in Thailand?', answer: 'Yes. Thailand’s Land Traffic Act requires an approved helmet for both the rider and any passenger on a scooter or motorbike, on every road in the country, including Phuket. It applies to tourists exactly the same as it applies to Thai residents.' },
+      { question: 'Does my scooter rental in Phuket come with a helmet, or do I need to bring my own?', answer: 'On Koh Ride, yes — every one of the 74 available scooters currently listed includes a helmet as standard, with no separate fee. You don’t need to bring or buy your own to comply with Thailand’s helmet law.' },
+      { question: 'What happens if I’m stopped riding without a helmet in Phuket?', answer: 'Riding without a helmet is an offense under Thai law, and police checkpoints across Phuket — including routes into Patong, Kata, and Chalong — do check. Being stopped can mean an on-the-spot fine, on top of the real safety risk of riding without one.' },
+      { question: 'Does the helmet law apply to passengers too, not just the driver?', answer: 'Yes — Thailand’s helmet law applies to both the rider and any passenger on the scooter. If you’re riding two-up, check with the shop when you book to make sure a second helmet is provided.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['xadv', 'pcx', 'click'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
