@@ -182,6 +182,30 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: [],
     areaSlugs: [],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'ride-tourists-scooter-phuket',
+    targetQuery: 'ride tourists scooter phuket',
+    alternateQueries: [],
+    title: 'Can Tourists Ride Scooters in Phuket?',
+    h1: 'Yes, Tourists Can Ride Scooters in Phuket',
+    description: 'Yes — tourists can legally ride and rent scooters in Phuket with a valid motorcycle license or IDP. Browse 66 real automatic scooters from ฿150/day.',
+    longDescription: 'Yes, tourists can rent and ride scooters in Phuket — it’s one of the most common ways visitors get around the island. Thai law allows it for any tourist holding a valid motorcycle license or an International Driving Permit (IDP) with the Category A endorsement alongside their home license. Koh Ride lists 66 real, available automatic scooters from 16 verified shops across the island, so once you have the right paperwork, you can compare real inventory and book directly — no OTA markup, no middleman fees.',
+    contentSections: [
+      { heading: 'Yes, tourists can ride scooters in Phuket', body: 'Renting and riding a scooter is completely normal for tourists visiting Phuket — thousands of visitors do it every day to get around the island independently. To ride legally, you need a valid motorcycle license or an International Driving Permit (IDP) carrying the Category A motorcycle endorsement alongside your home country license; riders holding a national license from an ASEAN country can ride without an IDP. Shops don’t always check, but riding without the right license can void your travel insurance if you’re in an accident.' },
+      { heading: 'What to expect renting as a tourist in Phuket', body: 'Koh Ride lists 66 real, available automatic scooters from 16 verified shops across Phuket, all including a helmet and insurance as standard, so there’s nothing extra to negotiate at pickup. Automatic scooters like the Honda PCX, Yamaha NMAX, and Honda Click are the easiest option for tourists, since there’s no clutch to manage in Phuket’s traffic — and 29 of the current listings offer delivery straight to your hotel or villa.' },
+    ],
+    highlights: ['66 real automatic scooters available right now for tourists to rent across Phuket', 'A valid motorcycle license or International Driving Permit (Category A) is all tourists need to ride legally', '16 verified shops across the island, all including helmet and insurance as standard', 'Automatic models like the Honda PCX, Yamaha NMAX, and Honda Click are the easiest choice for first-time tourist riders', '29 listings offer delivery straight to your hotel or villa'],
+    faq: [
+      { question: 'Can tourists legally ride scooters in Phuket?', answer: 'Yes — tourists can ride scooters in Phuket as long as they hold a valid motorcycle license or an International Driving Permit (IDP) with the Category A motorcycle endorsement alongside their home license. Riders from ASEAN countries can use their national license without an IDP.' },
+      { question: 'Do tourists need a license to rent a scooter in Phuket?', answer: 'Yes. Thai law requires a motorcycle license or IDP to ride legally — shops may not always check, but riding without one can void your travel insurance if you’re in an accident.' },
+      { question: 'How much does it cost for a tourist to rent a scooter in Phuket?', answer: 'Automatic scooter rental for tourists on Koh Ride starts from ฿150/day, with 66 real listings currently available from 16 verified shops, all including helmet and insurance.' },
+      { question: 'Is it easy for tourists to ride scooters in Phuket?', answer: 'Automatic scooters like the Honda Click and Honda PCX are the easiest option for tourists new to riding in Phuket traffic, since there’s no clutch to manage — every listing on Koh Ride also includes a helmet and insurance as standard.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['pcx', 'nmax', 'click'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
