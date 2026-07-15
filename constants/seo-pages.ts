@@ -133,6 +133,30 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['pcx', 'nmax', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'license-thailand-tourists-scooter',
+    targetQuery: 'license thailand tourists scooter',
+    alternateQueries: [],
+    title: 'Scooter License for Tourists in Thailand',
+    h1: 'Scooter License Requirements for Tourists in Thailand',
+    description: 'Tourists need a motorcycle license or IDP with Category A to ride a scooter in Thailand. Browse 66 real automatic scooters across Phuket from ฿150/day.',
+    longDescription: 'If you’re a tourist wondering what license you need to ride a scooter in Thailand, here’s the real answer: a Thai motorcycle license, or a foreign motorcycle license paired with an International Driving Permit carrying the Category A endorsement. Once you have it, Koh Ride lists 66 real automatic scooters from 16 verified shops across Phuket, ready to rent from ฿150/day with helmet and insurance included.',
+    contentSections: [
+      { heading: 'What license lets a tourist rent legally', body: 'Thailand recognizes two ways for a tourist to legally ride a scooter: a Thai driving license with a motorcycle category, or a foreign motorcycle license paired with an International Driving Permit (IDP) carrying the Category A endorsement — a car-only IDP does not count. Riders holding a national driving license from an ASEAN member country, including Malaysia, Singapore, and the Philippines, can ride without an IDP.' },
+      { heading: 'Why it matters beyond avoiding a fine', body: 'Riding without a valid motorcycle license or IDP is an offense in Thailand and can mean a fine at a police checkpoint. More importantly, most travel and medical insurance policies exclude coverage for accidents that happen while riding without a legally recognized license, so the real risk isn’t the fine — it’s being uninsured if you’re hurt. An IDP has to be arranged in your home country before you travel; Thailand does not issue them to visitors.' },
+      { heading: 'Automatic scooters ready for tourists in Phuket', body: 'Once your license or IDP is sorted, Koh Ride lists 66 real, available automatic scooters from 16 verified shops across all six areas of Phuket. Every listing includes a helmet and insurance as standard, prices start from ฿150/day, and 29 of the 66 listings offer delivery straight to your hotel.' },
+    ],
+    highlights: ['66 real automatic scooters are available now across 16 verified Phuket shops for tourists with a valid motorcycle license or IDP', 'A Thai motorcycle license or an International Driving Permit with the Category A endorsement lets tourists legally rent and ride', 'Riders from ASEAN countries, including Malaysia, Singapore, and the Philippines, can rent using just their national license, no IDP required', 'Every listed scooter includes helmet and insurance at no extra cost, with prices from ฿150/day', '29 of the 66 automatic scooters offer delivery, so the shop can bring it straight to your hotel'],
+    faq: [
+      { question: 'Can tourists rent a scooter in Thailand without a license?', answer: 'No — Thai law requires a motorcycle license or an International Driving Permit (IDP) with the Category A endorsement to legally ride a scooter, even as a tourist. Some shops may still hand over the keys without checking, but riding without one risks a fine and can void your travel insurance.' },
+      { question: 'What license do I need as a tourist to rent a scooter in Thailand?', answer: 'You need either a Thai motorcycle license, or your home country’s motorcycle license paired with an International Driving Permit carrying the Category A endorsement — a car-only IDP doesn’t count. Riders from ASEAN countries can use their national license without an IDP.' },
+      { question: 'How many automatic scooters can I rent in Phuket right now?', answer: 'Koh Ride currently lists 66 real, available automatic scooters from 16 verified shops across Phuket, priced from ฿150/day with helmet and insurance included, and 29 of them offer delivery.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['xadv', 'pcx', 'click'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
