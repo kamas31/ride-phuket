@@ -206,6 +206,31 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['pcx', 'nmax', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'driving-international-permit-thailand-scooter',
+    targetQuery: 'driving international permit thailand scooter',
+    alternateQueries: [],
+    title: 'International Driving Permit for Thailand Scooter Rental',
+    h1: 'International Driving Permit (IDP) for a Thailand Scooter Rental',
+    description: 'Yes — an International Driving Permit is required to legally rent a scooter in Thailand. See real IDP rules, plus 66 automatic scooters from ฿150/day.',
+    longDescription: 'Planning to rent a scooter in Thailand? An International Driving Permit (IDP) with the Category A motorcycle endorsement is legally required alongside your home country license before you can ride — a car-only IDP does not count, and it has to be arranged before you travel. Koh Ride lists 66 real automatic scooters from 16 verified shops across Phuket, all with helmet and insurance included, so once your International Driving Permit is sorted you can compare real inventory from ฿150/day and book directly with the shop.',
+    contentSections: [
+      { heading: 'What International Driving Permit you need for a scooter in Thailand', body: 'Thai law recognizes two ways to legally ride a scooter: a Thai motorcycle license, or a foreign motorcycle license paired with an International Driving Permit that carries the Category A endorsement — a car-only International Driving Permit does not count. Riders holding a national driving license from an ASEAN country, including Malaysia, Singapore, and the Philippines, can ride without an IDP.' },
+      { heading: 'Getting your International Driving Permit ready before you travel', body: 'An International Driving Permit has to be issued by your home country’s motoring authority before you arrive — Thailand does not issue them to visitors, so this isn’t something you can sort out after landing. Bring it along with your regular driving license and passport when you pick up your scooter; riding without a valid IDP or license risks a fine and can void your travel insurance if you’re in an accident.' },
+      { heading: 'Renting a scooter in Phuket once your IDP is sorted', body: 'Once you have a valid International Driving Permit, Koh Ride lists 66 real automatic scooters from 16 verified shops across Phuket, all with helmet and insurance included as standard. Prices start from ฿150/day, and 57 of these scooters offer a discounted monthly rate for longer stays.' },
+    ],
+    highlights: ['A Category A motorcycle endorsement on your International Driving Permit is legally required to ride a scooter in Thailand — a car-only IDP does not count', 'Your International Driving Permit must be issued in your home country before you travel — Thailand does not issue them to visitors', 'Riders with a national driving license from an ASEAN country can ride without an IDP', '66 real automatic scooters are available right now from 16 verified shops across Phuket, all with helmet and insurance included', 'Prices start from ฿150/day, with 57 scooters offering a discounted monthly rate for longer stays'],
+    faq: [
+      { question: 'Do I need an International Driving Permit to rent a scooter in Thailand?', answer: 'Yes. Alongside your home country motorcycle license, Thai law requires an International Driving Permit with the Category A motorcycle endorsement to ride a scooter legally — a car-only IDP is not valid. Riders from ASEAN countries can use their national license instead.' },
+      { question: 'What class of International Driving Permit do I need for a Thailand scooter rental?', answer: 'You need the Category A (motorcycle) endorsement on your International Driving Permit. A standard car-only IDP does not cover riding a scooter or motorbike in Thailand.' },
+      { question: 'Can I get an International Driving Permit after I arrive in Thailand?', answer: 'No. An International Driving Permit has to be issued by your home country’s motoring authority before you travel — Thailand does not issue them to visitors, so this needs to be arranged before you land.' },
+      { question: 'Which scooters can I rent in Phuket with an International Driving Permit?', answer: 'Once your IDP is sorted, Koh Ride lists 66 real automatic scooters from 16 verified shops across Phuket — Honda PCX, Honda Click, and Yamaha NMAX are among the most popular — all including helmet and insurance, from ฿150/day.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['pcx', 'click', 'nmax'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
