@@ -133,6 +133,29 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['pcx', 'nmax', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'car-license-ride-thailand-with-scooter',
+    targetQuery: 'car license ride thailand with scooter',
+    alternateQueries: [],
+    title: 'Can You Ride a Scooter in Thailand with a Car License?',
+    h1: 'Can You Ride a Scooter in Thailand with a Car License?',
+    description: 'A car license alone isn’t enough to ride a scooter in Thailand. Here’s the real rule on car licenses, motorcycle licenses, and IDPs for tourists.',
+    longDescription: 'If you’re wondering whether a car license lets you ride a scooter in Thailand, the answer is no — a car license doesn’t work, and neither does an IDP issued only for a car. Thai law requires a real motorcycle license, or an IDP with the Category A motorcycle endorsement, before you can legally ride a scooter with that license here. The one exception is riders with a national driving license from an ASEAN country, who can ride without needing an IDP at all.',
+    contentSections: [
+      { heading: 'Why a car license isn’t enough for a scooter', body: 'A driving license (or IDP) for cars only covers 4-wheeled vehicles under Thai law — it has no bearing on a 2-wheeled scooter or motorcycle. To ride a scooter, motorbike, or moped in Thailand you need a separate motorcycle license, or an IDP that specifically carries the Category A motorcycle class, issued in your home country alongside your regular license.' },
+      { heading: 'What tourists with only a car license should do', body: 'If you only hold a car license, renting and riding a scooter in Thailand without also getting a motorcycle license or a Category A International Driving Permit means you’re riding without a valid license — which can mean a fine at a checkpoint, and just as importantly, can void your travel insurance if you’re in an accident. Riders from ASEAN countries are the one exception, and can use their national license without needing an IDP.' },
+    ],
+    highlights: ['A car license or car-only IDP does not cover riding a scooter in Thailand — a real legal fact, not a shop policy', 'You need either a motorcycle license or an IDP with the Category A motorcycle endorsement to ride legally', 'Riders with a national driving license from an ASEAN country can ride without needing an IDP', 'Riding on a car license alone risks a fine and can void your travel insurance if you’re in an accident'],
+    faq: [
+      { question: 'Can I ride a scooter in Thailand with just a car license?', answer: 'No. A car license, or an IDP issued only for cars, doesn’t cover riding a scooter in Thailand. You need a motorcycle license, or an IDP with the Category A motorcycle endorsement, to ride legally.' },
+      { question: 'Is an International Driving Permit for cars enough to rent a scooter?', answer: 'No — a car-category IDP doesn’t cover motorcycles or scooters. You need an IDP that specifically includes the Category A motorcycle class, paired with your home country motorcycle license.' },
+      { question: 'What if I only have a car license and want to ride a scooter in Phuket?', answer: 'You’d need to get a motorcycle license or a Category A IDP before you travel — Thailand doesn’t issue IDPs to visitors after arrival. The one exception is riders from ASEAN countries, who can ride on their national license without an IDP.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: [],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
