@@ -328,6 +328,30 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['adv', 'xadv', 'forza', 'xmax', 'tmax'],
     areaSlugs: ['rawai', 'chalong', 'patong', 'phuket-town'],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'cheapest-scooter-rental-phuket',
+    targetQuery: 'cheapest scooter rental phuket',
+    alternateQueries: [],
+    title: 'Cheapest Scooter Rental in Phuket',
+    h1: 'Cheapest Scooter Rental in Phuket',
+    description: 'The cheapest scooter rental in Phuket: 9 real automatic scooters from 4 verified shops, starting at 150 THB/day, helmet and insurance included.',
+    longDescription: 'Looking for the cheapest scooter rental in Phuket? Koh Ride lists 9 real, available automatic scooters from 4 verified shops priced at 200 THB/day or less, starting from a genuine 150 THB/day — the lowest verified prices on the platform today, not a teaser rate that disappears at checkout. Every one of these budget listings still includes a helmet and insurance as standard, across Rawai, Phuket Town, and Kathu.',
+    contentSections: [
+      { heading: 'What counts as the cheapest scooter rental in Phuket', body: 'Koh Ride only surfaces real, currently available inventory — no fake listings or teaser prices that vanish once you show up at the shop. The cheapest tier on the platform today is 9 real automatic scooters priced at 200 THB/day or less, starting from a genuine 150 THB/day, spread across 4 verified shops.' },
+      { heading: 'The cheapest scooters are still automatic and insured', body: 'Every scooter in this cheapest price tier is an automatic — Honda PCX, Honda Click, Honda Lead, Yamaha NMAX, and Yamaha Grand Filano all have real listings at 200 THB/day or under — and every one includes a helmet and insurance as standard, so the lowest price on Koh Ride never means cutting corners on safety.' },
+    ],
+    highlights: ['9 real scooters from 150 THB/day — the lowest verified prices on Koh Ride today', '4 verified shops offer scooters in this cheapest price tier, across Rawai, Phuket Town, and Kathu', 'Helmet and insurance included on every listing, with no hidden extras added to the cheapest price', '5 of the 9 cheapest scooters also offer a discounted monthly rate for longer stays', '3 of the 9 cheapest scooters include delivery to your hotel or villa'],
+    faq: [
+      { question: 'What is the cheapest scooter rental in Phuket right now?', answer: 'The cheapest scooter rental on Koh Ride starts at 150 THB/day, with 9 real automatic scooters — including the Honda PCX, Honda Click, Yamaha NMAX, and Yamaha Grand Filano — priced at 200 THB/day or less across 4 verified shops.' },
+      { question: 'Where can I find the cheapest scooter rental in Phuket?', answer: 'The cheapest scooters on Koh Ride are currently listed in Rawai, Phuket Town, and Kathu — compare all 4 verified shops offering scooters at 200 THB/day or under before you book.' },
+      { question: 'Does the cheapest scooter rental in Phuket include a helmet and insurance?', answer: 'Yes — every one of the 9 scooters in Koh Ride’s cheapest price tier includes a helmet and insurance as standard, with no extra add-on fee.' },
+      { question: 'Can I rent the cheapest scooter in Phuket by the month?', answer: 'Yes — 5 of the 9 cheapest scooters on Koh Ride also offer a discounted monthly rate, which usually works out even cheaper per day than the daily price.' },
+    ],
+    filter: { maxPricePerDay: 200 },
+    relevantModelSlugs: ['pcx', 'nmax', 'click', 'lead', 'grand-filano'],
+    areaSlugs: ['rawai', 'phuket-town', 'kathu'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
