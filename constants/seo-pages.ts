@@ -280,6 +280,29 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'deposit-scooter-rental-phuket',
+    targetQuery: 'deposit scooter rental phuket',
+    alternateQueries: [],
+    title: 'Scooter Rental Deposit Guide for Phuket',
+    h1: 'How Much Is a Scooter Rental Deposit in Phuket?',
+    description: 'Real Phuket scooter rental deposit amounts, from 2,000 THB cash, passport-free options, and what’s legal — compare listings before you book.',
+    longDescription: 'Renting a scooter in Phuket almost always means putting down a security deposit, and the amount — plus whether a shop takes cash or wants your passport — varies a lot by shop and by bike. On Koh Ride, the exact deposit amount and accepted type is listed on every scooter before you contact the shop, so you can compare a 2,000 THB cash deposit on a Honda Click against a 50,000 THB deposit on a big bike, and avoid handing over your actual passport — which is technically illegal under Thai law.',
+    contentSections: [
+      { heading: 'How much deposit do Phuket scooter shops ask for?', body: 'Deposit size scales with the scooter’s value. Across Koh Ride’s available listings, everyday automatics — Honda Click, Honda Lead, Yamaha Grand Filano, Honda PCX, Yamaha NMAX — ask for a refundable cash deposit of roughly 2,000 to 10,000 THB. Bigger automatics like the Honda ADV, Honda Forza, and Honda XADV run 5,000 to 20,000 THB. Big bikes and premium models — sportbikes, cruisers, superbikes — carry the highest deposits, typically 30,000 to 50,000 THB, reflecting their replacement value.' },
+      { heading: 'Cash deposit vs. passport: what’s actually legal', body: 'A shop asking to hold your original passport as a security deposit is technically illegal under Thai law, even though some shops still ask for it. The safe, legal alternative is a cash deposit or a photocopy of your passport. On Koh Ride, only a small minority of available listings list passport as the required deposit type — most accept cash, and some accept either. Check the deposit type on a scooter’s listing page before you commit, and ask the shop directly if anything is unclear.' },
+    ],
+    highlights: ['Deposits scale with the scooter’s value — everyday automatics like the Honda Click or PCX typically ask 2,000-10,000 THB, while big bikes run 30,000-50,000 THB', 'Only 3 of 74 available Koh Ride listings require your passport as security — the rest accept a refundable cash deposit, the safer and legal option in Thailand', 'Every scooter’s exact deposit amount and accepted type — cash, passport copy, or both — is shown on its own listing page before you contact the shop', '43 of Koh Ride’s 74 available scooters clearly list a cash-eligible deposit option, so you can compare terms across shops before you commit'],
+    faq: [
+      { question: 'How much is a scooter rental deposit in Phuket?', answer: 'It depends on the scooter. On Koh Ride, everyday automatic scooters (Honda Click, PCX, Yamaha NMAX, Grand Filano) typically carry a 2,000-10,000 THB refundable cash deposit, larger automatics like the ADV or XADV run 5,000-20,000 THB, and big bikes or premium models can be 30,000-50,000 THB. The exact amount is listed on each scooter’s page.' },
+      { question: 'Do I have to give my passport as a deposit?', answer: 'No — asking for your original passport as security is technically illegal under Thai law. A cash deposit or a passport photocopy is the safer, legal alternative most shops accept. On Koh Ride, only a handful of available listings list passport as the required deposit type; the majority accept cash instead.' },
+      { question: 'Is the scooter rental deposit refundable?', answer: 'Yes. The deposit is returned when you bring the scooter back undamaged and on time. If there’s damage, the shop may deduct repair costs from it — take photos of the scooter’s condition before you ride off so you have your own record.' },
+    ],
+    filter: { maxPricePerDay: 1000, category: 'automatic' },
+    relevantModelSlugs: ['pcx', 'nmax', 'click', 'lead', 'adv', 'forza', 'grand-filano'],
+    areaSlugs: [],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
