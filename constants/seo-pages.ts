@@ -280,6 +280,30 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'big-scooter-phuket',
+    targetQuery: 'big scooter phuket',
+    alternateQueries: [],
+    title: 'Big Scooter Rental in Phuket',
+    h1: 'Big Scooters for Rent in Phuket',
+    description: 'Big scooter rental in Phuket: 29 real maxi-scooters — Honda ADV, X-ADV, Forza and Yamaha XMAX, TMAX — from ฿300–2,998/day across 7 verified shops.',
+    longDescription: 'Looking for a big scooter rental in Phuket? Koh Ride lists 29 real, available maxi-scooters and large-displacement automatics — Honda ADV, Honda X-ADV, Honda Forza, and Yamaha XMAX, TMAX — from 7 verified shops across Rawai, Chalong, Patong, and Phuket Town. Engine sizes range from 160cc up to 750cc, prices start from ฿300/day, and every listing includes a helmet and insurance as standard.',
+    contentSections: [
+      { heading: 'What counts as a big scooter in Phuket', body: 'Koh Ride splits its automatic scooter fleet into everyday models — the Honda PCX, Honda Click, and Yamaha NMAX — and a genuinely bigger, more powerful group: the Honda ADV, Honda X-ADV, Honda Forza, and Yamaha XMAX, TMAX. These big scooters carry larger engines, from 160cc on the ADV 160 up to 750cc on the X-ADV, plus more storage, more stability at speed, and a more commanding riding position than entry-level models.' },
+      { heading: 'Which big scooter fits your trip', body: 'The Honda X-ADV (750cc, from ฿1,000/day) is Koh Ride’s biggest and most powerful crossover scooter, followed by the Yamaha TMAX (560cc, from ฿2,000/day) for riders who want motorcycle-level performance in a fully automatic package. The Honda ADV 350 and Honda Forza (both 350cc, from ฿400–900/day) and the Yamaha XMAX (300cc, from ฿300–500/day) offer a lighter step up from everyday scooters, while still qualifying as genuine maxi-scooters.' },
+    ],
+    highlights: ['29 real big scooters live right now — Honda ADV, Honda X-ADV, Honda Forza, and Yamaha XMAX, TMAX — from 7 verified shops', 'Engine sizes range from 160cc up to 750cc on the Honda X-ADV, Koh Ride’s most powerful automatic scooter', 'Prices from ฿300/day, with the X-ADV and TMAX starting around ฿1,000–2,000/day for their extra size and power', '24 of the 29 big scooters offer a discounted monthly rate for longer stays', '15 of the 29 listings offer delivery straight to your hotel or villa', 'Available across Rawai, Chalong, Patong, and Phuket Town'],
+    faq: [
+      { question: 'What is a big scooter in Phuket?', answer: 'A big scooter (also called a maxi-scooter) is a larger, more powerful automatic than everyday models like the Honda PCX or Click. On Koh Ride, that means the Honda ADV, Honda X-ADV, Honda Forza, and Yamaha XMAX and TMAX — with engines from 160cc up to 750cc, still fully automatic with no clutch to manage.' },
+      { question: 'How much does a big scooter cost to rent in Phuket?', answer: 'Big scooter rental on Koh Ride starts from ฿300/day for a Yamaha XMAX, rising to ฿1,000–2,998/day for the Honda X-ADV and around ฿2,000/day for the Yamaha TMAX — Koh Ride’s two most powerful automatic scooters. 24 of the 29 available big scooters also offer a discounted monthly rate.' },
+      { question: 'Do I need a special license for a big scooter in Phuket?', answer: 'You need the same valid motorcycle license or International Driving Permit required for any scooter rental in Thailand — but because big scooters like the X-ADV and TMAX are heavier and more powerful, they suit riders with some prior scooter or motorcycle experience rather than complete beginners.' },
+      { question: 'Does Koh Ride have full motorcycles as well as big scooters?', answer: 'Yes — alongside these automatic maxi-scooters, Koh Ride also lists the Honda CBR 650R, a 650cc manual sport motorcycle, for experienced riders who specifically want a geared motorcycle rather than a twist-and-go automatic.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['adv', 'xadv', 'forza', 'xmax', 'tmax'],
+    areaSlugs: ['rawai', 'chalong', 'patong', 'phuket-town'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
