@@ -280,6 +280,30 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'average-price-scooter-rental-phuket',
+    targetQuery: 'average price scooter rental phuket',
+    alternateQueries: [],
+    title: 'Average Scooter Rental Price in Phuket',
+    h1: 'What’s the Average Scooter Rental Price in Phuket?',
+    description: 'The average scooter rental price in Phuket: ฿350/day median, ฿655/day mean, across 66 real automatic scooters from ฿150 to ฿2,998/day.',
+    longDescription: 'What’s the average scooter rental price in Phuket? Based on the 66 real, available automatic scooters listed on Koh Ride today, the mean average price is ฿655/day — but the median price, a more representative figure for a typical rental, is ฿350/day. The gap between the two exists because a small number of premium maxi-scooters pull the mean upward, while most everyday models cluster much lower.',
+    contentSections: [
+      { heading: 'How this average price is calculated', body: 'This average is calculated from Koh Ride’s 66 real, currently available automatic scooter listings across Phuket, not estimated or sourced from surveys. The mean (simple average) across all 66 is ฿655/day, but that figure is skewed upward by 16 Honda XADV maxi-scooters priced from ฿1,000 to ฿2,998/day. The median — the middle value when every price is sorted — is ฿350/day, and is the more useful number for anyone comparing what a typical scooter actually costs to rent.' },
+      { heading: 'Why the average price varies so much by model', body: 'Everyday commuter scooters make up the bulk of Phuket’s rental inventory and price well below the mean average: Honda Click averages ฿293/day, Yamaha NMAX ฿270/day, Yamaha AEROX ฿284/day, and Honda PCX ฿327/day, with the cheapest listings from ฿150/day. Larger automatic models push the average higher — the Honda ADV averages ฿564/day and the Honda XADV maxi-scooter averages ฿1,491/day, up to ฿2,998/day. Which figure is the "average price" that matters to you depends on which type of scooter you’re actually planning to rent.' },
+    ],
+    highlights: ['66 real automatic scooters live on Koh Ride today, priced from ฿150 to ฿2,998/day', 'The median scooter rental price is ฿350/day — more representative of a typical rental than the ฿655/day mean average', 'Everyday models average well below the mean: Honda Click ฿293/day, Yamaha NMAX ฿270/day, Honda PCX ฿327/day', 'The mean average is pulled higher by 16 Honda XADV maxi-scooters, which alone average ฿1,491/day', '57 of the 66 automatic scooters offer a discounted monthly rate, averaging around ฿11,989/month', 'Every listed price already includes helmet and insurance — no hidden add-on fees'],
+    faq: [
+      { question: 'What is the average scooter rental price in Phuket?', answer: 'Across the 66 real automatic scooters currently listed on Koh Ride, the mean average price is ฿655/day. The median price — a more representative figure for a typical rental — is ฿350/day, with common everyday models like the Honda Click, Honda PCX, and Yamaha NMAX priced between ฿200 and ฿500/day.' },
+      { question: 'Why is the average scooter rental price higher than what most scooters actually cost?', answer: 'The ฿655/day mean average includes 16 Honda XADV maxi-scooters priced from ฿1,000 to ฿2,998/day, which pulls the overall average up. Most everyday automatic scooters — Honda Click, Honda PCX, Yamaha NMAX, Yamaha AEROX — cost ฿150 to ฿500/day, much closer to the ฿350/day median.' },
+      { question: 'Is there an average monthly scooter rental price in Phuket too?', answer: 'Yes — 57 of the 66 automatic scooters on Koh Ride offer a discounted monthly rate, averaging around ฿11,989/month. Every monthly rate works out cheaper per day than that same shop’s standard daily rate.' },
+      { question: 'Does the average scooter rental price in Phuket include a helmet and insurance?', answer: 'Yes — all 66 automatic scooters used in this average include a helmet and insurance as standard, with no separate add-on fee, so the listed price is the real price you pay.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['click', 'pcx', 'nmax', 'xadv'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
