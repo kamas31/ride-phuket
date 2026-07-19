@@ -280,6 +280,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'how-scooter-rental-phuket',
+    targetQuery: 'how scooter rental phuket',
+    alternateQueries: [],
+    title: 'How to Rent a Scooter in Phuket',
+    h1: 'How to Rent a Scooter in Phuket: A Step-by-Step Guide',
+    description: 'Here’s how to rent a scooter in Phuket: browse 74 real listings from 16 verified shops, message the shop directly, then pick up or get delivery.',
+    longDescription: 'Wondering how to rent a scooter in Phuket? Here’s the real process, start to finish: browse 74 real, available scooters from 16 verified shops, message the shop directly to confirm availability, bring your license and deposit, then pick up your scooter — or have it delivered — with a helmet and insurance included on every listing.',
+    contentSections: [
+      { heading: 'Step 1: Browse and compare real listings', body: 'Start on Koh Ride’s live inventory: 74 real, available scooters from 16 verified shops across Rawai, Phuket Town, Chalong, Patong, Kathu, and Kata. Compare by area and price — automatic models like the Honda Click, Honda PCX, and Yamaha NMAX are the easiest choice if you’re new to riding in Phuket traffic, with prices starting from ฿150/day.' },
+      { heading: 'Step 2: Message the shop directly — there’s no online booking', body: 'Koh Ride doesn’t take online bookings or payments. Once you’ve found a scooter you like, contact the shop directly through the message button or WhatsApp. The shop confirms availability and arranges a pickup time — or, on 37 of the 74 current listings, delivers the scooter straight to your hotel or villa.' },
+      { heading: 'Step 3: Bring the right documents and deposit', body: 'Bring your passport (or a copy), your driving license, and an International Driving Permit with the Category A motorcycle endorsement if you’re not riding on a Thai license. Most shops ask for a cash deposit of ฿2,000–฿5,000, or accept a passport copy instead — never hand over your actual passport as security, since that’s technically illegal under Thai law.' },
+      { heading: 'Step 4: Check the scooter, then ride off covered', body: 'Every one of the 74 scooters listed on Koh Ride includes a helmet and insurance as standard, so there’s nothing extra to negotiate at pickup. Check the helmet fits, test the brakes and lights, and photograph any existing scratches or damage before you ride away — payment is usually cash on arrival, settled directly with the shop.' },
+    ],
+    highlights: ['74 real, available scooters from 16 verified shops across Phuket — browse and compare before contacting anyone', 'No online booking: message the shop directly via WhatsApp or the contact button, and they confirm your pickup or delivery', 'Helmet and insurance included on all 74 listings, with no extra fee to negotiate at pickup', 'Most shops ask for a ฿2,000–฿5,000 cash deposit or a passport copy — never hand over your actual passport', '37 of the 74 listings offer delivery straight to your hotel or villa'],
+    faq: [
+      { question: 'How do I rent a scooter in Phuket, step by step?', answer: 'Browse Koh Ride’s 74 real, available scooters from 16 verified shops, message the shop you like directly via WhatsApp or the contact button, bring your passport, license (plus an IDP if you’re not on a Thai license), and a cash deposit of ฿2,000–฿5,000, then check the scooter over before riding off — helmet and insurance are included on every listing.' },
+      { question: 'Do I need to book a scooter online before I arrive in Phuket?', answer: 'No — Koh Ride has no online booking or prepayment. You browse real listings, then message the shop directly to confirm availability and arrange pickup or delivery; payment is almost always cash on arrival.' },
+      { question: 'How much does it cost to rent a scooter in Phuket?', answer: 'Automatic scooters on Koh Ride start from ฿150/day, with everyday models like the Honda Click, Honda PCX, and Yamaha NMAX typically ฿200–฿500/day depending on the shop; 64 of the 74 current listings also offer a discounted monthly rate.' },
+      { question: 'What do I need to bring to rent a scooter in Phuket?', answer: 'Bring your passport (or a copy), your driving license, and an International Driving Permit with the Category A motorcycle endorsement if you’re riding on a foreign license. Most shops also ask for a cash deposit of ฿2,000–฿5,000 — or a passport copy instead of your actual passport.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: ['pcx', 'click', 'nmax'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
