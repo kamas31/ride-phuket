@@ -280,6 +280,30 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'insurance-scooter-rental-phuket',
+    targetQuery: 'insurance scooter rental phuket',
+    alternateQueries: [],
+    title: 'Scooter Rental Insurance in Phuket',
+    h1: 'Scooter Rental Insurance in Phuket: What It Covers',
+    description: 'All 74 scooters listed on Koh Ride already include insurance, from ฿150/day across 16 verified shops. See exactly what Thai insurance covers.',
+    longDescription: 'Looking for scooter rental with insurance included in Phuket? Every one of the 74 real, available scooters listed on Koh Ride already includes insurance as standard — there’s no separate add-on fee to negotiate with the shop. This page explains exactly what that insurance covers under Thai law, what it doesn’t, and lists real insured inventory from ฿150/day across 16 verified shops.',
+    contentSections: [
+      { heading: 'What Thailand’s compulsory scooter insurance actually covers', body: 'Thailand’s compulsory third-party insurance (Por Ror Bor) is legally required on every registered vehicle and should already be included in any legitimate rental. It covers injury to third parties involved in an accident — it does not cover damage to the scooter itself, your own injuries, or theft. Ask the shop directly if you want protection beyond the legal minimum, since coverage for those extras varies shop to shop.' },
+      { heading: 'How Koh Ride handles scooter rental insurance', body: 'All 74 available scooters listed on Koh Ride today already include insurance as standard, with zero exceptions — 66 of them are automatic scooters from ฿150/day across 16 verified shops in all six areas of Phuket, and 57 of those also offer a discounted monthly rate. You contact each shop directly to confirm exactly what’s covered before you book.' },
+    ],
+    highlights: ['All 74 available scooters listed on Koh Ride already include insurance as standard — no separate add-on fee', 'Thailand’s compulsory third-party insurance (Por Ror Bor) covers injury to others, not damage to the scooter, your own injuries, or theft', '66 insured automatic scooters are available from ฿150/day across 16 verified shops', '57 of the 66 insured automatic scooters also offer a discounted monthly rate for longer stays', 'Riding without a valid motorcycle license or IDP can void this insurance coverage'],
+    faq: [
+      { question: 'Does scooter rental in Phuket include insurance?', answer: 'Yes — every one of the 74 available scooters listed on Koh Ride includes insurance as standard, with no separate add-on fee. This is Thailand’s compulsory third-party insurance (Por Ror Bor), required by law on every registered vehicle.' },
+      { question: 'What does scooter rental insurance in Phuket actually cover?', answer: 'Thailand’s compulsory third-party insurance covers injury to other people involved in an accident. It does not cover damage to the scooter itself, your own injuries, or theft — ask the shop directly if you want additional coverage for those.' },
+      { question: 'Does my license affect my scooter rental insurance in Phuket?', answer: 'Yes. Riding without a valid motorcycle license or International Driving Permit (Category A) typically voids Thailand’s compulsory insurance, and can void your personal travel insurance too if you’re in an accident.' },
+      { question: 'How much does insured scooter rental cost in Phuket?', answer: 'Insured automatic scooter rental on Koh Ride starts from ฿150/day, with 66 real listings currently available from 16 verified shops across Phuket.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['xadv', 'pcx', 'click'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
