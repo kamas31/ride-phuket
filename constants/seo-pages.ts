@@ -280,6 +280,31 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'deposit-without-scooter-rental-phuket',
+    targetQuery: 'deposit without scooter rental phuket',
+    alternateQueries: [],
+    title: 'Scooter Rental in Phuket Without a Deposit',
+    h1: 'Scooter Rental in Phuket: No Deposit Options',
+    description: 'Scooter rental in Phuket without a deposit: no fully deposit-free listings exist yet, but 36 real scooters skip the passport hold, cash deposit from ฿2,000.',
+    longDescription: 'Searching for scooter rental in Phuket without a deposit? Here’s the honest answer: no shop on Koh Ride currently rents with zero deposit at all — a refundable deposit is standard practice everywhere on the island, protecting shops against damage, theft, and unpaid fines. What does exist, and solves the part of this that actually worries most riders, are 36 real automatic scooters from 10 verified shops that never ask for your passport — just a refundable cash deposit, starting from ฿2,000.',
+    contentSections: [
+      { heading: 'Why scooter shops in Phuket ask for a deposit', body: 'A deposit isn’t a Koh Ride policy — it’s how individual shops protect themselves against damage, theft, and traffic fines that arrive after a scooter is returned. Every shop sets its own amount and method, which is why deposit terms vary so much from one listing to the next. None of that makes a deposit optional, but it does mean the FORM of the deposit — cash versus your passport — is very much worth checking before you book.' },
+      { heading: 'Real no-passport, low-deposit options in Phuket', body: 'Of the 66 available automatic scooters on Koh Ride, none currently list a zero deposit. But 36 of them, from 10 verified shops across Rawai, Phuket Town, Chalong, and Kata, only require a refundable cash deposit — no passport held — ranging from ฿2,000 to ฿30,000 with a median around ฿7,000. That includes popular models like the Honda PCX, Honda Click, Honda ADV, and Honda XADV, and 25 of the 36 also offer delivery straight to your hotel.' },
+      { heading: 'What to check before you pay a deposit', body: 'Before handing over cash or your passport, ask the shop directly for their exact deposit amount and refund process, get a receipt for whatever you pay, and photograph the scooter together at pickup so there’s no dispute over pre-existing damage at drop-off. If a shop asks to hold your original passport, that’s worth a second thought — under Thai law, that practice is technically illegal, and a cash deposit or passport copy is the safer, legal alternative most shops will accept if you ask.' },
+    ],
+    highlights: ['No shop on Koh Ride currently offers a fully deposit-free scooter rental — every real listing requires some form of security deposit', '36 real automatic scooters from 10 verified shops never require your passport, just a refundable cash deposit from ฿2,000', 'Cash deposits on these no-passport listings range from ฿2,000 to ฿30,000, with a median around ฿7,000', 'Available across Rawai, Phuket Town, Chalong, and Kata, including the Honda PCX, Honda Click, Honda ADV, and Honda XADV', '25 of the 36 no-passport scooters also offer delivery straight to your hotel or villa'],
+    faq: [
+      { question: 'Can I rent a scooter in Phuket with absolutely no deposit?', answer: 'Not currently on Koh Ride — every real, available listing requires some form of security deposit. What 36 of the 66 automatic scooters do offer is a refundable cash-only deposit from ฿2,000, with no passport held, which is the closest real option to a deposit-free rental.' },
+      { question: 'Can I avoid handing over my passport as a deposit?', answer: 'Yes. 36 real automatic scooters from 10 verified shops across Rawai, Phuket Town, Chalong, and Kata accept a refundable cash deposit instead of your passport, starting from ฿2,000.' },
+      { question: 'Is it legal for a scooter shop to hold my passport as a deposit in Phuket?', answer: 'No — asking to hold your original passport as security is technically illegal under Thai law. A cash deposit or a passport copy is the safer, legal alternative, and most shops will accept it if you ask directly.' },
+      { question: 'What should I check before paying a deposit for a scooter in Phuket?', answer: 'Ask the shop directly for the exact deposit amount and refund process, get a receipt for whatever you pay, and photograph the scooter together at pickup so there’s no dispute over existing damage when you return it.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['xadv', 'adv', 'click', 'pcx', 'grand-filano'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'kata'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
