@@ -352,6 +352,31 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['pcx', 'nmax', 'click', 'lead', 'grand-filano'],
     areaSlugs: ['rawai', 'phuket-town', 'kathu'],
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'cost-how-it-much-scooter-rental-phuket',
+    targetQuery: 'cost how it much scooter rental phuket',
+    alternateQueries: [],
+    title: 'How Much Does It Cost to Rent a Scooter in Phuket?',
+    h1: 'How Much Does It Cost to Rent a Scooter in Phuket?',
+    description: 'How much does it cost to rent a scooter in Phuket? From ฿150-500/day for everyday models, up to ฿2,998/day for bigger automatics, or ฿3,500+/month.',
+    longDescription: 'How much does it cost to rent a scooter in Phuket? On Koh Ride, 66 real automatic scooters from 16 verified shops are live right now, with everyday models like the Honda Click, Honda PCX, and Yamaha NMAX priced from ฿150 to ฿500 per day. Bigger automatics like the Honda XADV and Yamaha TMAX cost more, up to ฿2,998/day, and 57 of the 66 listings also offer a discounted monthly rate from ฿3,500 - a median saving of about 43% over paying daily.',
+    contentSections: [
+      { heading: 'What it actually costs to rent a scooter in Phuket, by duration', body: 'Day-to-day, scooter rental in Phuket ranges from ฿150 to ฿2,998, depending on the model - most everyday automatics (Honda Click, Honda PCX, Yamaha NMAX) cost ฿200-500/day. Renting by the month works out cheaper: 57 of the 66 available automatic scooters offer a discounted monthly rate, starting from ฿3,500/month, with a median saving of around 43% compared to paying the daily rate for a full month.' },
+      { heading: 'Why some scooters cost more than others', body: 'The biggest cost driver is the model, not the shop. Everyday scooters - Honda Click, Honda PCX, Yamaha NMAX - sit at ฿150-500/day. Larger automatics cost noticeably more: the Honda ADV runs ฿400-700/day, the Honda Forza ฿700-900/day, and the Honda XADV and Yamaha TMAX ฿1,000-2,998/day. If you just need something to get around town, an everyday model keeps the cost down; a bigger automatic is a real cost jump, not a small upgrade fee.' },
+      { heading: 'What’s included, and what can add to the cost', body: 'Every one of the 66 automatic scooters on Koh Ride already includes a helmet and insurance in the listed price - there’s no separate add-on fee to budget for. One thing that can affect your total cost: 19 of the 66 listings have a 7-day minimum rental, so a short 2-3 day trip on one of those isn’t available at the daily rate - factor that in before you book. Delivery is available on 29 listings if you’d rather not collect the scooter yourself.' },
+    ],
+    highlights: ['66 real automatic scooters live now, priced from ฿150/day', 'Everyday models (Honda Click, Honda PCX, Yamaha NMAX) cost ฿200-500/day', 'Bigger automatics like the Honda XADV cost more, up to ฿2,998/day', '57 of 66 scooters offer a discounted monthly rate from ฿3,500, saving a median of 43% vs daily', 'Helmet and insurance included in every price - no hidden add-on fees'],
+    faq: [
+      { question: 'How much does it cost to rent a scooter in Phuket per day?', answer: 'Day rates on Koh Ride range from ฿150 to ฿2,998 depending on the model. Everyday automatics like the Honda Click, Honda PCX, and Yamaha NMAX cost ฿200-500/day, while bigger automatics like the Honda XADV cost more, up to ฿2,998/day.' },
+      { question: 'Is it cheaper to rent a scooter in Phuket by the month?', answer: 'Yes. 57 of the 66 automatic scooters on Koh Ride offer a discounted monthly rate, starting from ฿3,500/month, with a median saving of around 43% compared to paying the daily rate every day for a month.' },
+      { question: 'Does the rental cost include a helmet and insurance in Phuket?', answer: 'Yes - every one of the 66 automatic scooters listed on Koh Ride includes a helmet and insurance in the price shown, with no separate add-on fee.' },
+      { question: 'Are there any hidden costs when renting a scooter in Phuket?', answer: 'The main one to watch for is a minimum rental period: 19 of the 66 listings require at least 7 days, so a very short rental isn’t available at the daily rate on those. Otherwise, helmet, insurance, and (on 29 listings) delivery are already included in the price shown - there’s no separate markup.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['click', 'pcx', 'nmax', 'adv', 'xadv', 'forza', 'tmax'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
