@@ -475,6 +475,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'how-choose-scooter-phuket',
+    targetQuery: 'how choose scooter phuket',
+    alternateQueries: [],
+    title: 'How to Choose a Scooter in Phuket',
+    h1: 'How to Choose the Right Scooter in Phuket',
+    description: 'How to choose a scooter in Phuket: compare automatic models by experience level, group size, storage, and hill-road areas like Patong and Kata.',
+    longDescription: 'How do you choose a scooter in Phuket, out of the dozen real models available to rent? It comes down to four practical factors: how much riding experience you actually have, whether you’re riding solo or two-up, how much gear you need to store, and where you’re headed — Phuket Town traffic and the hill roads around Patong, Kata, and Karon suit different bikes. Koh Ride lists ten fully automatic models, from the lightweight Honda Click up to the maxi-scooter Yamaha TMAX, plus one full manual sport motorcycle, the Honda CBR 650R, so matching the bike to your trip matters more than just picking whatever’s cheapest.',
+    contentSections: [
+      { heading: 'Start with automatic vs. manual', body: 'Ten of Koh Ride’s eleven listed models are fully automatic — twist-and-go, no clutch or gear shifting — covering everything from the entry-level Honda Click and Honda Lead up to the maxi-scooter Yamaha TMAX. The one exception is the Honda CBR 650R, a 650cc manual sport motorcycle with a real clutch and gearbox, built for experienced motorcycle riders rather than scooter riders. If you haven’t ridden a geared motorcycle before, an automatic is the realistic choice — it removes the biggest learning curve entirely.' },
+      { heading: 'Match the scooter to your experience level', body: 'If you’re new to riding, the lightest, easiest-handling automatics are the Honda Click, Honda Lead, and Yamaha Grand Filano — all built for easy low-speed handling and simple to park in busy areas like Patong or Phuket Town. The Honda PCX and Yamaha NMAX are a natural step up once you’re comfortable, with the NMAX in particular suited to riders who’ve outgrown a 125cc scooter. Bigger, heavier models — the Honda ADV, Honda X-ADV, Honda Forza, Yamaha XMAX, and especially the Yamaha TMAX — suit riders with some prior scooter or motorcycle experience rather than complete beginners.' },
+      { heading: 'Think about who’s riding and how much you’re carrying', body: 'For a single rider running errands or making short beach trips, the Honda Click, Honda Lead, or Yamaha Grand Filano keep things light and easy to park, though the Grand Filano’s underseat storage is on the smaller side. If you’re riding two-up regularly, the Yamaha NMAX’s longer seat and larger frame make it a more comfortable pick than the Honda PCX, which seats two but suits lighter riders or shorter trips together. Carrying a full-face helmet plus a day bag is easiest on models built around bigger underseat storage, like the Honda Lead or Honda Forza.' },
+      { heading: 'Match the scooter to Phuket’s roads', body: 'Riders sticking to town traffic and flat beach roads are well served by any of the everyday automatics. For the hill roads around Patong, Kata, and Karon, the Yamaha NMAX and Yamaha XMAX are both called out as stable and confident thanks to their larger engines and wheelbase, and the Honda ADV’s extra ground clearance makes it a solid choice for hill roads and viewpoint routes in the same areas. If you want one bike that handles both in-town riding and longer exploring further afield, the Honda ADV or Honda X-ADV’s crossover styling is built for exactly that.' },
+    ],
+    highlights: ['Ten fully automatic models to choose from, plus one manual sport motorcycle (Honda CBR 650R) for experienced riders', 'Lightweight, beginner-friendly options: Honda Click, Honda Lead, and Yamaha Grand Filano', 'The Yamaha NMAX’s longer seat and larger frame make it a common pick for riding two-up', 'The Yamaha NMAX, Yamaha XMAX, and Honda ADV are called out as stable choices for the hill roads around Patong, Kata, and Karon', 'Bigger, more powerful models — Honda X-ADV, Yamaha TMAX, Honda Forza — suit riders with some prior scooter experience rather than complete beginners'],
+    faq: [
+      { question: 'What’s the easiest scooter to ride in Phuket as a beginner?', answer: 'The Honda Click, Honda Lead, and Yamaha Grand Filano are Koh Ride’s lightest, easiest-handling automatics — all straightforward for riders newer to scooters, with simple twist-and-go operation and no clutch or gears to manage.' },
+      { question: 'Do I need to know how to ride a manual to rent a scooter in Phuket?', answer: 'No. Ten of Koh Ride’s eleven listed models are fully automatic, so most riders never touch a clutch or gearbox. The one exception is the Honda CBR 650R, a manual 650cc sport motorcycle aimed specifically at experienced motorcycle riders, not the average scooter renter.' },
+      { question: 'Which scooter is best for riding two-up in Phuket?', answer: 'The Yamaha NMAX is the most commonly recommended choice for two riders, thanks to its longer seat and larger frame. The Honda PCX also seats two, but suits lighter riders or shorter trips together rather than frequent two-up riding.' },
+      { question: 'Which scooter handles Phuket’s hill roads best?', answer: 'The Yamaha NMAX and Yamaha XMAX are both noted for feeling stable and confident on the hill roads around Patong, Kata, and Karon, thanks to their larger engines and wheelbase. The Honda ADV’s extra ground clearance is also a solid option for hill roads and viewpoint routes in the same areas.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: ['click', 'lead', 'grand-filano', 'pcx', 'nmax', 'adv', 'xadv', 'forza', 'xmax', 'tmax', 'cbr-650r'],
+    areaSlugs: ['patong', 'kata', 'karon'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
