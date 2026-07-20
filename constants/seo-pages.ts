@@ -599,6 +599,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
     cluster: 'rental-options',
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'best-hills-scooter-phuket',
+    targetQuery: 'best hills scooter phuket',
+    alternateQueries: [],
+    title: 'Best Scooter for Phuket’s Hills',
+    h1: 'Best Scooter for Phuket’s Hills',
+    description: 'Best scooter for Phuket’s hills: 16 real automatics built for hill roads — Yamaha NMAX, Honda ADV, Yamaha XMAX, TMAX — from 200 THB/day, 8 verified shops.',
+    longDescription: 'Looking for the best scooter for Phuket’s hills? Koh Ride lists 16 real, available automatic scooters with the extra power and stability that Phuket’s steepest hill roads call for — Yamaha NMAX, Honda ADV, Yamaha XMAX, and Yamaha TMAX — from 8 verified shops in Rawai, Chalong, Patong, Phuket Town, and Kathu, starting at 200 THB/day.',
+    contentSections: [
+      { heading: 'Why a bigger-engine scooter is best for Phuket’s hills', body: 'Phuket’s hill roads around Patong, Kata, and Karon reward more power and stability than entry-level scooters offer. Koh Ride’s own model pages already flag the Yamaha NMAX (155cc), Honda ADV (160cc/350cc), Yamaha XMAX (300cc), and Yamaha TMAX (560cc) as stable, confident choices on these hill roads, thanks to their larger engines, wider wheelbases, and — on the ADV — extra ground clearance, versus lighter 110–125cc commuter scooters.' },
+      { heading: 'Which hill-capable model fits your trip', body: 'The Yamaha NMAX (155cc, from 200 THB/day) is the most affordable step up for hill roads. The Honda ADV (160cc or 350cc, from 400 THB/day) adds ground clearance and an adventure-style riding position. The Yamaha XMAX (300cc, from 300 THB/day) brings sportier handling and a larger chassis. The Yamaha TMAX (560cc, from 2,000 THB/day) is Koh Ride’s most powerful option, built for experienced riders who want motorcycle-level performance on Phuket’s steepest routes.' },
+    ],
+    highlights: ['16 real hill-capable automatic scooters live today — Yamaha NMAX, Honda ADV, Yamaha XMAX, and Yamaha TMAX', 'Engine sizes from 155cc (NMAX) up to 560cc (TMAX) — more power and stability than entry-level scooters on Phuket’s hill roads', 'Prices from 200 THB/day, across 8 verified shops in Rawai, Chalong, Patong, Phuket Town, and Kathu', '14 of the 16 hill-capable scooters offer a discounted monthly rate', 'Helmet and insurance included on every listing, with no hidden extras'],
+    faq: [
+      { question: 'What’s the best scooter for Phuket’s hills?', answer: 'For Phuket’s hill roads around Patong, Kata, and Karon, the best options are automatics with more power than entry-level scooters: the Yamaha NMAX (155cc), Honda ADV (160cc/350cc), Yamaha XMAX (300cc), and Yamaha TMAX (560cc). Koh Ride currently lists 16 real examples of these models from 8 verified shops, starting at 200 THB/day.' },
+      { question: 'Which is the most powerful scooter for Phuket’s hills?', answer: 'The Yamaha TMAX (560cc) is Koh Ride’s most powerful automatic scooter for hill roads, followed by the Honda ADV 350 (350cc) and Yamaha XMAX (300cc). The TMAX suits experienced riders rather than complete beginners.' },
+      { question: 'How much does a hill-capable scooter cost to rent in Phuket?', answer: 'Prices start from 200 THB/day for a Yamaha NMAX, rising to 400–700 THB/day for a Honda ADV, 300–500 THB/day for a Yamaha XMAX, and around 2,000 THB/day for the range-topping Yamaha TMAX.' },
+      { question: 'Can I rent a hill-capable scooter in Phuket for a full month?', answer: 'Yes — 14 of the 16 hill-capable scooters currently listed (NMAX, ADV, XMAX, and TMAX) offer a discounted monthly rate, which typically works out cheaper per day than a short daily rental.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['nmax', 'adv', 'xmax', 'tmax'],
+    areaSlugs: ['rawai', 'chalong', 'patong', 'phuket-town', 'kathu'],
+    cluster: 'pricing',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
