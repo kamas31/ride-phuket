@@ -703,6 +703,33 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'rental-options',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'long-term-scooter-rental-phuket',
+    targetQuery: 'long term scooter rental phuket',
+    alternateQueries: [],
+    title: 'Long-Term Scooter Rental Phuket',
+    h1: 'Long-Term Scooter Rental in Phuket',
+    description: 'Long-term scooter rental in Phuket for extended stays: 57 real automatic scooters with a monthly rate from 3,500 THB, across 15 verified shops in 6 areas.',
+    longDescription: 'Staying in Phuket for weeks or months rather than a short holiday? Koh Ride lists 57 real automatic scooters from 15 verified shops that offer a long-term monthly rental rate, starting from 3,500 THB/month — built for expats, digital nomads, and seasonal residents who need reliable transport for an extended stay, not just a few days. Every one of them works out cheaper per day than booking short-term, with a typical saving of around 43%. Compare long-term rates across Rawai, Chalong, Patong, Phuket Town, Kathu, and Kata before you commit.',
+    contentSections: [
+      { heading: 'What counts as long-term scooter rental in Phuket', body: 'On Koh Ride, long-term scooter rental means booking at the discounted monthly rate rather than paying the standard daily price — the option shops offer specifically for renters staying beyond a couple of weeks. 57 of the 66 available automatic scooters on the site currently have a real monthly rate, ranging from 3,500 THB for an everyday automatic like the Honda Click up to around 45,000 THB for a larger displacement model like the Honda X-ADV.' },
+      { heading: 'Why a long-term rental costs less the longer you stay', body: 'Because the monthly rate is fixed regardless of how many days you actually ride, the effective daily cost keeps dropping the longer your stay runs beyond a month. Across the 57 scooters with a monthly rate, the saving compared to that same shop’s standard daily rate ranges from 6% to 77%, with a median around 43% — for a stay of two or three months, that gap only grows relative to renting daily or weekly for the equivalent period.' },
+      { heading: 'What to check before booking a long-term scooter rental', body: 'Most Phuket rental shops ask for a cash deposit of around 2,000–5,000 THB when you pick up a scooter, refunded when it’s returned undamaged — factor this in before committing to a monthly rate. Every listing on Koh Ride includes a helmet and insurance as standard, and 27 of the 57 monthly-rate scooters also offer delivery, useful if you’re settling into long-term accommodation away from the shop itself.' },
+    ],
+    highlights: ['57 of 66 available automatic scooters currently offer a long-term (monthly) rental rate', '15 verified shops across 6 areas of Phuket offer long-term scooter rental', 'Long-term rates start from 3,500 THB/month, with helmet and insurance included on every listing', 'Renting long-term saves a median of about 43% per day compared to the standard daily rate', '27 of the 57 long-term-rate scooters offer delivery to your accommodation'],
+    faq: [
+      { question: 'How much does long-term scooter rental cost in Phuket?', answer: 'Long-term (monthly) scooter rental on Koh Ride starts from 3,500 THB/month for everyday automatics like the Honda Click, rising to around 45,000 THB/month for larger models like the Honda X-ADV. 57 real listings currently offer a long-term rate.' },
+      { question: 'Is long-term scooter rental cheaper than renting daily or weekly in Phuket?', answer: 'Yes. Every one of the 57 automatic scooters with a long-term monthly rate works out cheaper per day than that shop’s standard daily rate, with a typical saving of around 43% — the longer you stay, the more that saving adds up.' },
+      { question: 'What deposit do I need for a long-term scooter rental in Phuket?', answer: 'Most shops ask for a cash deposit of around 2,000–5,000 THB when you collect the scooter, refunded when it’s returned undamaged. Handing over your passport as a deposit isn’t recommended — a cash deposit or passport copy is the safer alternative.' },
+      { question: 'Which areas of Phuket offer long-term scooter rental?', answer: 'Long-term scooter rental is available from 15 verified shops across 6 areas: Rawai, Chalong, Patong, Phuket Town, Kathu, and Kata.' },
+    ],
+    filter: { category: 'automatic', requiresMonthlyRate: true },
+    relevantModelSlugs: ['xadv', 'pcx', 'click', 'adv', 'nmax', 'grand-filano', 'xmax', 'forza', 'lead', 'tmax'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'rental-options',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
