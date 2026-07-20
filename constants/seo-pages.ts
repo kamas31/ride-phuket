@@ -837,6 +837,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'day-trip-scooter-phuket',
+    targetQuery: 'day trip scooter phuket',
+    alternateQueries: [],
+    title: 'Day Trip Scooter Rental in Phuket',
+    h1: 'Your Guide to a Day Trip by Scooter in Phuket',
+    description: 'Renting a scooter for a day trip in Phuket: 66 real automatics from ฿150/day across 16 verified shops, ready to explore the island for a single day.',
+    longDescription: 'Planning a day trip around Phuket on a scooter? Koh Ride lists 66 real, available automatic scooters from 16 verified shops across the island, so you can rent for a single day — no monthly commitment — and explore beaches, viewpoints, and temples at your own pace. Every listing includes a helmet and insurance as standard, with prices from ฿150/day.',
+    contentSections: [
+      { heading: 'Real day trip routes by area', body: 'Wherever you start, Phuket’s real geography makes a day trip easy by scooter: from Rawai, Promthep Cape and Chalong Temple are minutes away; from Patong, the Phuket Viewpoint and Big Buddha are about 25 minutes; from Kata, Karon Beach and Promthep Cape sit just south; and from Phuket Town, the Old Town’s Sino-Portuguese streets and Rang Hill Viewpoint make a scenic loop before heading further out to the coast.' },
+      { heading: 'Renting for a single day, not a month', body: 'A day trip doesn’t need a long-term commitment — every one of the 66 automatic scooters listed on Koh Ride can be rented for just one day, with prices starting from ฿150/day and helmet and insurance included as standard. 29 of the 66 listings also offer delivery, so the shop can drop the scooter at your hotel the morning of your trip instead of you needing to collect it in person.' },
+    ],
+    highlights: ['66 real automatic scooters available today from ฿150/day across 16 verified shops — no monthly rental required for a single day trip', 'Helmet and insurance included on every listing, with 29 scooters offering delivery straight to your hotel before you set off', 'Real inventory across all 6 areas of Phuket — Rawai, Phuket Town, Chalong, Patong, Kathu, and Kata — so you can start your day trip close to where you’re staying', 'Everyday automatics like the Honda PCX, Yamaha NMAX, and Honda Click are the easiest choice for a full day riding between beaches, viewpoints, and temples'],
+    faq: [
+      { question: 'How much does it cost to rent a scooter for a day trip in Phuket?', answer: 'A day trip scooter rental on Koh Ride starts from ฿150/day, with 66 real automatic scooters currently available across 16 verified shops — no monthly commitment required, just a single day’s rental.' },
+      { question: 'What’s a good day trip route to ride in Phuket?', answer: 'It depends where you start: from Rawai you can reach Promthep Cape and Chalong Temple in minutes, from Patong the Phuket Viewpoint and Big Buddha are about 25 minutes away, and from Phuket Town the Old Town and Rang Hill Viewpoint make a scenic loop before heading out to the coast.' },
+      { question: 'Do I need to rent for a full month to get a scooter in Phuket?', answer: 'No — every one of the 66 automatic scooters listed on Koh Ride can be rented for just a single day, from ฿150/day, which is exactly what a day trip needs.' },
+      { question: 'Does a day trip scooter rental in Phuket include a helmet and insurance?', answer: 'Yes — all 66 automatic scooters listed on Koh Ride include a helmet and insurance as standard, with no separate add-on fee, whether you’re renting for a day or a month.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['pcx', 'nmax', 'click'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'phuket-guides',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
