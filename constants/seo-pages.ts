@@ -550,6 +550,30 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['click', 'lead', 'grand-filano', 'pcx', 'nmax', 'adv', 'xadv', 'forza', 'xmax', 'tmax', 'cbr-650r'],
     areaSlugs: ['patong', 'kata', 'karon'],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'weekly-scooter-rental-phuket',
+    targetQuery: 'weekly scooter rental phuket',
+    alternateQueries: [],
+    title: 'Weekly Scooter Rental Phuket',
+    h1: 'Weekly Scooter Rental in Phuket',
+    description: 'Weekly scooter rental in Phuket: 51 real automatic scooters with a discounted weekly rate from 1,000 THB, across 12 verified shops in 6 areas.',
+    longDescription: 'Staying in Phuket for about a week? Koh Ride lists 51 real automatic scooters from 12 verified shops that offer a discounted weekly rental rate, starting from 1,000 THB/week. Many work out cheaper than paying the daily rate for 7 days straight, with savings up to 43%. Compare weekly rates across Rawai, Phuket Town, Chalong, Patong, Kathu, and Kata before you book.',
+    contentSections: [
+      { heading: 'How weekly scooter rental pricing works in Phuket', body: 'Shops on Koh Ride set a separate, discounted price for renters staying about a week. 51 of the 66 automatic scooters listed have a real weekly rate, starting from 1,000 THB. Savings compared to paying the standard daily rate for 7 days straight range from 0% to 43%, with a median around 14% — not every shop discounts a full week the same amount, so it’s worth comparing before you book.' },
+      { heading: 'Which scooters are available for weekly rental', body: 'Weekly rates are most common on everyday automatics: Honda PCX, Honda CLICK, Honda ADV, Yamaha NMAX, Yamaha GRAND FILANO, and Honda LEAD all have real listings with a weekly rate on Koh Ride today, alongside larger options like the Honda X-ADV and Honda FORZA, and even the maxi-scooter Yamaha TMAX for riders wanting more power for a week of exploring.' },
+    ],
+    highlights: ['51 of 66 automatic scooters currently offer a discounted weekly rental rate', '12 verified shops across 6 areas of Phuket offer weekly scooter rental', 'Weekly rates start from 1,000 THB, with helmet and insurance included on every listing', '23 of the 51 weekly-rate scooters offer delivery', 'Weekly rentals can save up to 43% compared to paying the daily rate for 7 days straight'],
+    faq: [
+      { question: 'How much does weekly scooter rental cost in Phuket?', answer: 'Weekly scooter rental on Koh Ride starts from 1,000 THB/week for everyday automatics like the Honda PCX or Yamaha NMAX, rising for larger models like the Honda X-ADV. 51 real automatic scooters currently offer a weekly rate.' },
+      { question: 'Is weekly scooter rental cheaper than paying daily in Phuket?', answer: 'Often, yes — many of the 51 automatic scooters with a weekly rate work out cheaper than paying the standard daily rate for 7 days straight, with savings up to 43% depending on the shop and model.' },
+      { question: 'Which areas of Phuket offer weekly scooter rental?', answer: 'Weekly scooter rental is available from 12 verified shops across 6 areas: Rawai, Phuket Town, Chalong, Patong, Kathu, and Kata.' },
+      { question: 'Does weekly scooter rental in Phuket include a helmet and insurance?', answer: 'Yes. Every weekly-rate scooter listed on Koh Ride includes a helmet and insurance, with no separate add-on fee.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['pcx', 'click', 'adv', 'xadv', 'nmax', 'grand-filano', 'lead', 'forza', 'tmax'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
