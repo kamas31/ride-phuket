@@ -784,6 +784,33 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'parking-rules-scooter-phuket',
+    targetQuery: 'parking rules scooter phuket',
+    alternateQueries: [],
+    title: 'Scooter Parking Rules in Phuket',
+    h1: 'Scooter Parking Rules in Phuket: What’s Legal and What’s Not',
+    description: 'Scooter parking rules in Phuket: where parking is legal, no-parking curb markings, blocked-entrance and footpath bans, and what happens if you break them.',
+    longDescription: 'Phuket has real, enforced scooter parking rules, not just shop advice — where you can legally leave a scooter, what curb markings mean no parking at all, and what happens if you ignore them. Every scooter rented through Koh Ride is yours to park exactly like a Thai resident’s own bike: at a marked motorbike bay, inside a mall or hotel lot, or anywhere that doesn’t block traffic, a footpath, or someone’s doorway. This page breaks down the parking rules that actually apply, in plain terms, before you park illegally and come back to a ticket, a clamp, or a missing scooter.',
+    contentSections: [
+      { heading: 'What Thailand’s parking rules actually prohibit', body: 'Thai traffic law treats a parked scooter the same as a parked car for the rules that matter most: you can’t stop on a curb marked with a solid or double yellow line, block a footpath, driveway, or building entrance, or leave a scooter anywhere it forces other traffic to swerve around it. These aren’t shop policies or tourist-only restrictions — they’re the same road rules a Thai resident’s own bike has to follow, and police in busy tourist zones like Patong and Kata do check.' },
+      { heading: 'Where the parking rules actually allow you to leave a scooter', body: 'The rules are permissive almost everywhere that isn’t specifically marked or obviously obstructive: designated motorbike bays outside 7-Elevens, malls, and restaurants, hotel and guesthouse parking areas, and any curb without a no-parking marking. Shopping centres like Jungceylon in Patong and Central Phuket have large, free motorbike parking areas built for exactly this, and most guesthouses expect guests to park a rented scooter on-site overnight.' },
+      { heading: 'What happens if you break the parking rules', body: 'A scooter parked illegally in Thailand can be ticketed, and in high-enforcement tourist areas it can be clamped or towed at the owner’s expense until the fine is paid. On a rental, that responsibility sits with the renter, not the shop — any parking fine or towing charge issued during your rental period is yours to settle, so it’s worth treating the rules as real rather than optional, especially in Patong and Kata where enforcement is heaviest.' },
+    ],
+    highlights: ['Parking on a curb marked with a yellow no-parking line is illegal everywhere in Phuket, not just in tourist areas', 'Blocking a footpath, driveway, or building entrance breaks the same parking rules as blocking a road', 'Malls, 7-Elevens, restaurants, and hotels almost always have a free, marked motorbike parking area you can legally use', 'Illegally parked scooters can be ticketed, clamped, or towed — and as the renter, any fine is your responsibility, not the shop’s', 'Patong and Kata see the heaviest parking enforcement on the island, so stick to marked bays there especially'],
+    faq: [
+      { question: 'Is it illegal to park a scooter just anywhere in Phuket?', answer: 'Yes — Thailand’s parking rules prohibit stopping on a curb marked with a no-parking line, blocking a footpath or building entrance, or leaving a scooter where it obstructs traffic. Outside those restrictions, parking is generally allowed, especially in a marked motorbike bay.' },
+      { question: 'Who pays if my rental scooter gets a parking ticket in Phuket?', answer: 'You do. Parking fines and towing charges are tied to wherever the scooter was left, not to the rental shop, so any ticket issued while you have the scooter is your responsibility to settle before or when you return it.' },
+      { question: 'Where can I legally park a rental scooter for free in Phuket?', answer: 'Most 7-Elevens, shopping malls, restaurants, and hotels have a marked motorbike parking area that’s free to use — look for a painted bay or a motorbike symbol before you park on the street.' },
+      { question: 'Are parking rules stricter in Patong or Kata than the rest of Phuket?', answer: 'Enforcement is heavier in busy tourist zones like Patong and Kata, where police more actively ticket, clamp, or tow illegally parked scooters — the rules themselves are the same island-wide, but you’re more likely to be checked there.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: [],
+    areaSlugs: [],
+    cluster: 'license-laws',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
