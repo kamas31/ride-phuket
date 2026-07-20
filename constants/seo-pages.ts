@@ -757,6 +757,33 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'how-refuel-scooter-thailand',
+    targetQuery: 'how refuel scooter thailand',
+    alternateQueries: [],
+    title: 'How to Refuel a Scooter in Thailand',
+    h1: 'How to Refuel Your Rental Scooter in Thailand',
+    description: 'How to refuel a scooter in Thailand: which fuel to use, where to find petrol stations, and what Koh Ride’s 74 available scooters actually take.',
+    longDescription: 'Wondering how to refuel a scooter in Thailand? It’s simpler than it looks: nearly every rental scooter takes standard Gasohol 91 or Gasohol 95 petrol, sold at full-service stations across the country as well as small roadside stalls in more remote spots — never diesel. Koh Ride’s 74 available scooters, listed across 18 verified shops in Phuket, all run on this same everyday fuel, so there’s nothing special to arrange before you ride off.',
+    contentSections: [
+      { heading: 'Which fuel your scooter needs', body: 'Almost every automatic scooter and motorbike for rent in Thailand — including every model on Koh Ride — runs on regular unleaded petrol, most commonly sold as Gasohol 91 or Gasohol 95 (a standard ethanol-petrol blend used nationwide). If you’re ever unsure which grade a specific bike prefers, ask the shop when you pick it up — they’ll tell you in seconds. The one fuel to avoid entirely is diesel: putting diesel in a petrol scooter will damage the engine, so always double-check the pump before you fill up.' },
+      { heading: 'Where to find fuel stations in Thailand', body: 'Petrol stations are plentiful across Thailand, from major brands like PTT, Bangchak, Shell, Caltex, and Susco in towns and along main roads, to small roadside stalls selling fuel by the litre out of glass bottles or drums in more remote areas and outer islands. Almost all Thai stations are full-service — an attendant pumps the fuel for you, so there’s no need to get out and do it yourself like you might at home.' },
+      { heading: 'Practical tips before you ride off', body: 'Small roadside stalls are usually cash-only and priced a little higher per litre than a proper station, so keep some cash on hand if you’re heading somewhere remote. If you’re planning a longer day trip or a hill route away from town, it’s worth topping up before you set off rather than relying on finding a stall along the way. And if you’re ever unsure how much fuel is in the tank or which grade to use, just ask the shop you rented from — all 18 of Koh Ride’s verified shops are a message away.' },
+    ],
+    highlights: ['Nearly every rental scooter in Thailand, including all models on Koh Ride, runs on standard Gasohol 91 or Gasohol 95 petrol — never diesel', 'Petrol stations from major brands like PTT, Bangchak, Shell, and Caltex are common across the country, and almost all are full-service', 'Small roadside stalls sell fuel by the litre in more remote areas — handy in a pinch, but usually cash-only and a bit pricier', 'All 74 available scooters across Koh Ride’s 18 verified shops in Phuket use the same everyday petrol, with nothing special to arrange'],
+    faq: [
+      { question: 'What type of fuel does a rental scooter in Thailand use?', answer: 'Almost all rental scooters and motorbikes in Thailand, including every model listed on Koh Ride, run on regular petrol — usually Gasohol 91 or Gasohol 95. Never put diesel in a scooter; it will damage the engine. If you’re unsure which grade your specific bike takes, ask the shop before you ride off.' },
+      { question: 'Where can I find a petrol station in Thailand?', answer: 'Petrol stations are common across Thailand, including major brands like PTT, Bangchak, Shell, and Caltex in towns and along main roads. In more remote areas or on smaller islands, small roadside stalls sell fuel by the litre out of glass bottles or drums when a proper station isn’t nearby.' },
+      { question: 'Do I need to pump my own fuel in Thailand?', answer: 'Almost never — the large majority of petrol stations in Thailand are full-service, meaning an attendant pumps the fuel for you. You simply tell them which fuel grade and how much, by amount or by price, and pay once it’s done.' },
+      { question: 'What if I run low on fuel in a remote part of Phuket?', answer: 'Petrol stations are plentiful across Phuket, and even in more remote spots you’ll usually find a small roadside stall selling fuel by the litre out of bottles or drums. It’s still worth topping up before a longer hill route or day trip so you’re not relying on finding one along the way.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: [],
+    cluster: 'safety',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
