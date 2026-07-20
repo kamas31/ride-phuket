@@ -499,6 +499,31 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['pcx', 'xadv', 'adv', 'click', 'nmax'],
     areaSlugs: ['phuket-town', 'chalong', 'rawai', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'how-avoid-scooter-rental-scams-phuket',
+    targetQuery: 'how avoid scooter rental scams phuket',
+    alternateQueries: [],
+    title: 'How to Avoid Scooter Rental Scams in Phuket',
+    h1: 'How to Avoid Scooter Rental Scams in Phuket',
+    description: 'How to avoid scooter rental scams in Phuket: spot the passport-deposit trap and damage-blame tricks, and rent from 18 real verified shops instead.',
+    longDescription: 'Wondering how to avoid scooter rental scams in Phuket? The two scams reported most often are shops holding your passport as a deposit and then inventing damage to extort more money, and shops blaming you for scratches that were already there when you picked the bike up. Koh Ride only lists real, available scooters from 18 verified shops, shows each listing’s real deposit type before you ever contact anyone, and includes a helmet and insurance as standard on all 74 current listings — so you can spot and avoid the classic traps before you hand over a single baht.',
+    contentSections: [
+      { heading: 'The scams to watch for in Phuket', body: 'The passport-deposit trap is the most reported scooter rental scam in Phuket: a shop holds your actual passport as security, then invents damage or a late return to demand extra cash before giving it back — handing over your original passport as a deposit is technically illegal under Thai law, even though some shops still ask for it. A close second is the damage-blame scam, where a shop doesn’t note existing scratches or dents at pickup, then charges you for them when you return the bike. Bait-and-switch pricing is a third: an unrealistically cheap daily rate advertised on a sign or online, with ’mandatory’ helmet, insurance, or fuel fees added once you show up.' },
+      { heading: 'How to protect yourself before you rent', body: 'Before you commit to a shop, check what deposit it actually asks for — a shop that only accepts cash, never your passport, removes the single biggest scam risk entirely. Confirm the helmet and insurance are already included in the price you’re quoted, not an add-on sprung on you at pickup. Walk around the scooter with the shop staff before you ride off and photograph every existing scratch, dent, or scuff on your phone, so there’s no dispute over pre-existing damage when you bring it back. And favor a shop with a fixed address and real reviews over an anonymous roadside stall you can’t find again if something goes wrong.' },
+      { heading: 'Why a verified shop and transparent listing reduce your risk', body: 'Koh Ride only lists scooters from shops that go through a real verification step before they appear on the platform — 18 verified shops today, no anonymous stalls. Every one of the 74 available listings already includes a helmet and insurance as standard, so there’s no hidden fee to negotiate at pickup, and each listing shows its real deposit type and amount up front: right now 43 of the 74 available scooters accept a cash deposit instead of your passport, and only 3 require one. There’s no online prepayment either — you message the shop directly, inspect the scooter in person, and only hand over a deposit once you’re satisfied.' },
+    ],
+    highlights: ['Koh Ride only lists scooters from 18 verified shops — no anonymous roadside stalls with no fixed address', 'Every listing shows its real deposit type before you contact the shop — 43 of 74 available scooters accept a cash deposit instead of holding your passport', 'Helmet and insurance are included as standard on all 74 available listings, with no hidden add-on fee sprung on you at pickup', 'Only 3 of 74 available listings currently require a passport deposit — clearly shown before you ever get in touch', 'You contact the shop directly and inspect the scooter in person before paying any deposit — no online prepayment to lose to a scam'],
+    faq: [
+      { question: 'What’s the most common scooter rental scam in Phuket?', answer: 'The passport-deposit trap is reported most often: a shop holds your actual passport as security, then invents damage or a late fee to squeeze more cash out of you before handing it back. Holding your original passport as a deposit is technically illegal under Thai law, so the safest move is to only rent from a shop that accepts a cash deposit instead.' },
+      { question: 'Is it safe to leave my passport as a deposit for a scooter in Phuket?', answer: 'No — asking to hold your original passport as security is technically illegal under Thai law, and it’s the mechanism behind the most common scooter rental scam on the island. On Koh Ride, 43 of the 74 available scooters currently accept a cash deposit instead, and only 3 listings require a passport at all.' },
+      { question: 'How do I avoid being blamed for damage I didn’t cause?', answer: 'Walk around the scooter with the shop before you ride off and photograph every existing scratch, dent, or scuff on your phone. That record is your protection if a shop tries to charge you for pre-existing damage when you return it — a common trick used to justify keeping part of your deposit.' },
+      { question: 'How can I tell if a scooter rental shop in Phuket is legitimate?', answer: 'Look for a shop with a fixed address, real reviews, and a clearly stated cash deposit rather than a passport hold. Every shop listed on Koh Ride has gone through a verification step before it’s allowed on the platform — 18 verified shops today — and each listing shows its real deposit type and amount before you ever make contact.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: [],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
