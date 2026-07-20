@@ -475,6 +475,30 @@ export const SEO_PAGES: SeoPageMeta[] = [
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'daily-scooter-rental-phuket',
+    targetQuery: 'daily scooter rental phuket',
+    alternateQueries: [],
+    title: 'Daily Scooter Rental in Phuket – No Minimum Days',
+    h1: 'Daily Scooter Rental in Phuket',
+    description: 'Daily scooter rental in Phuket: 45 automatic scooters with zero minimum rental period, from THB 150/day, 13 verified shops, helmet & insurance included.',
+    longDescription: 'Need a scooter for just a day or two in Phuket? Koh Ride lists 45 real automatic scooters from 13 verified shops with zero minimum rental period, so a genuine one-day daily rental is bookable today with no weekly or monthly commitment. Prices start from THB 150/day, every listing includes a helmet and insurance, and 13 of these 45 also offer delivery straight to your hotel.',
+    contentSections: [
+      { heading: 'Which scooters you can really rent by the day', body: 'Not every scooter listed on Koh Ride can be booked for a single day — 21 of the 66 available automatic scooters require a 3-day or 7-day minimum rental period set by the shop. The 45 automatic scooters featured on this page have no minimum at all, so a genuine one-day daily rental is real and bookable today, priced from THB 150 to THB 2,000 per day depending on the model.' },
+      { heading: 'Popular models available for daily rental', body: 'The Honda PCX (11 listings), Honda XADV (10), Honda ADV (5), Honda Click (4), and Yamaha NMAX (4) make up the bulk of Phuket’s true daily-rental automatic scooters — covering everyday commuting scooters up to bigger touring bikes, all bookable without a minimum stay.' },
+    ],
+    highlights: ['45 real automatic scooters bookable for just one day — zero minimum rental period required', 'Prices from THB 150 to THB 2,000/day, helmet and insurance included on every listing', '13 verified shops offer true daily rental, spread across Phuket Town, Chalong, Rawai, Patong, Kathu, and Kata', '13 of these 45 listings also offer delivery straight to your hotel or villa', '36 of the 45 also offer a discounted monthly rate if you decide to extend your stay'],
+    faq: [
+      { question: 'Can I rent a scooter in Phuket for just one day?', answer: 'Yes — 45 of Koh Ride’s available automatic scooters have zero minimum rental period, so a genuine one-day daily rental is bookable today from THB 150/day, with helmet and insurance included.' },
+      { question: 'Do all scooter rental shops in Phuket offer daily rental?', answer: 'No — 21 of the 66 available automatic scooters on Koh Ride require a 3-day or 7-day minimum set by the shop. Koh Ride separates these from the 45 listings with no minimum, so you can find a genuine daily rental before contacting a shop.' },
+      { question: 'How much does daily scooter rental cost in Phuket?', answer: 'True daily-rental automatic scooters on Koh Ride range from THB 150/day for everyday models up to THB 2,000/day for larger bikes like the Honda XADV, with helmet and insurance included on every listing.' },
+      { question: 'Can I switch to a monthly rate later if I extend my stay?', answer: 'Often, yes — 36 of the 45 automatic scooters available for daily rental also offer a separate, discounted monthly rate, so you can start with a daily rental and switch if your trip runs longer.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['pcx', 'xadv', 'adv', 'click', 'nmax'],
+    areaSlugs: ['phuket-town', 'chalong', 'rawai', 'patong', 'kathu', 'kata'],
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
