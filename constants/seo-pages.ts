@@ -599,6 +599,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
     cluster: 'rental-options',
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'best-couples-scooter',
+    targetQuery: 'best couples scooter',
+    alternateQueries: [],
+    title: 'The Best Scooter for Couples in Phuket',
+    h1: 'The Best Scooter for Couples in Phuket',
+    description: 'The best scooter for couples in Phuket: real Yamaha NMAX, Honda ADV, and Honda PCX listings built for riding two-up, from ฿200/day.',
+    longDescription: 'Looking for the best scooter for couples in Phuket? Koh Ride lists real automatic scooters built for riding two-up, starting with the Yamaha NMAX, whose longer seat and larger frame make it a common pick for two people. The roomier Honda ADV suits couples covering more ground, and the Honda PCX is a budget-friendly option for shorter trips together. Every listing is a real, available scooter from a verified shop, with helmet and insurance included.',
+    contentSections: [
+      { heading: 'Which scooter is best for couples riding together in Phuket', body: 'The Yamaha NMAX is the most consistently recommended option for two people on Koh Ride, thanks to its longer seat and larger frame. Riders who want extra underseat storage and ground clearance for longer days often step up to the Honda ADV instead. The Honda PCX also seats two and costs less per day, but it’s best suited to lighter riders or shorter trips together — for frequent two-up riding, the NMAX or ADV are usually more comfortable.' },
+      { heading: 'What’s included when you rent a couples scooter in Phuket', body: 'Every scooter listed on Koh Ride — including every NMAX, ADV, and PCX — includes a helmet and insurance as standard, with no separate add-on fee. All three are fully automatic, so either partner can ride without learning to shift gears. Compare real listings by price and area, then message the shop directly to book.' },
+    ],
+    highlights: ['Yamaha NMAX (5 real listings, from ฿200/day) — Koh Ride’s most recommended pick for two-up comfort, with a longer seat and larger frame', 'Honda ADV (7 real listings, from ฿400/day) — more underseat storage and ground clearance for couples exploring further afield', 'Honda PCX (11 real listings, from ฿200/day) — the cheapest two-seat option, best for shorter trips together', 'All three models are fully automatic — no clutch or gear shifting for either rider', 'Real listings across Rawai, Chalong, Kathu, and Phuket Town, with helmet and insurance included on every scooter'],
+    faq: [
+      { question: 'What is the best scooter for couples to rent in Phuket?', answer: 'For most couples, the Yamaha NMAX is the best option — its longer seat and larger frame make it a common pick for two people riding together, and Koh Ride currently lists 5 real NMAX scooters from ฿200/day. Couples wanting extra storage and ground clearance for longer days often choose the Honda ADV instead (7 real listings, from ฿400/day).' },
+      { question: 'Is the Honda PCX good for two people?', answer: 'It seats two, but it’s best suited to lighter riders or shorter trips together — for frequent two-up riding, the larger Yamaha NMAX or Honda ADV are usually more comfortable. Koh Ride lists 11 real PCX scooters from ฿200/day.' },
+      { question: 'Do I need a special license to rent a scooter as a couple in Phuket?', answer: 'No — the requirement is the same as any scooter rental in Thailand: a valid motorcycle license, either Thai or an International Driving Permit with the Category A motorcycle endorsement. Confirm specific requirements with the shop before booking.' },
+      { question: 'Where can I rent a couples-friendly scooter in Phuket?', answer: 'Koh Ride lists real NMAX, ADV, and PCX scooters from verified shops across Rawai, Chalong, Kathu, and Phuket Town — compare live prices and contact the shop directly to book.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['nmax', 'adv', 'pcx'],
+    areaSlugs: ['rawai', 'chalong', 'kathu', 'phuket-town'],
+    cluster: 'pricing',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
