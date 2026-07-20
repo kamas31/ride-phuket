@@ -651,6 +651,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'pricing',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'best-long-rides-scooter',
+    targetQuery: 'best long rides scooter',
+    alternateQueries: [],
+    title: 'Best Scooter for Long Rides in Phuket',
+    h1: 'Best Scooters for Long Rides in Phuket',
+    description: 'The best scooters for long rides in Phuket: 29 real big-engine automatics — Honda ADV, X-ADV, Forza, Yamaha XMAX and TMAX — from ฿300/day, ABS included.',
+    longDescription: 'Planning a long ride around Phuket — a full day exploring the island, or a longer trip up the coast? The best scooters for long rides are the bigger-engine automatics, not the smallest city runabouts: Koh Ride lists 29 real Honda ADV, Honda X-ADV, Honda Forza, and Yamaha XMAX and TMAX scooters from 7 verified shops, priced from ฿300/day. These bigger automatics carry more power for sustained speed on longer rides, plus real comfort features rarely found on smaller scooters — 20 of the 29 have a windshield or wind visor, and 24 have ABS brakes. Want something lighter and cheaper that can still handle a long ride? Koh Ride’s 59 automatics of 150cc or more, including the Honda PCX, Yamaha NMAX, and Honda Click, are a capable step up from a basic 125cc scooter too.',
+    contentSections: [
+      { heading: 'What makes a scooter good for long rides', body: 'A scooter built for long rides needs more than an engine that just runs — it needs enough power to hold a comfortable speed for hours, and real comfort features for the distance. Among Koh Ride’s real inventory, that means a windshield or wind visor (20 of the 29 big-engine automatics have one), ABS brakes for safer stopping at speed (24 of the 29), and real underseat storage for a helmet, rain gear, or a day bag.' },
+      { heading: 'Which scooters on Koh Ride are best for long rides', body: 'Koh Ride’s best scooters for long rides are its 29 real big-engine automatics: the Honda X-ADV (750cc) and Yamaha TMAX (560cc) for maximum power, the Honda ADV and Honda Forza (350cc) for a lighter step up, and the Yamaha XMAX (300cc) as the most affordable big-engine option, from ฿300/day. For a cheaper long ride, the Honda PCX, Yamaha NMAX, and Honda Click (150-160cc) are also real, available options from ฿200/day.' },
+    ],
+    highlights: ['29 real big-engine automatics — Honda ADV, Honda X-ADV, Honda Forza, Yamaha XMAX, and Yamaha TMAX — built for long rides, from ฿300/day', '20 of the 29 come with a windshield or wind visor, and 24 have ABS brakes — real comfort and safety for longer distances', '7 verified shops offer these long-ride-ready scooters across Rawai, Chalong, Patong, and Phuket Town', '24 of the 29 also offer a discounted monthly rate, and 15 offer delivery to your hotel or villa', 'Prefer something lighter? 59 automatics of 150cc or more — including the Honda PCX, Yamaha NMAX, and Honda Click — are also capable choices for a long day out, from ฿200/day'],
+    faq: [
+      { question: 'What is the best scooter for long rides in Phuket?', answer: 'For genuinely long rides, Koh Ride’s 29 big-engine automatics are the best choice — Honda ADV, Honda X-ADV, Honda Forza, and Yamaha XMAX and TMAX all carry a 300cc+ engine, real comfort features like a windshield (20 of the 29), and ABS brakes (24 of the 29), and are available from ฿300/day across 7 verified shops.' },
+      { question: 'Do I need a big scooter for a long ride, or is a smaller one enough?', answer: 'A smaller automatic can manage a long ride, but a bigger engine makes it more comfortable — Koh Ride’s 59 automatics of 150cc or more, including the Honda PCX, Yamaha NMAX, and Honda Click, are a capable step up from a basic 125cc scooter, priced from ฿200/day.' },
+      { question: 'How much does it cost to rent the best scooter for long rides in Phuket?', answer: 'Koh Ride’s big-engine long-ride scooters range from ฿300/day for a Yamaha XMAX up to ฿2,998/day for a Honda X-ADV, with 24 of the 29 also offering a discounted monthly rate for longer stays.' },
+      { question: 'Do long-ride scooters on Koh Ride come with insurance and a helmet?', answer: 'Yes — every scooter listed on Koh Ride, including all 29 big-engine long-ride models, includes a helmet and insurance as standard, with no separate add-on fee.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['adv', 'xadv', 'forza', 'xmax', 'tmax', 'pcx', 'nmax', 'click'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu'],
+    cluster: 'pricing',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
