@@ -119,7 +119,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     urlStrategy: 'landing',
     slug: 'scooter-rental-phuket',
     targetQuery: 'scooter rental phuket',
-    alternateQueries: [],
+    alternateQueries: ['bike rental phuket'],
     title: 'Scooter Rental Phuket | 65 Real Listings',
     h1: 'Scooter Rental in Phuket',
     description: 'Scooter rental in Phuket made simple: 65 real, available automatic scooters across 16 verified shops, from ฿150/day, helmet and insurance included.',
