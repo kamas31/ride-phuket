@@ -730,6 +730,33 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'rental-options',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'fuel-stations-scooter-phuket',
+    targetQuery: 'fuel stations scooter phuket',
+    alternateQueries: [],
+    title: 'Fuel Stations for Scooters in Phuket',
+    h1: 'Where to Find Fuel Stations for Your Scooter in Phuket',
+    description: 'Fuel stations for scooters in Phuket: PTT has the widest coverage, plus Bangchak, PT, Shell, Caltex and Susco. See what to fill up and what it costs.',
+    longDescription: 'Looking for fuel stations to keep your rental scooter topped up around Phuket? PTT has the widest network of stations on the island and is the safest choice for longer routes between towns, with Bangchak, PT, Shell, Caltex, and Susco all common alternatives along the main roads. A full-service attendant fills the tank for you at every real station — no need to get off the bike — and Koh Ride lists 66 real automatic scooters from 16 verified shops if you still need to book your ride, from ฿150/day.',
+    contentSections: [
+      { heading: 'Which fuel stations to use in Phuket', body: 'PTT is the most common network of fuel stations across Phuket and the safest bet if you’re riding further afield, since its coverage extends well beyond the main tourist areas. Bangchak, PT, Shell, Caltex, and Susco are all solid, widely available alternatives in Patong, Kata, Chalong, Rawai, Phuket Town, and Kathu. Small roadside stalls selling fuel by the bottle do exist in some quieter sois, but they’re only worth using as a genuine emergency backup — the fuel’s purity isn’t guaranteed, and a bad tank can mean an expensive repair bill from the rental shop.' },
+      { heading: 'Which fuel a rental scooter actually takes', body: 'Almost every scooter for rent in Phuket runs on Gasohol, a blend of regular gasoline and ethanol, never diesel. Gasohol 95 (usually the green or orange pump) is the recommended default, giving smoother performance on hill roads and bigger-engine models. Gasohol 91 (blue or yellow pump) is a few baht cheaper per liter and fine for basic, lighter automatics like the Honda Click. Whichever grade you pick, it’s worth double-checking the attendant is filling from the right pump before they start.' },
+      { heading: 'What fuel actually costs, and how far it goes', body: 'Gasohol prices move with the daily market rate, but currently run roughly ฿36–44 per liter depending on the grade and station. For a rider covering a reasonable amount of ground each day, that typically works out to around ฿100–150 in fuel — a small add-on next to the scooter’s daily rental rate. Every real Koh Ride listing already includes helmet and insurance, so fuel is the one running cost you’ll pay for separately as you ride.' },
+    ],
+    highlights: ['PTT has the widest network of fuel stations across Phuket and is the safest bet for longer rides between towns', 'Scooters run on Gasohol 95 (green/orange pump) or Gasohol 91 (blue/yellow pump) — never diesel — with a full-service attendant filling the tank for you', 'Expect to spend roughly ฿100–150/day on fuel for active riding, at around ฿36–44 per liter depending on the grade', 'Avoid roadside bottled fuel stalls except as a genuine emergency — quality isn’t guaranteed and bad fuel can damage the engine', '66 real automatic scooters are available to rent right now from 16 verified shops across Phuket, from ฿150/day'],
+    faq: [
+      { question: 'What fuel do I put in a rental scooter in Phuket?', answer: 'Nearly every rental scooter in Phuket runs on Gasohol — either Gasohol 95 (green or orange pump) or Gasohol 91 (blue or yellow pump). 95 is the safer default for hill roads and bigger-engine models; 91 is fine for basic automatics like the Honda Click. Diesel is never used in a scooter.' },
+      { question: 'Where are the best fuel stations to use in Phuket?', answer: 'PTT has the widest network of fuel stations across Phuket and is the safest choice on longer routes, with Bangchak, PT, Shell, Caltex, and Susco all common, reliable alternatives in the main towns and along the primary roads.' },
+      { question: 'How much does it cost to fuel a scooter in Phuket?', answer: 'Gasohol currently runs roughly ฿36–44 per liter depending on the grade, and a day of active riding typically costs around ฿100–150 in fuel. Real prices shift with the daily market rate, so check the sign at the pump before you fill up.' },
+      { question: 'Is it safe to buy fuel from roadside bottle stalls in Phuket?', answer: 'Only treat it as a genuine emergency backup. Roadside bottled fuel quality isn’t guaranteed, and bad fuel can damage a scooter’s engine — a real fuel station is always the safer choice whenever one is nearby.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: [],
+    areaSlugs: [],
+    cluster: 'safety',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
