@@ -837,6 +837,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'big-buddha-by-scooter',
+    targetQuery: 'big buddha by scooter',
+    alternateQueries: [],
+    title: 'Ride to Big Buddha by Scooter in Phuket',
+    h1: 'Riding to Big Buddha by Scooter',
+    description: 'Want to visit Big Buddha by scooter? See real automatic scooters near Chalong and Rawai, the closest areas to Phuket’s hilltop Big Buddha viewpoint.',
+    longDescription: 'Big Buddha is one of Phuket’s most-visited viewpoints, and riding there by scooter is the easiest way to reach it on your own schedule. Chalong is the closest rental area — about 10 minutes from Big Buddha by scooter — with Rawai right next door, together home to dozens of real, available automatic scooters from verified local shops.',
+    contentSections: [
+      { heading: 'Getting to Big Buddha by scooter', body: 'Big Buddha is a hilltop landmark above Chalong in south Phuket, and riding there by scooter is the easiest way to reach it on your own schedule. Chalong is the closest rental area — about 10 minutes away by scooter — and Rawai is right next door. Riders based further north in Patong should plan for roughly 25 minutes each way. The final approach climbs a winding hill road, so take it at a comfortable pace.' },
+      { heading: 'Which scooter to rent for the ride', body: 'Every available scooter currently listed near Chalong and Rawai is an automatic, so there’s no clutch to manage on the hill up to Big Buddha. The most common picks in this area are the Honda XADV, Honda ADV, Honda Click, and Yamaha NMAX, priced from ฿200/day, with 19 of the 33 nearby options at ฿400/day or less. Every one of them comes with a helmet included.' },
+    ],
+    highlights: ['33 real automatic scooters available in Rawai and Chalong, the two areas closest to Big Buddha', 'Chalong is about 10 minutes from Big Buddha by scooter', 'Prices from ฿200/day, with 19 of 33 nearby options at ฿400/day or less', 'Popular nearby models: Honda XADV, Honda ADV, Honda Click, and Yamaha NMAX', 'Every scooter comes with a helmet included'],
+    faq: [
+      { question: 'Can I ride a scooter to Big Buddha in Phuket?', answer: 'Yes — Big Buddha is reachable by scooter via a paved road, with a winding, moderately steep final approach. The closest rental area is Chalong, about 10 minutes away; riders coming from Patong should allow around 25 minutes.' },
+      { question: 'Which area is closest to Big Buddha for renting a scooter?', answer: 'Chalong, roughly 10 minutes from Big Buddha by scooter. Koh Ride currently lists 33 real, available automatic scooters across Chalong and neighboring Rawai, from ฿200/day.' },
+      { question: 'How much does it cost to rent a scooter near Big Buddha?', answer: 'Automatic scooters near Chalong and Rawai start from ฿200/day, and 19 of the 33 currently listed options are ฿400/day or less.' },
+      { question: 'What’s the most popular scooter for visiting Big Buddha?', answer: 'The Honda XADV is the most common automatic scooter currently listed near Chalong and Rawai, followed by the Honda ADV, Honda Click, and Yamaha NMAX.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['xadv', 'adv', 'click', 'nmax'],
+    areaSlugs: ['chalong', 'rawai', 'patong'],
+    cluster: 'phuket-guides',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
