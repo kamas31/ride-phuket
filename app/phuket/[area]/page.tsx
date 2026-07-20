@@ -135,7 +135,11 @@ export default async function AreaPage({ params }: PageProps) {
     ],
   }
 
-  const related = getRelatedContent({ topicText: area.name, relevantModelSlugs: [] })
+  // An area page is structurally always in the "phuket-guides" topic cluster
+  // (constants/topic-clusters.ts) — real, but fixed for this whole page
+  // family, so it's stated here rather than stored redundantly on every
+  // constants/areas.ts entry.
+  const related = getRelatedContent({ topicText: area.name, relevantModelSlugs: [], clusterId: 'phuket-guides' })
 
   return (
     <>

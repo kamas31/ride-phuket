@@ -42,7 +42,7 @@ export default async function ComparePage({ params }: PageProps) {
 
   const breadcrumbJsonLd = buildComparePageBreadcrumbJsonLd(page)
   const faqJsonLd = buildComparePageFaqJsonLd(page)
-  const related = getRelatedContent({ excludeSlug: page.slug, topicText: page.targetQuery, relevantModelSlugs: [page.modelSlugA, page.modelSlugB] })
+  const related = getRelatedContent({ excludeSlug: page.slug, topicText: page.targetQuery, relevantModelSlugs: [page.modelSlugA, page.modelSlugB], clusterId: page.cluster })
 
   return (
     <>

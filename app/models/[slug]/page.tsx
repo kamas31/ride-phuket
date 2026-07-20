@@ -98,7 +98,11 @@ export default async function ModelPage({ params }: PageProps) {
   const breadcrumbJsonLd = buildModelBreadcrumbJsonLd(model)
   const faqJsonLd = buildModelFaqJsonLd(model)
 
-  const related = getRelatedContent({ topicText: model.name, relevantModelSlugs: [model.slug] })
+  // A model page is structurally always in the "models" topic cluster
+  // (constants/topic-clusters.ts) — real, but fixed for this whole page
+  // family, so it's stated here rather than stored redundantly on every
+  // constants/models.ts entry.
+  const related = getRelatedContent({ topicText: model.name, relevantModelSlugs: [model.slug], clusterId: 'models' })
 
   return (
     <>

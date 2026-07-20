@@ -40,18 +40,26 @@ function overlapScore(a: Set<string>, b: Set<string>): number {
  * overlap matching. relevantModelSlugs: models this page already features
  * (e.g. a model page passes its own slug) — boosts comparison pages that
  * literally reference one of these models, even if raw text overlap is thin.
+ * clusterId: this page's own topic cluster (constants/topic-clusters.ts) —
+ * the strongest relatedness signal available (bigger than the model-match
+ * bonus below), since two pages in the same cluster are related BY
+ * DEFINITION even when they share few literal words (e.g. "scooter rental
+ * deposit" and "scooter rental insurance" are both Pricing, but barely
+ * overlap on text alone).
  */
 export function getRelatedContent(opts: {
   excludeSlug?: string
   topicText: string
   relevantModelSlugs?: string[]
+  clusterId?: string
   maxPerCategory?: number
 }): RelatedContent {
   const max = opts.maxPerCategory ?? 4
   const topicTokens = significantTerms(opts.topicText)
   const relevantModels = new Set(opts.relevantModelSlugs ?? [])
+  const clusterBonus = (pageCluster: string | undefined) => (opts.clusterId && pageCluster === opts.clusterId ? 3 : 0)
 
-  const scoreSeoPage = (p: SeoPageMeta) => overlapScore(topicTokens, significantTerms(p.targetQuery))
+  const scoreSeoPage = (p: SeoPageMeta) => overlapScore(topicTokens, significantTerms(p.targetQuery)) + clusterBonus(p.cluster)
   const rankSeoPages = (pages: SeoPageMeta[]) =>
     pages
       .filter(p => p.slug !== opts.excludeSlug)
@@ -62,7 +70,7 @@ export function getRelatedContent(opts: {
       .map(x => x.page)
 
   const scoreCompare = (p: ComparePageMeta) => {
-    let score = overlapScore(topicTokens, significantTerms(p.targetQuery))
+    let score = overlapScore(topicTokens, significantTerms(p.targetQuery)) + clusterBonus(p.cluster)
     if (relevantModels.has(p.modelSlugA) || relevantModels.has(p.modelSlugB)) score += 2
     return score
   }

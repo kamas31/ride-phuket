@@ -54,7 +54,7 @@ export async function SeoPageBody({ page }: { page: SeoPageMeta }) {
     ).values()
   ).slice(0, 6)
   const relatedModels = page.filter ? matchingModels(scooters) : []
-  const related = getRelatedContent({ excludeSlug: page.slug, topicText: `${page.targetQuery} ${page.title}`, relevantModelSlugs: relatedModels.map(m => m.slug) })
+  const related = getRelatedContent({ excludeSlug: page.slug, topicText: `${page.targetQuery} ${page.title}`, relevantModelSlugs: relatedModels.map(m => m.slug), clusterId: page.cluster })
 
   const productJsonLd = buildSeoPageProductJsonLd(page, scooters.length, priceRange)
   const breadcrumbJsonLd = buildSeoPageBreadcrumbJsonLd(page)

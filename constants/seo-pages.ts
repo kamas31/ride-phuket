@@ -43,6 +43,9 @@ export interface SeoPageMeta {
   /** Structural facets for the internal-linking graph (lib/related-content.ts) — real constants/models.ts / constants/areas.ts slugs, never fabricated. Optional: absent on pages created before this field existed. */
   relevantModelSlugs?: string[]
   areaSlugs?: string[]
+  /** Real id from constants/topic-clusters.ts (lib/brain/topic-cluster-classifier.ts) — which topical cluster this page belongs to. Optional in the type for backward-compat with pre-cluster entries; the write-seo-page mutator requires it on every new page. */
+  cluster?: string
+  subCluster?: string
 }
 
 export const SEO_PAGES: SeoPageMeta[] = [
@@ -66,6 +69,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
       { question: 'Can I rent a scooter for a full month in Phuket?', answer: 'Yes — 56 of the 65 automatic scooters currently listed offer a discounted monthly rate, which usually works out cheaper per day than a short daily rental.' },
     ],
     filter: { category: 'automatic' },
+    cluster: 'pricing',
   },
   {
     urlStrategy: 'landing',
@@ -87,6 +91,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
       { question: 'Does monthly scooter rental in Phuket include a helmet and insurance?', answer: 'Yes. Every monthly-rate scooter listed on Koh Ride includes a helmet and insurance, with no separate add-on fee.' },
     ],
     filter: { category: 'automatic', requiresMonthlyRate: true },
+    cluster: 'rental-options',
   },
   {
     urlStrategy: 'guide',
@@ -108,6 +113,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
       { question: 'Can I get an International Driving Permit after I arrive in Phuket?', answer: 'No. An IDP has to be issued by your home country’s motoring authority before you travel — Thailand doesn’t issue them to visitors, so this needs to be sorted out before you land.' },
     ],
     filter: undefined,
+    cluster: 'license-laws',
   },
   {
     urlStrategy: 'landing',
@@ -132,6 +138,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['pcx', 'nmax', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'rental-options',
   },
   {
     urlStrategy: 'guide',
@@ -155,6 +162,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: undefined,
     relevantModelSlugs: [],
     areaSlugs: [],
+    cluster: 'license-laws',
   },
   {
     urlStrategy: 'landing',
@@ -181,6 +189,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: [],
     areaSlugs: [],
+    cluster: 'license-laws',
   },
   {
     urlStrategy: 'landing',
@@ -205,6 +214,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['pcx', 'nmax', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'license-laws',
   },
   {
     urlStrategy: 'landing',
@@ -230,6 +240,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['pcx', 'click', 'nmax'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'license-laws',
   },
   {
     urlStrategy: 'landing',
@@ -254,6 +265,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'license-laws',
   },
   {
     urlStrategy: 'landing',
@@ -279,6 +291,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'license-laws',
   },
   {
     urlStrategy: 'landing',
@@ -303,6 +316,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['click', 'pcx', 'nmax', 'xadv'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'pricing',
   },
   {
     urlStrategy: 'landing',
@@ -327,6 +341,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['adv', 'xadv', 'forza', 'xmax', 'tmax'],
     areaSlugs: ['rawai', 'chalong', 'patong', 'phuket-town'],
+    cluster: 'models',
   },
   {
     urlStrategy: 'landing',
@@ -351,6 +366,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { maxPricePerDay: 200 },
     relevantModelSlugs: ['pcx', 'nmax', 'click', 'lead', 'grand-filano'],
     areaSlugs: ['rawai', 'phuket-town', 'kathu'],
+    cluster: 'pricing',
   },
   {
     urlStrategy: 'guide',
@@ -376,6 +392,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['click', 'pcx', 'nmax', 'adv', 'xadv', 'forza', 'tmax'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'pricing',
   },
   {
     urlStrategy: 'landing',
@@ -399,6 +416,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { maxPricePerDay: 1000, category: 'automatic' },
     relevantModelSlugs: ['pcx', 'nmax', 'click', 'lead', 'adv', 'forza', 'grand-filano'],
     areaSlugs: [],
+    cluster: 'pricing',
   },
   {
     urlStrategy: 'landing',
@@ -424,6 +442,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['xadv', 'adv', 'click', 'pcx', 'grand-filano'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'kata'],
+    cluster: 'pricing',
   },
   {
     urlStrategy: 'guide',
@@ -450,6 +469,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: undefined,
     relevantModelSlugs: ['pcx', 'click', 'nmax'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'rental-options',
   },
   {
     urlStrategy: 'landing',
@@ -474,6 +494,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['xadv', 'pcx', 'click'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'pricing',
   },
   {
     urlStrategy: 'landing',
@@ -498,6 +519,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['pcx', 'xadv', 'adv', 'click', 'nmax'],
     areaSlugs: ['phuket-town', 'chalong', 'rawai', 'patong', 'kathu', 'kata'],
+    cluster: 'rental-options',
   },
   {
     urlStrategy: 'guide',
@@ -523,6 +545,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: undefined,
     relevantModelSlugs: [],
     areaSlugs: [],
+    cluster: 'safety',
   },
   {
     urlStrategy: 'guide',
@@ -549,6 +572,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: undefined,
     relevantModelSlugs: ['click', 'lead', 'grand-filano', 'pcx', 'nmax', 'adv', 'xadv', 'forza', 'xmax', 'tmax', 'cbr-650r'],
     areaSlugs: ['patong', 'kata', 'karon'],
+    cluster: 'models',
   },
   {
     urlStrategy: 'landing',
@@ -573,6 +597,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     filter: { category: 'automatic' },
     relevantModelSlugs: ['pcx', 'click', 'adv', 'xadv', 'nmax', 'grand-filano', 'lead', 'forza', 'tmax'],
     areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'rental-options',
   },
 ]
 

@@ -30,6 +30,9 @@ export interface ComparePageMeta {
   comparisonPoints: ComparePoint[]
   verdict: string
   faq: CompareFaq[]
+  /** Real id from constants/topic-clusters.ts (lib/brain/topic-cluster-classifier.ts) — which topical cluster this page belongs to. Every real comparison belongs to "models" today; kept as a real field (not hardcoded) so that stays true even if a future cluster ever covers comparisons differently. Optional in the type for backward-compat; write-compare-page.ts requires it on every new page. */
+  cluster?: string
+  subCluster?: string
 }
 
 export const COMPARE_PAGES: ComparePageMeta[] = [  {
@@ -54,6 +57,7 @@ export const COMPARE_PAGES: ComparePageMeta[] = [  {
       { question: 'Is the PCX or NMAX cheaper to rent in Phuket?', answer: 'Based on current live listings, PCX rentals run about ฿200–500/day and NMAX rentals run about ฿200–350/day, though pricing varies by shop and rental length — compare live listings below for today’s rates.' },
       { question: 'Which is better on Phuket’s hill roads, like Patong or Kata?', answer: 'Riders generally find the NMAX more stable on hill roads thanks to its slightly larger engine and wheelbase, but the PCX is still a capable, comfortable choice for most of the island’s roads.' },
     ],
+    cluster: 'models',
   },
   {
     slug: 'xadv-vs-tmax',
@@ -78,6 +82,7 @@ export const COMPARE_PAGES: ComparePageMeta[] = [  {
       { question: 'Is the TMAX harder to find than the X-ADV in Phuket?', answer: 'Yes, right now — live listings show the X-ADV available from 6 shops across 4 areas (Chalong, Patong, Phuket Town, Rawai), while the TMAX is currently listed by just one shop in Patong. Confirm availability directly with the shop before planning around a TMAX rental.' },
       { question: 'Does the X-ADV or TMAX use a dual-clutch transmission?', answer: 'The X-ADV does — Honda’s dual-clutch automatic (DCT) with an optional manual-style paddle shift. The TMAX uses a standard fully-automatic (twist-and-go) transmission, with no DCT.' },
     ],
+    cluster: 'models',
   },
 ]
 
