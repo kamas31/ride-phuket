@@ -14,7 +14,7 @@ export interface ModelMeta {
   modelQuery: string
   name: string           // "Honda PCX"
   label: string          // "PCX" — short form for compact UI
-  brand: 'Honda' | 'Yamaha'
+  brand: 'Honda' | 'Yamaha' | 'Harley-Davidson'
   description: string
   longDescription: string
   whyChooseIt: string[]
@@ -268,6 +268,28 @@ export const MODELS: ModelMeta[] = [
       { question: 'How much does it cost to rent a Honda CBR 650R in Phuket?', answer: 'Pricing varies by shop and rental length. Browse the live listing below for current day, week, and month rates from real shops.' },
     ],
     relatedModelSlugs: [],
+  },
+  {
+    slug: 'breakout-117',
+    modelQuery: 'Breakout 117',
+    name: 'Harley-Davidson Breakout 117',
+    label: 'Breakout 117',
+    brand: 'Harley-Davidson',
+    description: 'Rent the Harley-Davidson Breakout 117 in Phuket — a rare factory-custom cruiser available from one Phuket Town shop. Message them directly for pricing.',
+    longDescription: 'The Harley-Davidson Breakout 117 is a factory-custom cruiser built around Harley-Davidson’s Milwaukee-Eight 117 V-twin — a 1923cc engine, by far the largest-displacement machine in Koh Ride’s Phuket fleet. Its low, drag-style stance sets it apart from the automatic scooters most visitors rent, and it’s currently listed by just one Phuket Town shop, so it’s a genuinely rare find on the island.',
+    whyChooseIt: [
+      'Powered by Harley-Davidson’s 1923cc Milwaukee-Eight 117 V-twin — the largest-displacement bike in Koh Ride’s Phuket fleet',
+      'Factory-custom cruiser styling, a genuinely different riding experience from Phuket’s automatic scooter fleet',
+      'A rare find on the island — currently listed by only one Phuket Town shop',
+      'Suited to experienced motorcycle riders looking for something beyond a standard scooter rental',
+    ],
+    faq: [
+      { question: 'Is the Harley-Davidson Breakout 117 automatic or manual?', answer: 'Manual — it’s a full-size cruiser motorcycle with a clutch and gearbox, not a twist-and-go automatic scooter, so it suits experienced motorcycle riders rather than first-time renters.' },
+      { question: 'What license do I need to rent a Breakout 117 in Phuket?', answer: 'A valid motorcycle license covering large-displacement bikes is required. Given its 1923cc engine, this listing is intended for experienced riders — confirm the shop’s specific license and experience requirements before booking.' },
+      { question: 'How much does it cost to rent a Harley-Davidson Breakout 117 in Phuket?', answer: 'Pricing is set by the single shop currently offering this model. Browse the live listing below for current day, week, and month rates, or message the shop directly to confirm.' },
+      { question: 'Is delivery available for the Breakout 117?', answer: 'Yes — the shop offering this listing provides delivery for an additional fee, with helmet and insurance included. Message them directly to arrange pickup or delivery.' },
+    ],
+    relatedModelSlugs: ['cbr-650r'],
   },
 ]
 
