@@ -811,6 +811,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'license-laws',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'where-park-scooter-phuket',
+    targetQuery: 'where park scooter phuket',
+    alternateQueries: [],
+    title: 'Where to Park a Scooter in Phuket',
+    h1: 'Where to Park a Scooter in Phuket',
+    description: 'Where to park a scooter in Phuket: use free lots at 7-Elevens, malls, and beaches, avoid red-and-white no-parking curbs, and lock the steering to deter theft.',
+    longDescription: 'Working out where to park a scooter in Phuket comes down to two things: staying out of an illegal or blocked spot, and not leaving it easy to steal while you’re away from it. Most 7-Elevens, shopping malls, restaurants, and beach entrances around the island have a marked motorbike parking area you can use for free, while curbs painted red-and-white mark a legal no-parking zone that Thai traffic police do enforce. A few simple habits — checking for a marked space, keeping the scooter on level ground instead of sand or grass, and always locking the steering before you walk away — cover almost every parking situation you’ll run into in Phuket.',
+    contentSections: [
+      { heading: 'Where it’s legal to park', body: 'Curbs painted with red-and-white stripes are Thailand’s standard no-parking marking, and stopping there — or blocking a sidewalk, driveway, or shop entrance — can get a scooter ticketed or towed by local police. The safer, and usually free, option is a marked motorbike bay: almost every 7-Eleven, shopping mall, and restaurant in Phuket has one out front, and busier streets in Patong, Kata, and Phuket Town often have painted motorbike-only sections separate from car parking.' },
+      { heading: 'Parking safely to prevent theft', body: 'Scooter theft is an occasional but real risk in busier tourist areas, so always turn the handlebars and engage the built-in steering lock before you walk away — it’s the single biggest deterrent, since it stops the bike being ridden off rather than just wheeled. If your rental shop provided a disc lock or chain, use it too, especially overnight. Avoid leaving a helmet, phone, or bag visible on the seat or in the storage compartment, and where possible, choose a well-lit, busier spot over an empty side street.' },
+      { heading: 'Parking at the beach', body: 'At popular beaches like Patong, Kata, and Karon, motorbike parking near the sand is often informally managed by a local attendant who may ask for a small fee to watch over bikes — this is a normal, low-cost local practice rather than a scam, and it’s usually worth it for the peace of mind. Away from the main beach access points, the same red-and-white curb rule still applies, so avoid blocking pedestrian paths down to the sand.' },
+    ],
+    highlights: ['Most 7-Elevens, malls, and restaurants across Phuket provide free, marked motorbike parking', 'Curbs painted red-and-white are a legal no-parking zone enforced by Thai traffic police', 'Locking the steering before you walk away is the single biggest deterrent against scooter theft', 'Busy beaches like Patong and Kata often have an informal, low-cost attendant-managed parking area', 'Parking on soft sand or grass risks tipping the scooter — always look for level, hard ground'],
+    faq: [
+      { question: 'Is it legal to park a scooter anywhere in Phuket?', answer: 'No — curbs painted red-and-white mark a legal no-parking zone in Thailand, and blocking a sidewalk, driveway, or business entrance can get a scooter ticketed or towed. Look for a marked motorbike bay instead, most commonly outside 7-Elevens, malls, and restaurants.' },
+      { question: 'Where can I park for free near Patong or Kata beach?', answer: 'Most 7-Elevens, malls, and restaurants close to the main beaches offer free, marked motorbike parking. Right at the beach access points, parking is often informally managed by a local attendant for a small fee — a normal local practice, not a scam.' },
+      { question: 'How do I stop my scooter from being stolen while it’s parked?', answer: 'Always engage the built-in steering lock before walking away — it stops the bike being ridden off and is the biggest deterrent against opportunistic theft. Use an additional disc lock or chain if your rental shop provided one, and avoid leaving a helmet or valuables visible on the seat.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: [],
+    cluster: 'safety',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
