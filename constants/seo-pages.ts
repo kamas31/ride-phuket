@@ -863,6 +863,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'phuket-guides',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'dangerous-roads-phuket',
+    targetQuery: 'dangerous roads phuket',
+    alternateQueries: [],
+    title: 'Dangerous Roads in Phuket: A Rider’s Safety Guide',
+    h1: 'Phuket’s Most Dangerous Roads — And How to Ride Them Safely',
+    description: 'Phuket’s most dangerous roads for scooter riders — steep hairpin hills, blind corners, and accident-prone junctions to know before you ride.',
+    longDescription: 'Phuket has some genuinely dangerous roads for scooter riders — steep hairpin hill climbs, blind coastal corners, and busy junctions where accidents are common. Before you rent, it helps to know which routes demand extra caution and how to ride them safely.',
+    contentSections: [
+      { heading: 'Phuket’s most notorious dangerous roads', body: 'Patong Hill — the steep, winding route connecting Patong to Kathu and Phuket Town — is the island’s best-known hazard, with tight hairpin turns and a fast downhill grade that catches out inexperienced riders. The hill road linking Kata, Karon, and Nai Harn along the southern coast is similarly steep and twisty, with sharp blind corners above the cliffs. Chalong Circle, the large roundabout near Chalong, is one of the most accident-prone junctions on the island simply due to the volume of mixed traffic merging at once.' },
+      { heading: 'Why these roads are risky on a scooter', body: 'Steep gradients and tight hairpin corners mean less margin for error, especially for riders unused to driving on the left. Traffic on these roads mixes scooters with songthaews, tour vans, and trucks, all sharing the same tight lanes. During Phuket’s rainy season (roughly May to October), wet asphalt and oil residue make hill roads noticeably more slippery, and visibility on blind corners drops further after dark.' },
+      { heading: 'How to ride Phuket’s dangerous roads safely', body: 'Choose an automatic scooter with good tires and responsive brakes — there’s no clutch to stall on a steep climb, which matters most on hills like Patong Hill. Use both brakes gradually on long downhill sections rather than relying on one, slow down well before blind corners, and avoid unfamiliar hill roads at night or in heavy rain until you’re confident. A proper helmet and closed shoes are essential on every one of these routes, not just the highway.' },
+    ],
+    highlights: ['Real-time inventory of automatic scooters, easier to control on Phuket’s steepest hill roads', 'Contact shops directly — no added booking fees', 'Compare scooters by price, category, and location before you commit', 'Practical guidance on Phuket’s known accident hotspots before you ride'],
+    faq: [
+      { question: 'What are the most dangerous roads in Phuket for scooters?', answer: 'Patong Hill (connecting Patong to Kathu/Phuket Town), the hill road linking Kata, Karon, and Nai Harn, and Chalong Circle are the routes most commonly flagged for steep grades, hairpin turns, or heavy traffic and accidents.' },
+      { question: 'Is it safe for a beginner to ride a scooter on Phuket’s hill roads?', answer: 'It takes extra care. Beginners should choose an automatic scooter, avoid these roads during heavy rain or at night, go slowly on downhill hairpin sections, and consider a taxi or Grab for the steepest stretches until they’re more confident.' },
+      { question: 'Does the rainy season make Phuket’s roads more dangerous?', answer: 'Yes. From roughly May to October, wet roads and oil residue make hill roads like Patong Hill noticeably more slippery — reduce speed, brake earlier, and consider avoiding steep hill roads altogether during heavy downpours.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: [],
+    areaSlugs: ['patong', 'kata', 'karon', 'chalong'],
+    cluster: 'safety',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
