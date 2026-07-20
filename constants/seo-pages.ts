@@ -677,6 +677,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'pricing',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'delivery-scooter-phuket',
+    targetQuery: 'delivery scooter phuket',
+    alternateQueries: [],
+    title: 'Scooter Delivery in Phuket | 29 Real Listings',
+    h1: 'Scooter Delivery in Phuket',
+    description: 'Scooter delivery in Phuket: 29 real automatic scooters delivered to your hotel or villa, from 9 verified shops, helmet and insurance included.',
+    longDescription: 'Need your scooter delivered instead of picking it up in person? Koh Ride currently lists 29 real automatic scooters from 9 verified shops across Phuket that offer delivery straight to your hotel or villa, 14 of them at no extra delivery fee. Every listing includes a helmet and insurance as standard, with prices from ฿200/day, and you message the shop directly to arrange your delivery.',
+    contentSections: [
+      { heading: 'How scooter delivery works on Koh Ride', body: 'Each shop sets its own delivery terms. 14 of the 29 delivery-enabled automatic scooters on Koh Ride currently list free delivery, while the rest charge a delivery fee, typically ฿150 to ฿1,000 depending on distance from the shop. Message the shop directly through Koh Ride to confirm they can deliver to your hotel, villa, or the airport before you book.' },
+      { heading: 'Where scooter delivery is available in Phuket', body: 'Delivery-enabled scooters on Koh Ride are concentrated in Rawai (15 listings) and Phuket Town (10), with further options in Patong (2) and Kata (2). If you’re staying outside these areas, contact the shop directly — some will still deliver further afield for an additional fee.' },
+    ],
+    highlights: ['29 real automatic scooters currently offer delivery across Phuket', '9 verified shops deliver scooters directly to your hotel or villa', '14 of the 29 delivery-enabled scooters have no extra delivery fee', 'Delivery available in Rawai, Phuket Town, Patong, and Kata', 'Helmet and insurance included on every delivery scooter listing'],
+    faq: [
+      { question: 'How much does scooter delivery cost in Phuket?', answer: 'It depends on the shop and your location — 14 of the 29 delivery-enabled automatic scooters on Koh Ride currently offer free delivery, while others charge a delivery fee between ฿150 and ฿1,000. Message the shop directly to confirm the cost for your address.' },
+      { question: 'Which areas of Phuket offer scooter delivery?', answer: 'Delivery-enabled scooters on Koh Ride are currently listed in Rawai (15), Phuket Town (10), Patong (2), and Kata (2). Shops may also deliver outside these areas for an extra fee — contact them directly to check.' },
+      { question: 'Can I get a scooter delivered to my hotel or the airport in Phuket?', answer: 'Yes — many shops on Koh Ride deliver directly to hotels and villas, and some will deliver to Phuket International Airport for an additional fee. Confirm your exact delivery address with the shop when you book.' },
+      { question: 'Does every scooter on Koh Ride offer delivery?', answer: 'No — delivery is set per listing by each shop. Look for scooters marked with delivery available below, or message the shop directly, since not every automatic scooter in Phuket offers this option.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: ['pcx', 'nmax', 'click', 'adv', 'xadv', 'xmax', 'forza', 'lead', 'grand-filano', 'tmax'],
+    areaSlugs: ['rawai', 'phuket-town', 'patong', 'kata'],
+    cluster: 'rental-options',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
