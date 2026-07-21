@@ -915,6 +915,33 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'phuket-guides',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'how-inspect-rental-scooter-before-riding',
+    targetQuery: 'how inspect rental scooter before riding',
+    alternateQueries: [],
+    title: 'How to Inspect a Rental Scooter Before Riding',
+    h1: 'How to Inspect a Rental Scooter Before Riding',
+    description: 'How to inspect a rental scooter before riding: check tires, brakes, and lights, and photograph damage first — every Koh Ride listing includes insurance.',
+    longDescription: 'Before you ride off on a rental scooter in Phuket, a quick inspection takes less than five minutes and can save you from a breakdown on the road or a damage dispute when you return it. Check the tires, brakes, lights, mirrors, and horn yourself, and photograph any existing scratches or dents with the shop before riding away. Every one of Koh Ride’s 74 available listings already includes a helmet and insurance as standard from one of 18 verified shops, and real per-scooter features like ABS brakes, traction control, and LED lights are shown on each listing — so you know what to expect before you inspect the actual unit in person at pickup.',
+    contentSections: [
+      { heading: 'The pre-ride inspection checklist', body: 'Before you ride off, walk around the scooter and check the essentials yourself: squeeze the front brake lever and press the rear brake pedal to confirm both work, check that both tires have visible tread and aren’t soft, and test the headlight, taillight, brake light, and turn signals. Sit on the scooter, check that the mirrors are adjusted and unbroken, test the horn, and check the fuel gauge so you’re not hunting for a station five minutes into your ride. None of this takes more than a couple of minutes, and it catches the mechanical issues that cause most rental scooter breakdowns.' },
+      { heading: 'Document existing damage before you leave', body: 'Walk around the scooter with the shop staff and photograph every existing scratch, dent, or scuff on your phone before you ride away — timestamped photos are the clearest record you can have if a shop later tries to charge you for damage that was already there. This single step is the biggest protection against the most common dispute at drop-off in Phuket, and it takes less time than filling out the rental paperwork.' },
+      { heading: 'What Koh Ride shows you before you even arrive', body: 'Every one of Koh Ride’s 74 currently available listings already includes a helmet and insurance as standard, from one of 18 verified shops — so two of the biggest inspection items are already covered before you even show up. Each listing also shows its real features, such as ABS brakes, traction control, or LED lights, so you know what safety equipment to expect. None of that replaces physically inspecting the specific unit yourself at pickup, but it means you’re starting from a verified baseline instead of an anonymous roadside stall.' },
+    ],
+    highlights: ['Check both brakes (front lever and rear pedal), tire tread, and lights before you ride off — a two-minute check most riders skip', 'Photograph every existing scratch, dent, or scuff with the shop before you leave — the clearest protection against a damage dispute at drop-off', 'Every one of Koh Ride’s 74 available listings includes a helmet and insurance as standard, from one of 18 verified shops', 'Real per-scooter features like ABS brakes, traction control, and LED lights are listed on each Koh Ride listing, so you know what safety equipment to expect before you arrive', 'Test the horn, mirrors, and turn signals, and check the fuel level, before you ride away from the shop'],
+    faq: [
+      { question: 'What should I check before riding a rental scooter in Phuket?', answer: 'Check both brakes (front lever and rear pedal), tire tread and pressure, the headlight and taillight, the horn, mirrors, and fuel level before you ride off. It takes about two minutes and can save you a breakdown on the road.' },
+      { question: 'Why should I photograph a rental scooter before riding it?', answer: 'Photographing every existing scratch, dent, or scuff with the shop before you leave creates a record that protects you if a shop later tries to blame you for pre-existing damage — a common dispute at drop-off in Phuket.' },
+      { question: 'Does Koh Ride include insurance and a helmet on rental scooters?', answer: 'Yes — all 74 of Koh Ride’s currently available listings include a helmet and insurance as standard, from one of 18 verified shops, so those two items are already covered before you even start your in-person inspection.' },
+      { question: 'How do I know what safety features a rental scooter has before I arrive?', answer: 'Each Koh Ride listing shows its real features, such as ABS brakes, traction control, or LED lights, before you contact the shop — though you should still confirm the specific unit’s condition and equipment yourself at pickup.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: [],
+    cluster: 'safety',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
