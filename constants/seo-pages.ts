@@ -1052,6 +1052,33 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'how-lock-scooter-safely-phuket',
+    targetQuery: 'how lock scooter safely phuket',
+    alternateQueries: [],
+    title: 'How to Lock Your Scooter Safely in Phuket',
+    h1: 'How to Lock Your Scooter Safely in Phuket',
+    description: 'How to lock your scooter safely in Phuket: engage the built-in steering lock every time, add a disc lock or chain if you have one, and avoid high-theft spots.',
+    longDescription: 'Locking a rental scooter safely in Phuket comes down to two simple habits: always engage the built-in steering lock, and add a second lock when you have one for extra peace of mind. A few seconds spent locking up properly, and choosing a well-lit spot to leave it, is the biggest difference between a scooter that’s still there when you get back and one that isn’t.',
+    contentSections: [
+      { heading: 'Always engage the steering lock', body: 'Every rental scooter in Phuket has a built-in steering lock: turn the handlebars fully to one side, then turn the key to the lock position until you hear it click into place. This is the single most effective step you can take. It stops the scooter being ridden away, not just wheeled off, and takes only a few seconds every time you park, even for a quick stop.' },
+      { heading: 'Add a second lock when you can', body: 'If your rental shop provided a disc lock or chain, use it alongside the steering lock, especially for longer stops or overnight parking. Looping a chain through the wheel and around a fixed post or railing makes the scooter far harder to move at all. Two independent locks working together deter much more opportunistic theft than the steering lock alone.' },
+      { heading: 'Choose where you lock it up carefully', body: 'A locked scooter left on a dark, empty side street is still an easier target than one parked in a busy, well-lit spot outside a 7-Eleven, mall, or restaurant. Keep your helmet, phone, and any bags with you, or out of sight in the storage compartment, rather than left visible on the seat. A bike that looks empty of valuables draws far less attention.' },
+    ],
+    highlights: ['Engaging the built-in steering lock is the single biggest theft deterrent for a parked scooter', 'Turn the handlebars fully before turning the key, and listen for the lock to click into place', 'A disc lock or chain adds a second layer of security for longer stops or overnight parking', 'Locking up in a busy, well-lit spot deters theft more than an empty side street', 'Keep helmets, phones, and bags out of sight rather than visible on the seat'],
+    faq: [
+      { question: 'How do I lock a rental scooter safely in Phuket?', answer: 'Turn the handlebars fully to one side and turn the key to the lock position until it clicks — this engages the built-in steering lock, which stops the scooter being ridden away and is the single most effective step you can take every time you park.' },
+      { question: 'Is the steering lock enough to stop a scooter being stolen?', answer: 'It’s the biggest deterrent against opportunistic theft, but it isn’t foolproof on its own. For extra security on longer stops or overnight, add a disc lock or chain if your rental shop provided one, and choose a busy, well-lit parking spot over an empty side street.' },
+      { question: 'Where should I lock my scooter to keep it safe?', answer: 'Busy, well-lit spots, outside 7-Elevens, malls, restaurants, or hotels, are safer than quiet side streets, since a visible, populated area discourages opportunistic theft. Wherever you park, always engage the steering lock before walking away.' },
+      { question: 'Should I leave my helmet with the scooter when it’s locked?', answer: 'No — keep your helmet, phone, and any bags with you or stored out of sight in the under-seat compartment rather than visible on the seat. A scooter that looks empty of valuables draws far less attention than one with gear left in plain view.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: [],
+    cluster: 'safety',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
