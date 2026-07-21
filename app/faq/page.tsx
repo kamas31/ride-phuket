@@ -4,7 +4,7 @@ import { ChevronRight, MapPin } from 'lucide-react'
 import { SITE_URL, SITE_NAME } from '@/constants'
 import { AREAS } from '@/constants/areas'
 
-const FAQ_TITLE = 'Scooter Rental Phuket FAQ — Licenses, Prices & Safety'
+const FAQ_TITLE = 'Scooter Rental Phuket FAQ — License & Safety'
 const FAQ_DESC  = 'Answers to the most common questions about renting a scooter in Phuket. Driving license requirements, deposits, prices, safety tips, and insurance explained.'
 
 export const metadata: Metadata = {
