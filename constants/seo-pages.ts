@@ -915,6 +915,33 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'phuket-guides',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'what-documents-should-carry-while-riding-thailand',
+    targetQuery: 'what documents should carry while riding thailand',
+    alternateQueries: [],
+    title: 'What Documents Should You Carry While Riding in Thailand?',
+    h1: 'What Documents Should You Carry While Riding in Thailand?',
+    description: 'Here’s exactly what documents you should carry while riding a scooter in Thailand: your license or IDP, passport copy, and proof of rental.',
+    longDescription: 'Before you get on a scooter in Thailand, here’s what documents you should carry while riding: a valid motorcycle license or International Driving Permit with the Category A endorsement, your passport (a photocopy or photo is safer than the original), and proof of your rental agreement from the shop. Having the right paperwork on you matters just as much while riding as it does at pickup — it’s what actually gets checked at a police checkpoint or after an accident.',
+    contentSections: [
+      { heading: 'The documents you need on you while riding', body: 'Thai law requires a valid motorcycle license to ride a scooter — either a Thai license, or a foreign motorcycle license paired with an International Driving Permit (IDP) carrying the Category A endorsement, since a car-only IDP does not count. Riders holding a national driving license from an ASEAN country, including Malaysia, Singapore, and the Philippines, can ride without an IDP. Bring whichever of these applies to you every time you ride, not just when you pick up the scooter.' },
+      { heading: 'Carry a passport copy, not the original', body: 'You should have proof of your passport with you while riding, but the original is safer left behind — a shop asking to hold your actual passport as a security deposit is technically illegal under Thai law, and carrying it loose while riding risks losing it in an accident. Keep the original somewhere secure, like your hotel safe, and carry a photocopy or a clear photo on your phone instead.' },
+      { heading: 'Proof of your rental agreement helps too', body: 'It isn’t a legal requirement, but keeping your rental agreement or receipt from the shop on you while riding is good practice — it confirms you’re a legitimate renter if you’re stopped at a checkpoint, and it’s useful if you ever need to make an insurance claim after an accident.' },
+    ],
+    highlights: ['A valid motorcycle license or an International Driving Permit (IDP) with the Category A endorsement is the core document you need while riding a scooter in Thailand', 'Riders from ASEAN countries, including Malaysia, Singapore, and the Philippines, can ride on their national license alone — no IDP required', 'Carry a photocopy or photo of your passport while riding, not the original — handing over your actual passport as a deposit is technically illegal under Thai law', 'Keep proof of your rental agreement or receipt on you too, since it helps at a checkpoint or after an accident', '74 real, available automatic scooters are listed right now from 18 verified shops across Phuket, from ฿150/day, with insurance already included'],
+    faq: [
+      { question: 'What documents should I carry while riding a scooter in Thailand?', answer: 'Carry your motorcycle license or International Driving Permit with the Category A endorsement, a photocopy or photo of your passport, and proof of your rental agreement from the shop. Riders from ASEAN countries can ride on their national license alone, no IDP needed.' },
+      { question: 'Should I carry my actual passport while riding, or just a copy?', answer: 'A copy or photo is the safer choice. Handing over your original passport as a security deposit is technically illegal under Thai law, and carrying the original while riding risks losing it if you’re in an accident — keep it somewhere secure and bring a copy instead.' },
+      { question: 'What happens if I’m stopped without the right documents while riding?', answer: 'Riding without a valid motorcycle license or IDP is an offense that can mean an on-the-spot fine at a checkpoint, and it can void Thailand’s compulsory insurance and your personal travel insurance if you’re in an accident. If you are in an accident, call the tourist police at 1155 or the regular police at 191 before moving any vehicles.' },
+      { question: 'Do I need to carry proof of my scooter rental while riding?', answer: 'It’s not a legal requirement, but it’s good practice — a rental agreement or receipt from the shop helps confirm you’re a legitimate renter if you’re stopped at a checkpoint, and it’s useful for an insurance claim after an accident.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: [],
+    cluster: 'license-laws',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
