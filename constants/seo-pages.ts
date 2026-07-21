@@ -996,6 +996,33 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'license-laws',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'how-avoid-getting-scooter-stolen-thailand',
+    targetQuery: 'how avoid getting scooter stolen thailand',
+    alternateQueries: [],
+    title: 'How to Avoid Getting Your Scooter Stolen in Thailand',
+    h1: 'How to Avoid Getting Your Scooter Stolen in Thailand',
+    description: 'How to avoid getting your scooter stolen in Thailand: real anti-theft habits, what insurance and your deposit actually cover, and what to do if it happens.',
+    longDescription: 'Wondering how to avoid getting your scooter stolen in Thailand? Theft is an occasional but real risk in busier tourist areas, not an epidemic — and a handful of simple habits, done every single time you park, prevent almost all of it. Just as important: Thailand’s compulsory rental insurance does not cover a stolen scooter, and your security deposit exists partly to cover shops against exactly this risk, so knowing what you’re actually protected against matters as much as the habits themselves.',
+    contentSections: [
+      { heading: 'Habits that actually prevent scooter theft', body: 'Always turn the handlebars and engage the built-in steering lock before you walk away, every time, even for a quick stop — it’s the single biggest deterrent, since it stops the bike being ridden off rather than just wheeled away. If your rental shop provided a disc lock or chain, use it too, especially overnight or anywhere the scooter is out of sight for hours. Avoid leaving a helmet, phone, or bag visible on the seat or in the storage compartment, never leave the key in the ignition even briefly, and where you have a choice, park in a well-lit, busier spot rather than an empty side street.' },
+      { heading: 'What your insurance and deposit actually cover', body: 'Thailand’s compulsory third-party insurance (Por Ror Bor), included as standard on every scooter listed on Koh Ride, covers injury to other people in an accident — it does not cover a stolen scooter. The security deposit a shop asks for isn’t a Koh Ride policy; it’s how individual shops protect themselves against damage, theft, and unpaid fines, which means you can be liable for some or all of that deposit, or even the scooter’s replacement value, if it’s stolen while it’s rented to you. Ask the shop directly what happens if the scooter is stolen and what their deposit actually covers before you book, and never hand over your original passport as security — a cash deposit is the safer, legal alternative under Thai law.' },
+      { heading: 'If your scooter is stolen anyway', body: 'Contact the rental shop immediately, then report the theft to Thailand’s tourist police at 1155 (or the regular police at 191) to get an official police report — most shops and any travel insurance claim will require one. Acting fast and documenting everything, rather than waiting, is what protects you if there’s a dispute later over your deposit or who’s liable for the scooter.' },
+    ],
+    highlights: ['Engaging the built-in steering lock every time you park is the single biggest deterrent against opportunistic scooter theft in Thailand', 'Thailand’s compulsory third-party insurance does not cover a stolen scooter — ask the shop what your deposit actually protects against before you book', 'A disc lock or chain, if your shop provides one, adds a real second barrier on top of the steering lock, especially overnight', 'Choosing a well-lit, busier parking spot over an empty side street measurably lowers the risk of theft', 'If a scooter is stolen, report it to the shop and to Thailand’s tourist police at 1155 (or 191) immediately — a police report matters for your deposit and any insurance claim'],
+    faq: [
+      { question: 'How can I avoid getting my scooter stolen in Thailand?', answer: 'Engage the built-in steering lock every time you park, even briefly, and use a disc lock or chain if your shop provides one. Never leave the key in the ignition, keep valuables out of sight, and choose a well-lit, busier spot over an empty side street whenever you have the choice.' },
+      { question: 'Does scooter rental insurance in Thailand cover theft?', answer: 'No. Thailand’s compulsory third-party insurance (Por Ror Bor), included as standard on every scooter listed on Koh Ride, covers injury to other people in an accident — it does not cover a stolen scooter, damage to the bike, or your own injuries. Ask the shop directly what happens if a scooter is stolen before you book.' },
+      { question: 'What happens if my rented scooter gets stolen in Thailand?', answer: 'Contact the shop immediately and report it to Thailand’s tourist police at 1155 or the regular police at 191 to get an official police report. Since a shop’s security deposit exists partly to cover it against theft, you may be liable for some or all of it — acting quickly and documenting everything protects you if that’s disputed.' },
+      { question: 'Is scooter theft common for tourists in Phuket?', answer: 'It’s an occasional but real risk in busier tourist areas, not something that happens to most renters — the habits that prevent it are simple: always engage the steering lock, add a disc lock or chain when one’s provided, and avoid leaving a scooter unlocked in an empty, poorly lit spot.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: [],
+    cluster: 'safety',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
