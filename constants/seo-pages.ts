@@ -915,6 +915,33 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'phuket-guides',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'landing',
+    slug: 'during-rainy-riding-season-scooter-phuket',
+    targetQuery: 'during rainy riding season scooter phuket',
+    alternateQueries: [],
+    title: 'Riding a Scooter During Rainy Season in Phuket',
+    h1: 'Riding a Scooter in Phuket During Rainy Season',
+    description: 'Riding a scooter during Phuket’s rainy season: what changes on wet roads, 66 real automatics from ฿150/day, and safety tips from 16 verified shops.',
+    longDescription: 'Phuket’s rainy season runs roughly May to October, and riding a scooter here doesn’t stop just because it rains — locals ride through it every day. What changes during rainy season riding is how you should ride: slower, with more following distance, and ideally on an automatic scooter that’s easier to control if the road turns slick. Koh Ride lists 66 real, available automatic scooters from 16 verified shops across Phuket, every one with helmet and insurance included as standard, starting from ฿150/day.',
+    contentSections: [
+      { heading: 'When is Phuket’s rainy season', body: 'Phuket’s rainy season runs roughly May to October, with the heaviest, most consistent rain typically falling between June and September. Downpours are often short and intense rather than constant, so a clear morning can still turn into a sudden afternoon storm — worth checking a forecast before setting off on a longer ride.' },
+      { heading: 'How riding changes when the roads are wet', body: 'Wet asphalt in Phuket loses grip fastest at the start of rain, before oil and dust wash off the surface, so the first few minutes of a downpour are often the most slippery. Painted lane markings, metal drain covers, and pedestrian crossings all get noticeably more slippery when wet — slow down earlier, brake more gradually, and leave extra following distance behind trucks and songthaews.' },
+      { heading: 'Why an automatic scooter is the safer choice in the rain', body: 'An automatic scooter is easier to control on wet roads than a manual — there’s no clutch to manage while braking or pulling away on slick asphalt, which matters most in sudden rain. Koh Ride’s 66 available automatic scooters from 16 verified shops all include a helmet and insurance as standard, with prices from ฿150/day.' },
+      { heading: 'If you get caught in a sudden downpour', body: 'Tropical rain in Phuket often passes within 20–30 minutes, so pulling over under a petrol station canopy, 7-Eleven awning, or roadside shelter until it eases is usually safer than pushing through a heavy downpour. Keep your phone and documents in a waterproof bag or your scooter’s underseat storage, and dry the seat before riding off again.' },
+    ],
+    highlights: ['66 real automatic scooters available now from ฿150/day across 16 verified shops — no manual clutch to manage on slick, rainy-season roads', 'Helmet and insurance included as standard on every listing, with 29 of the 66 automatics offering delivery straight to your hotel', 'Real inventory across Rawai, Phuket Town, Chalong, Patong, Kathu, and Kata — start close to where you’re staying, whatever the weather', 'Practical, Phuket-specific guidance on riding safely once the rainy season (roughly May–October) sets in'],
+    faq: [
+      { question: 'Is it safe to ride a scooter in Phuket during rainy season?', answer: 'Yes, with more care than in the dry season — wet asphalt is most slippery in the first few minutes of rain, so slow down, brake earlier, and leave extra following distance. An automatic scooter is easier to control on slick roads since there’s no clutch to manage while braking.' },
+      { question: 'When is Phuket’s rainy season?', answer: 'Phuket’s rainy season runs roughly May to October, with the heaviest rain typically falling between June and September. Downpours are usually short, intense tropical showers rather than constant rain, so it’s worth checking a forecast before a longer ride.' },
+      { question: 'Should I rent an automatic or manual scooter for rainy season riding in Phuket?', answer: 'An automatic is the easier, safer choice for rainy season riding — there’s no clutch to manage while braking or pulling away on wet asphalt. Koh Ride currently lists 66 real automatic scooters from 16 verified shops, starting from ฿150/day.' },
+    ],
+    filter: { category: 'automatic' },
+    relevantModelSlugs: [],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'safety',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
