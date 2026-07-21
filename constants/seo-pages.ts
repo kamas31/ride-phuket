@@ -1023,6 +1023,35 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'how-dangerous-wet-roads-phuket',
+    targetQuery: 'how dangerous wet roads phuket',
+    alternateQueries: [],
+    title: 'How Dangerous Are Wet Roads in Phuket?',
+    h1: 'How Dangerous Are Phuket’s Wet Roads, Really?',
+    description: 'Wet roads in Phuket are genuinely more dangerous for scooter riders: slicker asphalt, longer stopping distances, less grip. Here’s how dangerous, and why.',
+    longDescription: 'How dangerous are wet roads in Phuket? Genuinely more dangerous than dry ones. Rain turns Phuket’s asphalt slick, especially in the first few minutes of a downpour when oil and rubber residue haven’t washed off yet, and it takes a scooter noticeably longer to stop or hold a line through a corner. Add standing water, painted lane markings, and metal drain covers, and wet roads become one of the biggest everyday hazards for scooter riders here for much of the year.',
+    contentSections: [
+      { heading: 'Why wet roads are especially dangerous in Phuket', body: 'Phuket’s rainy season runs roughly May to October, with sudden, heavy tropical downpours rather than steady drizzle. That pattern is what makes wet roads here riskier than a typical rainy commute elsewhere: a dry, oil-and-dust-coated road can turn into one of the most slippery surfaces you’ll ride on within the first few minutes of a downpour, before the rain has had time to wash that residue away. Poor drainage on some stretches also means potholes and dips fill with standing water that hides the road surface underneath.' },
+      { heading: 'How wet roads change the way a scooter handles', body: 'On a wet road, a scooter’s tires grip less, so braking distances stretch and it takes less to lose the back wheel through a corner than riders expect. Standing water can also cause a front tire to briefly lose contact with the road at speed. Painted lane markings, metal drain covers, and pedestrian crossings all get noticeably more slippery when wet than the surrounding asphalt. Phuket’s hill roads, like the route over Patong Hill and the Kata-Karon-Nai Harn coast road, are already demanding when dry, so the reduced grip of a wet surface makes them more dangerous still.' },
+      { heading: 'How to ride safely when Phuket’s roads are wet', body: 'Slow down as soon as the road turns wet, and give yourself extra following distance behind cars, songthaews, and trucks. Brake earlier and more gradually rather than grabbing a lever hard, and be especially cautious over painted lines, manhole covers, and standing water. If a downpour is heavy, pulling over under a petrol station canopy or roadside shelter until it eases is usually safer than pushing through it, since Phuket’s tropical showers are often intense but short-lived. An automatic scooter with good tires is easier to control on wet asphalt than a manual, since there’s no clutch to manage while braking or pulling away.' },
+      { heading: 'Scooter features that help most on wet roads', body: 'ABS brakes stop a wheel from locking under hard braking, which is exactly the failure mode that catches riders out on wet asphalt, and 49 of the 74 scooters currently available on Koh Ride (about two-thirds) include it. Traction control, which helps the rear wheel keep grip when power is applied on a slippery surface, is available on 18 of those 74 scooters. Every scooter listed also includes a helmet and Thailand’s compulsory insurance as standard, whatever the weather, so filtering for ABS on /explore is worth doing before you ride if rain is in the forecast.' },
+    ],
+    highlights: ['Wet roads measurably increase stopping distance and reduce cornering grip for any scooter, dry or wet tires alike', 'The first few minutes of rain are often the most dangerous, before built-up oil and rubber residue washes off the asphalt', '49 of Koh Ride’s 74 available scooters (about two-thirds) include ABS brakes, which shortens stopping distances on wet roads', 'Standing water, painted lane markings, and metal drain covers are common hidden slip hazards once roads are wet', 'Phuket’s hill roads, already demanding when dry, become more dangerous still when wet, so slow down further on routes like Patong Hill', 'Every scooter listed on Koh Ride includes a helmet and insurance as standard, whatever the weather'],
+    faq: [
+      { question: 'How dangerous are wet roads in Phuket for scooter riders?', answer: 'Genuinely more dangerous than dry roads. Braking distances increase, cornering grip drops, and the first few minutes of rain are often the most hazardous because oil and rubber residue on the asphalt hasn’t washed away yet. Slow down and increase your following distance the moment the road turns wet.' },
+      { question: 'Is Phuket’s rainy season the only time wet roads are a risk?', answer: 'No. Phuket’s rainy season runs roughly May to October and brings the most frequent downpours, but sudden tropical showers can happen outside those months too. Treat any visibly wet road with the same caution, not just during the official rainy season.' },
+      { question: 'Are Phuket’s hill roads more dangerous when wet?', answer: 'Yes. Routes like Patong Hill and the Kata-Karon-Nai Harn coast road are already steep and winding when dry, and reduced grip on a wet surface makes them more dangerous still, so reduce speed further on these roads specifically once it starts raining.' },
+      { question: 'Which scooter features help most on Phuket’s wet roads?', answer: 'ABS brakes and traction control both help directly: ABS shortens braking distance and stops the wheel from locking on slick asphalt, while traction control helps the rear wheel keep grip when accelerating on a wet surface. 49 of Koh Ride’s 74 available scooters include ABS and 18 include traction control, both filterable on /explore.' },
+      { question: 'Does riding in the rain change what’s legally required on a scooter in Phuket?', answer: 'No. A helmet is still legally required for rider and passenger, and every scooter listed on Koh Ride includes a helmet and Thailand’s compulsory third-party insurance as standard regardless of weather. Riding in the rain doesn’t relax that requirement, it just raises the stakes if you skip it.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: ['patong', 'kata', 'karon'],
+    cluster: 'safety',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
