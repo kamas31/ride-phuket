@@ -37,7 +37,7 @@ export const TOPIC_CLUSTERS: TopicClusterMeta[] = [
     description: 'Cost, price comparisons, deposits, and insurance for scooter rental in Phuket.',
     matchRule: {
       kind: 'keywords',
-      keywords: ['price', 'prices', 'pricing', 'cost', 'costs', 'cheap', 'cheapest', 'expensive', 'average', 'budget', 'deposit', 'insurance', 'best'],
+      keywords: ['price', 'prices', 'pricing', 'cost', 'costs', 'cheap', 'cheapest', 'expensive', 'average', 'budget', 'deposit', 'insurance'],
     },
   },
   {
