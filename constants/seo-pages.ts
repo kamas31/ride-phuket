@@ -1136,6 +1136,34 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'best-time-day-ride-scooter-phuket',
+    targetQuery: 'best time day ride scooter phuket',
+    alternateQueries: [],
+    title: 'Best Time of Day to Ride a Scooter in Phuket',
+    h1: 'What’s the Best Time of Day to Ride a Scooter in Phuket?',
+    description: 'The best time of day to ride a scooter in Phuket is early morning — cooler, quieter roads, with less risk from midday heat, rain, or riding after dark.',
+    longDescription: 'Timing matters almost as much as the scooter itself when you’re riding in Phuket. The best time of day to ride is generally early morning: temperatures are cooler, roads are quieter before the day’s traffic builds, and visibility is at its clearest. Midday brings the strongest sun and heat fatigue, afternoons during rainy season (roughly May to October) bring Phuket’s sudden tropical downpours, and after dark many roads outside the main tourist strips are poorly lit — each shifts the real risk of a ride, not just the comfort of it.',
+    contentSections: [
+      { heading: 'Early morning: the best time of day to ride', body: 'Riding in the early morning — roughly the couple of hours after sunrise — is generally the safest and most comfortable time to ride a scooter in Phuket. Temperatures are at their coolest before the tropical sun builds through the day, roads are quieter before tour buses, songthaews, and the day’s traffic pick up, and visibility is clear and even. For longer rides, hill routes, or anyone still building confidence on Phuket’s roads, an early start is the easiest way to stack the odds in your favor.' },
+      { heading: 'Why midday heat makes riding harder', body: 'Phuket sits close to the equator, and the sun is strongest roughly between 11am and 3pm — riding through the middle of the day on an exposed coastal or hill road means direct heat, glare, and faster dehydration, especially on longer routes with fewer shade stops. Heat fatigue dulls concentration and reaction time just as much as it drains energy, so if a ride has to happen in this window, plan more water stops and shorter riding stretches than you would in the cooler morning hours.' },
+      { heading: 'Afternoon and evening: watch for sudden rain', body: 'During Phuket’s rainy season (roughly May to October), a clear morning can turn into a sudden, intense afternoon or evening downpour with little warning — wet asphalt is at its most slippery in the first few minutes of rain, before oil and dust have washed off the road. Riding earlier in the day doesn’t guarantee dry roads, but it reduces the odds of getting caught in the heaviest part of the rainy-season rain cycle, which tends to build later in the day.' },
+      { heading: 'Why night riding carries the most risk', body: 'After dark is the riskiest time of day to ride a scooter in Phuket. Many roads outside the main tourist strips of Patong, Kata, and Karon are poorly lit, so potholes, animals, and other hazards are harder to spot with enough time to react — and on Phuket’s hill roads, visibility on blind corners drops further once the sun is down. If a ride after dark is unavoidable, slow down further than you would in daylight, stick to well-lit main roads where possible, and make sure your scooter’s headlight and brake light are both working before you set off.' },
+    ],
+    highlights: ['Early morning is generally the safest, most comfortable time to ride in Phuket — cooler temperatures, quieter roads, and the clearest visibility of the day', 'Phuket’s strongest midday sun, roughly 11am–3pm, brings heat fatigue and faster dehydration on exposed coastal and hill roads', 'Rainy season (roughly May–October) brings sudden, intense downpours that tend to build later in the day — wet roads are most slippery in the first few minutes of rain', 'Riding after dark is the riskiest time of day: many roads outside Patong, Kata, and Karon are poorly lit, and visibility on blind hill corners drops further at night', 'Every scooter listed on Koh Ride includes a helmet and insurance as standard, whatever time of day you ride'],
+    faq: [
+      { question: 'What is the best time of day to ride a scooter in Phuket?', answer: 'Early morning is generally the best time of day to ride a scooter in Phuket — temperatures are cooler, roads are quieter before the day’s traffic builds, and visibility is at its clearest. It’s also the easiest window for longer rides or Phuket’s steeper hill roads.' },
+      { question: 'Is it dangerous to ride a scooter in Phuket at night?', answer: 'Night riding is the riskiest time of day. Many roads outside the main tourist strips of Patong, Kata, and Karon are poorly lit, hazards like potholes and animals are harder to spot in time, and visibility on blind hill corners drops further after dark. If you do ride after dark, slow down, stick to well-lit main roads, and check your headlight and brake light before setting off.' },
+      { question: 'What time of day does it usually rain in Phuket?', answer: 'During Phuket’s rainy season, roughly May to October, downpours tend to build later in the day rather than in the early morning — a clear start can still turn into a sudden, heavy afternoon or evening shower. Riding earlier in the day reduces, but doesn’t eliminate, the chance of getting caught in the wettest part of that daily cycle.' },
+      { question: 'Should I avoid riding a scooter in Phuket during the hottest part of the day?', answer: 'It’s worth planning around it where you can. Phuket’s sun is strongest roughly between 11am and 3pm, and riding through that window on an exposed coastal or hill road brings more heat fatigue and faster dehydration than an early morning or late afternoon ride — plan extra water stops if a midday ride is unavoidable.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: ['patong', 'kata', 'karon'],
+    cluster: 'safety',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
