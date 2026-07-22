@@ -1136,6 +1136,33 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'rental-scooter-worth-it-phuket',
+    targetQuery: 'rental scooter worth it phuket',
+    alternateQueries: [],
+    title: 'Is Renting a Scooter Worth It in Phuket?',
+    h1: 'Is Renting a Scooter Worth It in Phuket?',
+    description: 'Yes — renting a scooter in Phuket is worth it: real automatic scooters from ฿150/day, helmet and insurance included, cheaper than taxis for every trip.',
+    longDescription: 'So, is renting a scooter worth it in Phuket? For most visitors, yes — Koh Ride lists 66 real, available automatic scooters from 16 verified shops across the island, starting at ฿150/day with a helmet and insurance already included. A single scooter replaces the cost and hassle of booking a taxi or Grab for every trip, giving you the freedom to reach beaches, viewpoints, and restaurants on your own schedule — as long as you weigh the real costs and legal requirements covered below before you book.',
+    contentSections: [
+      { heading: 'What renting a scooter in Phuket actually costs', body: 'Real, available automatic scooters on Koh Ride range from ฿150 to ฿2,998 per day, with a median price of ฿350/day across 66 live listings — most everyday models cost far less than that ceiling. A Honda Click averages ฿293/day, a Yamaha NMAX ฿270/day, a Yamaha AEROX ฿284/day, and a Honda PCX ฿327/day, and every one of these prices already includes a helmet and insurance, so there’s no hidden add-on fee to negotiate. 57 of the 66 automatic scooters also offer a discounted monthly rate, saving a median of about 43% compared to paying the daily rate for a full month.' },
+      { heading: 'The case for renting: why it’s worth it for most visitors', body: 'For most visitors, a scooter is worth it because it replaces the cost and hassle of booking a taxi or Grab for every single trip with one flat daily price, while giving you the freedom to reach beaches, viewpoints, and restaurants on your own schedule instead of waiting for a ride. With 16 verified shops spread across the island and 29 of the 66 automatic scooters offering delivery straight to your hotel, picking one up is straightforward even without a car.' },
+      { heading: 'When it might not be worth it', body: 'Renting isn’t automatically worth it for everyone. Thai law requires a valid motorcycle license or an International Driving Permit with the Category A endorsement to ride legally — riding without one risks a fine and can void your travel insurance if you’re in an accident, which changes the cost-benefit math considerably. Riders who are uncomfortable with Phuket’s hills and traffic, or staying only a day or two in one area, may find taxis or Grab a simpler choice instead.' },
+    ],
+    highlights: ['66 real automatic scooters available now on Koh Ride, from ฿150 to ฿2,998/day, all with helmet and insurance included', 'Median price is ฿350/day — well within reach compared to booking taxis or Grab for every trip around the island', '57 of the 66 automatic scooters offer a discounted monthly rate, saving a median of about 43% for longer stays', '16 verified shops across Phuket, with 29 listings offering delivery straight to your hotel', 'Worth it depends on having a valid motorcycle license or IDP — riding without one risks a fine and can void your travel insurance'],
+    faq: [
+      { question: 'Is it worth renting a scooter in Phuket instead of using taxis?', answer: 'For most visitors, yes — automatic scooters on Koh Ride start from ฿150/day (median ฿350/day) with helmet and insurance included, which typically works out cheaper than booking a taxi or Grab for every single trip around the island, while also giving you the freedom to go at your own pace.' },
+      { question: 'How much does it cost to rent a scooter in Phuket?', answer: 'Real automatic scooters on Koh Ride range from ฿150 to ฿2,998/day, with a median of ฿350/day across 66 live listings. Everyday models like the Honda Click (avg ฿293/day) and Yamaha NMAX (avg ฿270/day) sit well below that median.' },
+      { question: 'Is renting a scooter worth it for a short trip to Phuket?', answer: 'It depends on how much ground you plan to cover. If you’re staying in one area for just a day or two, a taxi or Grab may be simpler — but if you’re exploring multiple beaches or areas, a scooter from ฿150/day usually works out cheaper and more flexible than repeat taxi trips.' },
+      { question: 'Do I need a license for it to be worth renting a scooter in Phuket?', answer: 'Yes — Thai law requires a valid motorcycle license or an International Driving Permit with the Category A endorsement to ride legally. Riding without one risks a fine and can void your travel insurance, which is worth factoring into whether renting makes sense for you.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: ['click', 'pcx', 'nmax'],
+    areaSlugs: ['rawai', 'phuket-town', 'chalong', 'patong', 'kathu', 'kata'],
+    cluster: 'pricing',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
