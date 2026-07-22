@@ -1079,6 +1079,34 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'how-return-rental-scooter-without-problems',
+    targetQuery: 'how return rental scooter without problems',
+    alternateQueries: [],
+    title: 'How to Return a Rental Scooter Without Problems',
+    h1: 'How to Return a Rental Scooter Without Problems',
+    description: 'How to return your rental scooter in Phuket without problems: document its condition, match the fuel level, and get your deposit back in full.',
+    longDescription: 'Most disputes when you return a rental scooter come down to one thing: nobody agreed in advance on what "the same condition" means. Knowing how to return a rental scooter without problems just means closing the loop the same careful way you opened it — photograph the bike, return it with the fuel level you started with, and do the handover in person so both sides agree on the outcome before you walk away.',
+    contentSections: [
+      { heading: 'Photograph the scooter before you hand it back', body: 'Take clear photos (or a short video) of the scooter from all four sides, plus the odometer and fuel gauge, a few minutes before you return it. This mirrors the photos you should have taken at pickup — having both sets means neither side is relying on memory if a scratch or dent comes up in conversation.' },
+      { heading: 'Match the fuel level you picked it up with', body: 'Fuel policy isn’t standardized across every shop on Koh Ride’s marketplace, since each shop sets its own terms — but returning with the same fuel level you started with is the safest default almost everywhere, and it removes one of the most common friction points at drop-off. If you’re not sure what the shop expects, ask before you ride off on the first day, not at the last minute.' },
+      { heading: 'Do the return walk-through in person', body: 'Don’t just drop the keys and leave. Walk around the scooter with the shop owner or staff member, point to the same panels you photographed at pickup, and let them confirm out loud that everything matches. This short conversation is what actually prevents a dispute — a rushed, unattended return is when disagreements happen.' },
+      { heading: 'Get your deposit refund confirmed before you leave', body: 'Most shops hold a cash deposit of roughly ฿2,000–฿5,000 depending on the scooter, returned once they’ve checked the bike over with you. Don’t leave the shop until you’ve actually received the deposit back (or, if it’s being refunded another way, gotten clear confirmation of when and how) — settling this on the spot is far easier than chasing it down afterward.' },
+    ],
+    highlights: ['Photograph the scooter from all angles right before you return it', 'Return with the same fuel level you picked it up with', 'Walk through the return with the shop in person, never just drop the keys', 'Confirm your deposit refund before you leave the shop', 'Report any issue from the trip yourself, rather than waiting for the shop to find it'],
+    faq: [
+      { question: 'How do I return a rental scooter without problems in Phuket?', answer: 'Photograph the scooter’s condition right before drop-off, return it with the fuel level you started with, and do the handover in person so the shop can confirm everything matches what you both noted at pickup. Most disputes happen when one of these steps gets skipped, not because of an actual disagreement over damage.' },
+      { question: 'Do I need to return a rental scooter with a full tank in Phuket?', answer: 'It depends on the shop, since Koh Ride connects riders with many independent shops rather than one fixed policy. Returning with the same fuel level you picked it up with is the safest default if a shop hasn’t specified otherwise — ask when you collect the scooter so there’s no surprise at return.' },
+      { question: 'When do I get my deposit back after returning a rental scooter?', answer: 'Typically on the spot, once the shop has checked the scooter over with you and confirmed there’s no new damage. Shops commonly hold a cash deposit of around ฿2,000–฿5,000 depending on the model — don’t leave until the refund is actually in hand or you have clear confirmation of when it’s coming.' },
+      { question: 'What should I do if the shop claims damage I don’t remember causing?', answer: 'Show the return photos you took right before drop-off alongside the photos from pickup — this is exactly why taking both matters. If the two sets of photos genuinely don’t show the damage the shop is describing, walk through it with them calmly before agreeing to any deduction from your deposit.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: [],
+    cluster: 'pricing',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
