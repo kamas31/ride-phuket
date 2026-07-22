@@ -1136,6 +1136,33 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'scooter-vs-grab-phuket',
+    targetQuery: 'scooter vs grab phuket',
+    alternateQueries: [],
+    title: 'Scooter Rental vs Grab in Phuket: Which Is Better?',
+    h1: 'Scooter Rental vs Grab in Phuket: Which Should You Choose?',
+    description: 'Comparing scooter rental vs Grab in Phuket: real costs, freedom to explore, and which fits your trip, from a single day to a full month.',
+    longDescription: 'Deciding between a scooter rental and Grab in Phuket comes down to how long you’re staying and how much freedom you want. Grab is a pay-per-trip ride, ideal for a single night out or a quick airport transfer. A rented scooter is a flat cost for unlimited personal use, better suited to visitors who want to explore Phuket’s beaches and back roads on their own schedule rather than waiting on a driver for every trip.',
+    contentSections: [
+      { heading: 'Cost: paying once vs paying per ride', body: 'Koh Ride’s currently available scooters start from ฿150/day, with a site-wide median around ฿400/day, and most listings (64 of 74 available scooters today) offer a discounted rate if you rent by the week or month. That’s a fixed cost covering unlimited personal use of the scooter all day. Grab works the opposite way: every trip to the beach, a restaurant, or the next town over is its own fare, so the total cost climbs with how many times you go out, not how many days you’re on the island. For a single short visit, Grab can work out cheaper; for anyone exploring for several days or more, a rented scooter usually ends up the better value.' },
+      { heading: 'Convenience and freedom to explore', body: 'With your own rented scooter, you set the schedule: leave whenever you want, stop wherever looks interesting, and change plans without needing anyone else’s availability. Grab depends on a driver being nearby and willing to accept the trip, and coverage in Phuket is strongest around busy tourist areas like Patong and Phuket Town — waits can run longer once you’re further out, in quieter areas like Rawai or Nai Harn.' },
+      { heading: 'No riding required vs taking responsibility for the ride', body: 'Grab means you’re a passenger the whole time — no helmet, no navigating Phuket traffic yourself, and no license requirement, since someone else is driving. Renting a scooter puts you in control of the ride, which also means Thai law expects you to hold a valid motorbike license (an International Driving Permit, for most tourists) and to ride within local traffic rules.' },
+    ],
+    highlights: ['Koh Ride scooter rentals start from ฿150/day, with a current site-wide median around ฿400/day', '64 of 74 available scooters today offer a discounted weekly or monthly rate, unlike Grab’s per-trip pricing', 'A rented scooter means unlimited personal use all day, with no fares stacking up trip by trip', 'Grab requires no license, no deposit, and no riding experience since you’re a passenger, not a rider', 'Grab coverage is strongest in busy areas like Patong and Phuket Town, with longer waits common in quieter spots like Rawai and Nai Harn'],
+    faq: [
+      { question: 'Is it cheaper to rent a scooter or take Grab around Phuket?', answer: 'For a single short trip, Grab can be cheaper. But for anyone exploring Phuket over several days, a rented scooter is usually better value: Koh Ride listings start from ฿150/day, and most offer a discounted rate by the week or month, so the cost doesn’t grow every time you leave your hotel, unlike Grab’s per-trip fares.' },
+      { question: 'Do I need a license to rent a scooter instead of using Grab in Phuket?', answer: 'Yes. Riding your own rented scooter means you’re the one on the road, so Thai law expects a valid motorbike license (an International Driving Permit for most tourists). Taking Grab avoids this entirely, since you’re a passenger rather than the rider.' },
+      { question: 'Is Grab reliable everywhere in Phuket?', answer: 'Grab tends to work best in busier tourist areas like Patong and Phuket Town, where more drivers are active. In quieter parts of the island, such as Rawai or Nai Harn, fewer drivers are nearby, so waits for a ride can be longer — one reason many visitors choose a rented scooter for full flexibility instead.' },
+      { question: 'Can I use both a scooter rental and Grab during the same trip?', answer: 'Yes, there’s no rule against mixing the two. Some visitors rent a scooter for the days they want to explore freely, and rely on Grab for an evening out where they’d rather not ride.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: ['patong', 'phuket-town', 'rawai', 'nai-harn'],
+    cluster: 'pricing',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
