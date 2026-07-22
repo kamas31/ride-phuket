@@ -1136,6 +1136,34 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'scooter-vs-taxi-cost-phuket',
+    targetQuery: 'scooter vs taxi cost phuket',
+    alternateQueries: [],
+    title: 'Scooter vs Taxi Cost in Phuket: Which Is Cheaper?',
+    h1: 'Scooter vs Taxi Cost in Phuket',
+    description: 'Scooter vs taxi cost in Phuket: rent from ฿150/day (median ฿350) vs typical taxi fares of ฿200-800+ per trip. The real cost breakdown for your trip.',
+    longDescription: 'Scooter vs taxi cost in Phuket comes down to simple math: a taxi charges per trip, a rented scooter is one flat cost for unlimited use all day. On Koh Ride, 66 real automatic scooters are available right now from ฿150/day (median ฿350/day), while a single Phuket taxi ride commonly costs ฿200-400 in town or ฿700-800+ from the airport - so two or three taxi rides in a single day can already cost more than renting a scooter for the whole day.',
+    contentSections: [
+      { heading: 'How much does a taxi cost in Phuket?', body: 'Phuket’s metered taxis start around a ฿50 base fare plus roughly ฿10-12 per kilometre, but in practice most tourist rides are negotiated flat fares rather than strictly metered. A short trip across town commonly costs ฿200-400, and an airport transfer to areas like Patong typically runs ฿700-800, rising past ฿1,000 during peak arrival times. Tuk-tuks are similar or higher, often with a ฿200-400 minimum even for a short hop. Ride-hailing apps like Grab are usually cheaper and fixed-price, but every trip is still billed separately.' },
+      { heading: 'How much does scooter rental cost in Phuket?', body: 'Koh Ride currently lists 66 real, available automatic scooters from 16 verified shops, priced from ฿150/day up to ฿2,998/day for the largest maxi-scooters, with a ฿350/day median. Everyday commuter models - Honda Click, Honda PCX, Yamaha NMAX - typically rent for ฿200-500/day, well below the cost of even a couple of taxi rides. 57 of the 66 available scooters also offer a discounted rate if you rent by the week or month, so the cost per day drops the longer you keep it.' },
+      { heading: 'Scooter vs taxi cost: the real math for a day or a trip', body: 'A single airport-to-Patong taxi already costs close to, or more than, a full day’s scooter rental at Koh Ride’s ฿350/day median. Add just two or three more taxi rides in the same day - to the beach, to dinner, back to the hotel - and total taxi cost can easily reach ฿600-1,000+, against one flat scooter rental fee that covers unlimited trips all day. Over a longer stay the gap widens further: taxi cost multiplies with every ride taken, while scooter rental gets cheaper per day the longer you rent, with most listings offering a discounted weekly or monthly rate.' },
+    ],
+    highlights: ['66 real automatic scooters available now, from ฿150/day (median ฿350/day) across 16 verified shops', 'A single Phuket taxi ride commonly costs ฿200-400 in town, or ฿700-800+ from the airport - often more than a full day’s scooter rental', '57 of the 66 available scooters offer a discounted weekly or monthly rate, widening the cost gap the longer you stay', 'Scooter rental is one flat cost for unlimited use all day; taxi cost adds up again with every separate ride', 'Every listed scooter price already includes helmet and insurance - no per-trip surcharges like a taxi fare or tuk-tuk negotiation'],
+    faq: [
+      { question: 'Is renting a scooter cheaper than taking taxis in Phuket?', answer: 'Usually, yes, if you’re getting around more than once or twice a day. Koh Ride’s automatic scooters start from ฿150/day (median ฿350/day) for unlimited personal use, while a single Phuket taxi ride commonly costs ฿200-400 in town or ฿700-800+ from the airport. Two or three taxi trips in one day can already cost as much as, or more than, a full day of scooter rental.' },
+      { question: 'How much does a taxi cost in Phuket?', answer: 'Phuket taxis typically charge ฿200-400 for a short trip within town, and ฿700-800 (sometimes over ฿1,000 at peak times) for an airport transfer to areas like Patong. Most Phuket taxis are negotiated flat fares rather than strictly metered, so the price can vary by driver and destination.' },
+      { question: 'How much does it cost to rent a scooter in Phuket?', answer: 'On Koh Ride, 66 real automatic scooters are available from ฿150 to ฿2,998/day, with a ฿350/day median. Everyday models like the Honda Click, Honda PCX, and Yamaha NMAX typically cost ฿200-500/day, and 57 of the 66 listings also offer a discounted rate if you rent by the week or month.' },
+      { question: 'Is Grab cheaper than a taxi in Phuket?', answer: 'Generally yes - Grab and similar ride-hailing apps offer fixed prices that are usually lower than a negotiated street taxi fare in Phuket. But like a taxi, every Grab trip is still billed separately, so the cost still adds up with each ride, unlike a scooter rental’s single flat daily cost.' },
+      { question: 'Do I need a license to rent a scooter instead of taking taxis in Phuket?', answer: 'Yes - riding a rented scooter yourself requires a valid motorcycle license or International Driving Permit, since you’re the one driving. A taxi or Grab needs no license at all, since you’re a passenger. That’s the main trade-off against the lower cost: renting a scooter means taking on the riding yourself.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: ['click', 'pcx', 'nmax'],
+    areaSlugs: [],
+    cluster: 'pricing',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
