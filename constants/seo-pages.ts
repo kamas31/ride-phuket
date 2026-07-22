@@ -1079,6 +1079,35 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'safety',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'what-check-before-rental-scooter',
+    targetQuery: 'what check before rental scooter',
+    alternateQueries: [],
+    title: 'What to Check Before Renting a Scooter in Phuket',
+    h1: 'What to Check Before You Rent a Scooter in Phuket',
+    description: 'Here’s what to check before renting a scooter in Phuket — license, helmet and insurance, deposit type, and a quick condition check before you sign.',
+    longDescription: 'Before you rent a scooter in Phuket, here’s what to check first: your license or International Driving Permit, whether a helmet and insurance are included, what type of deposit the shop asks for, how the shop is rated, and the scooter’s condition at pickup. None of this takes more than a few minutes, and doing this check before you pay is what actually protects you if something goes wrong later.',
+    contentSections: [
+      { heading: 'The pre-rental checklist, in five minutes', body: 'Before you commit to a scooter in Phuket, run through five real checks: confirm your license or International Driving Permit covers a motorcycle, confirm the listing actually includes a helmet and insurance rather than assuming it, ask what type of deposit the shop wants, check whether the shop is verified, and inspect the scooter itself at pickup before you ride off. Doing this before you sign the rental agreement, not after, is what actually prevents a problem later.' },
+      { heading: 'Check your license or IDP before you book', body: 'Thai law requires a valid motorcycle license to rent and ride a scooter — either a Thai license, or a foreign motorcycle license paired with an International Driving Permit carrying the Category A endorsement, since a car-only IDP doesn’t count. Riders from ASEAN countries, including Malaysia, Singapore, and the Philippines, can ride on their national license alone. Check this before you book, not at pickup, since a shop can refuse to rent to you without it.' },
+      { heading: 'Check that a helmet and insurance are actually included', body: 'Don’t assume a helmet and insurance come standard — check the listing. Every one of Koh Ride’s 74 currently available scooters includes both a helmet and Thailand’s compulsory insurance as standard, from one of 18 verified shops, but that isn’t true everywhere, so confirm it before you book anywhere else.' },
+      { heading: 'Check the deposit type before you pay', body: 'Ask what type of deposit the shop takes before you hand anything over. Among Koh Ride listings that specify a deposit type, the large majority accept a cash deposit, sometimes with a card hold offered as an alternative — only a handful specify a passport instead, which is worth checking closely, since holding a renter’s original passport as security is technically illegal under Thai law. A cash deposit or card hold is the safer choice; if a shop insists on your passport, ask for a photocopy option instead.' },
+      { heading: 'Check the shop’s verification and the scooter’s condition at pickup', body: 'Check whether the shop is verified before you book — all 18 of Koh Ride’s active shops are verified, which is worth comparing against wherever else you’re looking. Then, at pickup, do a real two-minute check of the specific scooter: test both brakes, check the tire tread, test the lights and horn, and photograph any existing scratches or dents with the shop before you ride off — the single best protection against a damage dispute at drop-off.' },
+    ],
+    highlights: ['Check that your license or International Driving Permit (Category A) is valid before you book — Thai law requires it to ride legally', 'Every one of Koh Ride’s 74 available scooters includes a helmet and insurance as standard, from one of 18 verified shops — confirm this wherever else you look', 'Check the deposit type before you pay: most Koh Ride listings that specify one take a cash deposit, and holding your original passport as security is technically illegal under Thai law', 'Confirm the shop is verified — all 18 of Koh Ride’s active shops are verified', 'At pickup, spend two minutes checking both brakes, tire tread, and lights, and photograph any existing damage before you ride off'],
+    faq: [
+      { question: 'What should I check before renting a scooter in Phuket?', answer: 'Check five things before you rent: that your license or IDP covers a motorcycle, that the listing actually includes a helmet and insurance, what deposit type the shop wants, whether the shop is verified, and the scooter’s own condition at pickup. Checking all five before you sign takes a few minutes and prevents most rental problems.' },
+      { question: 'Do I need a license to rent a scooter in Phuket?', answer: 'Yes — a valid motorcycle license or an International Driving Permit with the Category A endorsement, since a car-only IDP doesn’t count. Riders from ASEAN countries, including Malaysia, Singapore, and the Philippines, can ride on their national license alone. Check this before you book.' },
+      { question: 'Is it safe to give my passport as a deposit for a scooter rental?', answer: 'It’s technically illegal under Thai law for a shop to hold your original passport as security. Check the deposit type before you pay — most Koh Ride listings that specify one accept a cash deposit instead, sometimes alongside a card hold, and only a small number ask for a passport.' },
+      { question: 'Does every scooter rental in Phuket include a helmet and insurance?', answer: 'No — don’t assume it, check the listing. All 74 of Koh Ride’s currently available scooters include both a helmet and Thailand’s compulsory insurance as standard, from one of 18 verified shops, but that isn’t guaranteed everywhere else.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: [],
+    cluster: 'safety',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
