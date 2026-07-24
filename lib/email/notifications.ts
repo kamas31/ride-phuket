@@ -11,8 +11,28 @@ import { SITE_NAME, SITE_URL } from '@/constants'
 
 const FROM = 'Koh Ride <noreply@kohride.com>'
 
+// Branded Koh Ride email shell — logo + wordmark header, white card, footer.
+// Table-based layout for broad email-client compatibility; the logo is the
+// hosted PWA app icon so it resolves in any inbox.
 function shell(bodyHtml: string): string {
-  return `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.6;color:#0f0f0e;max-width:520px;">${bodyHtml}</div>`
+  return `
+  <div style="background:#f8f8f6;padding:32px 16px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+    <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;border:1px solid #e8e8e4;">
+      <div style="padding:22px 28px;border-bottom:1px solid #f0f0ec;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td style="vertical-align:middle;">
+            <img src="${SITE_URL}/icons/icon-192.png" width="34" height="34" alt="${SITE_NAME}" style="display:block;border-radius:9px;" />
+          </td>
+          <td style="vertical-align:middle;padding-left:10px;font-size:17px;font-weight:800;letter-spacing:-0.01em;color:#0f0f0e;">${SITE_NAME}</td>
+        </tr></table>
+      </div>
+      <div style="padding:28px;font-size:15px;line-height:1.6;color:#0f0f0e;">${bodyHtml}</div>
+      <div style="padding:18px 28px;border-top:1px solid #f0f0ec;font-size:12px;line-height:1.5;color:#9c9c98;">
+        ${SITE_NAME} · Scooter rental marketplace, Phuket<br/>
+        Manage these emails anytime in your <a href="${SITE_URL}/profile" style="color:#FF6B35;text-decoration:none;">profile settings</a>.
+      </div>
+    </div>
+  </div>`
 }
 
 function button(href: string, label: string): string {
@@ -45,8 +65,7 @@ export async function sendMessageNotificationEmail(params: {
       <h2 style="font-size:18px;margin:0 0 12px;">${heading}</h2>
       <p style="margin:0 0 16px;color:#5c5c58;">You have a new message on ${SITE_NAME}:</p>
       <blockquote style="margin:0 0 20px;padding:12px 16px;background:#f8f8f6;border-left:3px solid #FF6B35;border-radius:8px;color:#0f0f0e;">${safePreview}</blockquote>
-      <p style="margin:0 0 20px;">${button(`${SITE_URL}/messages`, 'Open the conversation')}</p>
-      <p style="margin:0;font-size:12px;color:#9c9c98;">You can turn these emails off anytime in your Koh Ride profile settings.</p>
+      <p style="margin:0;">${button(`${SITE_URL}/messages`, 'Open the conversation')}</p>
     `)
 
     const resend = new Resend(process.env.RESEND_API_KEY)
@@ -74,16 +93,11 @@ export async function sendWhatsAppLeadEmail(params: {
       : 'New Koh Ride lead'
     const body = shell(`
       <h2 style="font-size:18px;margin:0 0 12px;">A visitor is interested in ${scooter}</h2>
-      <p style="margin:0 0 16px;color:#5c5c58;">
+      <p style="margin:0 0 20px;color:#5c5c58;">
         They've just taken your WhatsApp contact from your ${SITE_NAME} listing and should be
         messaging you shortly. Replying promptly gives you the best chance of securing the booking.
       </p>
-      <p style="margin:0 0 20px;color:#5c5c58;">
-        If the message they send doesn't mention ${SITE_NAME}, it's still this lead — some visitors
-        edit the pre-filled message before sending.
-      </p>
-      <p style="margin:0 0 20px;">${button(`${SITE_URL}`, 'View your listings')}</p>
-      <p style="margin:0;font-size:12px;color:#9c9c98;">You can turn these lead emails off anytime in your Koh Ride profile settings.</p>
+      <p style="margin:0;">${button(`${SITE_URL}`, 'View your listings')}</p>
     `)
 
     const resend = new Resend(process.env.RESEND_API_KEY)
