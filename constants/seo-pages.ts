@@ -144,7 +144,7 @@ export const SEO_PAGES: SeoPageMeta[] = [
     urlStrategy: 'guide',
     slug: 'car-license-ride-thailand-with-scooter',
     targetQuery: 'car license ride thailand with scooter',
-    alternateQueries: [],
+    alternateQueries: ['can you drive a scooter in thailand with a car license'],
     title: 'Can You Ride a Scooter in Thailand with a Car License?',
     h1: 'Can You Ride a Scooter in Thailand with a Car License?',
     description: 'A car license alone isn’t enough to ride a scooter in Thailand. Here’s the real rule on car licenses, motorcycle licenses, and IDPs for tourists.',

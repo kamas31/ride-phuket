@@ -72,6 +72,50 @@ export async function updateProfile(updates: {
   }
 }
 
+// Notification email toggles. Read separately from the core profile (rather
+// than added to getServerProfile's select) so the whole profile page keeps
+// working even if migration 053 hasn't been applied yet — a missing column
+// errors only this query, which then falls back to "enabled" (the default).
+export async function getNotificationPrefs(): Promise<{ messages: boolean; whatsappLeads: boolean }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { messages: true, whatsappLeads: true }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from('profiles')
+      .select('email_notif_messages,email_notif_whatsapp_leads')
+      .eq('id', user.id)
+      .single()
+    if (error || !data) return { messages: true, whatsappLeads: true }
+    return {
+      messages: data.email_notif_messages !== false,
+      whatsappLeads: data.email_notif_whatsapp_leads !== false,
+    }
+  } catch {
+    return { messages: true, whatsappLeads: true }
+  }
+}
+
+export async function updateNotificationPref(
+  column: 'email_notif_messages' | 'email_notif_whatsapp_leads',
+  enabled: boolean,
+): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not authenticated' }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from('profiles')
+      .update({ [column]: enabled, updated_at: new Date().toISOString() })
+      .eq('id', user.id)
+    return { error: error?.message ?? null }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Unknown error' }
+  }
+}
+
 export async function getShopForOwner(): Promise<{
   id: string; name: string; slug: string; location: string;
   verified: boolean; active: boolean; plan_type: string;

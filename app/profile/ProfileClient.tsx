@@ -1,16 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
-  Shield, Heart, LogOut,
+  Shield, Heart, LogOut, Bell,
   ChevronRight, Check, Phone, Mail, LayoutDashboard, Star, Trash2,
   MessageSquare, MessageCircle, HeadphonesIcon,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useSaved } from '@/hooks/useSaved'
-import { updateProfile, deleteAccount, requestShopAccountDeletion } from '@/app/actions/profile'
+import { updateProfile, deleteAccount, requestShopAccountDeletion, getNotificationPrefs, updateNotificationPref } from '@/app/actions/profile'
 import { createClient } from '@/lib/supabase/client'
 import { AvatarUploader } from '@/components/shared/AvatarUploader'
 import type { Profile } from '@/hooks/useProfile'
@@ -38,8 +38,28 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
   const [shopDeleteStep, setShopDeleteStep]       = useState<'idle' | 'confirm' | 'submitting' | 'done'>('idle')
   const [shopDeleteError, setShopDeleteError]     = useState<string | null>(null)
 
+  // Email notification toggles — loaded separately (see getNotificationPrefs),
+  // default ENABLED, so a not-yet-applied migration never shows them wrongly off.
+  const [notifMessages, setNotifMessages] = useState(true)
+  const [notifWhatsapp, setNotifWhatsapp] = useState(true)
+  const [showNotifWarning, setShowNotifWarning] = useState(false)
+  useEffect(() => {
+    getNotificationPrefs().then(p => { setNotifMessages(p.messages); setNotifWhatsapp(p.whatsappLeads) })
+  }, [])
+
   const isShopOwner = profile?.role === 'shop_owner'
   const memberSince = new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+
+  async function toggleNotif(
+    column: 'email_notif_messages' | 'email_notif_whatsapp_leads',
+    next: boolean,
+    setLocal: (v: boolean) => void,
+  ) {
+    setLocal(next)                              // optimistic
+    if (!next) setShowNotifWarning(true)        // surface the "you'll miss contacts" warning on disable
+    const { error } = await updateNotificationPref(column, next)
+    if (error) setLocal(!next)                  // revert on failure
+  }
 
   const MENU_SECTIONS = [
     ...(isShopOwner ? [{
@@ -293,6 +313,61 @@ export default function ProfileClient({ user, profile }: ProfileClientProps) {
             </div>
           </div>
         ))}
+
+        {/* Notifications section */}
+        <div>
+          <h2 className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-widest mb-3 px-1">
+            Notifications
+          </h2>
+          <div className="bg-white rounded-[20px] border border-[#e8e8e4] overflow-hidden divide-y divide-[#f0f0ec]">
+            {/* New messages — everyone */}
+            <div className="flex items-center gap-3.5 px-5 py-3.5">
+              <div className="w-8 h-8 bg-[#f0f0ec] rounded-[10px] flex items-center justify-center flex-shrink-0">
+                <Bell className="w-4 h-4 text-[#5c5c58]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-[#0f0f0e]">Email me new messages</p>
+                <p className="text-xs text-[#9c9c98]">When someone messages you on Koh Ride</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={notifMessages}
+                onClick={() => toggleNotif('email_notif_messages', !notifMessages, setNotifMessages)}
+                className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${notifMessages ? 'bg-[#FF6B35]' : 'bg-[#d4d4d0]'}`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${notifMessages ? 'translate-x-5' : ''}`} />
+              </button>
+            </div>
+
+            {/* WhatsApp leads — shop owners only */}
+            {isShopOwner && (
+              <div className="flex items-center gap-3.5 px-5 py-3.5">
+                <div className="w-8 h-8 bg-[#f0f0ec] rounded-[10px] flex items-center justify-center flex-shrink-0">
+                  <MessageCircle className="w-4 h-4 text-[#5c5c58]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-[#0f0f0e]">Email me new WhatsApp leads</p>
+                  <p className="text-xs text-[#9c9c98]">When a visitor takes your WhatsApp from a listing</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={notifWhatsapp}
+                  onClick={() => toggleNotif('email_notif_whatsapp_leads', !notifWhatsapp, setNotifWhatsapp)}
+                  className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${notifWhatsapp ? 'bg-[#FF6B35]' : 'bg-[#d4d4d0]'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${notifWhatsapp ? 'translate-x-5' : ''}`} />
+                </button>
+              </div>
+            )}
+          </div>
+          {showNotifWarning && (
+            <p className="text-xs text-[#b45309] bg-[#fffbeb] border border-[#fde68a] rounded-[12px] px-4 py-3 mt-2 leading-relaxed">
+              Heads up: if you use Koh Ride on the web, turning email off means you&apos;ll have no way of knowing someone contacted you unless you sign in and check regularly.
+            </p>
+          )}
+        </div>
 
         {/* Account section */}
         <div>

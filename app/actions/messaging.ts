@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ApnsClient, ApnsError, Notification, Host } from 'apns2'
+import { sendMessageNotificationEmail } from '@/lib/email/notifications'
+import { isEmailNotifEnabled } from '@/lib/notifications/prefs'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -201,6 +203,28 @@ export async function sendMessage(
     await sendMessagePush(otherUserId, 'Koh Ride', body, { conversationId }, admin)
   } catch {
     // Never surface push errors to the caller
+  }
+
+  // Email notification — fire and forget, best-effort, toggle-gated. Reaches
+  // the recipient whether they're a shop (new enquiry) or a rider (shop
+  // replied), which is the whole point for shop owners who live on the web app
+  // and get no push. Never blocks or fails message delivery.
+  try {
+    const recipientIsShop = otherUserId === convo.owner_id
+    if (await isEmailNotifEnabled(admin, otherUserId, 'email_notif_messages')) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: recipientUser } = await (admin as any).auth.admin.getUserById(otherUserId)
+      const toEmail = recipientUser?.user?.email as string | undefined
+      if (toEmail) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const scooterName = (convo.scooters as any)?.name ?? null
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const shopName = (convo.shops as any)?.name ?? 'A shop'
+        await sendMessageNotificationEmail({ toEmail, recipientIsShop, shopName, scooterName, preview: trimmed })
+      }
+    }
+  } catch {
+    // Never surface email errors to the caller
   }
 
   return {

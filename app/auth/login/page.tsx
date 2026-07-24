@@ -16,6 +16,12 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const redirect    = searchParams.get('next') ?? searchParams.get('redirect') ?? '/'
   const authError   = searchParams.get('error')
+  // Contextual copy for visitors bounced here from the in-app messaging wall
+  // (real, live-verified friction point — ~9% of engaged sessions in a 30-day
+  // sample hit this exact wall with no explanation of why). Signing in stays
+  // the primary path (that's the point of the wall — WhatsApp is deliberately
+  // mentioned as a small, secondary note, not a competing button).
+  const isMessagingRedirect = redirect.startsWith('/messages')
 
   const { user, loading, signInWithEmail, signInWithGoogle, signInWithApple, resetPassword } = useAuth()
 
@@ -222,7 +228,16 @@ function LoginForm() {
               ) : (
                 <>
                   <h1 className="text-[22px] font-bold text-[#0f0f0e] mb-1">Welcome back</h1>
-                  <p className="text-sm text-[#9c9c98] mb-6">Sign in to your Koh Ride account.</p>
+                  {isMessagingRedirect ? (
+                    <>
+                      <p className="text-sm text-[#9c9c98] mb-1">Sign in to message shops directly through Koh Ride.</p>
+                      <p className="text-xs text-[#9c9c98] mb-6">
+                        Prefer not to create an account? You can also contact a shop directly on WhatsApp from its listing page.
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-[#9c9c98] mb-6">Sign in to your Koh Ride account.</p>
+                  )}
 
                   {/* Google OAuth — web only (WKWebView blocks Google OAuth) */}
                   {!isNative() && (

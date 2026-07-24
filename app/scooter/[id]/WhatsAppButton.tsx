@@ -2,6 +2,7 @@
 
 import { trackEvent } from '@/lib/analytics'
 import { captureEvent } from '@/lib/posthog'
+import { notifyWhatsAppLead } from '@/app/actions/whatsapp-lead'
 
 interface WhatsAppButtonProps {
   href: string
@@ -20,6 +21,8 @@ export function WhatsAppButton({ href, shopId, scooterId, className, children }:
       onClick={() => {
         trackEvent({ eventType: 'whatsapp_click', shopId, scooterId })
         captureEvent('whatsapp_clicked', { shop_id: shopId, scooter_id: scooterId })
+        // Fire-and-forget — never await, so opening WhatsApp is never delayed.
+        void notifyWhatsAppLead(shopId, scooterId)
       }}
       className={className}
     >
