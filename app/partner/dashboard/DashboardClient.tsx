@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { ScooterImage } from '@/components/ride/ScooterImage'
 import {
-  Bike, Plus, Settings, MapPin,
+  Bike, Plus, Settings, MapPin, Bell,
   ChevronDown, ChevronRight, ArrowRight, Trash2, ShoppingBag,
   ExternalLink, Eye, MessageCircle, MessageSquare, Star,
   LogOut, Headphones,
@@ -13,7 +13,7 @@ import {
 import { cn, formatPrice } from '@/lib/utils'
 import { deleteScooter } from '@/app/actions/scooter-delete'
 import { toggleScooterAvailability } from '@/app/actions/scooter-availability'
-import { updateShopLogo } from '@/app/actions/profile'
+import { updateShopLogo, getNotificationPrefs, updateNotificationPref } from '@/app/actions/profile'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import {
@@ -54,6 +54,25 @@ export default function DashboardClient({
   const [deletingId, setDeletingId]       = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
   const [deleteError, setDeleteError]     = useState<string | null>(null)
+
+  // Email notification toggles — saved immediately, default ENABLED. Placed
+  // directly on the Shop page (not buried in Shop Settings) at Kamas's request.
+  const [notifMessages, setNotifMessages] = useState(true)
+  const [notifWhatsapp, setNotifWhatsapp] = useState(true)
+  const [showNotifWarning, setShowNotifWarning] = useState(false)
+  useEffect(() => {
+    getNotificationPrefs().then(p => { setNotifMessages(p.messages); setNotifWhatsapp(p.whatsappLeads) })
+  }, [])
+  async function toggleNotif(
+    column: 'email_notif_messages' | 'email_notif_whatsapp_leads',
+    next: boolean,
+    setLocal: (v: boolean) => void,
+  ) {
+    setLocal(next)
+    if (!next) setShowNotifWarning(true)
+    const { error: e } = await updateNotificationPref(column, next)
+    if (e) setLocal(!next)
+  }
 
   const availableCount = scooters.filter(s => s.available).length
   const offlineCount   = scooters.length - availableCount
@@ -650,6 +669,50 @@ export default function DashboardClient({
             </div>
           </div>
         )}
+
+        {/* ── NOTIFICATIONS ── */}
+        <div className="pb-3">
+          <p className="text-[10px] font-semibold text-[#9c9c98] uppercase tracking-widest mb-3 px-1">Notifications</p>
+          <div className="bg-white rounded-[20px] overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.04),0_2px_12px_-2px_rgba(0,0,0,0.05)] divide-y divide-[#f2f2ef]">
+            <div className="flex items-center gap-3.5 px-5 py-4">
+              <div className="w-8 h-8 bg-[#f5f4f2] rounded-[10px] flex items-center justify-center flex-shrink-0">
+                <Bell className="w-3.5 h-3.5 text-[#5c5c58]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[14px] font-medium text-[#0f0f0e]">Email me new messages</p>
+                <p className="text-[11px] text-[#9c9c98] mt-0.5">When a rider messages you on Koh Ride</p>
+              </div>
+              <button
+                type="button" role="switch" aria-checked={notifMessages}
+                onClick={() => toggleNotif('email_notif_messages', !notifMessages, setNotifMessages)}
+                className={cn('relative w-11 h-6 rounded-full transition-colors flex-shrink-0', notifMessages ? 'bg-[#FF6B35]' : 'bg-[#d4d4d0]')}
+              >
+                <span className={cn('absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform', notifMessages ? 'translate-x-5' : '')} />
+              </button>
+            </div>
+            <div className="flex items-center gap-3.5 px-5 py-4">
+              <div className="w-8 h-8 bg-[#f5f4f2] rounded-[10px] flex items-center justify-center flex-shrink-0">
+                <MessageCircle className="w-3.5 h-3.5 text-[#5c5c58]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[14px] font-medium text-[#0f0f0e]">Email me new WhatsApp leads</p>
+                <p className="text-[11px] text-[#9c9c98] mt-0.5">When a visitor takes your WhatsApp from a listing</p>
+              </div>
+              <button
+                type="button" role="switch" aria-checked={notifWhatsapp}
+                onClick={() => toggleNotif('email_notif_whatsapp_leads', !notifWhatsapp, setNotifWhatsapp)}
+                className={cn('relative w-11 h-6 rounded-full transition-colors flex-shrink-0', notifWhatsapp ? 'bg-[#FF6B35]' : 'bg-[#d4d4d0]')}
+              >
+                <span className={cn('absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform', notifWhatsapp ? 'translate-x-5' : '')} />
+              </button>
+            </div>
+          </div>
+          {showNotifWarning && (
+            <p className="text-xs text-[#b45309] bg-[#fffbeb] border border-[#fde68a] rounded-[12px] px-4 py-3 mt-2 leading-relaxed">
+              Heads up: if you use Koh Ride on the web, turning email off means you&apos;ll have no way of knowing someone contacted you unless you sign in and check regularly.
+            </p>
+          )}
+        </div>
 
         {/* ── SUPPORT ── */}
         <div className="pb-3">
