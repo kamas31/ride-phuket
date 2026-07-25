@@ -438,10 +438,10 @@ export default async function ShopPage({ params }: ShopPageProps) {
                 </Link>
               )}
               <Link
-                href={`/explore?location=${shop.location.toLowerCase()}`}
+                href="/explore"
                 className="flex items-center justify-center gap-2 w-full py-3 bg-[#f8f8f6] border border-[#e8e8e4] text-[#5c5c58] font-semibold text-sm rounded-full hover:bg-[#f0f0ec] hover:text-[#0f0f0e] transition-colors"
               >
-                All scooters in {shop.location}
+                All scooters in Phuket
               </Link>
 
             </div>
