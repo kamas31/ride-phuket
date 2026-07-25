@@ -1,14 +1,8 @@
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { SITE_NAME } from '@/constants'
-import { AREAS } from '@/constants/areas'
-import { MODELS } from '@/constants/models'
 import { CtaLink } from '@/components/analytics/CtaLink'
-
-const POPULAR_SLUGS = ['patong', 'kata', 'karon', 'rawai', 'bang-tao', 'phuket-town']
-
-// Tier-1 models only — keeps the footer column short as more models are added to MODELS.
-const POPULAR_MODEL_SLUGS = ['pcx', 'nmax', 'adv', 'xadv', 'tmax']
+import { getFooterStats } from '@/lib/footer-stats'
 
 const STATIC_SECTIONS = {
   Discover: [
@@ -28,15 +22,8 @@ const STATIC_SECTIONS = {
   ],
 }
 
-export default function Footer() {
-  const popularLinks = AREAS
-    .filter(a => POPULAR_SLUGS.includes(a.slug))
-    .sort((a, b) => POPULAR_SLUGS.indexOf(a.slug) - POPULAR_SLUGS.indexOf(b.slug))
-    .map(area => ({ href: `/phuket/${area.slug}`, label: area.label }))
-
-  const popularModels = MODELS
-    .filter(m => POPULAR_MODEL_SLUGS.includes(m.slug))
-    .sort((a, b) => POPULAR_MODEL_SLUGS.indexOf(a.slug) - POPULAR_MODEL_SLUGS.indexOf(b.slug))
+export default async function Footer() {
+  const { areas: topAreas, models: topModels } = await getFooterStats()
 
   return (
     <footer className="bg-[#0f0f0e] text-white">
@@ -76,16 +63,16 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Popular Locations — 6 top areas + View all link */}
+          {/* Popular Locations — top 5 by real live scooter count + View all link */}
           <div>
             <h4 className="text-xs font-semibold text-[#9c9c98] uppercase tracking-widest mb-4">
               Popular Locations
             </h4>
             <ul className="space-y-3">
-              {popularLinks.map(link => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-[#9c9c98] hover:text-white transition-colors">
-                    {link.label}
+              {topAreas.map(area => (
+                <li key={area.slug}>
+                  <Link href={`/phuket/${area.slug}`} className="text-sm text-[#9c9c98] hover:text-white transition-colors">
+                    {area.label}
                   </Link>
                 </li>
               ))}
@@ -101,19 +88,28 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Popular Models */}
+          {/* Popular Models — top 5 by real live scooter count + View all link */}
           <div>
             <h4 className="text-xs font-semibold text-[#9c9c98] uppercase tracking-widest mb-4">
               Popular Models
             </h4>
             <ul className="space-y-3">
-              {popularModels.map(model => (
+              {topModels.map(model => (
                 <li key={model.slug}>
                   <Link href={`/models/${model.slug}`} className="text-sm text-[#9c9c98] hover:text-white transition-colors">
                     {model.name}
                   </Link>
                 </li>
               ))}
+              <li className="pt-1">
+                <Link
+                  href="/models"
+                  className="inline-flex items-center gap-1 text-sm text-[#FF6B35] hover:text-[#e85d29] transition-colors font-medium"
+                >
+                  View all models
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </li>
             </ul>
           </div>
 
