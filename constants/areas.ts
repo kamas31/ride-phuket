@@ -35,9 +35,9 @@ export const AREAS: AreaMeta[] = [
     name: 'Karon',
     label: 'Karon Beach',
     description: 'Rent a scooter in Karon Beach, Phuket. Contact local shops directly from ฿250/day.',
-    longDescription: 'Karon Beach is the quieter, more family-friendly alternative to Patong. Wide beach, calm atmosphere, and excellent access to Phuket\'s interior. A scooter lets you explore at your own pace.',
-    highlights: ['Family-friendly area', 'Less crowded than Patong', 'Great road access'],
-    nearbyAttractions: ['Karon Viewpoint', 'Dino Park', 'Kata Beach', 'Patong (15 min)', 'Phuket Town (20 min)'],
+    longDescription: 'Karon Beach is the quieter, more family-friendly alternative to Patong. Wide beach, calm atmosphere, and excellent access to Phuket\'s interior. A scooter lets you explore at your own pace. At roughly 3km, Karon is Phuket’s second-longest beach after Patong, known for its fine sand that squeaks underfoot (locally called singing sand) and a noticeably calmer pace than the busier beach towns further north.',
+    highlights: ['Family-friendly area', 'Less crowded than Patong', 'Great road access', '3km of coastline to explore by scooter'],
+    nearbyAttractions: ['Karon Viewpoint', 'Dino Park', 'Kata Beach', 'Patong (15 min)', 'Phuket Town (20 min)', 'Kata Noi (10 min)'],
     priceFrom: 250,
   },
   {
