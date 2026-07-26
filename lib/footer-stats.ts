@@ -20,11 +20,33 @@ export interface FooterModelStat { slug: string; name: string; count: number }
 // same for every visitor regardless of session, so an anon client — same
 // RLS-scoped read any anonymous visitor already gets — is the correct tool,
 // not a workaround.
+//
+// Defensive on purpose: `next build` runs static generation across 5 parallel
+// Turbopack workers, and a real, live-observed failure (2026-07-26,
+// "Error: supabaseKey is required" thrown from THIS function, taking down the
+// entire build) is consistent with env vars not yet being available to every
+// worker at cold-cache evaluation time. This function used to assert both env
+// vars non-null and let the Supabase client throw straight into the cached
+// function with nothing to catch it. Now it degrades to an empty stats result
+// (Footer already renders fine with 0 areas/models — see .map() calls, no
+// crash on empty arrays) instead of ever throwing past this boundary, mirroring
+// how lib/supabase/queries.ts's getScooters() already treats "not configured"
+// as [] rather than a thrown error.
 async function fetchAvailableScooters() {
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-  const { data, error } = await supabase.from('scooters').select('*, shops(*)').eq('available', true)
-  if (error || !data) return []
-  return data.map(normalizeScooter)
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return []
+  try {
+    const supabase = createClient(url, key)
+    const { data, error } = await supabase.from('scooters').select('*, shops(*)').eq('available', true)
+    if (error || !data) return []
+    return data.map(normalizeScooter)
+  } catch {
+    // Never let a transient/build-time client error escape this boundary —
+    // this function runs inside unstable_cache, on every page, via the root
+    // layout; an uncaught throw here takes down unrelated pages' builds.
+    return []
+  }
 }
 
 async function computeFooterStats(): Promise<{ areas: FooterAreaStat[]; models: FooterModelStat[] }> {
