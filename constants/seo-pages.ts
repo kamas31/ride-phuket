@@ -1246,6 +1246,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'pricing',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'best-viewpoints-phuket',
+    targetQuery: 'best viewpoints phuket',
+    alternateQueries: [],
+    title: 'Best Viewpoints in Phuket by Scooter',
+    h1: 'The Best Viewpoints in Phuket, and How to Reach Them by Scooter',
+    description: 'Phuket’s best viewpoints — Promthep Cape, Karon Viewpoint, Rang Hill, and Big Buddha — and the closest rental area to reach each one by scooter.',
+    longDescription: 'Phuket’s best viewpoints are scattered across the island — a cliffside sunset point at the southern tip, hilltop lookouts above the beaches, and a temple hill over Phuket Town — and a rental scooter is the easiest way to reach more than one in the same day. Here’s where they are, which area to rent from, and how long the ride takes.',
+    contentSections: [
+      { heading: 'Phuket’s best viewpoints, area by area', body: 'Promthep Cape, at Phuket’s southern tip, is the island’s best-known sunset viewpoint — closest to Rawai and Nai Harn, both about 10 minutes away by scooter, with Kata a little further at around 15. Karon Viewpoint, on the coastal road between Kata and Karon, looks out over three beaches at once and is a short ride from either Karon or Kata Noi. Rang Hill (Khao Rang), just outside Phuket Town’s Old Quarter, gives a panorama over the town and the island’s east coast. Big Buddha, above Chalong, is Phuket’s highest viewpoint by elevation — about 10 minutes from Chalong or 25 from Patong — and has its own dedicated riding guide on this site.' },
+      { heading: 'Getting to Phuket’s viewpoints by scooter', body: 'Every one of these viewpoints sits at the top of a hill, so the final approach is usually a winding climb — an automatic scooter is the easier choice over a manual, since there’s no clutch to manage on the way up. Promthep Cape gets busy in the hour before sunset, Phuket’s most popular time to visit, so arrive a little early to find parking. Renting locally near whichever viewpoint you’re heading to first keeps the ride short; Rawai has the lowest prices in the south from ฿180/day, and Chalong from ฿200/day.' },
+    ],
+    highlights: ['Promthep Cape — Phuket’s best-known sunset viewpoint, about 10 minutes from Rawai or Nai Harn by scooter', 'Karon Viewpoint — a hilltop lookout over Kata, Karon, and Patong beaches, on the coastal road between Kata and Karon', 'Rang Hill (Khao Rang) — a panorama over Phuket Town and the east coast, minutes from the Old Quarter', 'Big Buddha — Phuket’s highest viewpoint, about 10 minutes from Chalong by scooter', 'Real, available automatic scooters near every one of these areas, from verified local shops, no booking fees'],
+    faq: [
+      { question: 'What are the best viewpoints in Phuket?', answer: 'Promthep Cape (sunset, at the southern tip), Karon Viewpoint (overlooking Kata, Karon, and Patong beaches), Rang Hill/Khao Rang (over Phuket Town), and Big Buddha (Phuket’s highest viewpoint, above Chalong) are the island’s four best-known viewpoints.' },
+      { question: 'What’s the best way to get to Phuket’s viewpoints?', answer: 'A rental scooter is the easiest way to reach more than one viewpoint in a day, since each sits at the top of its own hill road with no direct public transport. Renting from the area closest to your first stop — Rawai or Nai Harn for Promthep Cape, Chalong for Big Buddha — keeps the ride short.' },
+      { question: 'Which Phuket viewpoint is best for sunset?', answer: 'Promthep Cape, at the island’s southern tip, is Phuket’s most famous sunset viewpoint and gets busy in the hour beforehand — arrive early for parking.' },
+      { question: 'Do I need an automatic or manual scooter for the viewpoints?', answer: 'Automatic is the easier choice — every one of these viewpoints is reached via a winding hill climb, and there’s no clutch to manage on the way up.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: ['rawai', 'nai-harn', 'kata', 'karon', 'kata-noi', 'phuket-town', 'chalong', 'patong'],
+    cluster: 'phuket-guides',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
