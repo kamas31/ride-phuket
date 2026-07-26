@@ -1246,6 +1246,32 @@ export const SEO_PAGES: SeoPageMeta[] = [
     cluster: 'pricing',
     subCluster: undefined,
   },
+  {
+    urlStrategy: 'guide',
+    slug: 'where-watch-sunset-phuket',
+    targetQuery: 'where watch sunset phuket',
+    alternateQueries: [],
+    title: 'Where to Watch the Sunset in Phuket',
+    h1: 'The Best Places to Watch the Sunset in Phuket',
+    description: 'Where to watch the best sunset in Phuket: real viewpoints and beaches you can reach by scooter, from Promthep Cape to Karon Viewpoint.',
+    longDescription: 'If you’re wondering where to watch the sunset in Phuket, the island’s west-facing coastline gives you plenty of real options, all easily reached by scooter. Promthep Cape, at the southern tip near Rawai and Nai Harn, is Phuket’s most famous sunset spot, while Karon Viewpoint looks out over Kata, Karon, and the Andaman Sea from higher up the coast road. Renting a scooter means you can time your arrival for golden hour and move on to a second viewpoint the same evening, instead of waiting on a taxi or Grab driver.',
+    contentSections: [
+      { heading: 'Promthep Cape: Phuket’s most famous sunset viewpoint', body: 'At the southernmost tip of the island, Promthep Cape is where most visitors and locals go to watch the sunset in Phuket — a rocky headland with unobstructed views over the Andaman Sea, a lighthouse, and a small shrine. It sits just past Nai Harn and Rawai, both a short scooter ride away, and gets busy in the final 30 minutes before sunset, so arriving early secures a good spot.' },
+      { heading: 'Karon Viewpoint and other west-coast alternatives', body: 'Karon Viewpoint, on the coastal road between Kata and Karon, looks out over three beaches at once and is a quieter alternative to Promthep Cape. Because Nai Harn, Kata, and Karon all sit on Phuket’s west coast facing the Andaman Sea, you can also watch the sunset directly from the sand at any of these beaches without detouring to a dedicated viewpoint.' },
+    ],
+    highlights: ['Promthep Cape, at Phuket’s southern tip, is the island’s single most famous sunset viewpoint — reachable by scooter from Rawai, Nai Harn, and Kata', 'Karon Viewpoint overlooks Kata, Karon, and the Andaman Sea from high above the coast road, and is quieter than Promthep Cape', 'Phuket’s west-facing beaches, including Nai Harn, Kata, and Karon, all face the Andaman Sea, so the sun sets directly over the water', 'Sunset in Phuket falls year-round between roughly 6:00 and 6:45 PM local time, with only slight seasonal variation this close to the equator', 'A scooter lets you reach a viewpoint for golden hour and move on to a second one before dark, without waiting on a taxi or Grab driver'],
+    faq: [
+      { question: 'Where is the best place to watch the sunset in Phuket?', answer: 'Promthep Cape, at Phuket’s southern tip near Rawai and Nai Harn, is widely considered the island’s best sunset viewpoint. Karon Viewpoint, overlooking Kata and Karon beaches, is the best alternative when Promthep Cape is crowded.' },
+      { question: 'Can you watch the sunset in Phuket by scooter?', answer: 'Yes — Promthep Cape and Karon Viewpoint are both directly on the coastal road and easy to reach by scooter from Rawai, Nai Harn, Kata, or Karon. Renting one lets you time your arrival for golden hour rather than relying on a taxi.' },
+      { question: 'What time is sunset in Phuket?', answer: 'Phuket sits close to the equator, so sunset varies only slightly through the year — generally between about 6:00 PM and 6:45 PM local time (ICT).' },
+      { question: 'Which beaches in Phuket face the sunset?', answer: 'Phuket’s west coast faces the Andaman Sea, so Nai Harn, Kata, and Karon all offer sea-facing sunset views directly from the beach, in addition to dedicated viewpoints like Promthep Cape and Karon Viewpoint.' },
+    ],
+    filter: undefined,
+    relevantModelSlugs: [],
+    areaSlugs: ['rawai', 'nai-harn', 'kata', 'karon'],
+    cluster: 'phuket-guides',
+    subCluster: undefined,
+  },
 ]
 
 export function getSeoPage(slug: string, urlStrategy: 'guide' | 'landing'): SeoPageMeta | undefined {
