@@ -98,7 +98,7 @@ Last updated: 2026-07-27 (session 25)
 - [x] iOS push permission prompt fix — `rp_push_prompted` localStorage flag could permanently block `requestPermissions()` after an app delete/reinstall (remote-URL WKWebView storage can survive uninstall); `checkPush()` in `ConversationList.tsx` now trusts live OS permission state first (ADR-061)
 - [x] SEO V1.3: Yamaha TMAX model page (`/models/tmax`), X-ADV + TMAX added to footer Popular Models (ADR-062)
 - [x] "Which Scooter Should You Rent?" quiz (`/which-scooter`) — category-based recommendation engine, homepage teaser section, QA-verified against 10 rider profiles (ADR-063) — **postponed and removed from the codebase 2026-06-29, see ADR-063-addendum; fully recoverable from commit `09a799b`**
-- [x] TikTok Pixel browser integration — PageView (native SPA auto-detection, verified live, no manual per-route re-fire), ViewContent on scooter fiches, Contact on real WhatsApp-to-shop clicks; fully isolated from PostHog/business events, no Events API, no PII (ADR-067)
+- [x] TikTok Pixel browser integration — PageView (explicit `ttq.track('PageView')` per route via a skip-first-mount `usePathname()` tracker; TikTok's auto SPA re-fire only covers its own internal signal, not the Standard Event — ADR-068 corrected ADR-067), ViewContent on scooter fiches (`content_type: "product"`), Contact on real WhatsApp-to-shop clicks; fully isolated from PostHog/business events, no Events API, no PII; verified live against real TikTok Test Events (ADR-067, ADR-068)
 
 ---
 

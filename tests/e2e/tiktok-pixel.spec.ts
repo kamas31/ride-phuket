@@ -17,18 +17,19 @@ import { gotoAndWait } from '../helpers/navigation'
  * see components/analytics/TikTokPixel.tsx), then exposes live recording
  * functions for anything called after that.
  *
- * What this proves: ttq.page() fires exactly once on load, and the app's
- * own React/Next.js bundle never calls it again on a client-side route
- * change — there is no usePathname()-driven re-fire anywhere in this
- * codebase. That a real client-side navigation would still register as a
- * single PageView with TikTok is a separate, already-verified fact: TikTok's
- * own SDK auto-fires exactly one Pageview per History API pushState via its
- * HistoryObserver plugin — confirmed against the real script/real pixel ID
- * and documented with captured network payloads in docs/DECISIONS.md. This
- * test does not re-assert that third-party behavior (out of our control,
- * and not meaningful to pin in a committed CI test); it guards the
- * regression this codebase actually owns: nobody re-introducing a manual
- * per-navigation ttq.page() call that would double it up.
+ * Corrected model (see ADR-068): TikTok's automatic SPA re-tracking
+ * (HistoryObserver, triggered by ttq.page()) only ever reproduces its own
+ * internal analytics signals — never the Standard Event "PageView" that
+ * Test Events / Ads Manager actually read. There is no automatic
+ * equivalent for that event, so this codebase fires ttq.track('PageView')
+ * explicitly: once from the base snippet on load, and once per subsequent
+ * route change from a usePathname() effect that skips its own first mount.
+ * What this test proves is exactly that pairing: N navigations (including
+ * the initial load) produce exactly N track('PageView') calls — never
+ * fewer (the original bug — PageView missing from Test Events entirely)
+ * and never more (a duplicate on the same navigation) — while the
+ * unrelated internal ttq.page()-driven signal is irrelevant to either
+ * failure mode and isn't asserted on here.
  *
  * Timing note: next/script's `afterInteractive` strategy injects the script
  * element client-side, after hydration — later than `domcontentloaded`
@@ -46,7 +47,7 @@ const TTQ_STUB = `
   ttq.page = function () { window.__ttqCalls.push('page'); };
   ttq.track = function (name) { window.__ttqCalls.push('track:' + name); };
   window.ttq = ttq;
-  // Replay whatever the inline bootstrap already queued (e.g. ['load', id], ['page']) —
+  // Replay whatever the inline bootstrap already queued (e.g. ['load', id], ['page'], ['track', 'PageView']) —
   // mirrors how the real SDK processes its pre-load call queue on init.
   recordedQueue.forEach(function (call) {
     if (call[0] === 'page') ttq.page();
@@ -57,12 +58,14 @@ const TTQ_STUB = `
 
 type TtqWindow = { __ttqCalls?: string[] }
 
-async function ttqCallCount(page: import('@playwright/test').Page): Promise<number> {
-  return page.evaluate(() => (window as unknown as TtqWindow).__ttqCalls?.length ?? 0)
+async function pageViewCallCount(page: import('@playwright/test').Page): Promise<number> {
+  return page.evaluate(() =>
+    ((window as unknown as TtqWindow).__ttqCalls ?? []).filter(c => c === 'track:PageView').length
+  )
 }
 
 test.describe('TikTok Pixel — PageView call pattern', () => {
-  test('ttq.page() fires exactly once on load and is never re-fired by our own code on client-side navigation', async ({ page }) => {
+  test('ttq.track("PageView") fires exactly once per navigation — on load, and once per subsequent route change, never more', async ({ page }) => {
     await page.route('**/analytics.tiktok.com/i18n/pixel/events.js**', route => {
       route.fulfill({ status: 200, contentType: 'application/javascript', body: TTQ_STUB })
     })
@@ -77,34 +80,42 @@ test.describe('TikTok Pixel — PageView call pattern', () => {
     if (!scriptAppeared) {
       // NEXT_PUBLIC_TIKTOK_PIXEL_ID not configured for this run — the pixel
       // is expected to be entirely absent. Confirm the silent no-op path.
-      expect(await ttqCallCount(page)).toBe(0)
+      expect(await pageViewCallCount(page)).toBe(0)
       return
     }
 
     expect(await page.locator('#tiktok-pixel').count()).toBe(1)
 
-    await page.waitForFunction(() => (window as unknown as TtqWindow).__ttqCalls?.length === 1, { timeout: 5000 })
-    expect(await ttqCallCount(page)).toBe(1) // exactly the bootstrap snippet's own ttq.page()
+    await page.waitForFunction(
+      () => ((window as unknown as TtqWindow).__ttqCalls ?? []).filter(c => c === 'track:PageView').length === 1,
+      { timeout: 5000 },
+    )
+    expect(await pageViewCallCount(page)).toBe(1) // the base snippet's own ttq.track('PageView') on load
 
     const exploreLink = page.locator('a[href="/explore"]').first()
     await expect(exploreLink).toBeVisible()
     await exploreLink.click()
     await page.waitForURL('**/explore')
 
-    // No further ttq call is expected — give any (incorrect) re-fire a real
-    // chance to land before asserting the count held steady.
+    await page.waitForFunction(
+      () => ((window as unknown as TtqWindow).__ttqCalls ?? []).filter(c => c === 'track:PageView').length === 2,
+      { timeout: 5000 },
+    )
+    // Give any (incorrect) double-fire on this same navigation a real chance to land before asserting it held at 2.
     await page.waitForTimeout(1000)
-    expect(await ttqCallCount(page)).toBe(1) // still exactly one — no manual re-fire on route change
+    expect(await pageViewCallCount(page)).toBe(2) // exactly one more — not zero (the original bug), not three (a duplicate)
 
-    // A second client-side hop, to make sure nothing accumulates over time.
     const homeLink = page.locator('a[href="/"]').first()
     if (await homeLink.count() > 0) {
       await homeLink.click()
       await page.waitForURL('**/')
+      await page.waitForFunction(
+        () => ((window as unknown as TtqWindow).__ttqCalls ?? []).filter(c => c === 'track:PageView').length === 3,
+        { timeout: 5000 },
+      )
       await page.waitForTimeout(1000)
+      expect(await pageViewCallCount(page)).toBe(3)
     }
-
-    expect(await ttqCallCount(page)).toBe(1)
   })
 
   test('no TikTok script is injected when NEXT_PUBLIC_TIKTOK_PIXEL_ID is unset', async ({ page }) => {

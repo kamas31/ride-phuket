@@ -55,7 +55,7 @@ test('trackTikTokContact: no-ops when window.ttq is absent, even with pixel ID s
   delete process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID
 })
 
-test('trackTikTokViewContent: calls ttq.track("ViewContent", ...) with content_type always "scooter" and no PII', () => {
+test('trackTikTokViewContent: calls ttq.track("ViewContent", ...) with content_type always "product" and no PII', () => {
   process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID = PIXEL_ID
   let received: [string, Record<string, unknown> | undefined] | null = null
   installFakeWindow({ track: (event, props) => { received = [event, props] } })
@@ -68,7 +68,7 @@ test('trackTikTokViewContent: calls ttq.track("ViewContent", ...) with content_t
   assert.deepEqual(props, {
     content_id: 'scooter_42',
     content_name: 'Yamaha NMAX',
-    content_type: 'scooter',
+    content_type: 'product', // TikTok only accepts 'product'/'product_group' — 'scooter' was rejected
   })
   removeFakeWindow()
   delete process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID
@@ -104,9 +104,9 @@ test('trackTikTokContact: called with no args does not throw and sends an empty 
   delete process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID
 })
 
-test('trackTikTokPageView: swallows a throwing ttq.page() instead of propagating', () => {
+test('trackTikTokPageView: swallows a throwing ttq.track() instead of propagating', () => {
   process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID = PIXEL_ID
-  installFakeWindow({ page: () => { throw new Error('blocked by an extension') } })
+  installFakeWindow({ track: () => { throw new Error('blocked by an extension') } })
 
   assert.doesNotThrow(() => trackTikTokPageView())
 
@@ -124,14 +124,18 @@ test('trackTikTokViewContent: swallows a throwing ttq.track() instead of propaga
   delete process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID
 })
 
-test('trackTikTokPageView: calls ttq.page() exactly once per call — no internal retry/duplicate', () => {
+test('trackTikTokPageView: calls ttq.track("PageView") exactly once per call, with no properties — no internal retry/duplicate', () => {
   process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID = PIXEL_ID
   let calls = 0
-  installFakeWindow({ page: () => { calls++ } })
+  let received: [string, Record<string, unknown> | undefined] | null = null
+  installFakeWindow({ track: (event, props) => { calls++; received = [event, props] } })
 
   trackTikTokPageView()
 
   assert.equal(calls, 1)
+  const [event, props] = received as unknown as [string, Record<string, unknown> | undefined]
+  assert.equal(event, 'PageView')
+  assert.equal(props, undefined)
   removeFakeWindow()
   delete process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID
 })

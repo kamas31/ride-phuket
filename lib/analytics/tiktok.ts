@@ -10,19 +10,24 @@
 //   - Every exported function is wrapped so a TikTok Pixel failure (network,
 //     blocked script, malformed call) can never throw into calling code.
 //
-// PageView: only the base snippet's own ttq.page() call (see
-// components/analytics/TikTokPixel.tsx) fires on initial load. There is no
-// usePathname()-driven re-fire on client-side route changes — verified live
-// (real script, real pixel ID) that TikTok's own HistoryObserver plugin
-// already fires exactly one automatic Pageview per History API pushState,
-// which is exactly the mechanism Next.js App Router uses for client-side
-// navigation. Adding a manual re-fire here would double-count. See
-// docs/DECISIONS.md for the captured network evidence.
+// PageView: ttq.page() and TikTok's Standard Event "PageView" are two
+// unrelated signals — verified live (real script, real pixel ID) that
+// ttq.page()'s automatic HistoryObserver re-fire on client-side route
+// changes only ever reproduces ttq.page()'s own internal analytics events
+// ("Pageview"/"LandingPageView"/"EngagedSession"), never the Standard Event
+// "PageView" that Test Events / Ads Manager conversion tooling reads. See
+// ADR-067 (original, since-corrected conclusion) and ADR-068 (the
+// correction + evidence) in docs/DECISIONS.md.
 //
-// trackTikTokPageView() is still exported as a safe, reusable primitive for
-// any genuinely manual future call site (e.g. a virtual page change that
-// does NOT go through pushState) — it is intentionally not wired into any
-// automatic hook today.
+// trackTikTokPageView() therefore calls ttq.track('PageView') explicitly —
+// there is no automatic equivalent for the Standard Event. It is wired to a
+// usePathname()-driven tracker in components/analytics/TikTokPixel.tsx that
+// skips the very first mount (the base snippet's own ttq.track('PageView')
+// call already covers initial load), so it fires exactly once per route
+// change — same single-source-of-truth guarantee as ViewContent/Contact.
+// ttq.page() itself is kept in the base snippet: without it, the SDK never
+// sends any beacon at all (verified in ADR-067), so it remains required
+// "arming" even though it's no longer what drives PageView reporting.
 
 export interface TtqObject {
   page: () => void
@@ -47,12 +52,12 @@ function getTtq(): TtqObject | null {
   return window.ttq ?? null
 }
 
-/** Safe wrapper around ttq.page(). Not called automatically on navigation — see file header. */
+/** Fires TikTok's Standard Event "PageView" — see file header for why this is ttq.track(), not ttq.page(). */
 export function trackTikTokPageView(): void {
   const ttq = getTtq()
   if (!ttq) return
   try {
-    ttq.page()
+    ttq.track('PageView')
   } catch {
     // Silent — analytics must never break navigation.
   }
@@ -63,7 +68,11 @@ export interface TikTokViewContentParams {
   content_name: string
 }
 
-/** Fires TikTok's standard ViewContent event. content_type is always 'scooter' — no PII. */
+/**
+ * Fires TikTok's standard ViewContent event. content_type is always
+ * 'product' — TikTok only accepts 'product' or 'product_group' here; it
+ * rejected 'scooter' with "Content type is invalid in your event." No PII.
+ */
 export function trackTikTokViewContent({ content_id, content_name }: TikTokViewContentParams): void {
   const ttq = getTtq()
   if (!ttq) return
@@ -71,7 +80,7 @@ export function trackTikTokViewContent({ content_id, content_name }: TikTokViewC
     ttq.track('ViewContent', {
       content_id,
       content_name,
-      content_type: 'scooter',
+      content_type: 'product',
     })
   } catch {
     // Silent.

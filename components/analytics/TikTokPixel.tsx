@@ -1,20 +1,42 @@
+'use client'
+
 // TikTok Pixel — loads the official browser snippet once, from the root
 // layout. Renders nothing if NEXT_PUBLIC_TIKTOK_PIXEL_ID is unset.
 //
-// No usePathname()/route-change hook here — verified live that TikTok's own
-// SDK (HistoryObserver plugin) already fires exactly one automatic Pageview
-// per client-side route change (App Router navigation is a History API
-// pushState under the hood), once the base ttq.page() call below has run
-// once on load. See docs/DECISIONS.md for the evidence and lib/analytics/tiktok.ts
-// for why a manual re-fire would double-count.
+// PageView: ttq.page() below is kept only to "arm" the SDK (verified live —
+// without at least one call, no beacon of any kind is ever sent). It is NOT
+// what produces TikTok's Standard Event "PageView" that Test Events / Ads
+// Manager read — verified live that ttq.page()'s automatic HistoryObserver
+// re-fire on client-side navigation only reproduces its own internal
+// analytics signals ("Pageview"/"LandingPageView"/"EngagedSession"), never
+// the Standard Event. So the base snippet fires ttq.track('PageView')
+// explicitly once on load, and the usePathname() effect below fires it
+// again on every subsequent route change — skipping its own first mount so
+// the two never both cover the same navigation. See docs/DECISIONS.md
+// (ADR-067 original conclusion, ADR-068 the correction + evidence).
 //
 // No Automatic Advanced Matching: ttq.load() is called with no second
 // argument, and no ttq.identify() call exists anywhere in this codebase.
 
+import { useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import Script from 'next/script'
-import { TIKTOK_PIXEL_ID } from '@/lib/analytics/tiktok'
+import { TIKTOK_PIXEL_ID, trackTikTokPageView } from '@/lib/analytics/tiktok'
 
 export function TikTokPixel() {
+  const pathname = usePathname()
+  const isFirstRender = useRef(true)
+
+  useEffect(() => {
+    // The base snippet's own ttq.track('PageView') call already covers this
+    // first render's route — only re-fire on actual subsequent changes.
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    trackTikTokPageView()
+  }, [pathname])
+
   if (!TIKTOK_PIXEL_ID) return null
 
   return (
@@ -25,6 +47,7 @@ export function TikTokPixel() {
 
           ttq.load('${TIKTOK_PIXEL_ID}');
           ttq.page();
+          ttq.track('PageView');
         }(window, document, 'ttq');
       `}
     </Script>
