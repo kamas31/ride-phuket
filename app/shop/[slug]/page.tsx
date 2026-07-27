@@ -13,6 +13,7 @@ import { ScooterImage } from '@/components/ride/ScooterImage'
 import { TrustBadge } from '@/components/ride/TrustBadge'
 import { TrackView } from '@/components/analytics/TrackView'
 import { shopProperties } from '@/lib/posthog'
+import { TikTokContactLink } from '@/components/analytics/TikTokContactLink'
 import { ShopChatButton } from '@/components/shop/ShopChatButton'
 import { ShopQuickQuestions } from '@/components/shop/ShopQuickQuestions'
 import { ShopAboutSection } from '@/components/shop/ShopAboutSection'
@@ -339,15 +340,16 @@ export default async function ShopPage({ params }: ShopPageProps) {
 
                 {/* Secondary — WhatsApp */}
                 {waLink && (
-                  <a
+                  <TikTokContactLink
                     href={waLink}
                     target="_blank"
                     rel="noopener noreferrer"
+                    tiktokContact={{ shop_id: shop.id, placement: 'shop_page_cta' }}
                     className="flex items-center justify-center gap-2 w-full py-3 mt-2.5 rounded-full bg-[#16a34a] text-white text-sm font-bold hover:bg-[#15803d] transition-colors active:scale-[0.98]"
                   >
                     <MessageCircle className="w-4 h-4" />
                     Continue on WhatsApp
-                  </a>
+                  </TikTokContactLink>
                 )}
 
                 {/* Quick question chips — open Koh Ride Chat with prefill */}

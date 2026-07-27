@@ -89,6 +89,7 @@ export function StickyContactBar({
                     href={`https://wa.me/${contactNumber.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooterName} on Koh Ride and I'm interested.`)}`}
                     shopId={shopId}
                     scooterId={scooterId}
+                    placement="sticky_bar"
                     className="flex items-center gap-1.5 px-5 py-3 font-bold text-sm rounded-full bg-[#16a34a] text-white hover:bg-[#15803d] transition-colors active:scale-[0.97]"
                   >
                     <MessageCircle className="w-4 h-4" strokeWidth={1.5} />

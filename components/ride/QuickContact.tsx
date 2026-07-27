@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { buildWAUrl, WA_LABELS, type WATemplate, type WAContext } from '@/lib/whatsapp'
 import { trackEvent } from '@/lib/analytics'
 import { captureEvent } from '@/lib/posthog'
+import { trackTikTokContact } from '@/lib/analytics/tiktok'
 import { notifyWhatsAppLead } from '@/app/actions/whatsapp-lead'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -75,6 +76,7 @@ export function QuickContact({
           onClick={() => {
             trackEvent({ eventType: 'whatsapp_click', shopId, scooterId, metadata: ctx.scooterName ? { scooterName: ctx.scooterName } : {} })
             captureEvent('whatsapp_clicked', { shop_id: shopId, scooter_id: scooterId })
+            trackTikTokContact({ scooter_id: scooterId, shop_id: shopId, placement: 'quick_contact_primary' })
             if (shopId) void notifyWhatsAppLead(shopId, scooterId ?? '')
           }}
           className="flex items-center justify-center gap-2 w-full py-3 bg-[#f0fdf4] border border-[#22c55e]/20 text-[#16a34a] font-bold text-sm rounded-full hover:bg-[#dcfce7] transition-colors active:scale-[0.98]"
@@ -115,6 +117,7 @@ export function QuickContact({
                 onClick={() => {
                   trackEvent({ eventType: 'whatsapp_click', shopId, scooterId, metadata: { template: q, ...(ctx.scooterName ? { scooterName: ctx.scooterName } : {}) } })
                   captureEvent('whatsapp_clicked', { shop_id: shopId, scooter_id: scooterId, template: q })
+                  trackTikTokContact({ scooter_id: scooterId, shop_id: shopId, placement: 'quick_contact_chip' })
                   if (shopId) void notifyWhatsAppLead(shopId, scooterId ?? '')
                 }}
                 className="px-3 py-1.5 bg-[#f8f8f6] border border-[#e8e8e4] text-[11px] font-medium text-[#5c5c58] rounded-full hover:border-[#FF6B35]/40 hover:text-[#FF6B35] hover:bg-[#fff4f0] transition-colors active:scale-[0.97]"

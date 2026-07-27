@@ -1,5 +1,5 @@
 # Koh Ride — Roadmap
-Last updated: 2026-07-13 (session 23)
+Last updated: 2026-07-27 (session 25)
 
 ---
 
@@ -98,6 +98,7 @@ Last updated: 2026-07-13 (session 23)
 - [x] iOS push permission prompt fix — `rp_push_prompted` localStorage flag could permanently block `requestPermissions()` after an app delete/reinstall (remote-URL WKWebView storage can survive uninstall); `checkPush()` in `ConversationList.tsx` now trusts live OS permission state first (ADR-061)
 - [x] SEO V1.3: Yamaha TMAX model page (`/models/tmax`), X-ADV + TMAX added to footer Popular Models (ADR-062)
 - [x] "Which Scooter Should You Rent?" quiz (`/which-scooter`) — category-based recommendation engine, homepage teaser section, QA-verified against 10 rider profiles (ADR-063) — **postponed and removed from the codebase 2026-06-29, see ADR-063-addendum; fully recoverable from commit `09a799b`**
+- [x] TikTok Pixel browser integration — PageView (native SPA auto-detection, verified live, no manual per-route re-fire), ViewContent on scooter fiches, Contact on real WhatsApp-to-shop clicks; fully isolated from PostHog/business events, no Events API, no PII (ADR-067)
 
 ---
 
@@ -125,6 +126,7 @@ Last updated: 2026-07-13 (session 23)
 - [ ] **Sentry: set env vars** in Vercel (DSN, AUTH_TOKEN, ORG, PROJECT) — score goes 2.5→7/10 instantly
 - [ ] **Sentry: create `instrumentation-client.ts`** + add `Sentry.setUser()` in useAuth
 - [ ] **PostHog: set `NEXT_PUBLIC_POSTHOG_KEY`/`NEXT_PUBLIC_POSTHOG_HOST` env vars** in Vercel — code ships silently no-op'd until set (ADR-059)
+- [ ] **TikTok: set `NEXT_PUBLIC_TIKTOK_PIXEL_ID` env var** in Vercel (Project → Settings → Environment Variables) — code ships silently no-op'd until set (ADR-067)
 - [ ] Physical iPhone testing (TestFlight)
 - [ ] Verify Supabase "Link accounts to existing user" setting
 - [ ] TestFlight distribution

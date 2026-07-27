@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { trackEvent, type EventType } from '@/lib/analytics'
 import { captureEvent, registerSessionProperties, type PostHogEventName } from '@/lib/posthog'
+import { trackTikTokViewContent, type TikTokViewContentParams } from '@/lib/analytics/tiktok'
 
 interface TrackViewProps {
   // Omit on pages that have no business-facing event (e.g. the homepage) —
@@ -20,14 +21,18 @@ interface TrackViewProps {
   // other components on the same page (e.g. ImageGallery) automatically tag
   // their own events with this scooter/shop context — without re-deriving it.
   registerAsSessionProperties?: boolean
+  // Optional TikTok dual-dispatch — independent of both business events and
+  // PostHog. Omit on call sites that aren't a real scooter fiche.
+  tiktokViewContent?: TikTokViewContentParams
 }
 
 // Drop-in component for server pages: renders nothing, fires one tracking event on mount.
-export function TrackView({ eventType, shopId, scooterId, metadata, posthogEvent, posthogProperties, registerAsSessionProperties }: TrackViewProps) {
+export function TrackView({ eventType, shopId, scooterId, metadata, posthogEvent, posthogProperties, registerAsSessionProperties, tiktokViewContent }: TrackViewProps) {
   useEffect(() => {
     if (eventType) trackEvent({ eventType, shopId, scooterId, metadata })
     if (posthogEvent) captureEvent(posthogEvent, posthogProperties)
     if (registerAsSessionProperties && posthogProperties) registerSessionProperties(posthogProperties)
+    if (tiktokViewContent) trackTikTokViewContent(tiktokViewContent)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return null

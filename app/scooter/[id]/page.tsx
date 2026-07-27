@@ -212,6 +212,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
         posthogEvent="scooter_viewed"
         posthogProperties={scooterProperties(scooter)}
         registerAsSessionProperties
+        tiktokViewContent={{ content_id: scooter.id, content_name: `${scooter.brand} ${scooter.model}` }}
       />
       <AdminBadgeControl scooterId={scooter.id} initial={scooter.showNewListingBadge} initialPosition={scooter.explorePosition} />
 
@@ -311,6 +312,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                   href={`https://wa.me/${contactNumber.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
                   shopId={shop.id}
                   scooterId={scooter.id}
+                  placement="scooter_mobile_cta"
                   className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full bg-[#16a34a] text-white text-[15px] font-bold hover:bg-[#15803d] transition-colors active:scale-[0.98]"
                 >
                   <MessageCircle className="w-5 h-5" />
@@ -446,6 +448,7 @@ export default async function ScooterPage({ params }: ScooterPageProps) {
                     href={`https://wa.me/${contactNumber.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi! I found your ${scooter.name} on Koh Ride and I'm interested.`)}`}
                     shopId={shop.id}
                     scooterId={scooter.id}
+                    placement="scooter_contact_card"
                     className="flex items-center justify-center gap-2.5 w-full py-4 rounded-[14px] bg-[#16a34a] text-white text-[15px] font-bold hover:bg-[#15803d] transition-colors active:scale-[0.98]"
                   >
                     <MessageCircle className="w-5 h-5" />

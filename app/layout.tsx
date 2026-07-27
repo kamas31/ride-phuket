@@ -8,6 +8,7 @@ import Footer from '@/components/layout/Footer'
 import MobileBottomNav from '@/components/layout/MobileBottomNav'
 import { CapacitorProvider } from '@/components/capacitor/CapacitorProvider'
 import { PostHogProvider } from '@/components/analytics/PostHogProvider'
+import { TikTokPixel } from '@/components/analytics/TikTokPixel'
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from '@/constants'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
       </head>
       <body className="antialiased">
+        <TikTokPixel />
         <CapacitorProvider>
           <PostHogProvider>
             <Navbar />
